@@ -25,10 +25,9 @@ MPFR_VERSION=mpfr-4.1.0
 GMP_VERSION=gmp-6.2.1
 MPC_VERSION=mpc-1.2.1
 ISL_VERSION=isl-0.24
-#CLOOG_VERSION=cloog-0.18.1
 NEWLIB_VERSION=newlib-4.1.0
 WGET_OPTIONS="-nc -P downloads"
-BINUTILS_REPO=git://sourceware.org/git/binutils-gdb.git
+BINUTILS_REPO=https://github.com/ZacWalk/binutils-woarm64.git
 GCC_REPO=https://github.com/ZacWalk/gcc-woarm64.git
 MINGW_REPO=https://github.com/ZacWalk/mingw-woarm64.git
 
@@ -117,8 +116,17 @@ build_libgcc()
 {
         # Build Libgcc
         cd $BUILD_DIR/gcc
-        make $PARALLEL_MAKE all-target-libgcc 
+        make $PARALLEL_MAKE all-target-libgcc
         make install-target-libgcc
+        cd ../..
+}
+
+build_libstdcpp()
+{
+        # Build libstdc++
+        cd $BUILD_DIR/gcc
+        make $PARALLEL_MAKE all-target-libstdc++-v3
+        make install-target-libstdc++-v3
         cd ../..
 
         # Build the rest of GCC
@@ -132,6 +140,7 @@ download_sources
 build_compiler
 build_mingw
 build_libgcc
+build_libstdcpp
 
-# trap - EXIT
+trap - EXIT
 echo 'Success!'

@@ -11,7 +11,7 @@ sudo apt-get install build-essential binutils-for-build texinfo bison flex zlib1
 Running build.sh will build the cross compiler. It installs it into ~/cross. The build script does multiple things.
  - Downloads dependencies
  - Clones several dependencies 
-    - binutils from sourceware
+    - modified binutils from https://github.com/ZacWalk/binutils-woarm64.git
     - modified gcc from https://github.com/ZacWalk/gcc-woarm64
     - modified mingw from https://github.com/ZacWalk/mingw-woarm64
  - Builds and installs: binutils, mingw, gcc and libgcc.
