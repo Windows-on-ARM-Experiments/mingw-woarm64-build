@@ -77,7 +77,12 @@ build_compiler()
         # Build C/C++ Compilers
         mkdir -p $BUILD_DIR/gcc
         cd $BUILD_DIR/gcc
-        ../../code/$GCC_VERSION/configure --prefix=$INSTALL_PATH --target=$TARGET --enable-languages=c,c++ $CONFIGURATION_OPTIONS --enable-decimal-float=no
+        ../../code/$GCC_VERSION/configure --prefix=$INSTALL_PATH --target=$TARGET \
+                --enable-languages=c,c++,fortran \
+                --disable-sjlj-exceptions \
+                --disable-libunwind-exceptions \
+                --enable-decimal-float=no \
+                $CONFIGURATION_OPTIONS
         make $PARALLEL_MAKE all-gcc
         make install-gcc
         cd ../..
@@ -128,12 +133,24 @@ build_libstdcpp()
         make $PARALLEL_MAKE all-target-libstdc++-v3
         make install-target-libstdc++-v3
         cd ../..
+}
 
+build_libgfortran()
+{
+        # Build libgfortran++
+        cd $BUILD_DIR/gcc
+        make $PARALLEL_MAKE all-target-libgfortran
+        make install-target-libgfortran
+        cd ../..
+}
+
+build_remaining()
+{
         # Build the rest of GCC
-        # cd $BUILD_DIR/gcc
-        # make $PARALLEL_MAKE all
-        # make install
-        # cd ../..
+        cd $BUILD_DIR/gcc
+        make $PARALLEL_MAKE all
+        make install
+        cd ../..
 }
 
 download_sources
@@ -141,6 +158,8 @@ build_compiler
 build_mingw
 build_libgcc
 build_libstdcpp
+build_libgfortran
+#build_remaining
 
 trap - EXIT
 echo 'Success!'
