@@ -1,3 +1,6 @@
 build-aarch64/
 code/
 downloads/
+tests/*.exe
+tests/*.s
+tests/*.gkd

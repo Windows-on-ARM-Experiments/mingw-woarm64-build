@@ -12,6 +12,7 @@ trap 'echo FAILED COMMAND: $previous_command' EXIT
 #TARGET_ARCH=x86_64
 TARGET_ARCH=aarch64
 INSTALL_PATH=~/cross
+SKIP_CONFIG=1
 BUILD_DIR=build-$TARGET_ARCH
 TARGET=$TARGET_ARCH-w64-mingw32
 CONFIGURATION_OPTIONS="--disable-multilib --disable-threads --disable-shared --disable-gcov"
@@ -69,7 +70,9 @@ build_compiler()
         # Build Binutils
         mkdir -p $BUILD_DIR/binutils
         cd $BUILD_DIR/binutils
-        ../../code/$BINUTILS_VERSION/configure --prefix=$INSTALL_PATH --target=$TARGET $CONFIGURATION_OPTIONS
+        if [ -z $SKIP_CONFIG ] ; then ../../code/$BINUTILS_VERSION/configure \
+                --prefix=$INSTALL_PATH --target=$TARGET $CONFIGURATION_OPTIONS
+        fi
         make $PARALLEL_MAKE
         make install
         cd ../..
@@ -77,12 +80,15 @@ build_compiler()
         # Build C/C++ Compilers
         mkdir -p $BUILD_DIR/gcc
         cd $BUILD_DIR/gcc
-        ../../code/$GCC_VERSION/configure --prefix=$INSTALL_PATH --target=$TARGET \
+        if [ -z $SKIP_CONFIG ] ; then ../../code/$GCC_VERSION/configure \
+                --prefix=$INSTALL_PATH --target=$TARGET \
                 --enable-languages=c,c++,fortran \
                 --disable-sjlj-exceptions \
                 --disable-libunwind-exceptions \
+                --enable-seh-exceptions \
                 --enable-decimal-float=no \
                 $CONFIGURATION_OPTIONS
+         fi
         make $PARALLEL_MAKE all-gcc
         make install-gcc
         cd ../..
@@ -93,7 +99,9 @@ build_mingw()
         # mingw headers
         mkdir -p $BUILD_DIR/mingw-headers
         cd $BUILD_DIR/mingw-headers
-        ../../code/$MINGW_VERSION/mingw-w64-headers/configure --prefix=$INSTALL_PATH/$TARGET --host=$TARGET --with-default-msvcrt=msvcrt
+        if [ -z $SKIP_CONFIG ] ; then ../../code/$MINGW_VERSION/mingw-w64-headers/configure \
+                --prefix=$INSTALL_PATH/$TARGET --host=$TARGET --with-default-msvcrt=msvcrt
+        fi
         make
         make install
         cd ../..
@@ -104,18 +112,18 @@ build_mingw()
         # Build mingw
         mkdir -p $BUILD_DIR/mingw
         cd $BUILD_DIR/mingw
-        ../../code/$MINGW_VERSION/mingw-w64-crt/configure \
+        if [ -z $SKIP_CONFIG ] ; then ../../code/$MINGW_VERSION/mingw-w64-crt/configure \
                 --build=x86_64-linux-gnu \
                 --with-sysroot=$INSTALL_PATH \
                 --prefix=$INSTALL_PATH/$TARGET \
                 --host=$TARGET \
                 --enable-libarm64 --disable-lib32 --disable-lib64 --disable-libarm32 \
-                --with-default-msvcrt=msvcrt --without-runtime
+                --with-default-msvcrt=msvcrt
+        fi
         make $PARALLEL_MAKE
         make install
         cd ../..
 }
-
 
 build_libgcc()
 {
@@ -159,7 +167,7 @@ build_mingw
 build_libgcc
 build_libstdcpp
 build_libgfortran
-#build_remaining
+build_remaining
 
 trap - EXIT
 echo 'Success!'
