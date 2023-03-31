@@ -12,7 +12,7 @@ trap 'echo FAILED COMMAND: $previous_command' EXIT
 #TARGET_ARCH=x86_64
 TARGET_ARCH=aarch64
 INSTALL_PATH=~/cross
-SKIP_CONFIG=1
+#SKIP_CONFIG=1
 BUILD_DIR=build-$TARGET_ARCH
 TARGET=$TARGET_ARCH-w64-mingw32
 CONFIGURATION_OPTIONS="--disable-multilib --disable-threads --disable-shared --disable-gcov"
