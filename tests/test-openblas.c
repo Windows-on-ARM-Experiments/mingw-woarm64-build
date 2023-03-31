@@ -1,3 +1,9 @@
+// This is a small test app for openblas. 
+// git clone  https://github.com/xianyi/OpenBLAS.git
+// cd OpenBLAS
+// make BINARY=64 CC=~/cross/bin/aarch64-w64-mingw32-gcc HOSTCC=gcc TARGET=ARMV8
+//  ~/cross/bin/aarch64-w64-mingw32-gcc -I. -L. test-openblas.c -lopenblas -o test-openblas.exe
+
 #include <cblas.h>
 #include <stdio.h>
 
