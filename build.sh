@@ -88,7 +88,7 @@ build_compiler()
                 --enable-seh-exceptions \
                 --enable-decimal-float=no \
                 $CONFIGURATION_OPTIONS
-         fi
+        fi
         make $PARALLEL_MAKE all-gcc
         make install-gcc
         cd ../..
