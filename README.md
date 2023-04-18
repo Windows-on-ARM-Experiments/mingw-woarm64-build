@@ -10,7 +10,7 @@ This repository contains a script to build a GNU toolchain cross compiler for Wi
 
 # Install build dependencies:
 
-sudo apt-get install build-essential binutils-for-build texinfo bison flex zlib1g-dev libgmp-dev dejagnu 
+sudo apt-get install build-essential binutils-for-build texinfo bison flex zlib1g-dev libgmp-dev dejagnu libmpc-dev
 
 # Build the cross-compiler
 
