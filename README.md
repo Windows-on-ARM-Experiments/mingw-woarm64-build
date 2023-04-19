@@ -1,6 +1,6 @@
-# Windows-on-ARM64 GNU toolchain cross compiler.
+# Windows-on-arm64 GNU toolchain cross compiler.
 
-This repository contains a script to build a GNU toolchain cross compiler for Windows-on-ARM64. It is a **work in progress**. This allows binaries that can execute on Windows-on-Arm64 to be built on Linux. I have only tested this script on Ubuntu/WSL.
+This repository contains a script to build a GNU toolchain cross compiler for Windows-on-arm64. It is a **work in progress**. This allows binaries that can execute on Windows-on-arm64 to be built on Linux. I have only tested this script on Ubuntu/WSL.
 
 # Known issues:
  - Stack unwinding is broken. Throw causes a C++ app to abort.
@@ -10,7 +10,7 @@ This repository contains a script to build a GNU toolchain cross compiler for Wi
 
 # Install build dependencies:
 
-sudo apt-get install build-essential binutils-for-build texinfo bison flex zlib1g-dev libgmp-dev dejagnu 
+sudo apt-get install build-essential binutils-for-build texinfo bison flex zlib1g-dev libgmp-dev dejagnu libmpc-dev
 
 # Build the cross-compiler
 
