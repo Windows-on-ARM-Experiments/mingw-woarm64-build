@@ -2,7 +2,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-int calc_func(int x, int y)
+int get_len()
+{
+  return 100;
+}
+
+int calc_func2(int x, int y)
 {
     printf("calc-func\n");
     int i = x;
@@ -10,11 +15,11 @@ int calc_func(int x, int y)
     return i + j;
 }
 
-int throw_func(void)
+int throw_func1(void)
 {
   printf("throw-func\n");
-  int x = calc_func(13, 19);
-  throw x;
+  int x = calc_func2(13, 19);
+  return x;
 }
 
 void big_stack_func(void)
@@ -22,25 +27,21 @@ void big_stack_func(void)
   printf("big-stack-func\n");
   char sz[0x4000] = "";
   strcpy(sz, "hello");
+
+  int num = get_len();
+    
+  {
+      int scopes[num];
+      int temps[num];
+
+      throw_func1();
+  }
 }
 
 int main(void)
 {
     printf("main\n");
     big_stack_func();
-
-    int rc = 0;
-    float rd = 1.0f;
-
-    try
-    {
-        int j = throw_func();
-    }
-    catch(...)
-    {
-        throw;
-    }
-    
     printf("return\n");
-    return rc;
+    return 0;
 }

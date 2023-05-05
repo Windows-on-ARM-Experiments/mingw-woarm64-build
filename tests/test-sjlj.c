@@ -7,6 +7,7 @@ static jmp_buf env;
 
 int jumper(int val)
 {
+	printf("jumper\n");
     longjmp(env, val);
 }
 

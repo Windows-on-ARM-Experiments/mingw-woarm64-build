@@ -12,7 +12,8 @@ trap 'echo FAILED COMMAND: $previous_command' EXIT
 #TARGET_ARCH=x86_64
 TARGET_ARCH=aarch64
 INSTALL_PATH=~/cross
-#SKIP_CONFIG=1
+RUN_DOWNLOAD=1
+RUN_CONFIG=1
 BUILD_DIR=build-$TARGET_ARCH
 TARGET=$TARGET_ARCH-w64-mingw32
 CONFIGURATION_OPTIONS="--disable-multilib --disable-threads --disable-shared --disable-gcov"
@@ -36,6 +37,7 @@ export PATH=$INSTALL_PATH/bin:$PATH
 
 download_sources()
 {
+        echo " ==== download sources"
         # Download packages
         # wget $WGET_OPTIONS https://ftp.gnu.org/gnu/binutils/$BINUTILS_VERSION.tar.gz
         # wget $WGET_OPTIONS https://ftp.gnu.org/gnu/gcc/$GCC_VERSION/$GCC_VERSION.tar.gz
@@ -68,9 +70,10 @@ build_compiler()
         mkdir -p $BUILD_DIR
 
         # Build Binutils
+        echo "==== build binutils"
         mkdir -p $BUILD_DIR/binutils
         cd $BUILD_DIR/binutils
-        if [ -z $SKIP_CONFIG ] ; then ../../code/$BINUTILS_VERSION/configure \
+        if [ $RUN_CONFIG = 1 ] ; then ../../code/$BINUTILS_VERSION/configure \
                 --prefix=$INSTALL_PATH --target=$TARGET $CONFIGURATION_OPTIONS
         fi
         make $PARALLEL_MAKE
@@ -78,9 +81,10 @@ build_compiler()
         cd ../..
 
         # Build C/C++ Compilers
+        echo "==== build gcc"
         mkdir -p $BUILD_DIR/gcc
         cd $BUILD_DIR/gcc
-        if [ -z $SKIP_CONFIG ] ; then ../../code/$GCC_VERSION/configure \
+        if [ $RUN_CONFIG = 1 ] ; then ../../code/$GCC_VERSION/configure \
                 --prefix=$INSTALL_PATH --target=$TARGET \
                 --enable-languages=c,c++,fortran \
                 --disable-sjlj-exceptions \
@@ -97,9 +101,10 @@ build_compiler()
 build_mingw()
 {
         # mingw headers
+        echo "==== build mingw-headers"
         mkdir -p $BUILD_DIR/mingw-headers
         cd $BUILD_DIR/mingw-headers
-        if [ -z $SKIP_CONFIG ] ; then ../../code/$MINGW_VERSION/mingw-w64-headers/configure \
+        if [ $RUN_CONFIG = 1 ] ; then ../../code/$MINGW_VERSION/mingw-w64-headers/configure \
                 --prefix=$INSTALL_PATH/$TARGET --host=$TARGET --with-default-msvcrt=msvcrt
         fi
         make
@@ -110,9 +115,10 @@ build_mingw()
         ln -sf $INSTALL_PATH/$TARGET $INSTALL_PATH/mingw
 
         # Build mingw
+        echo "==== build mingw"
         mkdir -p $BUILD_DIR/mingw
         cd $BUILD_DIR/mingw
-        if [ -z $SKIP_CONFIG ] ; then ../../code/$MINGW_VERSION/mingw-w64-crt/configure \
+        if [ $RUN_CONFIG = 1 ] ; then ../../code/$MINGW_VERSION/mingw-w64-crt/configure \
                 --build=x86_64-linux-gnu \
                 --with-sysroot=$INSTALL_PATH \
                 --prefix=$INSTALL_PATH/$TARGET \
@@ -127,6 +133,7 @@ build_mingw()
 
 build_libgcc()
 {
+        echo "==== build libgcc"
         # Build Libgcc
         cd $BUILD_DIR/gcc
         make $PARALLEL_MAKE all-target-libgcc
@@ -136,6 +143,7 @@ build_libgcc()
 
 build_libstdcpp()
 {
+        echo "==== build libstdcpp"
         # Build libstdc++
         cd $BUILD_DIR/gcc
         make $PARALLEL_MAKE all-target-libstdc++-v3
@@ -145,6 +153,7 @@ build_libstdcpp()
 
 build_libgfortran()
 {
+        echo "==== build libgfortran"
         # Build libgfortran++
         cd $BUILD_DIR/gcc
         make $PARALLEL_MAKE all-target-libgfortran
@@ -154,6 +163,7 @@ build_libgfortran()
 
 build_remaining()
 {
+        echo "==== build remaining"
         # Build the rest of GCC
         cd $BUILD_DIR/gcc
         make $PARALLEL_MAKE all
@@ -161,7 +171,19 @@ build_remaining()
         cd ../..
 }
 
-download_sources
+for var in "$@"
+do
+    if [ "$var" = "q" ] || [ "$var" = "quick" ] ; then 
+      RUN_CONFIG=0
+      RUN_DOWNLOAD=0
+      echo " ==== quick build"
+    fi
+done
+
+if [ $RUN_DOWNLOAD = 1 ] ; then   
+   download_sources
+fi
+
 build_compiler
 build_mingw
 build_libgcc
