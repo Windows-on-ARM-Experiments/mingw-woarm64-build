@@ -12,6 +12,11 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+        
+      - name: Install Dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y build-essential binutils-for-build texinfo bison flex zlib1g-dev libgmp-dev dejagnu libmpc-dev
 
       - name: Run Bash Script
         run: |
