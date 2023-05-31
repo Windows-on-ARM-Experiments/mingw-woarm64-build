@@ -1,5 +1,7 @@
 # Windows-on-arm64 GNU toolchain cross compiler.
 
+[![Build toolchain](https://github.com/ZacWalk/mingw-woarm64-build/actions/workflows/main.yml/badge.svg)](https://github.com/ZacWalk/mingw-woarm64-build/actions/workflows/main.yml)
+
 This repository contains a script to build a GNU toolchain cross compiler for Windows-on-arm64. It is a **work in progress**. This allows binaries that can execute on Windows-on-arm64 to be built on Linux. I have only tested this script on Ubuntu/WSL.
 
 # Known issues:
