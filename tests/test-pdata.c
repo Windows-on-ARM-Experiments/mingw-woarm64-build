@@ -42,13 +42,26 @@ static void print_symbol(HANDLE hp, DWORD64 offset)
 	{
 		printf(" %s+0x%.04llX", p->Name, dwDisplacement);
 	}
+	else
+	{
+		DWORD64 base;
+		UNWIND_HISTORY_TABLE history;
+		PRUNTIME_FUNCTION func = RtlLookupFunctionEntry(offset, &base, &history);
+
+		if (func)
+		{
+			printf(" %llX", (DWORD64)func);
+		}
+	}
 }
 
-static ULONG compute_xdata_size(PULONG Xdata)
+
+static void dump_xdata(PULONG Xdata)
 {
-	ULONG Size;
-	ULONG EpilogScopes;
-	ULONG UnwindWords;
+	ULONG Size = 0;
+	ULONG EpilogScopes = 0;
+	ULONG UnwindWords = 0;
+
 
 	if ((Xdata[0] >> 22) != 0) {
 		Size = 4;
@@ -62,16 +75,21 @@ static ULONG compute_xdata_size(PULONG Xdata)
 	}
 
 	if (!(Xdata[0] & (1 << 21))) {
-		Size += 4 * EpilogScopes;
+		Size += 4 * EpilogScopes;		
 	}
+
+	wprintf(L"    epilog scopes = %d\n", EpilogScopes);
+	wprintf(L"    unwind words = %d\n", UnwindWords);
 
 	Size += 4 * UnwindWords;
 
 	if (Xdata[0] & (1 << 20)) {
+		ULONG exception_rva = Xdata[Size / 4];
+		wprintf(L"    exception rva = %x\n", exception_rva);
 		Size += 4;  // Exception handler RVA
 	}
 
-	return Size;
+	wprintf(L"    size = %d\n", Size);
 }
 
 void walk_stack_rtl()
@@ -198,7 +216,7 @@ void list_pdata()
 		{
 			IMAGE_RUNTIME_FUNCTION_ENTRY entry = funcs[i];
 			//PVOID va = ImageRvaToVa(image, base, entry.BeginAddress, NULL);
-			PVOID va = module.BaseOfImage + entry.BeginAddress;
+			PVOID va = (PVOID)(module.BaseOfImage + entry.BeginAddress);
 
 			wprintf(L" %2d: %.08X:%.08X -- %.08llX ", i, entry.BeginAddress, entry.UnwindData, (ULONG64)va);
 
@@ -211,9 +229,8 @@ void list_pdata()
 
 			if ((entry.UnwindData & 0x03) == 0)
 			{
-				PVOID va = module.BaseOfImage + entry.UnwindData;
-				ULONG unwind_size = compute_xdata_size(va);
-				wprintf(L"      %d ... \n", unwind_size);
+				PVOID va = (PVOID)(module.BaseOfImage + entry.UnwindData);
+				dump_xdata(va);
 			}
 		}
 	}
@@ -232,6 +249,7 @@ void level4(void)
 void level3(void) { level4(); }
 void level2(void) { level3(); }
 void level1(void) { level2(); }
+
 
 int main(void)
 {

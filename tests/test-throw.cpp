@@ -10,8 +10,22 @@
 #error "__SEH__ must be defined."
 #endif
 
+struct scope
+{
+  scope()
+  {
+    printf("construct\n");
+  }
+
+  ~scope()
+  {
+    printf("destruct\n");
+  }
+};
+
 int throw_func(void)
 {
+  scope s;
   printf("throw-func\n");
   throw 32;
 }
@@ -26,6 +40,7 @@ int main(void)
     }
     catch(...)
     {
+      printf("catch\n");
     }
     
     printf("main end\n");
