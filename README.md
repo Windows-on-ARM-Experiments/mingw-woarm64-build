@@ -30,7 +30,7 @@ To build a simple C file, something like this works:
 ```
 ~/cross/bin/aarch64-w64-mingw32-gcc hello.c
 ```
-I was able to cross compile zlib and insall as follows:
+I was able to cross compile zlib and install as follows:
 ```
 make -f win32/Makefile.gcc DESTDIR=~/cross CC=~/cross/bin/aarch64-w64-mingw32-gcc AR=~/cross/bin/aarch64-w64-mingw32-ar RANLIB=~/cross/bin/aarch64-w64-mingw32-ranlib RC=~/cross/bin/aarch64-w64-mingw32-windres STRIP=~/cross/bin/aarch64-w64-mingw32-strip BINARY_PATH=$PREFIXDIR/bin INCLUDE_PATH=$PREFIXDIR/include LIBRARY_PATH=$PREFIXDIR/lib SHARED_MODE=1 PREFIX=aarch64-w64-mingw32- clean install
 ```
