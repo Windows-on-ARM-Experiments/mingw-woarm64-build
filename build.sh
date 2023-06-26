@@ -9,6 +9,20 @@ trap 'echo FAILED COMMAND: $previous_command' EXIT
 # See: http://preshing.com/20141119/how-to-build-a-gcc-cross-compiler
 #-------------------------------------------------------------------------------------------
 
+BINUTILS_REPO=https://github.com/ZacWalk/binutils-woarm64.git
+BINUTILS_BRANCH=${BINUTILS_BRANCH:-woarm64}
+# BINUTILS_VERSION=binutils-2.40
+BINUTILS_VERSION=binutils-master
+
+GCC_REPO=https://github.com/ZacWalk/gcc-woarm64.git
+GCC_BRANCH=${GCC_BRANCH:-woarm64}
+# GCC_VERSION=gcc-12.2.0
+GCC_VERSION=gcc-master
+
+MINGW_REPO=https://github.com/ZacWalk/mingw-woarm64.git
+MINGW_BRANCH=${MINGW_BRANCH:-woarm64}
+MINGW_VERSION=mingw-w64-master
+
 #TARGET_ARCH=x86_64
 TARGET_ARCH=aarch64
 INSTALL_PATH=~/cross
@@ -18,20 +32,12 @@ BUILD_DIR=build-$TARGET_ARCH
 TARGET=$TARGET_ARCH-w64-mingw32
 CONFIGURATION_OPTIONS="--disable-multilib --disable-threads --disable-shared --disable-gcov"
 PARALLEL_MAKE=-j6
-# BINUTILS_VERSION=binutils-2.40
-# GCC_VERSION=gcc-12.2.0
-BINUTILS_VERSION=binutils-master
-GCC_VERSION=gcc-master
-MINGW_VERSION=mingw-w64-master
 MPFR_VERSION=mpfr-4.1.0
 GMP_VERSION=gmp-6.2.1
 MPC_VERSION=mpc-1.2.1
 ISL_VERSION=isl-0.24
 NEWLIB_VERSION=newlib-4.1.0
 WGET_OPTIONS="-nc -P downloads"
-BINUTILS_REPO=https://github.com/ZacWalk/binutils-woarm64.git
-GCC_REPO=https://github.com/ZacWalk/gcc-woarm64.git
-MINGW_REPO=https://github.com/ZacWalk/mingw-woarm64.git
 
 export PATH=$INSTALL_PATH/bin:$PATH
 
@@ -52,9 +58,9 @@ download_sources()
         cd code
         for f in ../downloads/*.tar*; do tar xf $f --skip-old-files; done
 
-        git clone "$BINUTILS_REPO" "$BINUTILS_VERSION"  || git -C "$BINUTILS_VERSION" pull
-        git clone "$GCC_REPO" "$GCC_VERSION" || git -C "$GCC_VERSION" pull
-        git clone "$MINGW_REPO" "$MINGW_VERSION" || git -C "$MINGW_VERSION" pull
+        git clone "$BINUTILS_REPO" -b "$BINUTILS_BRANCH" "$BINUTILS_VERSION"  || git -C "$BINUTILS_VERSION" pull
+        git clone "$GCC_REPO" -b "$GCC_BRANCH" "$GCC_VERSION" || git -C "$GCC_VERSION" pull
+        git clone "$MINGW_REPO" -b "$MINGW_BRANCH" "$MINGW_VERSION" || git -C "$MINGW_VERSION" pull
 
         # Symbolic links for deps
         cd $GCC_VERSION
