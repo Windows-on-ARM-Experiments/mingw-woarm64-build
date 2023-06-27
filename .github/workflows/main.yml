@@ -4,6 +4,24 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      binutils-branch:
+        description: 'Binutils branch to build'
+        required: false
+        default: 'woarm64'
+      gcc-branch:
+        description: 'GCC branch to build'
+        required: false
+        default: 'woarm64'
+      mingw-branch:
+        description: 'Mingw branch to build'
+        required: false
+        default: 'woarm64'
+env:
+  BINUTILS_BRANCH: ${{ github.event.inputs.binutils-branch }}
+  GCC_BRANCH: ${{ github.event.inputs.gcc-branch }}
+  MINGW_BRANCH: ${{ github.event.inputs.mingw-branch }}
 
 jobs:
   run-script:
