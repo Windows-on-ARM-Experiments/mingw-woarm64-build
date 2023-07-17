@@ -91,8 +91,12 @@ build_compiler()
         mkdir -p $BUILD_DIR/gcc
         cd $BUILD_DIR/gcc
         if [ $RUN_CONFIG = 1 ] ; then ../../code/$GCC_VERSION/configure \
-                --prefix=$INSTALL_PATH --target=$TARGET \
-                --enable-languages=c,c++,fortran \
+                --prefix=$INSTALL_PATH \
+                --target=$TARGET \
+                --with-newlib \
+                --without-headers \
+                --enable-languages=c,lto,c++,fortran \
+                --disable-bootstrap \
                 --disable-sjlj-exceptions \
                 --disable-libunwind-exceptions \
                 --enable-seh-exceptions \
