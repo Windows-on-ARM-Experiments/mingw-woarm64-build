@@ -44,17 +44,19 @@ export PATH=$INSTALL_PATH/bin:$PATH
 
 make_folders()
 {
+    echo "::group::Make folders"
     mkdir -p code
     mkdir -p $BUILD_DIR
     mkdir -p $BUILD_DIR/binutils
     mkdir -p $BUILD_DIR/gcc
     mkdir -p $BUILD_DIR/mingw-headers
     mkdir -p $BUILD_DIR/mingw
+    echo "::endgroup::"
 }
 
 download_sources()
 {
-    echo " ==== download sources"
+    echo "::group::Download sources"
     # Download packages
     # wget $WGET_OPTIONS https://ftp.gnu.org/gnu/binutils/$BINUTILS_VERSION.tar.gz
     # wget $WGET_OPTIONS https://ftp.gnu.org/gnu/gcc/$GCC_VERSION/$GCC_VERSION.tar.gz
@@ -80,29 +82,32 @@ download_sources()
     ln -sf `ls -1d ../mpc-*/` mpc
     ln -sf `ls -1d ../isl-*/` isl
     cd ../..
+    echo "::endgroup::"
 }
 
 config_binutils()
 {
-    echo "==== config binutils"
+    echo "::group::Configure binutils"
     cd $BUILD_DIR/binutils
     ../../code/$BINUTILS_VERSION/configure \
         --prefix=$INSTALL_PATH --target=$TARGET 
     cd ../..
+    echo "::endgroup::"
 }
 
 build_binutils()
 {
-    echo "==== build binutils"
+    echo "::group::Build binutils"
     cd $BUILD_DIR/binutils
     make $PARALLEL_MAKE
     make install
     cd ../..
+    echo "::endgroup::"
 }
 
 config_gcc_compiler()
 {
-    echo "==== config gcc compiler"    
+    echo "::group::Configure GCC"
     cd $BUILD_DIR/gcc
     if [ $MSYS2_CONFIG = 1 ] ; then
         # REMOVED --libexecdir=/opt/lib
@@ -146,42 +151,46 @@ config_gcc_compiler()
             --disable-sjlj-exceptions
     fi
     cd ../..
+    echo "::endgroup::"
 }
 
 build_gcc_compiler()
 {
-    echo "==== build gcc compiler"
+    echo "::group::Build GCC"
     cd $BUILD_DIR/gcc
     make $PARALLEL_MAKE all-gcc
     make install-gcc
     cd ../..
+    echo "::endgroup::"
 }
 
 config_mingw_headers()
 {
-    echo "==== config mingw headers"
+    echo "::group::Configure MinGW headers"
     cd $BUILD_DIR/mingw-headers
     ../../code/$MINGW_VERSION/mingw-w64-headers/configure \
         --prefix=$INSTALL_PATH/$TARGET \
         --host=$TARGET \
         --with-default-msvcrt=msvcrt
     cd ../..
+    echo "::endgroup::"
 }
 
 build_mingw_headers()
 {
-    echo "==== build mingw headers"
+    echo "::group::Build MinGW headers"
     cd $BUILD_DIR/mingw-headers
     make
     make install
     cd ../..
     # Symlink for gcc
     ln -sf $INSTALL_PATH/$TARGET $INSTALL_PATH/mingw
+    echo "::endgroup::"
 }
 
 config_mingw_crt()
 {
-    echo "==== config mingw crt"
+    echo "::group::Configure MinGW CRT"
     cd $BUILD_DIR/mingw
     ../../code/$MINGW_VERSION/mingw-w64-crt/configure \
         --build=x86_64-linux-gnu \
@@ -195,20 +204,22 @@ config_mingw_crt()
         --disable-shared \
         --with-default-msvcrt=msvcrt
     cd ../..
+    echo "::endgroup::"
 }
 
 build_mingw_crt()
 {
-    echo "==== build mingw crt"
+    echo "::group::Build MinGW CRT"
     cd $BUILD_DIR/mingw
     make $PARALLEL_MAKE
     make install
     cd ../..
+    echo "::endgroup::"
 }
 
 config_mingw_libs()
 {
-    echo "==== config mingw libs"
+    echo "::group::Configure MinGW libraries"
     cd $BUILD_DIR/mingw
     ../../code/$MINGW_VERSION/configure \
         --prefix=$INSTALL_PATH/$TARGET \
@@ -221,52 +232,60 @@ config_mingw_libs()
         --with-libraries=libmangle,pseh,winpthreads \
         --with-default-msvcrt=msvcrt
     cd ../..
+    echo "::endgroup::"
 }
 
 build_mingw_libs()
 {
-    echo "==== build mingw libs"
+    echo "::group::Build MinGW libraries"
     cd $BUILD_DIR/mingw
     make
     make install
     cd ../..
+    echo "::endgroup::"
 }
 
 build_libgcc()
 {
-    echo "==== build libgcc"
+    echo "::group::Build libgcc"
     cd $BUILD_DIR/gcc
     make $PARALLEL_MAKE all-target-libgcc
     make install-target-libgcc
     cd ../..
+    echo "::endgroup::"
 }
 
 build_libstdcpp()
 {
-    echo "==== build libstdcpp"
+    echo "::group::Build libstdcpp"
     cd $BUILD_DIR/gcc
     make $PARALLEL_MAKE all-target-libstdc++-v3
     make install-target-libstdc++-v3
     cd ../..
+    echo "::endgroup::"
 }
 
 build_libgfortran()
 {
-    echo "==== build libgfortran"
+    echo "::group::Build libgfortran"
     cd $BUILD_DIR/gcc
     make $PARALLEL_MAKE all-target-libgfortran
     make install-target-libgfortran
     cd ../..
+    echo "::endgroup::"
 }
 
 build_gcc_remaining()
 {
-    echo "==== build GCC remaining"
+    echo "::group::Build remaining"
     cd $BUILD_DIR/gcc
     make $PARALLEL_MAKE all
     make install
     cd ../..
+    echo "::endgroup::"
 }
+
+set -x # echo on
 
 for var in "$@"
 do
