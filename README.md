@@ -5,10 +5,7 @@
 This repository contains a script to build a GNU toolchain cross compiler for Windows-on-arm64. It is a **work in progress**. This allows binaries that can execute on Windows-on-arm64 to be built on Linux. I have only tested this script on Ubuntu/WSL.
 
 # Known issues:
- - Stack unwinding is broken. Throw causes a C++ app to abort.
- - SEH Pseudo Ops are still a work in progress. Some are emitted commented out as I am still working to fix them.
- - Not sure if libatomic is correctly implemented.
- - __chkstk not currently emitted.
+This toolchain is not yet ready for real-world use. Problems and missing parts are listed in the [issues](https://github.com/ZacWalk/mingw-woarm64-build/issues).
 
 # Install build dependencies:
 
