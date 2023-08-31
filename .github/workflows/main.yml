@@ -18,6 +18,11 @@ on:
         description: 'Mingw branch to build'
         required: false
         default: 'woarm64'
+      check:
+        description: 'Check if the toolchain is working'
+        type: boolean
+        required: false
+        default: 'false'
 env:
   BINUTILS_BRANCH: ${{ github.event.inputs.binutils_branch }}
   GCC_BRANCH: ${{ github.event.inputs.gcc_branch }}
@@ -36,7 +41,13 @@ jobs:
           sudo apt update
           sudo apt install -y build-essential binutils-for-build texinfo bison flex zlib1g-dev libgmp-dev dejagnu libmpc-dev
 
-      - name: Run Bash Script
+      - name: Build
         run: |
           chmod +x ./build.sh
           bash ./build.sh
+      
+      - name: Check
+        if: ${{ github.event.inputs.check }}
+        run: |
+          chmod +x ./check.sh
+          bash ./check.sh

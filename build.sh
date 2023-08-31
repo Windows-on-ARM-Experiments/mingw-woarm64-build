@@ -71,11 +71,8 @@ download_sources()
         cd ../..
 }
 
-build_compiler()
+build_binutils()
 {
-        mkdir -p $BUILD_DIR
-
-        # Build Binutils
         echo "==== build binutils"
         mkdir -p $BUILD_DIR/binutils
         cd $BUILD_DIR/binutils
@@ -85,8 +82,10 @@ build_compiler()
         make $PARALLEL_MAKE
         make install
         cd ../..
+}
 
-        # Build C/C++ Compilers
+build_gcc()
+{
         echo "==== build gcc"
         mkdir -p $BUILD_DIR/gcc
         cd $BUILD_DIR/gcc
@@ -190,7 +189,9 @@ if [ $RUN_DOWNLOAD = 1 ] ; then
    download_sources
 fi
 
-build_compiler
+build_binutils
+
+build_gcc
 build_mingw
 build_libgcc
 build_libstdcpp
