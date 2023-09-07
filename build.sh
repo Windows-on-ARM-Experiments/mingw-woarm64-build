@@ -28,6 +28,7 @@ TARGET_ARCH=aarch64
 INSTALL_PATH=~/cross
 RUN_DOWNLOAD=1
 RUN_CONFIG=1
+MSYS2_CONFIG=1
 BUILD_DIR=build-$TARGET_ARCH
 TARGET=$TARGET_ARCH-w64-mingw32
 CONFIGURATION_OPTIONS="--disable-multilib --disable-threads --disable-shared --disable-gcov"
@@ -90,14 +91,51 @@ build_compiler()
         echo "==== build gcc"
         mkdir -p $BUILD_DIR/gcc
         cd $BUILD_DIR/gcc
-        if [ $RUN_CONFIG = 1 ] ; then ../../code/$GCC_VERSION/configure \
-                --prefix=$INSTALL_PATH --target=$TARGET \
-                --enable-languages=c,c++,fortran \
-                --disable-sjlj-exceptions \
-                --disable-libunwind-exceptions \
-                --enable-seh-exceptions \
-                --enable-decimal-float=no \
-                $CONFIGURATION_OPTIONS
+        if [ $RUN_CONFIG = 1 ] ; then
+                if [ $MSYS2_CONFIG = 1 ] ; then
+                        # TODO: Remove --enable-decimal-float=no
+                        ../../code/$GCC_VERSION/configure \
+                                --prefix=$INSTALL_PATH \
+                                --target=$TARGET \
+                                --libexecdir=/opt/lib \
+                                --disable-bootstrap \
+                                --enable-languages=c,lto,c++,fortran \
+                                --enable-shared \
+                                --enable-static \
+                                --enable-threads=win32 \
+                                --enable-graphite \
+                                --enable-fully-dynamic-string \
+                                --enable-libstdcxx-filesystem-ts=yes \
+                                --enable-libstdcxx-time=yes \
+                                --disable-libstdcxx-pch \
+                                --disable-libstdcxx-debug \
+                                --enable-cloog-backend=isl \
+                                --enable-version-specific-runtime-libs \
+                                --disable-isl-version-check \
+                                --enable-lto \
+                                --enable-libgomp \
+                                --enable-decimal-float=no \
+                                --disable-multilib \
+                                --enable-checking=release \
+                                --disable-rpath \
+                                --disable-win32-registry \
+                                --disable-werror \
+                                --disable-symvers \
+                                --with-libiconv \
+                                --with-system-zlib \
+                                --with-{gmp,mpfr,mpc,isl}=/usr \
+                                --with-gnu-as \
+                                --with-gnu-ld
+                else 
+                        ../../code/$GCC_VERSION/configure \
+                                --prefix=$INSTALL_PATH --target=$TARGET \
+                                --enable-languages=c,c++,fortran \
+                                --disable-sjlj-exceptions \
+                                --disable-libunwind-exceptions \
+                                --enable-seh-exceptions \
+                                --enable-decimal-float=no \
+                                $CONFIGURATION_OPTIONS
+                fi
         fi
         make $PARALLEL_MAKE all-gcc
         make install-gcc
