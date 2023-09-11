@@ -28,9 +28,9 @@ TARGET_ARCH=aarch64
 INSTALL_PATH=~/cross
 RUN_DOWNLOAD=1
 RUN_CONFIG=1
+MSYS2_CONFIG=1
 BUILD_DIR=build-$TARGET_ARCH
 TARGET=$TARGET_ARCH-w64-mingw32
-CONFIGURATION_OPTIONS="--disable-multilib --disable-threads --disable-shared --disable-gcov"
 PARALLEL_MAKE=-j6
 MPFR_VERSION=mpfr-4.1.0
 GMP_VERSION=gmp-6.2.1
@@ -71,57 +71,100 @@ download_sources()
         cd ../..
 }
 
-build_compiler()
+build_binutils()
 {
-        mkdir -p $BUILD_DIR
-
         # Build Binutils
         echo "==== build binutils"
         mkdir -p $BUILD_DIR/binutils
         cd $BUILD_DIR/binutils
         if [ $RUN_CONFIG = 1 ] ; then ../../code/$BINUTILS_VERSION/configure \
-                --prefix=$INSTALL_PATH --target=$TARGET $CONFIGURATION_OPTIONS
+                --prefix=$INSTALL_PATH --target=$TARGET 
         fi
         make $PARALLEL_MAKE
         make install
         cd ../..
+}
 
+build_gcc_compiler()
+{
         # Build C/C++ Compilers
-        echo "==== build gcc"
+        echo "==== build gcc compiler"
         mkdir -p $BUILD_DIR/gcc
         cd $BUILD_DIR/gcc
-        if [ $RUN_CONFIG = 1 ] ; then ../../code/$GCC_VERSION/configure \
-                --prefix=$INSTALL_PATH --target=$TARGET \
-                --enable-languages=c,c++,fortran \
-                --disable-sjlj-exceptions \
-                --disable-libunwind-exceptions \
-                --enable-seh-exceptions \
-                --enable-decimal-float=no \
-                $CONFIGURATION_OPTIONS
+        if [ $RUN_CONFIG = 1 ] ; then
+                if [ $MSYS2_CONFIG = 1 ] ; then
+                        # TODO: Remove --enable-decimal-float=no
+                        # REMOVED --libexecdir=/opt/lib
+                        # REMOVED --with-{gmp,mpfr,mpc,isl}=/usr
+                        ../../code/$GCC_VERSION/configure \
+                                --prefix=$INSTALL_PATH \
+                                --target=$TARGET \
+                                --enable-languages=c,lto,c++,fortran \
+                                --enable-shared \
+                                --enable-static \
+                                --enable-threads=win32 \
+                                --enable-graphite \
+                                --enable-fully-dynamic-string \
+                                --enable-libstdcxx-filesystem-ts=yes \
+                                --enable-libstdcxx-time=yes \
+                                --enable-cloog-backend=isl \
+                                --enable-version-specific-runtime-libs \
+                                --enable-lto \
+                                --enable-libgomp \
+                                --enable-decimal-float=no \
+                                --enable-checking=release \
+                                --disable-multilib \
+                                --disable-shared \
+                                --disable-rpath \
+                                --disable-win32-registry \
+                                --disable-werror \
+                                --disable-symvers \
+                                --disable-libstdcxx-pch \
+                                --disable-libstdcxx-debug \
+                                --disable-isl-version-check \
+                                --disable-bootstrap \
+                                --with-libiconv \
+                                --with-system-zlib \
+                                --with-gnu-as \
+                                --with-gnu-ld
+                else 
+                        ../../code/$GCC_VERSION/configure \
+                                --prefix=$INSTALL_PATH --target=$TARGET \
+                                --enable-languages=c,c++,fortran \
+                                --disable-libunwind-exceptions \
+                                --enable-seh-exceptions \
+                                --disable-decimal-float \
+                                --disable-sjlj-exceptions
+                fi
         fi
         make $PARALLEL_MAKE all-gcc
         make install-gcc
         cd ../..
 }
 
-build_mingw()
+build_mingw_headers()
 {
         # mingw headers
-        echo "==== build mingw-headers"
+        echo "==== build mingw headers"
         mkdir -p $BUILD_DIR/mingw-headers
         cd $BUILD_DIR/mingw-headers
         if [ $RUN_CONFIG = 1 ] ; then ../../code/$MINGW_VERSION/mingw-w64-headers/configure \
-                --prefix=$INSTALL_PATH/$TARGET --host=$TARGET --with-default-msvcrt=msvcrt
+                --prefix=$INSTALL_PATH/$TARGET \
+                --host=$TARGET \
+                --with-default-msvcrt=msvcrt
         fi
         make
         make install
-        cd ../..
 
+        cd ../..
         # Symlink for gcc
         ln -sf $INSTALL_PATH/$TARGET $INSTALL_PATH/mingw
+}
 
+build_mingw_crt()
+{
         # Build mingw
-        echo "==== build mingw"
+        echo "==== build mingw crt"
         mkdir -p $BUILD_DIR/mingw
         cd $BUILD_DIR/mingw
         if [ $RUN_CONFIG = 1 ] ; then ../../code/$MINGW_VERSION/mingw-w64-crt/configure \
@@ -129,10 +172,36 @@ build_mingw()
                 --with-sysroot=$INSTALL_PATH \
                 --prefix=$INSTALL_PATH/$TARGET \
                 --host=$TARGET \
-                --enable-libarm64 --disable-lib32 --disable-lib64 --disable-libarm32 \
+                --enable-libarm64 \
+                --disable-lib32 \
+                --disable-lib64 \
+                --disable-libarm32 \
+                --disable-shared \
                 --with-default-msvcrt=msvcrt
         fi
         make $PARALLEL_MAKE
+        make install
+        cd ../..
+}
+
+build_mingw_libs()
+{
+        # mingw libraries
+        echo "==== build mingw"
+        mkdir -p $BUILD_DIR/mingw
+        cd $BUILD_DIR/mingw
+        if [ $RUN_CONFIG = 1 ] ; then ../../code/$MINGW_VERSION/configure \
+                --prefix=$INSTALL_PATH/$TARGET \
+                --host=$TARGET \
+                --enable-libarm64 \
+                --disable-lib32 \
+                --disable-lib64 \
+                --disable-libarm32 \
+                --disable-shared \
+                --with-libraries=libmangle,pseh,winpthreads \
+                --with-default-msvcrt=msvcrt
+        fi
+        make
         make install
         cd ../..
 }
@@ -167,9 +236,9 @@ build_libgfortran()
         cd ../..
 }
 
-build_remaining()
+build_gcc_remaining()
 {
-        echo "==== build remaining"
+        echo "==== build GCC remaining"
         # Build the rest of GCC
         cd $BUILD_DIR/gcc
         make $PARALLEL_MAKE all
@@ -190,12 +259,17 @@ if [ $RUN_DOWNLOAD = 1 ] ; then
    download_sources
 fi
 
-build_compiler
-build_mingw
+mkdir -p $BUILD_DIR
+
+build_binutils
+build_gcc_compiler
+build_mingw_headers
+build_mingw_crt
 build_libgcc
+build_mingw_libs
 build_libstdcpp
 build_libgfortran
-build_remaining
+build_gcc_remaining
 
 trap - EXIT
 echo 'Success!'
