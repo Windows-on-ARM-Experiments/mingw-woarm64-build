@@ -86,8 +86,21 @@ config_binutils()
 {
     echo "==== config binutils"
     cd $BUILD_DIR/binutils
-    ../../code/$BINUTILS_VERSION/configure \
-        --prefix=$INSTALL_PATH --target=$TARGET 
+    if [ $MSYS2_CONFIG = 1 ] ; then
+        ../../code/$BINUTILS_VERSION/configure \
+            --prefix=$INSTALL_PATH \
+            --build=$BUILD \
+            --host=$BUILD \
+            --target=$TARGET \
+            --enable-lto \
+            --enable-64-bit-bfd \
+            --disable-werror \
+            --with-libiconv-prefix=/usr
+    else
+        ../../code/$BINUTILS_VERSION/configure \
+            --prefix=$INSTALL_PATH \
+            --target=$TARGET
+    fi
     cd ../..
 }
 
@@ -102,13 +115,16 @@ build_binutils()
 
 config_gcc_compiler()
 {
-    echo "==== config gcc compiler"    
+    echo "==== config gcc compiler"
     cd $BUILD_DIR/gcc
     if [ $MSYS2_CONFIG = 1 ] ; then
         # REMOVED --libexecdir=/opt/lib
         # REMOVED --with-{gmp,mpfr,mpc,isl}=/usr
+        # ADDED --disable-shared
         ../../code/$GCC_VERSION/configure \
             --prefix=$INSTALL_PATH \
+            --build=$BUILD \
+            --host=$BUILD \
             --target=$TARGET \
             --enable-languages=c,lto,c++,fortran \
             --enable-shared \
@@ -161,10 +177,22 @@ config_mingw_headers()
 {
     echo "==== config mingw headers"
     cd $BUILD_DIR/mingw-headers
-    ../../code/$MINGW_VERSION/mingw-w64-headers/configure \
-        --prefix=$INSTALL_PATH/$TARGET \
-        --host=$TARGET \
-        --with-default-msvcrt=msvcrt
+    if [ $MSYS2_CONFIG = 1 ] ; then
+        ../../code/$MINGW_VERSION/mingw-w64-headers/configure \
+            --prefix=$INSTALL_PATH/$TARGET \
+            --build=$BUILD \
+            --host=$BUILD \
+            --target=$TARGET \
+            --enable-sdk=all \
+            --enable-secure-api \
+            --with-default-win32-winnt=0x601 \
+            --with-default-msvcrt=msvcrt
+    else
+        ../../code/$MINGW_VERSION/mingw-w64-headers/configure \
+            --prefix=$INSTALL_PATH/$TARGET \
+            --host=$TARGET \
+            --with-default-msvcrt=msvcrt
+    fi
     cd ../..
 }
 
@@ -183,17 +211,31 @@ config_mingw_crt()
 {
     echo "==== config mingw crt"
     cd $BUILD_DIR/mingw
-    ../../code/$MINGW_VERSION/mingw-w64-crt/configure \
-        --build=x86_64-linux-gnu \
-        --with-sysroot=$INSTALL_PATH \
-        --prefix=$INSTALL_PATH/$TARGET \
-        --host=$TARGET \
-        --enable-libarm64 \
-        --disable-lib32 \
-        --disable-lib64 \
-        --disable-libarm32 \
-        --disable-shared \
-        --with-default-msvcrt=msvcrt
+    if [ $MSYS2_CONFIG = 1 ] ; then
+        ../../code/$MINGW_VERSION/mingw-w64-crt/configure \
+            --prefix=$INSTALL_PATH/$TARGET \
+            --build=$BUILD \
+            --host=$BUILD \
+            --target=$TARGET \
+            --enable-wildcard \
+            --disable-dependency-tracking \
+            --enable-libarm64 \
+            --disable-lib32 \
+            --disable-lib64 \
+            --disable-libarm32
+    else
+        ../../code/$MINGW_VERSION/mingw-w64-crt/configure \
+            --build=x86_64-linux-gnu \
+            --with-sysroot=$INSTALL_PATH \
+            --prefix=$INSTALL_PATH/$TARGET \
+            --host=$TARGET \
+            --enable-libarm64 \
+            --disable-lib32 \
+            --disable-lib64 \
+            --disable-libarm32 \
+            --disable-shared \
+            --with-default-msvcrt=msvcrt
+    fi
     cd ../..
 }
 
