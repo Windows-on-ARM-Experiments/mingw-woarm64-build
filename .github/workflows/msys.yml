@@ -1,0 +1,22 @@
+name: Build MinGW and MSYS2 toolchain in MSYS2 shell
+
+on:
+    workflow_dispatch:
+      inputs:
+        msys2_packages_branch:
+          description: 'MSYS2-packages branch to build'
+          required: false
+          default: 'woarm64'
+
+jobs:
+    mingw-w64-cross-headers:
+        runs-on: windows-latest
+        
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v2
+              with:
+                  ref: ${{ github.event.inputs.msys2_packages_branch }}
+
+            - name: Test
+              run: echo "Hello World!"
