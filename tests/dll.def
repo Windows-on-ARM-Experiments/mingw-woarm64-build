@@ -1,0 +1,4 @@
+LIBRARY     dll-auto
+EXPORTS
+  funcc
+  funcstd

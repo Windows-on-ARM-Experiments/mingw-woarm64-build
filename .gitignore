@@ -7,3 +7,6 @@ downloads/
 *.gkd
 *.o
 *.pdb
+*.dump
+*.log
+*.a
