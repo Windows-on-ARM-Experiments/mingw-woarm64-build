@@ -93,7 +93,6 @@ build_gcc_compiler()
         cd $BUILD_DIR/gcc
         if [ $RUN_CONFIG = 1 ] ; then
                 if [ $MSYS2_CONFIG = 1 ] ; then
-                        # TODO: Remove --enable-decimal-float=no
                         # REMOVED --libexecdir=/opt/lib
                         # REMOVED --with-{gmp,mpfr,mpc,isl}=/usr
                         ../../code/$GCC_VERSION/configure \
@@ -111,7 +110,6 @@ build_gcc_compiler()
                                 --enable-version-specific-runtime-libs \
                                 --enable-lto \
                                 --enable-libgomp \
-                                --enable-decimal-float=no \
                                 --enable-checking=release \
                                 --disable-multilib \
                                 --disable-shared \
@@ -133,7 +131,6 @@ build_gcc_compiler()
                                 --enable-languages=c,c++,fortran \
                                 --disable-libunwind-exceptions \
                                 --enable-seh-exceptions \
-                                --disable-decimal-float \
                                 --disable-sjlj-exceptions
                 fi
         fi

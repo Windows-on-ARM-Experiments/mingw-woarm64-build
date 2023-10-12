@@ -254,5 +254,6 @@ void level1(void) { level2(); }
 int main(void)
 {
 	level1();
+	printf("ok\n");
 	return 0;
 }

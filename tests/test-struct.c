@@ -38,5 +38,6 @@ int main()
 
    copy_parts(&a, b);
    printf("result %d %d %d %d\n", b->a, b->b, b->c, b->d);
+   printf("ok\n");
    return 0;
 }

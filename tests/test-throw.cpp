@@ -43,6 +43,6 @@ int main(void)
       printf("catch\n");
     }
     
-    printf("main end\n");
+    printf("ok\n");
     return 0;
 }

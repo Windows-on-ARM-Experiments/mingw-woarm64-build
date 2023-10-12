@@ -18,4 +18,5 @@ void main()
   for(i=0; i<9; i++)
     printf("%lf ", C[i]);
   printf("\n");
+  printf("ok\n");
 }

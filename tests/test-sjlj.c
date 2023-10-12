@@ -25,6 +25,6 @@ int main()
         printf("setjmp %d\n", val);
 	}
 
-    printf("terminating\n");
+    printf("ok\n");
 	return 0;
 }
