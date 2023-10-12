@@ -27,6 +27,9 @@ jobs:
   run-script:
     runs-on: ubuntu-latest
 
+    env:
+      INSTALL_PATH: ${{ github.workspace }}/cross
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -40,3 +43,9 @@ jobs:
         run: |
           chmod +x ./build.sh
           bash ./build.sh
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: linux-toolchain
+          path: ${{ env.INSTALL_PATH }}
