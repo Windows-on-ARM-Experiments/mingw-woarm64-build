@@ -74,6 +74,14 @@ download_sources()
     git -C "$MINGW_VERSION" pull || git clone "$MINGW_REPO" -b "$MINGW_BRANCH" "$MINGW_VERSION"
 
     # Symbolic links for deps
+    cd $BINUTILS_VERSION
+    ln -sf `ls -1d ../mpfr-*/` mpfr
+    ln -sf `ls -1d ../gmp-*/` gmp
+    ln -sf `ls -1d ../mpc-*/` mpc
+    ln -sf `ls -1d ../isl-*/` isl
+    cd ..
+
+    # Symbolic links for deps
     cd $GCC_VERSION
     ln -sf `ls -1d ../mpfr-*/` mpfr
     ln -sf `ls -1d ../gmp-*/` gmp
