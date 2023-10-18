@@ -1,4 +1,4 @@
-build-aarch64/
+build-aarch64-w64-mingw32/
 code/
 downloads/
 *.exe
