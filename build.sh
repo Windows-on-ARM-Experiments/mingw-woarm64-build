@@ -278,11 +278,11 @@ do
     fi
 done
 
+make_folders
+
 if [ $RUN_DOWNLOAD = 1 ] ; then
    download_sources
 fi
-
-make_folders
 
 if [ $RUN_CONFIG = 1 ] ; then
     config_binutils
