@@ -25,7 +25,14 @@ env:
 
 jobs:
   run-script:
+    strategy:
+      matrix:
+        target: [aarch64, x86_64]
+
     runs-on: ubuntu-latest
+
+    env:
+      TARGET_ARCH: ${{ matrix.target }}
 
     steps:
       - name: Checkout repository

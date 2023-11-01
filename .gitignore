@@ -1,5 +1,5 @@
 .vscode/
-build-aarch64-w64-mingw32/
+build-*/
 code/
 downloads/
 *.exe

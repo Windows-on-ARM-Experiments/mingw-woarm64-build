@@ -23,14 +23,12 @@ MINGW_REPO=https://github.com/ZacWalk/mingw-woarm64.git
 MINGW_BRANCH=${MINGW_BRANCH:-woarm64}
 MINGW_VERSION=mingw-w64-master
 
-# TARGET_ARCH=x86_64
-TARGET_ARCH=aarch64
+TARGET_ARCH=${TARGET_ARCH:-aarch64}
+TARGET=$TARGET_ARCH-w64-mingw32
 INSTALL_PATH=~/cross
 RUN_DOWNLOAD=1
 RUN_CONFIG=1
 MSYS2_CONFIG=1
-TARGET=$TARGET_ARCH-w64-mingw32
-# TARGET=$TARGET_ARCH-pc-cygwin
 BUILD_DIR=build-$TARGET
 PARALLEL_MAKE=-j6
 MPFR_VERSION=mpfr-4.1.0
@@ -41,6 +39,15 @@ NEWLIB_VERSION=newlib-4.1.0
 WGET_OPTIONS="-nc -P downloads"
 
 export PATH=$INSTALL_PATH/bin:$PATH
+
+case "$TARGET" in
+    x86_64*)
+        MINGW_CONF="--disable-lib32 --enable-lib64 --disable-libarm32 --disable-libarm64"
+    ;;
+    aarch64*)
+        MINGW_CONF="--disable-lib32 --disable-lib64 --disable-libarm32 --enable-libarm64"
+    ;;
+esac
 
 make_folders()
 {
@@ -188,12 +195,9 @@ config_mingw_crt()
         --with-sysroot=$INSTALL_PATH \
         --prefix=$INSTALL_PATH/$TARGET \
         --host=$TARGET \
-        --enable-libarm64 \
-        --disable-lib32 \
-        --disable-lib64 \
-        --disable-libarm32 \
         --disable-shared \
-        --with-default-msvcrt=msvcrt
+        --with-default-msvcrt=msvcrt \
+        $MING_CONF
     cd ../..
 }
 
@@ -213,13 +217,10 @@ config_mingw_libs()
     ../../code/$MINGW_VERSION/configure \
         --prefix=$INSTALL_PATH/$TARGET \
         --host=$TARGET \
-        --enable-libarm64 \
-        --disable-lib32 \
-        --disable-lib64 \
-        --disable-libarm32 \
         --disable-shared \
         --with-libraries=libmangle,pseh,winpthreads \
         --with-default-msvcrt=msvcrt
+        $MING_CONF
     cd ../..
 }
 
