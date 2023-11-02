@@ -285,13 +285,13 @@ fi
 
 if [ $RUN_CONFIG = 1 ] ; then
     config_binutils
-    config_gcc_compiler
     config_mingw_headers
+    config_gcc_compiler
 fi
 
 build_binutils
-build_gcc_compiler
 build_mingw_headers
+build_gcc_compiler
 
 if [ $RUN_CONFIG = 1 ] ; then
     config_mingw_crt
