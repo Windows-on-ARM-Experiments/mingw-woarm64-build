@@ -36,13 +36,11 @@ jobs:
         
       - name: Install Dependencies
         run: |
-          sudo apt update
-          sudo apt install -y build-essential binutils-for-build texinfo bison flex zlib1g-dev libgmp-dev dejagnu libmpc-dev
+          ./install-dependencies.sh
 
       - name: Run Bash Script
         run: |
-          chmod +x ./build.sh
-          bash ./build.sh
+          ./build.sh
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
