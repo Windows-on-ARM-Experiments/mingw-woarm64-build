@@ -50,7 +50,6 @@ make_folders()
     mkdir -p $BUILD_DIR/gcc
     mkdir -p $BUILD_DIR/mingw-headers
     mkdir -p $BUILD_DIR/mingw
-    mkdir -p $BUILD_DIR/mingw
 }
 
 download_sources()
