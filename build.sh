@@ -23,6 +23,7 @@ MINGW_REPO=https://github.com/ZacWalk/mingw-woarm64.git
 MINGW_BRANCH=${MINGW_BRANCH:-woarm64}
 MINGW_VERSION=mingw-w64-master
 
+BUILD=x86_64-linux-gnu
 # TARGET_ARCH=x86_64
 TARGET_ARCH=aarch64
 INSTALL_PATH=~/cross
@@ -87,7 +88,10 @@ config_binutils()
     echo "==== config binutils"
     cd $BUILD_DIR/binutils
     ../../code/$BINUTILS_VERSION/configure \
-        --prefix=$INSTALL_PATH --target=$TARGET 
+        --prefix=$INSTALL_PATH \
+        --build=$BUILD \
+        --host=$BUILD \
+        --target=$TARGET 
     cd ../..
 }
 
@@ -102,13 +106,15 @@ build_binutils()
 
 config_gcc_compiler()
 {
-    echo "==== config gcc compiler"    
+    echo "==== config gcc compiler"
     cd $BUILD_DIR/gcc
     if [ $MSYS2_CONFIG = 1 ] ; then
         # REMOVED --libexecdir=/opt/lib
         # REMOVED --with-{gmp,mpfr,mpc,isl}=/usr
         ../../code/$GCC_VERSION/configure \
             --prefix=$INSTALL_PATH \
+            --build=$BUILD \
+            --host=$BUILD \
             --target=$TARGET \
             --enable-languages=c,lto,c++,fortran \
             --enable-shared \
@@ -139,7 +145,10 @@ config_gcc_compiler()
             --with-gnu-ld
     else 
         ../../code/$GCC_VERSION/configure \
-            --prefix=$INSTALL_PATH --target=$TARGET \
+            --prefix=$INSTALL_PATH \
+            --build=$BUILD \
+            --host=$BUILD \
+            --target=$TARGET \
             --enable-languages=c,c++,fortran \
             --disable-libunwind-exceptions \
             --enable-seh-exceptions \
@@ -163,6 +172,7 @@ config_mingw_headers()
     cd $BUILD_DIR/mingw-headers
     ../../code/$MINGW_VERSION/mingw-w64-headers/configure \
         --prefix=$INSTALL_PATH/$TARGET \
+        --build=$BUILD \
         --host=$TARGET \
         --with-default-msvcrt=msvcrt
     cd ../..
@@ -184,10 +194,10 @@ config_mingw_crt()
     echo "==== config mingw crt"
     cd $BUILD_DIR/mingw
     ../../code/$MINGW_VERSION/mingw-w64-crt/configure \
-        --build=x86_64-linux-gnu \
-        --with-sysroot=$INSTALL_PATH \
         --prefix=$INSTALL_PATH/$TARGET \
+        --build=$BUILD \
         --host=$TARGET \
+        --with-sysroot=$INSTALL_PATH \
         --enable-libarm64 \
         --disable-lib32 \
         --disable-lib64 \
@@ -212,6 +222,7 @@ config_mingw_libs()
     cd $BUILD_DIR/mingw
     ../../code/$MINGW_VERSION/configure \
         --prefix=$INSTALL_PATH/$TARGET \
+        --build=$BUILD \
         --host=$TARGET \
         --enable-libarm64 \
         --disable-lib32 \
