@@ -32,7 +32,7 @@ MSYS2_CONFIG=1
 TARGET=$TARGET_ARCH-w64-mingw32
 # TARGET=$TARGET_ARCH-pc-cygwin
 BUILD_DIR=build-$TARGET
-PARALLEL_MAKE=-j6
+PARALLEL_MAKE=-j$(nproc)
 MPFR_VERSION=mpfr-4.1.0
 GMP_VERSION=gmp-6.2.1
 MPC_VERSION=mpc-1.2.1
@@ -172,7 +172,7 @@ build_mingw_headers()
 {
     echo "==== build mingw headers"
     cd $BUILD_DIR/mingw-headers
-    make
+    make $PARALLEL_MAKE
     make install
     cd ../..
     # Symlink for gcc
@@ -227,7 +227,7 @@ build_mingw_libs()
 {
     echo "==== build mingw libs"
     cd $BUILD_DIR/mingw
-    make
+    make $PARALLEL_MAKE
     make install
     cd ../..
 }
