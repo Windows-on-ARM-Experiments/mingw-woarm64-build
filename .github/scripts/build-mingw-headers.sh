@@ -3,9 +3,19 @@
 MINGW_VERSION=${MINGW_VERSION:-mingw-w64-master}
 
 TARGET=${TARGET:-aarch64-w64-mingw32}
+CRT=${CRT:-msvcrt}
 BUILD_PATH=${BUILD_PATH:-$PWD/build-$TARGET}
 BUILD_MAKE_OPTIONS=-j$(nproc)
 INSTALL_PATH=${INSTALL_PATH:-~/cross}
+
+case "$CRT" in
+    ucrt)
+        MINGW_CONF="$MINGW_CONF --with-default-msvcrt=ucrt"
+    ;;
+    msvcrt)
+        MINGW_CONF="$MINGW_CONF --with-default-msvcrt=msvcrt"
+    ;;
+esac
 
 export PATH=$INSTALL_PATH/bin:$PATH
 
@@ -19,7 +29,7 @@ echo "::group::Configure MinGW headers"
 ../../code/$MINGW_VERSION/mingw-w64-headers/configure \
     --prefix=$INSTALL_PATH/$TARGET \
     --host=$TARGET \
-    --with-default-msvcrt=msvcrt
+    $MINGW_CONF
 echo "::endgroup::"
 
 cd $BUILD_PATH/mingw-headers
