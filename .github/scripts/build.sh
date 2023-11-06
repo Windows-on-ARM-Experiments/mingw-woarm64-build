@@ -4,6 +4,7 @@ set -e # exit on error
 set -x # echo on
 
 TARGET=${TARGET:-aarch64-w64-mingw32}
+UCRT=${UCRT:-msvcrt}
 INSTALL_PATH=${INSTALL_PATH:-~/cross}
 
 .github/scripts/build-binutils.sh
