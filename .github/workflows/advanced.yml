@@ -18,26 +18,86 @@ on:
         description: 'Mingw branch to build'
         required: false
         default: 'woarm64'
-env:
-  BINUTILS_BRANCH: ${{ github.event.inputs.binutils_branch }}
-  GCC_BRANCH: ${{ github.event.inputs.gcc_branch }}
-  MINGW_BRANCH: ${{ github.event.inputs.mingw_branch }}
 
 jobs:
   run-script:
+    strategy:
+      matrix:
+        target: [aarch64-w64-mingw32]
+        crt: [msvcrt]
+
     runs-on: ubuntu-latest
 
     env:
+      BINUTILS_REPO: https://github.com/ZacWalk/binutils-woarm64.git
+      BINUTILS_BRANCH: ${{ github.event.inputs.binutils_branch }}
+      BINUTILS_VERSION: binutils-master
+      GCC_REPO: https://github.com/ZacWalk/gcc-woarm64.git
+      GCC_BRANCH: ${{ github.event.inputs.gcc_branch }}
+      GCC_VERSION: gcc-master
+      MINGW_REPO: https://github.com/ZacWalk/mingw-woarm64.git
+      MINGW_BRANCH: ${{ github.event.inputs.mingw_branch }}
+      MINGW_VERSION: mingw-w64-master
+      TARGET: ${{ matrix.target }}
       INSTALL_PATH: ${{ github.workspace }}/cross
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         
       - name: Install Dependencies
         run: |
           .github/scripts/install-dependencies.sh
 
-      - name: Run Build
+      - name: Install libraries
         run: |
-          .github/scripts/build.sh
+          .github/scripts/install-libraries.sh
+
+      - name: Checkout binutils
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.BINUTILS_REPO }}
+          ref: ${{ env.BINUTILS_BRANCH }}
+          path: ${{ github.workspace }}/code/${{ env.BINUTILS_VERSION }}
+
+      - name: Checkout GCC
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.GCC_REPO }}
+          ref: ${{ env.GCC_BRANCH }}
+          path: ${{ github.workspace }}/code/${{ env.GCC_VERSION }}
+
+      - name: Checkout MinGW
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.MINGW_REPO }}
+          ref: ${{ env.MINGW_BRANCH }}
+          path: ${{ github.workspace }}/code/${{ env.MINGW_VERSION }}
+
+      - name: Build binutils
+        run: |
+          .github/scripts/build-binutils.sh
+
+      - name: Build MinGW headers
+        run: |
+          .github/scripts/build-mingw-headers.sh
+
+      - name: Build GCC
+        run: |
+          .github/scripts/build-gcc.sh
+
+      - name: Build MinGW CRT
+        run: |
+          .github/scripts/build-mingw-crt.sh
+
+      - name: Build libgcc
+        run: |
+          .github/scripts/build-libgcc.sh
+
+      - name: Build MinGW
+        run: |
+          .github/scripts/build-mingw.sh
+
+      - name: Build GCC libs
+        run: |
+          .github/scripts/build-gcc-libs.sh
