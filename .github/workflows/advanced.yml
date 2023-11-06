@@ -26,6 +26,11 @@ jobs:
   build-toolchain:
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        target: [aarch64-w64-mingw32, x86_64-w64-mingw32]
+        crt: [msvcrt, ucrt]
+
     env:
       BINUTILS_REPO: ZacWalk/binutils-woarm64
       BINUTILS_BRANCH: ${{ github.event.inputs.binutils_branch }}
@@ -36,7 +41,8 @@ jobs:
       MINGW_REPO: ZacWalk/mingw-woarm64
       MINGW_BRANCH: ${{ github.event.inputs.mingw_branch }}
       MINGW_VERSION: mingw-w64-master
-      TARGET: aarch64-w64-mingw32
+      TARGET: ${{ matrix.target }}
+      CRT: ${{ matrix.crt }}
       INSTALL_PATH: ${{ github.workspace }}/cross
 
     steps:
@@ -105,6 +111,6 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ env.TARGET }}-toolchain
+          name: ${{ env.TARGET }}-${{ env.CRT }}-toolchain
           path: ${{ env.INSTALL_PATH }}
           retention-days: 1
