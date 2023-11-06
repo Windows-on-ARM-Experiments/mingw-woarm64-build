@@ -1,4 +1,4 @@
-name: Build main toolchain
+name: Build toolchain variants
 
 on:
   push:
@@ -40,11 +40,11 @@ jobs:
 
       - name: Run Build
         run: |
-          ./build.sh
+          .github/scripts/build.sh
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
-          name: main-aarch64-w64-mingw32-toolchain
+          name: aarch64-w64-mingw32-toolchain
           path: ${{ env.INSTALL_PATH }}
           retention-days: 1
