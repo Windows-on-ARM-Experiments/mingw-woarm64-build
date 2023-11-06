@@ -40,10 +40,4 @@ jobs:
 
       - name: Run Build
         run: |
-          ./build.sh
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: linux-toolchain
-          path: ${{ env.INSTALL_PATH }}
+          .github/scripts/build.sh

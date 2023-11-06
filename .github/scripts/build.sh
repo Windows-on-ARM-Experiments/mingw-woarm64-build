@@ -1,7 +1,5 @@
 #! /bin/bash
 set -e
-trap 'previous_command=$this_command; this_command=$BASH_COMMAND' DEBUG
-trap 'echo FAILED COMMAND: $previous_command' EXIT
 
 #-------------------------------------------------------------------------------------------
 # This WIP script will download packages for, configure, 
@@ -90,7 +88,7 @@ config_binutils()
     cd $BUILD_DIR/binutils
     ../../code/$BINUTILS_VERSION/configure \
         --prefix=$INSTALL_PATH \
-        --target=$TARGET
+        --target=$TARGET 
     cd ../..
     echo "::endgroup::"
 }
@@ -319,5 +317,4 @@ build_libstdcpp
 build_libgfortran
 build_gcc_remaining
 
-trap - EXIT
 echo 'Success!'
