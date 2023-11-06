@@ -1,4 +1,5 @@
-#! /bin/bash
+#!/bin/bash
+
 set -e # stop at first error
 set -x # echo on
 
