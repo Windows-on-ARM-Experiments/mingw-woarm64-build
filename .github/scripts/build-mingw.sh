@@ -1,7 +1,11 @@
 #!/bin/bash
 
+set -e # exit on error
+set -x # echo on
+
 MINGW_VERSION=${MINGW_VERSION:-mingw-w64-master}
 
+BUILD=${BUILD:-x86_64-pc-linux-gnu}
 TARGET=${TARGET:-aarch64-w64-mingw32}
 CRT=${CRT:-msvcrt}
 BUILD_PATH=${BUILD_PATH:-$PWD/build-$TARGET}
@@ -28,26 +32,34 @@ esac
 
 export PATH=$INSTALL_PATH/bin:$PATH
 
-set -e # exit on error
-set -x # echo on
-
 cd $BUILD_PATH/mingw
 
-echo "::group::Configure MinGW libraries"
-../../code/$MINGW_VERSION/configure \
-    --prefix=$INSTALL_PATH/$TARGET \
-    --host=$TARGET \
-    --disable-shared \
-    --with-libraries=libmangle,pseh,winpthreads \
-    $MINGW_CONF
-echo "::endgroup::"
+if [ $RUN_CONFIG = 1 ] ; then
+    echo "::group::Configure MinGW libraries"
 
-cd $BUILD_PATH/mingw
+    rm -rf $BUILD_PATH/mingw/*
+
+    ../../code/$MINGW_VERSION/configure \
+        --prefix=$INSTALL_PATH/$TARGET \
+        --build=$BUILD \
+        --host=$TARGET \
+        --disable-shared \
+        --enable-sdk=all \
+        --enable-secure-api \
+        --with-default-win32-winnt=0x601 \
+        --with-libraries=libmangle,pseh,winpthreads \
+        $MINGW_CONF
+    echo "::endgroup::"
+fi
 
 echo "::group::Build MinGW"
 make $BUILD_MAKE_OPTIONS
 echo "::endgroup::"
 
-echo "::group::Install MinGW"
-make install
-echo "::endgroup::"
+if [ $RUN_INSTALL = 1 ] ; then
+    echo "::group::Install MinGW"
+    make install
+    echo "::endgroup::"
+fi
+
+echo 'Success!'

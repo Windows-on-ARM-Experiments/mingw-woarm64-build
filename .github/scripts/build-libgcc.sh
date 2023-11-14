@@ -1,5 +1,8 @@
 #!/bin/bash
 
+set -e # exit on error
+set -x # echo on
+
 TARGET=${TARGET:-aarch64-w64-mingw32}
 BUILD_PATH=${BUILD_PATH:-$PWD/build-$TARGET}
 BUILD_MAKE_OPTIONS=-j$(nproc)
@@ -12,6 +15,10 @@ echo "::group::Build libgcc"
 make $BUILD_MAKE_OPTIONS all-target-libgcc
 echo "::endgroup::"
 
-echo "::group::Install libgcc"
-make install-target-libgcc
-echo "::endgroup::"
+if [ $RUN_INSTALL = 1 ] ; then
+    echo "::group::Install libgcc"
+    make install-target-libgcc
+    echo "::endgroup::"
+fi
+
+echo 'Success!'

@@ -1,5 +1,8 @@
 #!/bin/bash
 
+set -e # exit on error
+set -x # echo on
+
 BINUTILS_VERSION=${BINUTILS_VERSION:-binutils-master}
 GCC_VERSION=${GCC_VERSION:-gcc-master}
 
@@ -9,9 +12,6 @@ GMP_VERSION=gmp-6.2.1
 MPC_VERSION=mpc-1.2.1
 ISL_VERSION=isl-0.24
 WGET_OPTIONS="-nc -P downloads"
-
-set -e # exit on error
-set -x # echo on
 
 echo "::group::Install libraries"
 
