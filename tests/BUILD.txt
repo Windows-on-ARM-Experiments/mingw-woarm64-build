@@ -1,0 +1,7 @@
+Building aarch64-w64-mingw32 tests on WSL
+
+cmake -S . -B build
+cmake --build build
+
+it generates Arm64 Windows executable
+build/aarch64_mingw_tests
