@@ -1,4 +1,4 @@
-Building aarch64-w64-mingw32 tests on WSL
+Building aarch64-w64-mingw32 tests on Linux or WSL
 
 cmake -S . -B build
 cmake --build build
