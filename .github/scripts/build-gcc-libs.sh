@@ -1,5 +1,8 @@
 #!/bin/bash
 
+set -e # exit on error
+set -x # echo on
+
 TARGET=${TARGET:-aarch64-w64-mingw32}
 BUILD_PATH=${BUILD_PATH:-$PWD/build-$TARGET}
 BUILD_MAKE_OPTIONS=-j$(nproc)

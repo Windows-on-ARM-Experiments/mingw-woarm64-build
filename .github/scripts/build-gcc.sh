@@ -1,5 +1,8 @@
 #!/bin/bash
 
+set -e # exit on error
+set -x # echo on
+
 GCC_VERSION=${GCC_VERSION:-gcc-master}
 
 TARGET=${TARGET:-aarch64-w64-mingw32}
@@ -8,9 +11,6 @@ BUILD_MAKE_OPTIONS=-j$(nproc)
 INSTALL_PATH=${INSTALL_PATH:-~/cross}
 
 export PATH=$INSTALL_PATH/bin:$PATH
-
-set -e # exit on error
-set -x # echo on
 
 mkdir -p $BUILD_PATH/gcc
 

@@ -1,5 +1,8 @@
 #!/bin/bash
 
+set -e # exit on error
+set -x # echo on
+
 MINGW_VERSION=${MINGW_VERSION:-mingw-w64-master}
 
 TARGET=${TARGET:-aarch64-w64-mingw32}
@@ -27,9 +30,6 @@ case "$CRT" in
 esac
 
 export PATH=$INSTALL_PATH/bin:$PATH
-
-set -e # exit on error
-set -x # echo on
 
 cd $BUILD_PATH/mingw
 
