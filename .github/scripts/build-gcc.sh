@@ -14,11 +14,11 @@ if [ $RUN_CONFIG = 1 ] || [ ! -f "$GCC_BUILD_PATH/Makefile" ] ; then
 
     # REMOVED --libexecdir=/opt/lib
     # REMOVED --with-{gmp,mpfr,mpc,isl}=/usr
+    # ADDED --disable-shared
     $SOURCE_PATH/$GCC_VERSION/configure \
         --prefix=$TOOLCHAIN_PATH \
         --target=$TARGET \
         --enable-languages=c,lto,c++,fortran \
-        --enable-shared \
         --enable-static \
         --enable-threads=win32 \
         --enable-graphite \

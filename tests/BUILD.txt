@@ -1,6 +1,10 @@
 Building aarch64-w64-mingw32 tests on Linux or WSL
 
-cmake -S . -B build
+TOOLCHAIN_PATH=~/cross
+TOOLCHAIN_FILE=$PWD/../.github/cmake/aarch64-w64-mingw32.cmake
+PATH=$TOOLCHAIN_PATH/bin:$PATH
+
+cmake -S . -B build -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN_FILE
 cmake --build build
 
 It generates Arm64 Windows executable.
