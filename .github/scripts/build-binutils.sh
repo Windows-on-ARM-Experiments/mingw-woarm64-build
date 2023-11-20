@@ -7,7 +7,7 @@ cd $BUILD_PATH/binutils
 
 echo "::group::Configure binutils"
 $SOURCE_PATH/$BINUTILS_VERSION/configure \
-    --prefix=$INSTALL_PATH \
+    --prefix=$TOOLCHAIN_PATH \
     --target=$TARGET
 echo "::endgroup::"
 

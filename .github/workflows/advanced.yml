@@ -22,6 +22,10 @@ on:
         required: false
         default: 'woarm64'
 
+env:
+  TOOLCHAIN_PATH: ${{ github.workspace }}/cross
+  LIBJPEG_TURBO_PATH: ${{ github.workspace }}/libjpeg-turbo
+
 jobs:
   build-toolchain:
     runs-on: ubuntu-latest
@@ -43,7 +47,6 @@ jobs:
       MINGW_VERSION: mingw-w64-master
       TARGET: ${{ matrix.target }}
       CRT: ${{ matrix.crt }}
-      INSTALL_PATH: ${{ github.workspace }}/cross
 
     steps:
       - name: Checkout repository
@@ -108,9 +111,71 @@ jobs:
         run: |
           .github/scripts/build-gcc-libs.sh
 
+      - name: Pack toolchain
+        run: |
+          .github/scripts/pack-toolchain.sh
+
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
           name: ${{ env.TARGET }}-${{ env.CRT }}-toolchain
-          path: ${{ env.INSTALL_PATH }}
+          path: ${{ env.TARGET }}-${{ env.CRT }}-toolchain.tar.gz
           retention-days: 1
+
+  build-libjpeg-turbo:
+    needs: [build-toolchain]
+    runs-on: ubuntu-latest
+
+    env:
+      LIBJPEG_TURBO_REPO: libjpeg-turbo/libjpeg-turbo
+      LIBJPEG_TURBO_BRANCH: main
+      LIBJPEG_TURBO_VERSION: libjpeg-turbo-main
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: ${{ github.workspace }}
+
+      - name: Checkout libjpeg-turbo
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.LIBJPEG_TURBO_REPO }}
+          ref: ${{ env.LIBJPEG_TURBO_BRANCH }}
+          path: ${{ github.workspace }}/code/${{ env.LIBJPEG_TURBO_VERSION }}
+
+      - name: Download toolchain
+        uses: actions/download-artifact@v3
+        with:
+          name: aarch64-w64-mingw32-msvcrt-toolchain
+          path: ${{ github.workspace }}
+
+      - name: Unpack toolchain
+        run: |
+          .github/scripts/unpack-toolchain.sh
+
+      - name: Build libjpeg-turbo
+        run: |
+          .github/scripts/build-libjpeg-turbo.sh
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: aarch64-w64-mingw32-msvcrt-libjpeg-turbo
+          path: ${{ env.LIBJPEG_TURBO_PATH }}
+          retention-days: 1
+
+  test-libpeg-turbo:
+    needs: [build-libjpeg-turbo]
+    runs-on: [Windows, GCC, ARM64]
+
+    steps:
+      - name: Download libjpeg-turbo
+        uses: actions/download-artifact@v3
+        with:
+          name: aarch64-w64-mingw32-msvcrt-libjpeg-turbo
+          path: ${{ github.workspace }}
+
+      - name: Test libjpeg-turbo
+        run: |
+          .github/scripts/test-libjpeg-turbo.ps1

@@ -10,7 +10,7 @@ echo "::group::Configure GCC"
 # REMOVED --libexecdir=/opt/lib
 # REMOVED --with-{gmp,mpfr,mpc,isl}=/usr
 $SOURCE_PATH/$GCC_VERSION/configure \
-    --prefix=$INSTALL_PATH \
+    --prefix=$TOOLCHAIN_PATH \
     --target=$TARGET \
     --enable-languages=c,lto,c++,fortran \
     --enable-shared \

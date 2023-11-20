@@ -6,7 +6,7 @@ cd $BUILD_PATH/mingw
 
 echo "::group::Configure MinGW libraries"
 $SOURCE_PATH/$MINGW_VERSION/configure \
-    --prefix=$INSTALL_PATH/$TARGET \
+    --prefix=$TOOLCHAIN_PATH/$TARGET \
     --host=$TARGET \
     --disable-shared \
     --with-libraries=libmangle,pseh,winpthreads \

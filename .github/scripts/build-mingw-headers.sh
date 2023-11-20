@@ -7,7 +7,7 @@ cd $BUILD_PATH/mingw-headers
 
 echo "::group::Configure MinGW headers"
 $SOURCE_PATH/$MINGW_VERSION/mingw-w64-headers/configure \
-    --prefix=$INSTALL_PATH/$TARGET \
+    --prefix=$TOOLCHAIN_PATH/$TARGET \
     --host=$TARGET \
     $MINGW_CONF
 echo "::endgroup::"
@@ -23,6 +23,6 @@ make install
 echo "::endgroup::"
 
 # Symlink for gcc
-ln -sf $INSTALL_PATH/$TARGET $INSTALL_PATH/mingw
+ln -sf $TOOLCHAIN_PATH/$TARGET $TOOLCHAIN_PATH/mingw
 
 echo 'Success!'
