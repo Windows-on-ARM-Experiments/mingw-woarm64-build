@@ -1,10 +1,18 @@
 set(CMAKE_VERBOSE_MAKEFILE ON)
-set(CMAKE_C_COMPILER "$ENV{HOME}/cross/bin/aarch64-w64-mingw32-gcc")
+
+if (NOT DEFINED ENV{TARGET}) 
+  set(ENV{TARGET} "aarch64-w64-mingw32") 
+endif()
+if (NOT DEFINED ENV{INSTALL_PATH}) 
+  set(ENV{INSTALL_PATH} "$ENV{HOME}/cross") 
+endif()
+
+set(CMAKE_C_COMPILER "$ENV{INSTALL_PATH}/bin/$ENV{TARGET}-gcc")
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_COMPILER "$ENV{HOME}/cross/bin/aarch64-w64-mingw32-c++")
-set(CMAKE_RANLIB "$ENV{HOME}/cross/bin/aarch64-w64-mingw32-ranlib")
+set(CMAKE_CXX_COMPILER "$ENV{INSTALL_PATH}/bin/$ENV{TARGET}-c++")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fopenmp")
+set(CMAKE_RANLIB "$ENV{INSTALL_PATH}/bin/$ENV{TARGET}-ranlib")
 
 include(FetchContent)
 FetchContent_Declare(
@@ -20,28 +28,28 @@ project(aarch64_mingw_tests)
 enable_testing()
 
 add_executable(
-  aarch64_mingw_tests
-  bigdata_test.cpp
-  iostream_test.cpp
-  math_test.c
-  math_test.cpp
-  omp_test.c
-  omp_test.cpp
-  pdata_test.c
-  pdata_test.cpp
-  sjlj_test.c
-  sjlj_test.cpp
-  struct_test.c
-  struct_test.cpp
-  throw_test.cpp
-  varargs_test.c
-  varargs_test.cpp
+  aarch64-mingw-tests.exe
+  bigdata-test.cpp
+  iostream-test.cpp
+  math-test.c
+  math-test.cpp
+  omp-test.c
+  omp-test.cpp
+  pdata-test.c
+  pdata-test.cpp
+  sjlj-test.c
+  sjlj-test.cpp
+  struct-test.c
+  struct-test.cpp
+  throw-test.cpp
+  varargs-test.c
+  varargs-test.cpp
 )
 
-set_source_files_properties(test-dll.c PROPERTIES COMPILE_FLAGS "-DIMPORT_API=")
-
 target_link_libraries(
-  aarch64_mingw_tests
+  aarch64-mingw-tests.exe
   GTest::gtest_main
   dbghelp
 )
+
+set_target_properties(aarch64-mingw-tests.exe PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")

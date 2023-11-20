@@ -40,7 +40,7 @@ static void print_symbol(HANDLE hp, DWORD64 offset)
 
 	if (SymGetSymFromAddr64(hp, offset, &dwDisplacement, p))
 	{
-		printf(" %s+0x%.04llX", p->Name, dwDisplacement);
+		// printf(" %s+0x%.04llX", p->Name, dwDisplacement);
 	}
 	else
 	{
