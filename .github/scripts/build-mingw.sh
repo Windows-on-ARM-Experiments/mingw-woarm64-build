@@ -4,21 +4,28 @@ source `dirname $0`/config-mingw.sh
 
 cd $BUILD_PATH/mingw
 
-echo "::group::Configure MinGW libraries"
-$SOURCE_PATH/$MINGW_VERSION/configure \
-    --prefix=$INSTALL_PATH/$TARGET \
-    --host=$TARGET \
-    --disable-shared \
-    --with-libraries=libmangle,pseh,winpthreads \
-    $MINGW_CONF
-echo "::endgroup::"
+if [ $RUN_CONFIG = 1 ] ; then
+    echo "::group::Configure MinGW libraries"
 
-cd $BUILD_PATH/mingw
+    rm -rf $BUILD_PATH/mingw/*
+
+    $SOURCE_PATH/$MINGW_VERSION/configure \
+        --prefix=$INSTALL_PATH/$TARGET \
+        --host=$TARGET \
+        --disable-shared \
+        --with-libraries=libmangle,pseh,winpthreads \
+        $MINGW_CONF
+    echo "::endgroup::"
+fi
 
 echo "::group::Build MinGW"
 make $BUILD_MAKE_OPTIONS
 echo "::endgroup::"
 
-echo "::group::Install MinGW"
-make install
-echo "::endgroup::"
+if [ $RUN_INSTALL = 1 ] ; then
+    echo "::group::Install MinGW"
+    make install
+    echo "::endgroup::"
+fi
+
+echo 'Success!'
