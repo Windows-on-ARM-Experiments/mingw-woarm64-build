@@ -29,20 +29,24 @@ jobs:
 
     strategy:
       matrix:
-        target: [aarch64-w64-mingw32, x86_64-w64-mingw32]
+        arch: [aarch64, x86_64]
+        platform: [w64-mingw32, pc-linux-gnu]
         crt: [msvcrt, ucrt]
+        exclude:
+          - platform: pc-linux-gnu
+            crt: ucrt
 
     env:
       BINUTILS_REPO: Windows-on-ARM-Experiments/binutils-woarm64
-      BINUTILS_BRANCH: ${{ github.event.inputs.binutils_branch }}
+      BINUTILS_BRANCH: ${{ github.event.inputs.binutils_branch || 'woarm64' }}
       BINUTILS_VERSION: binutils-master
       GCC_REPO: Windows-on-ARM-Experiments/gcc-woarm64
-      GCC_BRANCH: ${{ github.event.inputs.gcc_branch }}
+      GCC_BRANCH: ${{ github.event.inputs.gcc_branch || 'woarm64' }}
       GCC_VERSION: gcc-master
       MINGW_REPO: Windows-on-ARM-Experiments/mingw-woarm64
-      MINGW_BRANCH: ${{ github.event.inputs.mingw_branch }}
+      MINGW_BRANCH: ${{ github.event.inputs.mingw_branch || 'woarm64' }}
       MINGW_VERSION: mingw-w64-master
-      TARGET: ${{ matrix.target }}
+      TARGET: ${{ matrix.arch }}-${{ matrix.platform }}
       CRT: ${{ matrix.crt }}
       TOOLCHAIN_PACKAGE_NAME: ${{ matrix.target }}-${{ matrix.crt }}-toolchain.tar.gz
 
@@ -67,6 +71,7 @@ jobs:
           path: ${{ github.workspace }}/code/${{ env.GCC_VERSION }}
 
       - name: Checkout MinGW
+        if: ${{ matrix.platform != 'pc-linux-gnu' }}
         uses: actions/checkout@v4
         with:
           repository: ${{ env.MINGW_REPO }}
@@ -86,6 +91,7 @@ jobs:
           .github/scripts/build-binutils.sh
 
       - name: Build MinGW headers
+        if: ${{ matrix.platform != 'pc-linux-gnu' }}
         run: |
           .github/scripts/build-mingw-headers.sh
 
@@ -94,6 +100,7 @@ jobs:
           .github/scripts/build-gcc.sh
 
       - name: Build MinGW CRT
+        if: ${{ matrix.platform != 'pc-linux-gnu' }}
         run: |
           .github/scripts/build-mingw-crt.sh
 
@@ -102,6 +109,7 @@ jobs:
           .github/scripts/build-libgcc.sh
 
       - name: Build MinGW
+        if: ${{ matrix.platform != 'pc-linux-gnu' }}
         run: |
           .github/scripts/build-mingw.sh
 
@@ -114,6 +122,7 @@ jobs:
           .github/scripts/pack-toolchain.sh
 
       - name: Upload artifact
+        if: ${{ matrix.platform != 'pc-linux-gnu' }}
         uses: actions/upload-artifact@v3
         with:
           name: ${{ env.TOOLCHAIN_PACKAGE_NAME }}
