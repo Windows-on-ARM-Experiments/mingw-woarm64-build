@@ -1,16 +1,6 @@
 #!/bin/bash
 
-GCC_VERSION=${GCC_VERSION:-gcc-master}
-
-TARGET=${TARGET:-aarch64-w64-mingw32}
-BUILD_PATH=${BUILD_PATH:-$PWD/build-$TARGET}
-BUILD_MAKE_OPTIONS=-j$(nproc)
-INSTALL_PATH=${INSTALL_PATH:-~/cross}
-
-export PATH=$INSTALL_PATH/bin:$PATH
-
-set -e # exit on error
-set -x # echo on
+source `dirname $0`/config.sh
 
 mkdir -p $BUILD_PATH/gcc
 
@@ -19,7 +9,7 @@ cd $BUILD_PATH/gcc
 echo "::group::Configure GCC"
 # REMOVED --libexecdir=/opt/lib
 # REMOVED --with-{gmp,mpfr,mpc,isl}=/usr
-../../code/$GCC_VERSION/configure \
+$SOURCE_PATH/$GCC_VERSION/configure \
     --prefix=$INSTALL_PATH \
     --target=$TARGET \
     --enable-languages=c,lto,c++,fortran \

@@ -1,7 +1,6 @@
 #!/bin/bash
 
-set -e # stop at first error
-set -x # echo on
+source `dirname $0`/config.sh
 
 echo "::group::Install Dependencies"
 sudo apt update

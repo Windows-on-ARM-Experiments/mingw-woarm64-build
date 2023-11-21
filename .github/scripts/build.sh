@@ -1,11 +1,6 @@
 #!/bin/bash
 
-set -e # exit on error
-set -x # echo on
-
-export TARGET=${TARGET:-aarch64-w64-mingw32}
-export CRT=${CRT:-msvcrt}
-export INSTALL_PATH=${INSTALL_PATH:-~/cross}
+source `dirname $0`/config-mingw.sh
 
 .github/scripts/build-binutils.sh
 .github/scripts/build-mingw-headers.sh
