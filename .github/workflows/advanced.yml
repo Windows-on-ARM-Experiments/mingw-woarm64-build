@@ -44,6 +44,8 @@ jobs:
       TARGET: ${{ matrix.target }}
       CRT: ${{ matrix.crt }}
       INSTALL_PATH: ${{ github.workspace }}/cross
+      TOOLCHAIN_PATH: ${{ github.workspace }}/cross
+      TOOLCHAIN_PACKAGE_NAME: ${{ matrix.target }}-${{ matrix.crt }}-toolchain.tar.gz
 
     steps:
       - name: Checkout repository
@@ -108,9 +110,64 @@ jobs:
         run: |
           .github/scripts/build-gcc-libs.sh
 
+      - name: Pack toolchain
+        run: |
+          .github/scripts/pack-toolchain.sh
+
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ env.TARGET }}-${{ env.CRT }}-toolchain
-          path: ${{ env.INSTALL_PATH }}
+          name: ${{ env.TOOLCHAIN_PACKAGE_NAME }}
+          path: ${{ github.workspace }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
           retention-days: 1
+
+  build-aarch64-tests:
+    needs: [build-toolchain]
+    runs-on: ubuntu-latest
+
+    env:
+      TARGET: aarch64-w64-mingw32
+      INSTALL_PATH: ${{ github.workspace }}/cross
+      TOOLCHAIN_PATH: ${{ github.workspace }}/cross
+      TOOLCHAIN_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-toolchain.tar.gz
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: ${{ github.workspace }}
+
+      - name: Download toolchain
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ env.TOOLCHAIN_PACKAGE_NAME }}
+          path: ${{ github.workspace }}
+
+      - name: Unpack toolchain
+        run: |
+          .github/scripts/unpack-toolchain.sh
+  
+      - name: Build aarch64-tests
+        run: |
+          .github/scripts/build-aarch64-tests.sh
+
+      - name: Upload build-aarch64-mingw-tests
+        uses: actions/upload-artifact@v3
+        with:
+          name: aarch64-w64-mingw32-msvcrt-tests
+          path: tests/build/bin/aarch64-mingw-tests.exe
+          retention-days: 3
+
+  execute-aarch64-tests:
+    needs: [build-aarch64-tests]
+    runs-on: [Windows, GCC, ARM64]
+
+    steps:
+      - name: Download build-aarch64-mingw-tests
+        uses: actions/download-artifact@v3
+        with:
+          name: aarch64-w64-mingw32-msvcrt-tests
+
+      - name: Execute aarch64-mingw-tests
+        run:
+          ${{ github.workspace }}\aarch64-mingw-tests.exe
