@@ -3,7 +3,6 @@
 source `dirname $0`/config.sh
 
 MINGW_VERSION=${MINGW_VERSION:-mingw-w64-master}
-CRT=${CRT:-msvcrt}
 
 case "$TARGET" in
     x86_64*)
