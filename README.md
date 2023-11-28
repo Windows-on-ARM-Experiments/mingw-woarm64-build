@@ -1,11 +1,11 @@
 # Windows-on-arm64 GNU toolchain cross compiler.
 
-[![Build toolchain](https://github.com/ZacWalk/mingw-woarm64-build/actions/workflows/main.yml/badge.svg)](https://github.com/ZacWalk/mingw-woarm64-build/actions/workflows/main.yml)
+[![Build toolchain](https://github.com/Windows-on-ARM-Experiments/mingw-woarm64-build/actions/workflows/main.yml/badge.svg)](https://github.com/Windows-on-ARM-Experiments/mingw-woarm64-build/actions/workflows/main.yml)
 
 This repository contains a script to build a GNU toolchain cross compiler for Windows-on-arm64. It is a **work in progress**. This allows binaries that can execute on Windows-on-arm64 to be built on Linux. I have only tested this script on Ubuntu/WSL.
 
 # Known issues:
-This toolchain is not yet ready for real-world use. Problems and missing parts are listed in the [issues](https://github.com/ZacWalk/mingw-woarm64-build/issues).
+This toolchain is not yet ready for real-world use. Problems and missing parts are listed in the [issues](https://github.com/Windows-on-ARM-Experiments/mingw-woarm64-build/issues).
 
 # Install build dependencies:
 
@@ -16,9 +16,9 @@ sudo apt-get install build-essential binutils-for-build texinfo bison flex zlib1
 Running build.sh will build the cross compiler. It installs it into ~/cross. The build script does multiple things.
  - Downloads dependencies
  - Clones several dependencies 
-    - modified binutils from https://github.com/ZacWalk/binutils-woarm64.git
-    - modified gcc from https://github.com/ZacWalk/gcc-woarm64
-    - modified mingw from https://github.com/ZacWalk/mingw-woarm64
+    - modified binutils from https://github.com/Windows-on-ARM-Experiments/binutils-woarm64.git
+    - modified gcc from https://github.com/Windows-on-ARM-Experiments/gcc-woarm64
+    - modified mingw from https://github.com/Windows-on-ARM-Experiments/mingw-woarm64
  - Builds and installs: binutils, mingw, gcc and libgcc.
 
 # Using the cross compiler

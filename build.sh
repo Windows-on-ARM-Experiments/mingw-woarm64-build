@@ -9,17 +9,17 @@ trap 'echo FAILED COMMAND: $previous_command' EXIT
 # See: http://preshing.com/20141119/how-to-build-a-gcc-cross-compiler
 #-------------------------------------------------------------------------------------------
 
-BINUTILS_REPO=https://github.com/ZacWalk/binutils-woarm64.git
+BINUTILS_REPO=https://github.com/Windows-on-ARM-Experiments/binutils-woarm64.git
 BINUTILS_BRANCH=${BINUTILS_BRANCH:-woarm64}
 # BINUTILS_VERSION=binutils-2.40
 BINUTILS_VERSION=binutils-master
 
-GCC_REPO=https://github.com/ZacWalk/gcc-woarm64.git
+GCC_REPO=https://github.com/Windows-on-ARM-Experiments/gcc-woarm64.git
 GCC_BRANCH=${GCC_BRANCH:-woarm64}
 # GCC_VERSION=gcc-12.2.0
 GCC_VERSION=gcc-master
 
-MINGW_REPO=https://github.com/ZacWalk/mingw-woarm64.git
+MINGW_REPO=https://github.com/Windows-on-ARM-Experiments/mingw-woarm64.git
 MINGW_BRANCH=${MINGW_BRANCH:-woarm64}
 MINGW_VERSION=mingw-w64-master
 
