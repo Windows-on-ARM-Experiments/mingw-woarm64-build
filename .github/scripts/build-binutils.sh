@@ -13,7 +13,7 @@ if [ $RUN_CONFIG = 1 ] || [ ! -f "$BINUTILS_BUILD_PATH/Makefile" ] ; then
     rm -rf $BINUTILS_BUILD_PATH/*
 
     $SOURCE_PATH/$BINUTILS_VERSION/configure \
-        --prefix=$INSTALL_PATH \
+        --prefix=$TOOLCHAIN_PATH \
         --target=$TARGET
     echo "::endgroup::"
 fi

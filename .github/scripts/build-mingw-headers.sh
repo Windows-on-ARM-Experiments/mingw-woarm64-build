@@ -13,7 +13,7 @@ if [ $RUN_CONFIG = 1 ] || [ ! -f "$MINGW_HEADERS_BUILD_PATH/Makefile" ] ; then
     rm -rf $MINGW_HEADERS_BUILD_PATH/*
 
     $SOURCE_PATH/$MINGW_VERSION/mingw-w64-headers/configure \
-        --prefix=$INSTALL_PATH/$TARGET \
+        --prefix=$TOOLCHAIN_PATH/$TARGET \
         --host=$TARGET \
         $MINGW_CONF
     echo "::endgroup::"
@@ -28,7 +28,7 @@ if [ $RUN_INSTALL = 1 ] ; then
     make install
 
     # Symlink for gcc
-    ln -sf $INSTALL_PATH/$TARGET $INSTALL_PATH/mingw
+    ln -sf $TOOLCHAIN_PATH/$TARGET $TOOLCHAIN_PATH/mingw
 
     echo "::endgroup::"
 fi

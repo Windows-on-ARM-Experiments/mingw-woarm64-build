@@ -13,7 +13,7 @@ if [ $RUN_CONFIG = 1 ] || [ ! -f "$MINGW_BUILD_PATH/Makefile" ] ; then
     rm -rf $MINGW_BUILD_PATH/*
 
     $SOURCE_PATH/$MINGW_VERSION/configure \
-        --prefix=$INSTALL_PATH/$TARGET \
+        --prefix=$TOOLCHAIN_PATH/$TARGET \
         --host=$TARGET \
         --disable-shared \
         --with-libraries=libmangle,pseh,winpthreads \
