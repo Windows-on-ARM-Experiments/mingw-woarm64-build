@@ -30,6 +30,8 @@ enable_testing()
 add_executable(
   aarch64-mingw-tests.exe
   bigdata-test.cpp
+  chkstk-test.c
+  chkstk-test.cpp
   iostream-test.cpp
   math-test.c
   math-test.cpp
