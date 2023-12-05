@@ -41,6 +41,8 @@ add_executable(
   pdata-test.cpp
   sjlj-test.c
   sjlj-test.cpp
+  sscanf-double.c
+  sscanf-double.cpp
   struct-test.c
   struct-test.cpp
   throw-test.cpp
