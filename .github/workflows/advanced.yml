@@ -33,13 +33,13 @@ jobs:
         crt: [msvcrt, ucrt]
 
     env:
-      BINUTILS_REPO: ZacWalk/binutils-woarm64
+      BINUTILS_REPO: Windows-on-ARM-Experiments/binutils-woarm64
       BINUTILS_BRANCH: ${{ github.event.inputs.binutils_branch }}
       BINUTILS_VERSION: binutils-master
-      GCC_REPO: ZacWalk/gcc-woarm64
+      GCC_REPO: Windows-on-ARM-Experiments/gcc-woarm64
       GCC_BRANCH: ${{ github.event.inputs.gcc_branch }}
       GCC_VERSION: gcc-master
-      MINGW_REPO: ZacWalk/mingw-woarm64
+      MINGW_REPO: Windows-on-ARM-Experiments/mingw-woarm64
       MINGW_BRANCH: ${{ github.event.inputs.mingw_branch }}
       MINGW_VERSION: mingw-w64-master
       TARGET: ${{ matrix.target }}
