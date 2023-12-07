@@ -148,7 +148,7 @@ jobs:
         run: |
           .github/scripts/build-aarch64-tests.sh
 
-      - name: Upload build-aarch64-mingw-tests
+      - name: Upload aarch64-w64-mingw32-msvcrt-tests
         uses: actions/upload-artifact@v3
         with:
           name: aarch64-w64-mingw32-msvcrt-tests
@@ -160,7 +160,7 @@ jobs:
     runs-on: [Windows, GCC, ARM64]
 
     steps:
-      - name: Download build-aarch64-mingw-tests
+      - name: Download aarch64-w64-mingw32-msvcrt-tests
         uses: actions/download-artifact@v3
         with:
           name: aarch64-w64-mingw32-msvcrt-tests
@@ -168,3 +168,76 @@ jobs:
       - name: Execute aarch64-mingw-tests
         run:
           ${{ github.workspace }}\aarch64-mingw-tests.exe
+
+  build-openblas:
+    needs: [build-toolchain]
+    runs-on: ubuntu-latest
+
+    env:
+      OPENBLAS_REPO: OpenMathLib/OpenBLAS.git
+      TARGET: aarch64-w64-mingw32
+      TOOLCHAIN_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-toolchain.tar.gz
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: ${{ github.workspace }}
+
+      - name: Checkout OpenBLAS
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.OPENBLAS_REPO }}
+          ref: develop
+          path: ${{ github.workspace }}/code/OpenBLAS
+
+      - name: Download toolchain
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ env.TOOLCHAIN_PACKAGE_NAME }}
+          path: ${{ github.workspace }}
+
+      - name: Unpack toolchain
+        run: |
+          .github/scripts/unpack-toolchain.sh
+    
+      - name: Build OpenBLAS
+        run: |
+          .github/scripts/build-openblas.sh
+
+      - name: Pack OpenBLAS
+        run: |
+          .github/scripts/pack-openblas-tests.sh
+  
+      - name: Upload aarch64-msvcrt-openblas-tests
+        uses: actions/upload-artifact@v3
+        with:
+          name: aarch64-msvcrt-openblas-tests
+          path: ${{ github.workspace }}/code/OpenBLAS/aarch64-msvcrt-openblas-tests.zip
+          retention-days: 3
+        
+  execute-openblas-tests:
+    needs: [build-openblas]
+    runs-on: [Windows, GCC, ARM64]
+
+    env:
+      OPENBLAS_TESTS_PATH: ${{ github.workspace }}/openblas-tests
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: ${{ github.workspace }}
+
+      - name: Download aarch64-msvcrt-openblas-tests
+        uses: actions/download-artifact@v3
+        with:
+          name: aarch64-msvcrt-openblas-tests
+
+      - name: Unpack aarch64-msvcrt-openblas-tests.zip
+        run: |
+          .github/scripts/unpack-openblas-tests.ps1
+  
+      - name: Execute aarch64-mingw-tests
+        run: |
+          C:\Program` Files\Git\bin\bash.exe .github/scripts/test-openblas.sh
