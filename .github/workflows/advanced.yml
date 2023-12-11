@@ -30,10 +30,10 @@ jobs:
     strategy:
       matrix:
         arch: [aarch64, x86_64]
-        platform: [w64-mingw32, pc-linux-gnu]
+        platform: [w64-mingw32, linux-gnu]
         crt: [msvcrt, ucrt]
         exclude:
-          - platform: pc-linux-gnu
+          - platform: linux-gnu
             crt: ucrt
 
     env:
@@ -71,7 +71,7 @@ jobs:
           path: ${{ github.workspace }}/code/${{ env.GCC_VERSION }}
 
       - name: Checkout MinGW
-        if: ${{ matrix.platform != 'pc-linux-gnu' }}
+        if: ${{ matrix.platform != 'linux-gnu' }}
         uses: actions/checkout@v4
         with:
           repository: ${{ env.MINGW_REPO }}
@@ -90,8 +90,13 @@ jobs:
         run: |
           .github/scripts/build-binutils.sh
 
+      - name: Install cross headers
+        if: ${{ matrix.platform == 'linux-gnu' }}
+        run: |
+          [ -d /usr/${{ env.TARGET }}/include ] && cp -r /usr/${{ env.TARGET }}/include ${{ env.TOOLCHAIN_PATH }}/${{ env.TARGET }} 
+
       - name: Build MinGW headers
-        if: ${{ matrix.platform != 'pc-linux-gnu' }}
+        if: ${{ matrix.platform != 'linux-gnu' }}
         run: |
           .github/scripts/build-mingw-headers.sh
 
@@ -100,7 +105,7 @@ jobs:
           .github/scripts/build-gcc.sh
 
       - name: Build MinGW CRT
-        if: ${{ matrix.platform != 'pc-linux-gnu' }}
+        if: ${{ matrix.platform != 'linux-gnu' }}
         run: |
           .github/scripts/build-mingw-crt.sh
 
@@ -109,7 +114,7 @@ jobs:
           .github/scripts/build-libgcc.sh
 
       - name: Build MinGW
-        if: ${{ matrix.platform != 'pc-linux-gnu' }}
+        if: ${{ matrix.platform != 'linux-gnu' }}
         run: |
           .github/scripts/build-mingw.sh
 
@@ -122,7 +127,7 @@ jobs:
           .github/scripts/pack-toolchain.sh
 
       - name: Upload artifact
-        if: ${{ matrix.platform != 'pc-linux-gnu' }}
+        if: ${{ matrix.platform != 'linux-gnu' }}
         uses: actions/upload-artifact@v3
         with:
           name: ${{ env.TOOLCHAIN_PACKAGE_NAME }}
