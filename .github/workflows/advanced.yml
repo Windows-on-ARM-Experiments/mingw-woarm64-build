@@ -19,11 +19,42 @@ on:
         description: 'Mingw branch to build'
         required: false
         default: 'woarm64'
+      openblas_branch:
+        description: 'OpenBLAS branch to test'
+        required: false
+        default: 'develop'
+      openssl_branch:
+        description: 'OpenSSL branch to test'
+        required: false
+        default: 'fix-tests'
 
 env:
+  BINUTILS_REPO: Windows-on-ARM-Experiments/binutils-woarm64
+  BINUTILS_BRANCH: ${{ github.event.inputs.binutils_branch || 'woarm64' }}
+  BINUTILS_VERSION: binutils-master
+
+  GCC_REPO: Windows-on-ARM-Experiments/gcc-woarm64
+  GCC_BRANCH: ${{ github.event.inputs.gcc_branch || 'woarm64' }}
+  GCC_VERSION: gcc-master
+
+  MINGW_REPO: Windows-on-ARM-Experiments/mingw-woarm64
+  MINGW_BRANCH: ${{ github.event.inputs.mingw_branch || 'woarm64' }}
+  MINGW_VERSION: mingw-w64-master
+
+  OPENBLAS_REPO: OpenMathLib/OpenBLAS.git
+  OPENBLAS_BRANCH: ${{ github.event.inputs.openblas_branch || 'develop' }}
+  OPENBLAS_VERSION: openblas-develop
+
+  OPENSSL_REPO: Windows-on-ARM-Experiments/openssl
+  OPENSSL_BRANCH: ${{ github.event.inputs.openssl_branch || 'fix-tests' }}
+  OPENSSL_VERSION: openssl-master
+
   TOOLCHAIN_PATH: ${{ github.workspace }}/cross
   TOOLCHAIN_NAME: aarch64-w64-mingw32-msvcrt
   TOOLCHAIN_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-toolchain.tar.gz
+
+  SOURCE_PATH: ${{ github.workspace }}/code
+  ARTIFACT_PATH: ${{ github.workspace }}/artifact
 
 jobs:
   build-toolchain:
@@ -35,17 +66,6 @@ jobs:
         crt: [msvcrt, ucrt]
 
     env:
-      BINUTILS_REPO: Windows-on-ARM-Experiments/binutils-woarm64
-      BINUTILS_BRANCH: ${{ github.event.inputs.binutils_branch || 'woarm64' }}
-      BINUTILS_VERSION: binutils-master
-      GCC_REPO: Windows-on-ARM-Experiments/gcc-woarm64
-      GCC_BRANCH: ${{ github.event.inputs.gcc_branch || 'woarm64' }}
-      GCC_VERSION: gcc-master
-      MINGW_REPO: Windows-on-ARM-Experiments/mingw-woarm64
-      MINGW_BRANCH: ${{ github.event.inputs.mingw_branch || 'woarm64' }}
-      MINGW_VERSION: mingw-w64-master
-      TARGET: ${{ matrix.target }}
-      CRT: ${{ matrix.crt }}
       TOOLCHAIN_NAME: ${{ matrix.target }}-${{ matrix.crt }}
       TOOLCHAIN_PACKAGE_NAME: ${{ matrix.target }}-${{ matrix.crt }}-toolchain.tar.gz
 
@@ -74,7 +94,7 @@ jobs:
         id: cache-toolchain
         uses: actions/cache@v3
         with:
-          path: ${{ github.workspace }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
+          path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
           key: ${{ env.TOOLCHAIN_NAME }}-${{ steps.binutils-sha.outputs.sha }}-${{ steps.gcc-sha.outputs.sha }}-${{ steps.mingw-sha.outputs.sha }}
 
       - name: Checkout binutils
@@ -83,7 +103,7 @@ jobs:
         with:
           repository: ${{ env.BINUTILS_REPO }}
           ref: ${{ env.BINUTILS_BRANCH }}
-          path: ${{ github.workspace }}/code/${{ env.BINUTILS_VERSION }}
+          path: ${{ env.SOURCE_PATH }}/${{ env.BINUTILS_VERSION }}
 
       - name: Checkout GCC
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
@@ -91,7 +111,7 @@ jobs:
         with:
           repository: ${{ env.GCC_REPO }}
           ref: ${{ env.GCC_BRANCH }}
-          path: ${{ github.workspace }}/code/${{ env.GCC_VERSION }}
+          path: ${{ env.SOURCE_PATH }}/${{ env.GCC_VERSION }}
 
       - name: Checkout MinGW
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
@@ -99,7 +119,7 @@ jobs:
         with:
           repository: ${{ env.MINGW_REPO }}
           ref: ${{ env.MINGW_BRANCH }}
-          path: ${{ github.workspace }}/code/${{ env.MINGW_VERSION }}
+          path: ${{ env.SOURCE_PATH }}/${{ env.MINGW_VERSION }}
 
       - name: Install dependencies
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
@@ -156,8 +176,8 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: ${{ env.TOOLCHAIN_PACKAGE_NAME }}
-          path: ${{ github.workspace }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
-          retention-days: 1
+          path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
+          retention-days: 3
 
     outputs:
       binutils-sha: ${{ steps.binutils-sha.outputs.sha }}
@@ -177,7 +197,7 @@ jobs:
       - name: Download toolchain
         uses: actions/cache/restore@v3
         with:
-          path: ${{ github.workspace }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
+          path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
           key: ${{ env.TOOLCHAIN_NAME }}-${{ needs.build-toolchain.outputs.binutils-sha }}-${{ needs.build-toolchain.outputs.gcc-sha }}-${{ needs.build-toolchain.outputs.mingw-sha }}
           fail-on-cache-miss: true
 
@@ -192,7 +212,7 @@ jobs:
       - name: Upload tests artifact
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ env.TOOLCHAIN_NAME }} tests
+          name: ${{ env.TOOLCHAIN_NAME }}-tests
           path: tests/build/bin/aarch64-mingw-tests.exe
           retention-days: 3
 
@@ -204,18 +224,16 @@ jobs:
       - name: Download ${{ env.TOOLCHAIN_NAME }} tests
         uses: actions/download-artifact@v3
         with:
-          name: ${{ env.TOOLCHAIN_NAME }} tests
+          name: ${{ env.TOOLCHAIN_NAME }}-tests
+          path: ${{ env.ARTIFACT_PATH }}
 
       - name: Execute ${{ env.TOOLCHAIN_NAME }} tests
         run:
-          ${{ github.workspace }}\aarch64-mingw-tests.exe
+          ${{ env.ARTIFACT_PATH }}\aarch64-mingw-tests.exe
 
   build-openblas:
     needs: [build-toolchain]
     runs-on: ubuntu-latest
-
-    env:
-      OPENBLAS_REPO: OpenMathLib/OpenBLAS.git
 
     steps:
       - name: Checkout repository
@@ -227,13 +245,13 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: ${{ env.OPENBLAS_REPO }}
-          ref: develop
-          path: ${{ github.workspace }}/code/OpenBLAS
+          ref: ${{ env.OPENBLAS_BRANCH }}
+          path: ${{ env.SOURCE_PATH }}/${{ env.OPENBLAS_VERSION }}
 
       - name: Download toolchain
         uses: actions/cache/restore@v3
         with:
-          path: ${{ github.workspace }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
+          path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
           key: ${{ env.TOOLCHAIN_NAME }}-${{ needs.build-toolchain.outputs.binutils-sha }}-${{ needs.build-toolchain.outputs.gcc-sha }}-${{ needs.build-toolchain.outputs.mingw-sha }}
           fail-on-cache-miss: true
 
@@ -253,7 +271,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: ${{ env.TOOLCHAIN_NAME }}-openblas-tests
-          path: ${{ github.workspace }}/code/OpenBLAS/${{ env.TOOLCHAIN_NAME }}-openblas-tests.zip
+          path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_NAME }}-openblas-tests.zip
           retention-days: 3
         
   execute-openblas-tests:
@@ -273,6 +291,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: ${{ env.TOOLCHAIN_NAME }}-openblas-tests
+          path: ${{ env.ARTIFACT_PATH }}
 
       - name: Unpack OpenBLAS tests
         run: |
@@ -281,3 +300,98 @@ jobs:
       - name: Execute OpenBLAS tests
         run: |
           C:\Program` Files\Git\bin\bash.exe .github/scripts/test-openblas.sh
+
+  build-openssl:
+    needs: [build-toolchain]
+    runs-on: ubuntu-latest
+
+    env:
+      OPENSSL_PATH: ${{ github.workspace }}/openssl
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: ${{ github.workspace }}
+
+      - name: Checkout OpenSSL
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.OPENSSL_REPO }}
+          ref: ${{ env.OPENSSL_BRANCH }}
+          path: ${{ env.SOURCE_PATH }}/${{ env.OPENSSL_VERSION }}
+
+      - name: Install OpenSSL dependencies
+        run: |
+          .github/scripts/install-openssl-dependencies.sh
+
+      - name: Download toolchain
+        uses: actions/cache/restore@v3
+        with:
+          path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
+          key: ${{ env.TOOLCHAIN_NAME }}-${{ needs.build-toolchain.outputs.binutils-sha }}-${{ needs.build-toolchain.outputs.gcc-sha }}-${{ needs.build-toolchain.outputs.mingw-sha }}
+          fail-on-cache-miss: true
+
+      - name: Unpack toolchain
+        run: |
+          .github/scripts/unpack-toolchain.sh
+
+      - name: Build OpenSSL
+        run: |
+          .github/scripts/build-openssl.sh
+
+      - name: Pack OpenSSL
+        run: |
+          .github/scripts/pack-openssl.sh
+
+      - name: Pack OpenSSL tests
+        run: |
+          .github/scripts/pack-openssl-tests.sh
+    
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.TOOLCHAIN_NAME }}-openssl
+          path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_NAME }}-openssl.zip
+          retention-days: 3
+
+      - name: Upload tests artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.TOOLCHAIN_NAME }}-openssl-tests
+          path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_NAME }}-openssl-tests.zip
+          retention-days: 3
+
+  execute-openssl-tests:
+    needs: [build-openssl]
+    runs-on: [Windows, GCC, ARM64]
+
+    env:
+      OPENSSL_TESTS_PATH: ${{ github.workspace }}/openssl-tests
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: ${{ github.workspace }}
+
+      - name: Checkout OpenSSL
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.OPENSSL_REPO }}
+          ref: ${{ env.OPENSSL_BRANCH }}
+          path: ${{ env.SOURCE_PATH }}/${{ env.OPENSSL_VERSION }}
+
+      - name: Download OpenSSL tests
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ env.TOOLCHAIN_NAME }}-openssl-tests
+          path: ${{ env.ARTIFACT_PATH }}
+
+      - name: Unpack OpenSSL tests
+        run: |
+          .github/scripts/unpack-openssl-tests.ps1
+
+      - name: Execute OpenSSL tests
+        run: |
+          .github/scripts/execute-openssl-tests.ps1
