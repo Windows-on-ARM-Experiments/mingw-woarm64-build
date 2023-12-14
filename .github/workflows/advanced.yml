@@ -120,10 +120,11 @@ jobs:
         run: |
           .github/scripts/build-binutils.sh
 
-      - name: Install cross headers
+      - name: Install cross headers and libraries
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform == 'linux-gnu' }}
         run: |
-          [ -d /usr/${{ env.TARGET }}/include ] && cp -r /usr/${{ env.TARGET }}/include ${{ env.TOOLCHAIN_PATH }}/${{ env.TARGET }} 
+          [ -d /usr/${{ env.TARGET }}/include ] && cp -r /usr/${{ env.TARGET }}/include ${{ env.TOOLCHAIN_PATH }}/${{ env.TARGET }}
+          [ -d /usr/${{ env.TARGET }}/lib ] && cp -r /usr/${{ env.TARGET }}/lib ${{ env.TOOLCHAIN_PATH }}/${{ env.TARGET }}
 
       - name: Build MinGW headers
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform != 'linux-gnu' }}

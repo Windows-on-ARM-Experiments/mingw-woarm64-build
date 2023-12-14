@@ -43,6 +43,7 @@ if [ $RUN_CONFIG = 1 ] || [ ! -f "$GCC_BUILD_PATH/Makefile" ] ; then
     CFLAGS=$CFLAGS $SOURCE_PATH/$GCC_VERSION/configure \
         --prefix=$TOOLCHAIN_PATH \
         --target=$TARGET \
+        --includedir=$TOOLCHAIN_PATH/$TARGET/include \
         --enable-languages=c,lto,c++,fortran \
         --enable-static \
         --enable-graphite \
