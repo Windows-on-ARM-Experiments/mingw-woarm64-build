@@ -1,0 +1,15 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 02709e9a..51954169 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -861,8 +861,8 @@ endif()
+ set(TESTIMAGES ${CMAKE_CURRENT_SOURCE_DIR}/testimages)
+ set(MD5CMP ${CMAKE_CURRENT_BINARY_DIR}/md5/md5cmp)
+ if(CMAKE_CROSSCOMPILING)
+-  file(RELATIVE_PATH TESTIMAGES ${CMAKE_CURRENT_BINARY_DIR} ${TESTIMAGES})
+-  file(RELATIVE_PATH MD5CMP ${CMAKE_CURRENT_BINARY_DIR} ${MD5CMP})
++  set(TESTIMAGES "testimages")
++  set(MD5CMP "md5/md5cmp")
+ endif()
+ 
+ # The output of the floating point DCT/IDCT algorithms differs depending on the

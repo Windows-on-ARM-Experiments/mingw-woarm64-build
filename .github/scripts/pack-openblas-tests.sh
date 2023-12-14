@@ -2,9 +2,12 @@
 
 source `dirname $0`/config.sh
 
-echo "::group::Pack OpenBLAS"
-    cd $SOURCE_PATH/OpenBLAS
-    zip $TOOLCHAIN_NAME-openblas-tests.zip ctest/x* ctest/cin* ctest/din* ctest/sin* ctest/zin*
+OPENBLAS_BUILD_PATH=$SOURCE_PATH/$OPENBLAS_VERSION
+
+echo "::group::Pack OpenBLAS tests"
+    mkdir -p $ARTIFACT_PATH
+    cd $OPENBLAS_BUILD_PATH
+    zip $ARTIFACT_PATH/$TOOLCHAIN_NAME-openblas-tests.zip ctest/x* ctest/cin* ctest/din* ctest/sin* ctest/zin*
 echo "::endgroup::"
 
 echo 'Success!'

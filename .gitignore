@@ -2,6 +2,7 @@
 build-*/
 code/
 downloads/
+artifact/
 *.exe
 *.dll
 *.s
