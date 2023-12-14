@@ -45,6 +45,10 @@ env:
   OPENBLAS_BRANCH: ${{ github.event.inputs.openblas_branch || 'develop' }}
   OPENBLAS_VERSION: openblas-develop
 
+  ZLIB_REPO: madler/zlib
+  ZLIB_BRANCH: 'develop'
+  ZLIB_VERSION: zlib-develop
+
   OPENSSL_REPO: Windows-on-ARM-Experiments/openssl
   OPENSSL_BRANCH: ${{ github.event.inputs.openssl_branch || 'fix-tests' }}
   OPENSSL_VERSION: openssl-master
@@ -197,7 +201,7 @@ jobs:
 
       - name: Upload artifact
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ env.TOOLCHAIN_PACKAGE_NAME }}
           path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
@@ -234,7 +238,7 @@ jobs:
           .github/scripts/build-aarch64-tests.sh
 
       - name: Upload tests artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ env.TOOLCHAIN_NAME }}-tests
           path: tests/build/bin/aarch64-mingw-tests.exe
@@ -246,7 +250,7 @@ jobs:
 
     steps:
       - name: Download ${{ env.TOOLCHAIN_NAME }} tests
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: ${{ env.TOOLCHAIN_NAME }}-tests
           path: ${{ env.ARTIFACT_PATH }}
@@ -292,7 +296,7 @@ jobs:
           .github/scripts/pack-openblas-tests.sh
   
       - name: Upload tests artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ env.TOOLCHAIN_NAME }}-openblas-tests
           path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_NAME }}-openblas-tests.zip
@@ -312,7 +316,7 @@ jobs:
           path: ${{ github.workspace }}
 
       - name: Download OpenBLAS tests
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: ${{ env.TOOLCHAIN_NAME }}-openblas-tests
           path: ${{ env.ARTIFACT_PATH }}
@@ -324,12 +328,59 @@ jobs:
       - name: Execute OpenBLAS tests
         run: |
           C:\Program` Files\Git\bin\bash.exe .github/scripts/test-openblas.sh
+  
+  build-zlib:
+    needs: [build-toolchain]
+    runs-on: ubuntu-latest 
+
+    env:
+      ZLIB_PATH: ${{ github.workspace }}/zlib
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: ${{ github.workspace }}
+
+      - name: Checkout zlib
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.ZLIB_REPO }}
+          ref: ${{ env.ZLIB_BRANCH }}
+          path: ${{ env.SOURCE_PATH }}/${{ env.ZLIB_VERSION }}
+
+      - name: Download toolchain
+        uses: actions/cache/restore@v3
+        with:
+          path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
+          key: ${{ env.TOOLCHAIN_NAME }}-${{ needs.build-toolchain.outputs.binutils-sha }}-${{ needs.build-toolchain.outputs.gcc-sha }}-${{ needs.build-toolchain.outputs.mingw-sha }}
+          fail-on-cache-miss: true
+
+      - name: Unpack toolchain
+        run: |
+          .github/scripts/unpack-toolchain.sh
+  
+      - name: Build zlib
+        run: |
+          .github/scripts/build-zlib.sh
+
+      - name: Pack zlib
+        run: |
+          .github/scripts/pack-zlib.sh
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.TOOLCHAIN_NAME }}-zlib
+          path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_NAME }}-zlib.zip
+          retention-days: 3
 
   build-openssl:
-    needs: [build-toolchain]
+    needs: [build-toolchain, build-zlib]
     runs-on: ubuntu-latest
 
     env:
+      ZLIB_PATH: ${{ github.workspace }}/zlib
       OPENSSL_PATH: ${{ github.workspace }}/openssl
 
     steps:
@@ -360,6 +411,16 @@ jobs:
         run: |
           .github/scripts/unpack-toolchain.sh
 
+      - name: Download zlib
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.TOOLCHAIN_NAME }}-zlib
+          path: ${{ env.ARTIFACT_PATH }}
+
+      - name: Unpack zlib
+        run: |
+          .github/scripts/unpack-zlib.sh
+
       - name: Build OpenSSL
         run: |
           .github/scripts/build-openssl.sh
@@ -373,14 +434,14 @@ jobs:
           .github/scripts/pack-openssl-tests.sh
     
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ env.TOOLCHAIN_NAME }}-openssl
           path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_NAME }}-openssl.zip
           retention-days: 3
 
       - name: Upload tests artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ env.TOOLCHAIN_NAME }}-openssl-tests
           path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_NAME }}-openssl-tests.zip
@@ -391,6 +452,7 @@ jobs:
     runs-on: [Windows, GCC, ARM64]
 
     env:
+      ZLIB_PATH: ${{ github.workspace }}/zlib
       OPENSSL_TESTS_PATH: ${{ github.workspace }}/openssl-tests
 
     steps:
@@ -407,7 +469,7 @@ jobs:
           path: ${{ env.SOURCE_PATH }}/${{ env.OPENSSL_VERSION }}
 
       - name: Download OpenSSL tests
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: ${{ env.TOOLCHAIN_NAME }}-openssl-tests
           path: ${{ env.ARTIFACT_PATH }}
@@ -416,10 +478,19 @@ jobs:
         run: |
           .github/scripts/unpack-openssl-tests.ps1
 
+      - name: Download zlib
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.TOOLCHAIN_NAME }}-zlib
+          path: ${{ env.ARTIFACT_PATH }}
+  
+      - name: Unpack zlib
+        run: |
+          .github/scripts/unpack-zlib.ps1
+  
       - name: Execute OpenSSL tests
         run: |
           .github/scripts/execute-openssl-tests.ps1
-
 
   build-libjpeg-turbo:
     needs: [build-toolchain]
@@ -469,14 +540,14 @@ jobs:
           .github/scripts/pack-libjpeg-turbo-tests.sh
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ env.TOOLCHAIN_NAME }}-libjpeg-turbo
           path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_NAME }}-libjpeg-turbo.zip
           retention-days: 3
 
       - name: Upload tests artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ env.TOOLCHAIN_NAME }}-libjpeg-turbo-tests
           path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_NAME }}-libjpeg-turbo-tests.zip
@@ -496,7 +567,7 @@ jobs:
           path: ${{ github.workspace }}
 
       - name: Download libjpeg-turbo tests
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: ${{ env.TOOLCHAIN_NAME }}-libjpeg-turbo-tests
           path: ${{ env.ARTIFACT_PATH }}

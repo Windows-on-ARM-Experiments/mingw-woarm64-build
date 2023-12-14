@@ -13,7 +13,9 @@ if [ $RUN_CONFIG = 1 ] || [ ! -f "$OPENSSL_BUILD_PATH/Makefile" ] ; then
         $SOURCE_PATH/$OPENSSL_VERSION/Configure \
             --prefix=$OPENSSL_PATH \
             --cross-compile-prefix=$TOOLCHAIN_PATH/bin/$TARGET- \
-            mingw-arm64
+            --with-zlib-include=$ZLIB_PATH/include \
+            --with-zlib-lib=$ZLIB_PATH/lib \
+            enable-acvp-tests enable-comp enable-fips enable-unit-test enable-zlib mingw-arm64
     echo "::endgroup::"
 fi
 
