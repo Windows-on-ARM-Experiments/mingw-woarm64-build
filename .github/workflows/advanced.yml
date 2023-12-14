@@ -76,8 +76,8 @@ jobs:
     env:
       TARGET: ${{ matrix.arch }}-${{ matrix.platform }}
       CRT: ${{ matrix.crt }}
-      TOOLCHAIN_NAME: ${{ matrix.target }}-${{ matrix.crt }}
-      TOOLCHAIN_PACKAGE_NAME: ${{ matrix.target }}-${{ matrix.crt }}-toolchain.tar.gz
+      TOOLCHAIN_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}
+      TOOLCHAIN_PACKAGE_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}-toolchain.tar.gz
 
     steps:
       - name: Checkout repository
