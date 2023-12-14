@@ -14,29 +14,15 @@ if [ $RUN_CONFIG = 1 ] || [ ! -f "$GCC_BUILD_PATH/Makefile" ] ; then
 
     case $TARGET in
         *linux*)
-            # REMOVED --with-isl=/usr"
             HOST_OPTION=" \
-                --enable-shared \
-                --enable-threads=posix \
                 --with-gmp=/usr \
                 --with-mpfr=/usr \
                 --with-mpc=/usr"
             ;;
-        *) # *mingw*)
-            # REMOVED --enable-shared
-            # ADDED --disable-shared
-            # REMOVED --libexecdir=/opt/lib
-            # REMOVED --with-{gmp,mpfr,mpc,isl}=/usr
+        *mingw*)
             HOST_OPTION=" \
-                --disable-shared \
                 --enable-threads=win32 \
-                --disable-rpath \
-                --disable-win32-registry \
-                --disable-werror \
-                --disable-symvers \
-                --disable-libstdcxx-pch \
-                --disable-libstdcxx-debug \
-                --disable-isl-version-check"
+                --disable-win32-registry"
             ;;
     esac
 
@@ -45,6 +31,7 @@ if [ $RUN_CONFIG = 1 ] || [ ! -f "$GCC_BUILD_PATH/Makefile" ] ; then
         --target=$TARGET \
         --includedir=$TOOLCHAIN_PATH/$TARGET/include \
         --enable-languages=c,lto,c++,fortran \
+        --enable-shared \
         --enable-static \
         --enable-graphite \
         --enable-fully-dynamic-string \
@@ -55,8 +42,15 @@ if [ $RUN_CONFIG = 1 ] || [ ! -f "$GCC_BUILD_PATH/Makefile" ] ; then
         --enable-lto \
         --enable-libgomp \
         --enable-checking=release \
-        --disable-bootstrap \
         --disable-multilib \
+        --disable-shared \
+        --disable-rpath \
+        --disable-werror \
+        --disable-symvers \
+        --disable-libstdcxx-pch \
+        --disable-libstdcxx-debug \
+        --disable-isl-version-check \
+        --disable-bootstrap \
         --with-libiconv \
         --with-system-zlib \
         --with-gnu-as \
