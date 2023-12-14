@@ -90,6 +90,11 @@ jobs:
         run: |
           .github/scripts/get-sha.sh ${{ env.BINUTILS_REPO }} ${{ env.BINUTILS_BRANCH }}
 
+      - name: Get workflow SHA
+        id: workflow-sha
+        run: |
+          echo sha=$(git log -1 --pretty=format:"%H" .github/workflows/ .github/scripts) >> "$GITHUB_OUTPUT"
+
       - name: Get GCC SHA
         id: gcc-sha
         run: |
@@ -105,7 +110,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
-          key: ${{ env.TOOLCHAIN_NAME }}-${{ steps.binutils-sha.outputs.sha }}-${{ steps.gcc-sha.outputs.sha }}-${{ steps.mingw-sha.outputs.sha }}
+          key: ${{ env.TOOLCHAIN_NAME }}--${{ steps.workflow-sha.outputs.sha }}-${{ steps.binutils-sha.outputs.sha }}-${{ steps.gcc-sha.outputs.sha }}-${{ steps.mingw-sha.outputs.sha }}
 
       - name: Checkout binutils
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
