@@ -74,6 +74,8 @@ jobs:
             crt: ucrt
 
     env:
+      TARGET: ${{ matrix.arch }}-${{ matrix.platform }}
+      CRT: ${{ matrix.crt }}
       TOOLCHAIN_NAME: ${{ matrix.target }}-${{ matrix.crt }}
       TOOLCHAIN_PACKAGE_NAME: ${{ matrix.target }}-${{ matrix.crt }}-toolchain.tar.gz
 
