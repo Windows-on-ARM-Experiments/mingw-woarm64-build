@@ -49,6 +49,10 @@ env:
   OPENSSL_BRANCH: ${{ github.event.inputs.openssl_branch || 'fix-tests' }}
   OPENSSL_VERSION: openssl-master
 
+  LIBJPEG_TURBO_REPO: libjpeg-turbo/libjpeg-turbo
+  LIBJPEG_TURBO_BRANCH: main
+  LIBJPEG_TURBO_VERSION: libjpeg-turbo-main
+
   TOOLCHAIN_PATH: ${{ github.workspace }}/cross
   TOOLCHAIN_NAME: aarch64-w64-mingw32-msvcrt
   TOOLCHAIN_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-toolchain.tar.gz
@@ -395,3 +399,92 @@ jobs:
       - name: Execute OpenSSL tests
         run: |
           .github/scripts/execute-openssl-tests.ps1
+
+
+  build-libjpeg-turbo:
+    needs: [build-toolchain]
+    runs-on: ubuntu-latest
+
+    env:
+      LIBJPEG_TURBO_PATH: ${{ github.workspace }}/libjpeg-turbo
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: ${{ github.workspace }}
+
+      - name: Checkout libjpeg-turbo
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.LIBJPEG_TURBO_REPO }}
+          ref: ${{ env.LIBJPEG_TURBO_BRANCH }}
+          path: ${{ env.SOURCE_PATH }}/${{ env.LIBJPEG_TURBO_VERSION }}
+
+      - name: Patch libjpeg-turbo
+        run: |
+          .github/scripts/patch-libjpeg-turbo.sh
+
+      - name: Download toolchain
+        uses: actions/cache/restore@v3
+        with:
+          path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
+          key: ${{ env.TOOLCHAIN_NAME }}-${{ needs.build-toolchain.outputs.binutils-sha }}-${{ needs.build-toolchain.outputs.gcc-sha }}-${{ needs.build-toolchain.outputs.mingw-sha }}
+          fail-on-cache-miss: true
+
+      - name: Unpack toolchain
+        run: |
+          .github/scripts/unpack-toolchain.sh
+
+      - name: Build libjpeg-turbo
+        run: |
+          .github/scripts/build-libjpeg-turbo.sh
+
+      - name: Pack libjpeg-turbo
+        run: |
+          .github/scripts/pack-libjpeg-turbo.sh
+
+      - name: Pack libjpeg-turbo tests
+        run: |
+          .github/scripts/pack-libjpeg-turbo-tests.sh
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.TOOLCHAIN_NAME }}-libjpeg-turbo
+          path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_NAME }}-libjpeg-turbo.zip
+          retention-days: 3
+
+      - name: Upload tests artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.TOOLCHAIN_NAME }}-libjpeg-turbo-tests
+          path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_NAME }}-libjpeg-turbo-tests.zip
+          retention-days: 3
+
+  execute-libpeg-turbo-tests:
+    needs: [build-libjpeg-turbo]
+    runs-on: [Windows, GCC, ARM64]
+
+    env:
+      LIBJPEG_TURBO_TESTS_PATH: ${{ github.workspace }}/libjpeg-turbo-tests
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: ${{ github.workspace }}
+
+      - name: Download libjpeg-turbo tests
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ env.TOOLCHAIN_NAME }}-libjpeg-turbo-tests
+          path: ${{ env.ARTIFACT_PATH }}
+
+      - name: Unpack libjpeg-turbo tests
+        run: |
+          .github/scripts/unpack-libjpeg-turbo-tests.ps1
+
+      - name: Execute libjpeg-turbo tests
+        run: |
+          .github/scripts/execute-libjpeg-turbo-tests.ps1
