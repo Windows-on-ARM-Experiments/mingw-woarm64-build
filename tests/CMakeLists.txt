@@ -35,6 +35,8 @@ add_executable(
   iostream-test.cpp
   math-test.c
   math-test.cpp
+  nested-functions-test.c
+  nested-functions-test.cpp
   omp-test.c
   omp-test.cpp
   pdata-test.c
