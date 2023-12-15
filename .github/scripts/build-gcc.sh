@@ -13,12 +13,6 @@ if [ $RUN_CONFIG = 1 ] || [ ! -f "$GCC_BUILD_PATH/Makefile" ] ; then
     rm -rf $GCC_BUILD_PATH/*
 
     case $TARGET in
-        *linux*)
-            HOST_OPTION=" \
-                --with-gmp=/usr \
-                --with-mpfr=/usr \
-                --with-mpc=/usr"
-            ;;
         *mingw*)
             HOST_OPTION=" \
                 --enable-threads=win32 \
