@@ -20,7 +20,7 @@ if [ $RUN_CONFIG = 1 ] || [ ! -f "$GCC_BUILD_PATH/Makefile" ] ; then
             ;;
     esac
 
-    CFLAGS=$CFLAGS $SOURCE_PATH/$GCC_VERSION/configure \
+    $SOURCE_PATH/$GCC_VERSION/configure \
         --prefix=$TOOLCHAIN_PATH \
         --target=$TARGET \
         --includedir=$TOOLCHAIN_PATH/$TARGET/include \

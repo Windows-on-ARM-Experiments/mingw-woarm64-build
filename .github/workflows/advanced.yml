@@ -68,10 +68,12 @@ jobs:
       matrix:
         arch: [aarch64, x86_64]
         platform: [w64-mingw32, linux-gnu]
-        crt: [msvcrt, ucrt]
+        crt: [msvcrt, ucrt, libc]
         exclude:
           - platform: linux-gnu
             crt: ucrt
+          - platform: w64-mingw32
+            crt: libc
 
     env:
       TARGET: ${{ matrix.arch }}-${{ matrix.platform }}
@@ -154,8 +156,7 @@ jobs:
       - name: Install cross headers and libraries
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform == 'linux-gnu' }}
         run: |
-          [ -d /usr/${{ env.TARGET }}/include ] && cp -r /usr/${{ env.TARGET }}/include ${{ env.TOOLCHAIN_PATH }}/${{ env.TARGET }}
-          [ -d /usr/${{ env.TARGET }}/lib ] && cp -r /usr/${{ env.TARGET }}/lib ${{ env.TOOLCHAIN_PATH }}/${{ env.TARGET }}
+          .github/scripts/install-cross-headers-libs.sh
 
       - name: Build MinGW headers
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform != 'linux-gnu' }}
