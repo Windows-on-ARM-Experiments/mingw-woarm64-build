@@ -20,6 +20,8 @@ if [ $RUN_CONFIG = 1 ] || [ ! -f "$GCC_BUILD_PATH/Makefile" ] ; then
             ;;
     esac
 
+    # REMOVED --libexecdir=/opt/lib
+    # REMOVED --with-{gmp,mpfr,mpc,isl}=/usr
     $SOURCE_PATH/$GCC_VERSION/configure \
         --prefix=$TOOLCHAIN_PATH \
         --target=$TARGET \
