@@ -71,7 +71,7 @@ jobs:
         crt: [msvcrt, ucrt, libc]
         exclude:
           - platform: linux-gnu
-            crt: ucrt
+            crt: [msvcrt, ucrt]
           - platform: w64-mingw32
             crt: libc
 
