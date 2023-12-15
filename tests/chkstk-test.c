@@ -2,12 +2,17 @@
    Tests stack probing
 */
 
-void f1(char* data) 
+#define BIG_STACK_ALLOC_SIZE 300000
+
+void write_to_big_stack_alloc(char* stack_data) 
 {
-    *data = 0;
+    stack_data[0] = 18;
+    stack_data[BIG_STACK_ALLOC_SIZE - 1] = 19;
 }
 
-void chkstk_test() {
-    char test[300000];
-    f1(test);
+int check_big_stack_allocation() 
+{
+    char stack_data[BIG_STACK_ALLOC_SIZE];
+    write_to_big_stack_alloc(stack_data);
+    return stack_data[BIG_STACK_ALLOC_SIZE - 1] == 19;
 }

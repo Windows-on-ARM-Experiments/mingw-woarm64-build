@@ -1,10 +1,10 @@
 #include <gtest/gtest.h>
 
-extern "C" void chkstk_test();
+extern "C" int check_big_stack_allocation();
 
 TEST(Aarch64MinGW, CHKSTKTest) 
 {
-    chkstk_test();
+    ASSERT_TRUE(check_big_stack_allocation());
 }
 
 
