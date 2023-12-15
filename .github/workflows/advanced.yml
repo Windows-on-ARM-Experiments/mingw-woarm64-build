@@ -85,15 +85,15 @@ jobs:
         with:
           path: ${{ github.workspace }}
 
-      - name: Get binutils SHA
-        id: binutils-sha
-        run: |
-          .github/scripts/get-sha.sh ${{ env.BINUTILS_REPO }} ${{ env.BINUTILS_BRANCH }}
-
       - name: Get workflow SHA
         id: workflow-sha
         run: |
           echo sha=$(git log -1 --pretty=format:"%H" .github/workflows/ .github/scripts) >> "$GITHUB_OUTPUT"
+
+      - name: Get binutils SHA
+        id: binutils-sha
+        run: |
+          .github/scripts/get-sha.sh ${{ env.BINUTILS_REPO }} ${{ env.BINUTILS_BRANCH }}
 
       - name: Get GCC SHA
         id: gcc-sha
