@@ -12,15 +12,23 @@ if [ $RUN_CONFIG = 1 ] || [ ! -f "$GCC_BUILD_PATH/Makefile" ] ; then
 
     rm -rf $GCC_BUILD_PATH/*
 
+    case $TARGET in
+        *mingw*)
+            HOST_OPTION=" \
+                --enable-threads=win32 \
+                --disable-win32-registry"
+            ;;
+    esac
+
     # REMOVED --libexecdir=/opt/lib
     # REMOVED --with-{gmp,mpfr,mpc,isl}=/usr
     $SOURCE_PATH/$GCC_VERSION/configure \
         --prefix=$TOOLCHAIN_PATH \
         --target=$TARGET \
+        --includedir=$TOOLCHAIN_PATH/$TARGET/include \
         --enable-languages=c,lto,c++,fortran \
         --enable-shared \
         --enable-static \
-        --enable-threads=win32 \
         --enable-graphite \
         --enable-fully-dynamic-string \
         --enable-libstdcxx-filesystem-ts=yes \
@@ -33,7 +41,6 @@ if [ $RUN_CONFIG = 1 ] || [ ! -f "$GCC_BUILD_PATH/Makefile" ] ; then
         --disable-multilib \
         --disable-shared \
         --disable-rpath \
-        --disable-win32-registry \
         --disable-werror \
         --disable-symvers \
         --disable-libstdcxx-pch \
@@ -43,17 +50,18 @@ if [ $RUN_CONFIG = 1 ] || [ ! -f "$GCC_BUILD_PATH/Makefile" ] ; then
         --with-libiconv \
         --with-system-zlib \
         --with-gnu-as \
-        --with-gnu-ld
+        --with-gnu-ld \
+        $HOST_OPTION
     echo "::endgroup::"
 fi
 
 echo "::group::Build GCC"
-make $BUILD_MAKE_OPTIONS all-gcc
+    make $BUILD_MAKE_OPTIONS all-gcc
 echo "::endgroup::"
 
 if [ $RUN_INSTALL = 1 ] ; then
     echo "::group::Install GCC"
-    make install-gcc
+        make install-gcc
     echo "::endgroup::"
 fi
 

@@ -66,18 +66,33 @@ jobs:
 
     strategy:
       matrix:
-        target: [aarch64-w64-mingw32, x86_64-w64-mingw32]
-        crt: [msvcrt, ucrt]
+        arch: [aarch64, x86_64]
+        platform: [w64-mingw32, linux-gnu]
+        crt: [msvcrt, ucrt, libc]
+        exclude:
+          - platform: linux-gnu
+            crt: msvcrt
+          - platform: linux-gnu
+            crt: ucrt
+          - platform: w64-mingw32
+            crt: libc
 
     env:
-      TOOLCHAIN_NAME: ${{ matrix.target }}-${{ matrix.crt }}
-      TOOLCHAIN_PACKAGE_NAME: ${{ matrix.target }}-${{ matrix.crt }}-toolchain.tar.gz
+      TARGET: ${{ matrix.arch }}-${{ matrix.platform }}
+      CRT: ${{ matrix.crt }}
+      TOOLCHAIN_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}
+      TOOLCHAIN_PACKAGE_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}-toolchain.tar.gz
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           path: ${{ github.workspace }}
+
+      - name: Get workflow SHA
+        id: workflow-sha
+        run: |
+          echo sha=$(git log -1 --pretty=format:"%H" .github/workflows/ .github/scripts) >> "$GITHUB_OUTPUT"
 
       - name: Get binutils SHA
         id: binutils-sha
@@ -99,7 +114,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
-          key: ${{ env.TOOLCHAIN_NAME }}-${{ steps.binutils-sha.outputs.sha }}-${{ steps.gcc-sha.outputs.sha }}-${{ steps.mingw-sha.outputs.sha }}
+          key: ${{ env.TOOLCHAIN_NAME }}-${{ steps.workflow-sha.outputs.sha }}-${{ steps.binutils-sha.outputs.sha }}-${{ steps.gcc-sha.outputs.sha }}-${{ steps.mingw-sha.outputs.sha }}
 
       - name: Checkout binutils
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
@@ -118,7 +133,7 @@ jobs:
           path: ${{ env.SOURCE_PATH }}/${{ env.GCC_VERSION }}
 
       - name: Checkout MinGW
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform != 'linux-gnu' }}
         uses: actions/checkout@v4
         with:
           repository: ${{ env.MINGW_REPO }}
@@ -140,8 +155,13 @@ jobs:
         run: |
           .github/scripts/build-binutils.sh
 
+      - name: Install cross headers and libraries
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform == 'linux-gnu' }}
+        run: |
+          .github/scripts/install-cross-headers-libs.sh
+
       - name: Build MinGW headers
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform != 'linux-gnu' }}
         run: |
           .github/scripts/build-mingw-headers.sh
 
@@ -151,7 +171,7 @@ jobs:
           .github/scripts/build-gcc.sh
 
       - name: Build MinGW CRT
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform != 'linux-gnu' }}
         run: |
           .github/scripts/build-mingw-crt.sh
 
@@ -161,7 +181,7 @@ jobs:
           .github/scripts/build-libgcc.sh
 
       - name: Build MinGW
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform != 'linux-gnu' }}
         run: |
           .github/scripts/build-mingw.sh
 
