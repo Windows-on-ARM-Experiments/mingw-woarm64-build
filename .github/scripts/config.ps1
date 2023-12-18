@@ -13,6 +13,7 @@ if ( -not $env:BUILD_PATH ) { $env:BUILD_PATH = "$PWD\build-$env:TOOLCHAIN_NAME"
 if ( -not $env:ARTIFACT_PATH ) { $env:ARTIFACT_PATH = "$PWD\artifact" }
 if ( -not $env:PERL_PATH ) { $env:PERL_PATH = "C:\Strawberry\perl\bin" }
 
+if ( -not $env:ZLIB_PATH ) { $env:ZLIB_PATH = "$PWD\zlib" }
 if ( -not $env:OPENBLAS_TESTS_PATH ) { $env:OPENBLAS_TESTS_PATH = "$PWD\openblas-tests" }
 if ( -not $env:OPENSSL_TESTS_PATH ) { $env:OPENSSL_TESTS_PATH = "$PWD\openssl-tests" }
 if ( -not $env:LIBJPEG_TURBO_TESTS_PATH ) { $env:LIBJPEG_TURBO_TESTS_PATH = "$PWD\libjpeg-turbo-tests" }
