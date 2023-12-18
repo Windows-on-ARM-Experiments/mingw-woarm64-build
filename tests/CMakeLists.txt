@@ -27,11 +27,15 @@ project(aarch64_mingw_tests)
 
 enable_testing()
 
+add_library(simple-dll SHARED dll.c)
+
 add_executable(
   aarch64-mingw-tests.exe
   bigdata-test.cpp
   chkstk-test.c
   chkstk-test.cpp
+  dll-test.c
+  dll-test.cpp
   iostream-test.cpp
   math-test.c
   math-test.cpp
@@ -55,7 +59,9 @@ add_executable(
 target_link_libraries(
   aarch64-mingw-tests.exe
   GTest::gtest_main
-  dbghelp
+  simple-dll
 )
 
+set_target_properties(simple-dll PROPERTIES SUFFIX ".dll")
+set_target_properties(simple-dll PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 set_target_properties(aarch64-mingw-tests.exe PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
