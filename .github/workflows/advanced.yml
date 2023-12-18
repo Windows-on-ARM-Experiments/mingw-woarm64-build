@@ -10,15 +10,15 @@ on:
       binutils_branch:
         description: 'Binutils branch to build'
         required: false
-        default: 'woarm64'
+        default: 'aarch64-patch-min'
       gcc_branch:
         description: 'GCC branch to build'
         required: false
-        default: 'woarm64'
+        default: 'aarch64-patch-min'
       mingw_branch:
         description: 'Mingw branch to build'
         required: false
-        default: 'woarm64'
+        default: 'aarch64-patch-min'
       openblas_branch:
         description: 'OpenBLAS branch to test'
         required: false
@@ -38,15 +38,15 @@ on:
 
 env:
   BINUTILS_REPO: Windows-on-ARM-Experiments/binutils-woarm64
-  BINUTILS_BRANCH: ${{ inputs.binutils_branch || 'woarm64' }}
+  BINUTILS_BRANCH: ${{ inputs.binutils_branch || 'aarch64-patch-min' }}
   BINUTILS_VERSION: binutils-master
 
   GCC_REPO: Windows-on-ARM-Experiments/gcc-woarm64
-  GCC_BRANCH: ${{ inputs.gcc_branch || 'woarm64' }}
+  GCC_BRANCH: ${{ inputs.gcc_branch || 'aarch64-patch-min' }}
   GCC_VERSION: gcc-master
 
   MINGW_REPO: Windows-on-ARM-Experiments/mingw-woarm64
-  MINGW_BRANCH: ${{ inputs.mingw_branch || 'woarm64' }}
+  MINGW_BRANCH: ${{ inputs.mingw_branch || 'aarch64-patch-min' }}
   MINGW_VERSION: mingw-w64-master
 
   OPENBLAS_REPO: OpenMathLib/OpenBLAS.git
