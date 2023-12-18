@@ -21,3 +21,9 @@ case "$CRT" in
         MINGW_CONF="$MINGW_CONF --with-default-msvcrt=msvcrt"
     ;;
 esac
+
+if [[ $TARGET == *mingw* ]]; then
+    BUILD_MINGW=1
+else
+    BUILD_MINGW=0
+fi
