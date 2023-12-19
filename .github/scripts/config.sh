@@ -11,8 +11,18 @@ OPENSSL_VERSION=${OPENSSL_VERSION:-openssl-master}
 LIBJPEG_TURBO_VERSION=${LIBJPEG_TURBO_VERSION:-libjpeg-turbo-main}
 
 TARGET=${TARGET:-aarch64-w64-mingw32}
-CRT=${CRT:-msvcrt}
+if [[ $TARGET == *mingw* ]]; then
+    CRT=${CRT:-msvcrt}
+else
+    CRT=${CRT:-libc}
+fi
 TOOLCHAIN_NAME=${TOOLCHAIN_NAME:-$TARGET-$CRT}
+
+if [[ ($TARGET == *mingw* && ($CRT != "msvcrt" && $CRT != "ucrt")) ||
+    ($TARGET == *linux* && $CRT != "libc") ]]; then
+    echo "Unsupported target $TARGET with CRT $CRT!"
+    exit 1
+fi
 
 SOURCE_PATH=${SOURCE_PATH:-$PWD/code}
 PATCHES_PATH=${PATCHE_PATH:-$PWD/patches}
