@@ -195,10 +195,15 @@ jobs:
           .github/scripts/build-gcc-libs.sh
 
       - name: Pack toolchain
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && env.TOOLCHAIN_NAME == 'aarch64-w64-mingw32-msvcrt' }}
         run: |
           .github/scripts/pack-toolchain.sh
 
+      - name: Pack toolchain mock
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && env.TOOLCHAIN_NAME != 'aarch64-w64-mingw32-msvcrt' }}
+        run: |
+          .github/scripts/pack-toolchain-mock.sh
+          
       - name: Upload artifact
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
         uses: actions/upload-artifact@v4
