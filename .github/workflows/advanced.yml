@@ -243,11 +243,15 @@ jobs:
         run: |
           .github/scripts/build-aarch64-tests.sh
 
-      - name: Upload tests artifact
+      - name: Pack tests
+        run: |
+          tar czf ${{ env.TESTS_PACKAGE_NAME }} -C tests/build/bin/ .
+
+      - name: Upload build-aarch64-mingw-tests
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.TOOLCHAIN_NAME }}-tests
-          path: tests/build/bin/aarch64-mingw-tests.exe
+          name: ${{ env.TESTS_PACKAGE_NAME }}
+          path: tests/build/bin/${{ env.TESTS_PACKAGE_NAME }}
           retention-days: 3
 
   execute-aarch64-tests:
@@ -255,7 +259,7 @@ jobs:
     runs-on: [Windows, GCC, ARM64]
 
     steps:
-      - name: Download ${{ env.TOOLCHAIN_NAME }} tests
+      - name: Download build-aarch64-mingw-tests
         uses: actions/download-artifact@v4
         with:
           name: ${{ env.TOOLCHAIN_NAME }}-tests
