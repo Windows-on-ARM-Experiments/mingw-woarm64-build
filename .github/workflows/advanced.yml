@@ -223,6 +223,11 @@ jobs:
     needs: [build-toolchain]
     runs-on: ubuntu-latest
 
+    env:
+      TARGET: aarch64-w64-mingw32
+      TOOLCHAIN_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-toolchain.tar.gz
+      TESTS_PACKAGE_NAME: ${{ matrix.target }}-${{ matrix.crt }}-tests.tar.gz
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -258,6 +263,9 @@ jobs:
   execute-aarch64-tests:
     needs: [build-aarch64-tests]
     runs-on: [Windows, GCC, ARM64]
+
+    env:
+      TESTS_PACKAGE_NAME: ${{ matrix.target }}-${{ matrix.crt }}-tests.tar.gz
 
     steps:
       - name: Download build-aarch64-mingw-tests
