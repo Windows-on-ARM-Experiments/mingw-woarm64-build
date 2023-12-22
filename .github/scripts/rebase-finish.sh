@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source `dirname $0`/config.sh
+source `dirname ${BASH_SOURCE[0]}`/config.sh
 
 REBASE_BRANCH=$1
 ORIGIN_BRANCH=$2

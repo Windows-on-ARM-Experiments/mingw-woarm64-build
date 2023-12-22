@@ -94,7 +94,7 @@ jobs:
       CRT: ${{ matrix.crt }}
       TOOLCHAIN_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}
       TOOLCHAIN_PACKAGE_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}-toolchain.tar.gz
-      TESTS_PACKAGE_NAME: ${{ matrix.target }}-${{ matrix.crt }}-tests.tar.gz
+      TESTS_PACKAGE_NAME: ${{ matrix.arch }}-${{ matrix.crt }}-tests.tar.gz
 
     steps:
       - name: Checkout repository
@@ -105,29 +105,39 @@ jobs:
       - name: Get workflow SHA
         id: workflow-sha
         run: |
-          echo sha=$(git log -1 --pretty=format:"%H" .github/workflows/ .github/scripts) >> "$GITHUB_OUTPUT"
+          .github/scripts/get-files-sha.sh ${{ github.workspace }} .github/workflows/advanced.yml
 
       - name: Get binutils SHA
         id: binutils-sha
         run: |
-          .github/scripts/get-sha.sh ${{ env.BINUTILS_REPO }} ${{ env.BINUTILS_BRANCH }}
+          .github/scripts/get-repository-sha.sh ${{ env.BINUTILS_REPO }} ${{ env.BINUTILS_BRANCH }}
 
       - name: Get GCC SHA
         id: gcc-sha
         run: |
-          .github/scripts/get-sha.sh ${{ env.GCC_REPO }} ${{ env.GCC_BRANCH }}
+          .github/scripts/get-repository-sha.sh ${{ env.GCC_REPO }} ${{ env.GCC_BRANCH }}
 
       - name: Get MinGW SHA
         id: mingw-sha
         run: |
-          .github/scripts/get-sha.sh ${{ env.MINGW_REPO }} ${{ env.MINGW_BRANCH }}
+          .github/scripts/get-repository-sha.sh ${{ env.MINGW_REPO }} ${{ env.MINGW_BRANCH }}
+
+      - name: Get binutils scripts SHA
+        id: binutils-scripts-sha
+        run: |
+          .github/scripts/get-files-sha.sh ${{ github.workspace }} .github/scripts/binutils
+  
+      - name: Get toolchain scripts SHA
+        id: toolchain-scripts-sha
+        run: |
+          .github/scripts/get-files-sha.sh ${{ github.workspace }} .github/scripts/toolchain
 
       - name: Cache toolchain
         id: cache-toolchain
         uses: actions/cache@v3
         with:
           path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
-          key: ${{ env.TOOLCHAIN_NAME }}-${{ steps.workflow-sha.outputs.sha }}-${{ steps.binutils-sha.outputs.sha }}-${{ steps.gcc-sha.outputs.sha }}-${{ steps.mingw-sha.outputs.sha }}
+          key: ${{ env.TOOLCHAIN_NAME }}-${{ steps.workflow-sha.outputs.sha }}-${{ steps.binutils-sha.outputs.sha }}-${{ steps.gcc-sha.outputs.sha }}-${{ steps.mingw-sha.outputs.sha }}-${{ steps.binutils-scripts-sha.outputs.sha }}-${{ steps.toolchain-scripts-sha.outputs.sha }}
 
       - name: Checkout binutils
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
@@ -166,52 +176,52 @@ jobs:
       - name: Build binutils
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
         run: |
-          .github/scripts/build-binutils.sh
+          .github/scripts/binutils/build.sh
 
       - name: Install cross headers and libraries
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform == 'linux-gnu' }}
         run: |
-          .github/scripts/install-cross-headers-libs.sh
+          .github/scripts/binutils/install-cross-headers-libs.sh
 
       - name: Build MinGW headers
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform != 'linux-gnu' }}
         run: |
-          .github/scripts/build-mingw-headers.sh
+          .github/scripts/toolchain/build-mingw-headers.sh
 
       - name: Build GCC
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
         run: |
-          .github/scripts/build-gcc.sh
+          .github/scripts/toolchain/build-gcc.sh
 
       - name: Build MinGW CRT
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform != 'linux-gnu' }}
         run: |
-          .github/scripts/build-mingw-crt.sh
+          .github/scripts/toolchain/build-mingw-crt.sh
 
       - name: Build libgcc
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
         run: |
-          .github/scripts/build-libgcc.sh
+          .github/scripts/toolchain/build-libgcc.sh
 
       - name: Build MinGW
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform != 'linux-gnu' }}
         run: |
-          .github/scripts/build-mingw.sh
+          .github/scripts/toolchain/build-mingw.sh
 
       - name: Build GCC libs
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
         run: |
-          .github/scripts/build-gcc-libs.sh
+          .github/scripts/toolchain/build-gcc-libs.sh
 
       - name: Pack toolchain
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && env.TOOLCHAIN_NAME == 'aarch64-w64-mingw32-msvcrt' }}
         run: |
-          .github/scripts/pack-toolchain.sh
+          .github/scripts/toolchain/pack.sh
 
       - name: Pack toolchain mock
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && env.TOOLCHAIN_NAME != 'aarch64-w64-mingw32-msvcrt' }}
         run: |
-          .github/scripts/pack-toolchain-mock.sh
+          .github/scripts/toolchain/pack-mock.sh
           
       - name: Upload artifact
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
@@ -226,6 +236,8 @@ jobs:
       binutils-sha: ${{ steps.binutils-sha.outputs.sha }}
       gcc-sha: ${{ steps.gcc-sha.outputs.sha }}
       mingw-sha: ${{ steps.mingw-sha.outputs.sha }} 
+      binutils-scripts-sha: ${{ steps.binutils-scripts-sha.outputs.sha }}
+      toolchain-scripts-sha: ${{ steps.toolchain-scripts-sha.outputs.sha }}
 
   build-aarch64-tests:
     needs: [build-toolchain]
@@ -244,16 +256,16 @@ jobs:
         uses: actions/cache/restore@v3
         with:
           path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
-          key: ${{ env.TOOLCHAIN_NAME }}-${{ needs.build-toolchain.outputs.workflow-sha }}-${{ needs.build-toolchain.outputs.binutils-sha }}-${{ needs.build-toolchain.outputs.gcc-sha }}-${{ needs.build-toolchain.outputs.mingw-sha }}
+          key: ${{ env.TOOLCHAIN_NAME }}-${{ needs.build-toolchain.outputs.workflow-sha }}-${{ needs.build-toolchain.outputs.binutils-sha }}-${{ needs.build-toolchain.outputs.gcc-sha }}-${{ needs.build-toolchain.outputs.mingw-sha }}-${{ needs.build-toolchain.outputs.binutils-scripts-sha }}-${{ needs.build-toolchain.outputs.toolchain-scripts-sha }}
           fail-on-cache-miss: true
 
       - name: Unpack toolchain
         run: |
-          .github/scripts/unpack-toolchain.sh
+          .github/scripts/toolchain/unpack.sh
   
       - name: Build aarch64-tests
         run: |
-          .github/scripts/build-aarch64-tests.sh
+          .github/scripts/tests/build.sh
 
       - name: Pack tests
         run: |
@@ -274,7 +286,12 @@ jobs:
       TESTS_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-tests.tar.gz
 
     steps:
-      - name: Download build-aarch64-mingw-tests
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: ${{ github.workspace }}
+
+      - name: Download ${{ env.TOOLCHAIN_NAME }} tests
         uses: actions/download-artifact@v4
         with:
           name: ${{ env.TESTS_PACKAGE_NAME }}
@@ -286,7 +303,7 @@ jobs:
 
       - name: Execute ${{ env.TOOLCHAIN_NAME }} tests
         run:
-          ${{ env.ARTIFACT_PATH }}\aarch64-mingw-tests.exe
+          .github/scripts/tests/execute-tests.ps1
 
   build-openblas:
     needs: [build-toolchain]
@@ -309,20 +326,20 @@ jobs:
         uses: actions/cache/restore@v3
         with:
           path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
-          key: ${{ env.TOOLCHAIN_NAME }}-${{ needs.build-toolchain.outputs.workflow-sha }}-${{ needs.build-toolchain.outputs.binutils-sha }}-${{ needs.build-toolchain.outputs.gcc-sha }}-${{ needs.build-toolchain.outputs.mingw-sha }}
+          key: ${{ env.TOOLCHAIN_NAME }}-${{ needs.build-toolchain.outputs.workflow-sha }}-${{ needs.build-toolchain.outputs.binutils-sha }}-${{ needs.build-toolchain.outputs.gcc-sha }}-${{ needs.build-toolchain.outputs.mingw-sha }}-${{ needs.build-toolchain.outputs.binutils-scripts-sha }}-${{ needs.build-toolchain.outputs.toolchain-scripts-sha }}
           fail-on-cache-miss: true
 
       - name: Unpack toolchain
         run: |
-          .github/scripts/unpack-toolchain.sh
+          .github/scripts/toolchain/unpack.sh
     
       - name: Build OpenBLAS
         run: |
-          .github/scripts/build-openblas.sh
+          .github/scripts/openblas/build.sh
 
       - name: Pack OpenBLAS tests
         run: |
-          .github/scripts/pack-openblas-tests.sh
+          .github/scripts/openblas/pack-tests.sh
   
       - name: Upload tests artifact
         uses: actions/upload-artifact@v4
@@ -352,11 +369,11 @@ jobs:
 
       - name: Unpack OpenBLAS tests
         run: |
-          .github/scripts/unpack-openblas-tests.ps1
+          .github/scripts/openblas/unpack-tests.ps1
   
       - name: Execute OpenBLAS tests
         run: |
-          C:\Program` Files\Git\bin\bash.exe .github/scripts/test-openblas.sh
+          C:\Program` Files\Git\bin\bash.exe .github/scripts/openblas/execute-tests.sh
   
   build-zlib:
     needs: [build-toolchain]
@@ -382,20 +399,20 @@ jobs:
         uses: actions/cache/restore@v3
         with:
           path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
-          key: ${{ env.TOOLCHAIN_NAME }}-${{ needs.build-toolchain.outputs.workflow-sha }}-${{ needs.build-toolchain.outputs.binutils-sha }}-${{ needs.build-toolchain.outputs.gcc-sha }}-${{ needs.build-toolchain.outputs.mingw-sha }}
+          key: ${{ env.TOOLCHAIN_NAME }}-${{ needs.build-toolchain.outputs.workflow-sha }}-${{ needs.build-toolchain.outputs.binutils-sha }}-${{ needs.build-toolchain.outputs.gcc-sha }}-${{ needs.build-toolchain.outputs.mingw-sha }}-${{ needs.build-toolchain.outputs.binutils-scripts-sha }}-${{ needs.build-toolchain.outputs.toolchain-scripts-sha }}
           fail-on-cache-miss: true
 
       - name: Unpack toolchain
         run: |
-          .github/scripts/unpack-toolchain.sh
+          .github/scripts/toolchain/unpack.sh
   
       - name: Build zlib
         run: |
-          .github/scripts/build-zlib.sh
+          .github/scripts/zlib/build.sh
 
       - name: Pack zlib
         run: |
-          .github/scripts/pack-zlib.sh
+          .github/scripts/zlib/pack.sh
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -427,18 +444,18 @@ jobs:
 
       - name: Install OpenSSL dependencies
         run: |
-          .github/scripts/install-openssl-dependencies.sh
+          .github/scripts/openssl/install-dependencies.sh
 
       - name: Download toolchain
         uses: actions/cache/restore@v3
         with:
           path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
-          key: ${{ env.TOOLCHAIN_NAME }}-${{ needs.build-toolchain.outputs.workflow-sha }}-${{ needs.build-toolchain.outputs.binutils-sha }}-${{ needs.build-toolchain.outputs.gcc-sha }}-${{ needs.build-toolchain.outputs.mingw-sha }}
+          key: ${{ env.TOOLCHAIN_NAME }}-${{ needs.build-toolchain.outputs.workflow-sha }}-${{ needs.build-toolchain.outputs.binutils-sha }}-${{ needs.build-toolchain.outputs.gcc-sha }}-${{ needs.build-toolchain.outputs.mingw-sha }}-${{ needs.build-toolchain.outputs.binutils-scripts-sha }}-${{ needs.build-toolchain.outputs.toolchain-scripts-sha }}
           fail-on-cache-miss: true
 
       - name: Unpack toolchain
         run: |
-          .github/scripts/unpack-toolchain.sh
+          .github/scripts/toolchain/unpack.sh
 
       - name: Download zlib
         uses: actions/download-artifact@v4
@@ -448,19 +465,19 @@ jobs:
 
       - name: Unpack zlib
         run: |
-          .github/scripts/unpack-zlib.sh
+          .github/scripts/zlib/unpack.sh
 
       - name: Build OpenSSL
         run: |
-          .github/scripts/build-openssl.sh
+          .github/scripts/openssl/build.sh
 
       - name: Pack OpenSSL
         run: |
-          .github/scripts/pack-openssl.sh
+          .github/scripts/openssl/pack.sh
 
       - name: Pack OpenSSL tests
         run: |
-          .github/scripts/pack-openssl-tests.sh
+          .github/scripts/openssl/pack-tests.sh
     
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -505,7 +522,7 @@ jobs:
 
       - name: Unpack OpenSSL tests
         run: |
-          .github/scripts/unpack-openssl-tests.ps1
+          .github/scripts/openssl/unpack-tests.ps1
 
       - name: Download zlib
         uses: actions/download-artifact@v4
@@ -515,11 +532,11 @@ jobs:
   
       - name: Unpack zlib
         run: |
-          .github/scripts/unpack-zlib.ps1
+          .github/scripts/zlib/unpack.ps1
   
       - name: Execute OpenSSL tests
         run: |
-          .github/scripts/execute-openssl-tests.ps1
+          .github/scripts/openssl/execute-tests.ps1
 
   build-libjpeg-turbo:
     needs: [build-toolchain]
@@ -543,30 +560,30 @@ jobs:
 
       - name: Patch libjpeg-turbo
         run: |
-          .github/scripts/patch-libjpeg-turbo.sh
+          .github/scripts/libjpeg-turbo/patch.sh
 
       - name: Download toolchain
         uses: actions/cache/restore@v3
         with:
           path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
-          key: ${{ env.TOOLCHAIN_NAME }}-${{ needs.build-toolchain.outputs.workflow-sha }}-${{ needs.build-toolchain.outputs.binutils-sha }}-${{ needs.build-toolchain.outputs.gcc-sha }}-${{ needs.build-toolchain.outputs.mingw-sha }}
+          key: ${{ env.TOOLCHAIN_NAME }}-${{ needs.build-toolchain.outputs.workflow-sha }}-${{ needs.build-toolchain.outputs.binutils-sha }}-${{ needs.build-toolchain.outputs.gcc-sha }}-${{ needs.build-toolchain.outputs.mingw-sha }}-${{ needs.build-toolchain.outputs.binutils-scripts-sha }}-${{ needs.build-toolchain.outputs.toolchain-scripts-sha }}
           fail-on-cache-miss: true
 
       - name: Unpack toolchain
         run: |
-          .github/scripts/unpack-toolchain.sh
+          .github/scripts/toolchain/unpack.sh
 
       - name: Build libjpeg-turbo
         run: |
-          .github/scripts/build-libjpeg-turbo.sh
+          .github/scripts/libjpeg-turbo/build.sh
 
       - name: Pack libjpeg-turbo
         run: |
-          .github/scripts/pack-libjpeg-turbo.sh
+          .github/scripts/libjpeg-turbo/pack.sh
 
       - name: Pack libjpeg-turbo tests
         run: |
-          .github/scripts/pack-libjpeg-turbo-tests.sh
+          .github/scripts/libjpeg-turbo/pack-tests.sh
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -603,8 +620,8 @@ jobs:
 
       - name: Unpack libjpeg-turbo tests
         run: |
-          .github/scripts/unpack-libjpeg-turbo-tests.ps1
+          .github/scripts/libjpeg-turbo/unpack-tests.ps1
 
       - name: Execute libjpeg-turbo tests
         run: |
-          .github/scripts/execute-libjpeg-turbo-tests.ps1
+          .github/scripts/libjpeg-turbo/execute-tests.ps1

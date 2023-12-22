@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source `dirname $0`/config.sh
+source `dirname ${BASH_SOURCE[0]}`/config.sh
 
 UPSTREAM_URL=$1 
 UPSTREAM_BRANCH=$2
