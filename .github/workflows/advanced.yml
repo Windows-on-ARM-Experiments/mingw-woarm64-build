@@ -226,7 +226,7 @@ jobs:
     env:
       TARGET: aarch64-w64-mingw32
       TOOLCHAIN_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-toolchain.tar.gz
-      TESTS_PACKAGE_NAME: ${{ matrix.target }}-${{ matrix.crt }}-tests.tar.gz
+      TESTS_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-tests.tar.gz
 
     steps:
       - name: Checkout repository
@@ -265,7 +265,7 @@ jobs:
     runs-on: [Windows, GCC, ARM64]
 
     env:
-      TESTS_PACKAGE_NAME: ${{ matrix.target }}-${{ matrix.crt }}-tests.tar.gz
+      TESTS_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-tests.tar.gz
 
     steps:
       - name: Download build-aarch64-mingw-tests
