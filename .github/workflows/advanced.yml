@@ -257,7 +257,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.TESTS_PACKAGE_NAME }}
-          path: tests/build/bin/${{ env.TESTS_PACKAGE_NAME }}
+          path: ${{ env.TESTS_PACKAGE_NAME }}
           retention-days: 3
 
   execute-aarch64-tests:
