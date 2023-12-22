@@ -86,6 +86,7 @@ jobs:
       CRT: ${{ matrix.crt }}
       TOOLCHAIN_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}
       TOOLCHAIN_PACKAGE_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}-toolchain.tar.gz
+      TESTS_PACKAGE_NAME: ${{ matrix.target }}-${{ matrix.crt }}-tests.tar.gz
 
     steps:
       - name: Checkout repository
