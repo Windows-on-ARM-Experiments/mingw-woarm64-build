@@ -3,7 +3,7 @@
 
 void omp_test(void)
 {
-    #pragma omp parallel
+#pragma omp parallel
     {
         printf("Hello from process: %d\n", omp_get_thread_num());
     }

@@ -1,4 +1,4 @@
-/* 
+/*
    Tests data in a structure is addressed correctrly
 */
 
@@ -33,18 +33,18 @@ void copy_parts(struct aaa *a, struct bbb *b)
 
 // This checks elements in a struct
 // are accessed correctly by copying across values.
-int check_struct() 
+int check_struct()
 {
-   struct aaa a = { 11, 22, { 0 }, 33, 44 };
-   struct bbb *b = (struct bbb*)malloc(sizeof(struct bbb));
+    struct aaa a = {11, 22, {0}, 33, 44};
+    struct bbb *b = (struct bbb *)malloc(sizeof(struct bbb));
 
-   copy_parts(&a, b);
+    copy_parts(&a, b);
 
-   // check all values are the same
-   int success = b->a == 11 &&
-    b->b == 22 &&
-    b->c == 33 &&
-    b->d == 44;
+    // check all values are the same
+    int success = b->a == 11 &&
+                  b->b == 22 &&
+                  b->c == 33 &&
+                  b->d == 44;
 
-   return success;
+    return success;
 }

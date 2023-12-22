@@ -1,16 +1,16 @@
-/* 
+/*
    Tests stack probing
 */
 
 #define BIG_STACK_ALLOC_SIZE 300000
 
-void write_to_big_stack_alloc(char* stack_data) 
+void write_to_big_stack_alloc(char *stack_data)
 {
     stack_data[0] = 18;
     stack_data[BIG_STACK_ALLOC_SIZE - 1] = 19;
 }
 
-int check_big_stack_allocation() 
+int check_big_stack_allocation()
 {
     char stack_data[BIG_STACK_ALLOC_SIZE];
     write_to_big_stack_alloc(stack_data);

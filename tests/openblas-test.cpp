@@ -2,9 +2,7 @@
 
 extern "C" void openblas_test();
 
-TEST(Aarch64MinGW, OpenBLASTest) 
+TEST(Aarch64MinGW, OpenBLASTest)
 {
     openblas_test();
 }
-
-
