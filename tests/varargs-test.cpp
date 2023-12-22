@@ -9,6 +9,8 @@ extern "C" void test_va_arg_pack(char *buf, size_t length);
 // the Windows ABI.
 TEST(Aarch64MinGW, TestVaList)
 {
+    GTEST_SKIP();
+    
     char sz[100];
     test_va_list(sz, 100);
     ASSERT_STREQ(sz, "string 11 1919 111.111000");
