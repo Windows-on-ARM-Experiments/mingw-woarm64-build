@@ -59,7 +59,7 @@ env:
 
   TOOLCHAIN_PATH: ${{ github.workspace }}/cross
   TOOLCHAIN_NAME: aarch64-w64-mingw32-msvcrt
-  TOOLCHAIN_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-tests.tar.gz.zip
+  TOOLCHAIN_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-toolchain.tar.gz
 
   SOURCE_PATH: ${{ github.workspace }}/code
   ARTIFACT_PATH: ${{ github.workspace }}/artifact
