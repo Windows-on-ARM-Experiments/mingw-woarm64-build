@@ -59,7 +59,7 @@ env:
 
   TOOLCHAIN_PATH: ${{ github.workspace }}/cross
   TOOLCHAIN_NAME: aarch64-w64-mingw32-msvcrt
-  TOOLCHAIN_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-toolchain.tar.gz
+  TOOLCHAIN_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-tests.tar.gz.zip
 
   SOURCE_PATH: ${{ github.workspace }}/code
   ARTIFACT_PATH: ${{ github.workspace }}/artifact
@@ -86,7 +86,7 @@ jobs:
       CRT: ${{ matrix.crt }}
       TOOLCHAIN_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}
       TOOLCHAIN_PACKAGE_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}-toolchain.tar.gz
-      TESTS_PACKAGE_NAME: ${{ matrix.target }}-${{ matrix.crt }}-tests.tar.gz
+      TESTS_PACKAGE_NAME: ${{ matrix.target }}-${{ matrix.crt }}-tests.tar.gz.zip
 
     steps:
       - name: Checkout repository
@@ -224,7 +224,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      TESTS_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-tests.tar.gz
+      TESTS_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-tests.tar.gz.zip
 
     steps:
       - name: Checkout repository
@@ -263,7 +263,7 @@ jobs:
     runs-on: [Windows, GCC, ARM64]
 
     env:
-      TESTS_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-tests.tar.gz
+      TESTS_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-tests.tar.gz.zip
 
     steps:
       - name: Download build-aarch64-mingw-tests
