@@ -1,10 +1,8 @@
 #include <gtest/gtest.h>
 
-extern "C" void dll_test();
+extern "C" int check_dll();
 
-TEST(Aarch64MinGW, DllTest) 
+TEST(Aarch64MinGW, DllTest)
 {
-    dll_test();
+    ASSERT_EQ(check_dll(), 0);
 }
-
-

@@ -2,9 +2,7 @@
 
 extern "C" void sjlj_test();
 
-TEST(Aarch64MinGW, SJLJTest) 
+TEST(Aarch64MinGW, SJLJTest)
 {
     sjlj_test();
 }
-
-

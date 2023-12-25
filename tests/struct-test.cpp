@@ -1,10 +1,8 @@
 #include <gtest/gtest.h>
 
-extern "C" void struct_test();
+extern "C" int check_struct();
 
-TEST(Aarch64MinGW, StructTest) 
+TEST(Aarch64MinGW, StructTest)
 {
-    struct_test();
+    ASSERT_TRUE(check_struct());
 }
-
-

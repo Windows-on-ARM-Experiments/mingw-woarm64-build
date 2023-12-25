@@ -2,9 +2,7 @@
 
 extern "C" void omp_test();
 
-TEST(Aarch64MinGW, OmpTest) 
+TEST(Aarch64MinGW, OmpTest)
 {
     omp_test();
 }
-
-

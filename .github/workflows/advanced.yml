@@ -86,6 +86,7 @@ jobs:
       CRT: ${{ matrix.crt }}
       TOOLCHAIN_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}
       TOOLCHAIN_PACKAGE_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}-toolchain.tar.gz
+      TESTS_PACKAGE_NAME: ${{ matrix.target }}-${{ matrix.crt }}-tests.tar.gz
 
     steps:
       - name: Checkout repository
@@ -222,6 +223,9 @@ jobs:
     needs: [build-toolchain]
     runs-on: ubuntu-latest
 
+    env:
+      TESTS_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-tests.tar.gz
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -243,23 +247,34 @@ jobs:
         run: |
           .github/scripts/build-aarch64-tests.sh
 
-      - name: Upload tests artifact
+      - name: Pack tests
+        run: |
+          tar czf ${{ env.TESTS_PACKAGE_NAME }} -C tests/build/bin/ .
+
+      - name: Upload build-aarch64-mingw-tests
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.TOOLCHAIN_NAME }}-tests
-          path: tests/build/bin/aarch64-mingw-tests.exe
+          name: ${{ env.TESTS_PACKAGE_NAME }}
+          path: ${{ env.TESTS_PACKAGE_NAME }}
           retention-days: 3
 
   execute-aarch64-tests:
     needs: [build-aarch64-tests]
     runs-on: [Windows, GCC, ARM64]
 
+    env:
+      TESTS_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-tests.tar.gz
+
     steps:
-      - name: Download ${{ env.TOOLCHAIN_NAME }} tests
+      - name: Download build-aarch64-mingw-tests
         uses: actions/download-artifact@v4
         with:
-          name: ${{ env.TOOLCHAIN_NAME }}-tests
+          name: ${{ env.TESTS_PACKAGE_NAME }}
           path: ${{ env.ARTIFACT_PATH }}
+
+      - name: Unpack tests
+        run: |
+          tar xzf ${{ env.ARTIFACT_PATH }}\${{ env.TESTS_PACKAGE_NAME }} -C ${{ env.ARTIFACT_PATH }}
 
       - name: Execute ${{ env.TOOLCHAIN_NAME }} tests
         run:

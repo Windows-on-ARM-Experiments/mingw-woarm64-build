@@ -14,38 +14,38 @@
 
 struct scope
 {
-  scope()
-  {
-    printf("construct\n");
-  }
+    scope()
+    {
+        printf("construct\n");
+    }
 
-  ~scope()
-  {
-    printf("destruct\n");
-  }
+    ~scope()
+    {
+        printf("destruct\n");
+    }
 };
 
 int throw_func(void)
 {
-  scope s;
-  printf("throw-func\n");
-  throw 32;
+    scope s;
+    printf("throw-func\n");
+    throw 32;
 }
 
-TEST(Aarch64MinGW, ThrowTest) 
+TEST(Aarch64MinGW, ThrowTest)
 {
     GTEST_SKIP();
-    
+
     printf("main start\n");
 
     try
     {
         throw_func();
     }
-    catch(...)
+    catch (...)
     {
-      printf("catch\n");
+        printf("catch\n");
     }
-    
+
     printf("ok\n");
 }
