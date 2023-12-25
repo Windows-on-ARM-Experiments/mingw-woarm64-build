@@ -274,7 +274,7 @@ jobs:
 
       - name: Unpack tests
         run: |
-          tar xzf aarch64-w64-mingw32-msvcrt-tests.tar.gz.zip -C ${{ env.ARTIFACT_PATH }}
+          tar xzf ${{ env.ARTIFACT_PATH }}\${{ env.TESTS_PACKAGE_NAME }} -C ${{ env.ARTIFACT_PATH }}
 
       - name: Execute ${{ env.TOOLCHAIN_NAME }} tests
         run:
