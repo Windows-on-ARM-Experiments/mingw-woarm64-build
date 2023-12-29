@@ -12,7 +12,7 @@ if [ $RUN_CONFIG = 1 ] || [ ! -f "$FFMPEG_BUILD_PATH/Makefile" ] ; then
         rm -rf $FFMPEG_BUILD_PATH/*
 
         echo Patch FFmpeg
-        sed -i "/_type=gcc/,/_cflags/s/_cflags_speed='-O3'/_cflags_speed='-O1'/" $SOURCE_PATH/$FFMPEG_VERSION/configure
+        sed -i "/_type=gcc/,/_cflags/s/_cflags_speed='-O3'/_cflags_speed='-O0'/" $SOURCE_PATH/$FFMPEG_VERSION/configure
         sed -i "s/\$(M)\$(TARGET_EXEC) \$(TARGET_PATH)/echo '\0/;s/-y \$(TARGET_PATH)\/\$@ 2>\/dev\/null/test \0\'/;s/\$(Q)\$(SRC_PATH)\/tests\/fate-run.sh/echo \0/" $SOURCE_PATH/$FFMPEG_VERSION/tests/Makefile
 
         $SOURCE_PATH/$FFMPEG_VERSION/configure \
