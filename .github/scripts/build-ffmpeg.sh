@@ -27,6 +27,10 @@ echo "::group::Build FFmpeg"
     make $BUILD_MAKE_OPTIONS
 echo "::endgroup::"
 
+echo "::group::Build FFmpeg"
+    make $BUILD_MAKE_OPTIONS fate
+echo "::endgroup::"
+
 if [ $RUN_INSTALL = 1 ] ; then
     echo "::group::Install FFmpeg"
         make install
