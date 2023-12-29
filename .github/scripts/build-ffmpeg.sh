@@ -11,11 +11,10 @@ if [ $RUN_CONFIG = 1 ] || [ ! -f "$FFMPEG_BUILD_PATH/Makefile" ] ; then
     echo "::group::Configure FFmpeg"
         rm -rf $FFMPEG_BUILD_PATH/*
 
-        echo Patching FFmpeg
-        sed -i "/_type=llvm_gcc/,/_cflags/s/_cflags_speed='-O3'/_cflags_speed='-O2'/" $SOURCE_PATH/$FFMPEG_VERSION/configure
+        echo Patch FFmpeg
+        sed -i "/_type=gcc/,/_cflags/s/_cflags_speed='-O3'/_cflags_speed='-O2'/" $SOURCE_PATH/$FFMPEG_VERSION/configure
         sed -i "s/\$(M)\$(TARGET_EXEC) \$(TARGET_PATH)/echo '\0/;s/-y \$(TARGET_PATH)\/\$@ 2>\/dev\/null/test \0\'/;s/\$(Q)\$(SRC_PATH)\/tests\/fate-run.sh/echo \0/" $SOURCE_PATH/$FFMPEG_VERSION/tests/Makefile
 
-        CFLAGS="-Wno-incompatible-pointer-types -O2" \
         $SOURCE_PATH/$FFMPEG_VERSION/configure \
             --prefix=$FFMPEG_PATH \
             --arch=aarch64 \
