@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source `dirname $0`/config.sh
+source `dirname ${BASH_SOURCE[0]}`/config.sh
 
 MINGW_VERSION=${MINGW_VERSION:-mingw-w64-master}
 
