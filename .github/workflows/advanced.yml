@@ -27,22 +27,30 @@ on:
         description: 'OpenSSL branch to test'
         required: false
         default: 'fix-tests'
+  workflow_call:
+    inputs:
+      binutils_branch:
+        type: string
+      gcc_branch:
+        type: string
+      mingw_branch:
+        type: string
 
 env:
   BINUTILS_REPO: Windows-on-ARM-Experiments/binutils-woarm64
-  BINUTILS_BRANCH: ${{ github.event.inputs.binutils_branch || 'woarm64' }}
+  BINUTILS_BRANCH: ${{ inputs.binutils_branch || 'woarm64' }}
   BINUTILS_VERSION: binutils-master
 
   GCC_REPO: Windows-on-ARM-Experiments/gcc-woarm64
-  GCC_BRANCH: ${{ github.event.inputs.gcc_branch || 'woarm64' }}
+  GCC_BRANCH: ${{ inputs.gcc_branch || 'woarm64' }}
   GCC_VERSION: gcc-master
 
   MINGW_REPO: Windows-on-ARM-Experiments/mingw-woarm64
-  MINGW_BRANCH: ${{ github.event.inputs.mingw_branch || 'woarm64' }}
+  MINGW_BRANCH: ${{ inputs.mingw_branch || 'woarm64' }}
   MINGW_VERSION: mingw-w64-master
 
   OPENBLAS_REPO: OpenMathLib/OpenBLAS.git
-  OPENBLAS_BRANCH: ${{ github.event.inputs.openblas_branch || 'develop' }}
+  OPENBLAS_BRANCH: ${{ inputs.openblas_branch || 'develop' }}
   OPENBLAS_VERSION: openblas-develop
 
   ZLIB_REPO: madler/zlib
@@ -50,7 +58,7 @@ env:
   ZLIB_VERSION: zlib-develop
 
   OPENSSL_REPO: Windows-on-ARM-Experiments/openssl
-  OPENSSL_BRANCH: ${{ github.event.inputs.openssl_branch || 'fix-tests' }}
+  OPENSSL_BRANCH: ${{ inputs.openssl_branch || 'fix-tests' }}
   OPENSSL_VERSION: openssl-master
 
   LIBJPEG_TURBO_REPO: libjpeg-turbo/libjpeg-turbo
