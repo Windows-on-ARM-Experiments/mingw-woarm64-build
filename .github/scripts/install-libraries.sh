@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source `dirname $0`/config.sh
+source `dirname ${BASH_SOURCE[0]}`/config.sh
 
 MPFR_VERSION=mpfr-4.1.0
 GMP_VERSION=gmp-6.2.1

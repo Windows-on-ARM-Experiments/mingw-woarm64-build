@@ -19,9 +19,9 @@ on:
         required: false
         default: 'woarm64'
 env:
-  BINUTILS_BRANCH: ${{ github.event.inputs.binutils_branch }}
-  GCC_BRANCH: ${{ github.event.inputs.gcc_branch }}
-  MINGW_BRANCH: ${{ github.event.inputs.mingw_branch }}
+  BINUTILS_BRANCH: ${{ inputs.binutils_branch }}
+  GCC_BRANCH: ${{ inputs.gcc_branch }}
+  MINGW_BRANCH: ${{ inputs.mingw_branch }}
 
 jobs:
   run-script:
