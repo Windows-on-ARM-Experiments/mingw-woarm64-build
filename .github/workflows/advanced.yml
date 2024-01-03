@@ -672,17 +672,19 @@ jobs:
 
       - name: Build FFmpeg
         run: |
-          .github/scripts/build-ffmpeg.sh
+          .github/scripts/ffmpeg/build-ffmpeg.sh
 
       - name: Pack FFmpeg
+        if: false
         run: |
-          .github/scripts/pack-ffmpeg.sh
+          .github/scripts/ffmpeg/pack-ffmpeg.sh
 
       - name: Pack FFmpeg tests
         run: |
-          .github/scripts/pack-ffmpeg-tests.sh
+          .github/scripts/ffmpeg/pack-ffmpeg-tests.sh
 
       - name: Upload artifact
+        if: false
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.TOOLCHAIN_NAME }}-ffmpeg
@@ -709,6 +711,13 @@ jobs:
         with:
           path: ${{ github.workspace }}
 
+      - name: Checkout FFmpeg
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.FFMPEG_REPO }}
+          ref: ${{ env.FFMPEG_BRANCH }}
+          path: ${{ env.SOURCE_PATH }}/${{ env.FFMPEG_VERSION }}
+
       - name: Download FFmpeg tests
         uses: actions/download-artifact@v4
         with:
@@ -717,8 +726,8 @@ jobs:
 
       - name: Unpack FFmpeg tests
         run: |
-          .github/scripts/unpack-ffmpeg-tests.ps1
+          .github/scripts/ffmpeg/unpack-ffmpeg-tests.ps1
 
       - name: Execute FFmpeg tests
         run: |
-          .github/scripts/execute-ffmpeg-tests.ps1
+          .github/scripts/ffmpeg/execute-ffmpeg-tests.ps1
