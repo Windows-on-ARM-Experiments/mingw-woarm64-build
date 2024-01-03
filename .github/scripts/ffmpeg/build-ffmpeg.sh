@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source `dirname $0`/config.sh
+source `dirname ${BASH_SOURCE[0]}`/../config.sh
 
 FFMPEG_BUILD_PATH=$BUILD_PATH/ffmpeg
 
@@ -30,7 +30,7 @@ echo "::group::Build FFmpeg"
 echo "::endgroup::"
 
 echo "::group::Build FFmpeg"
-    make fate > fate.txt
+    make fate > fate.log
 echo "::endgroup::"
 
 echo 'Success!'

@@ -1,11 +1,11 @@
 #!/bin/bash
 
-source `dirname $0`/config.sh
+source `dirname ${BASH_SOURCE[0]}`/../config.sh
 
 echo "::group::Pack FFmpeg"
     mkdir -p $ARTIFACT_PATH
     cd $FFMPEG_PATH
-    zip -r $ARTIFACT_PATH/$TOOLCHAIN_NAME-ffmpeg.zip *
+    zip -R $ARTIFACT_PATH/$TOOLCHAIN_NAME-ffmpeg.zip fate.log *.exe */*.exe --exclude ffmpeg_g.exe ffprobe_g.exe
 echo "::endgroup::"
 
 echo 'Success!'
