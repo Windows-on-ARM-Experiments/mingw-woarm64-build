@@ -668,7 +668,7 @@ jobs:
 
       - name: Unpack toolchain
         run: |
-          .github/scripts/unpack-toolchain.sh
+          .github/scripts/toolchain/unpack.sh
 
       - name: Build FFmpeg
         run: |
