@@ -730,4 +730,4 @@ jobs:
 
       - name: Execute FFmpeg tests
         run: |
-          .github/scripts/ffmpeg/execute-ffmpeg-tests.ps1
+          C:\Program` Files\Git\bin\bash.exe .github/scripts/ffmpeg/execute-ffmpeg-tests.sh
