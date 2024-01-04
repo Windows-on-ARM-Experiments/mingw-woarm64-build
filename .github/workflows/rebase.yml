@@ -50,6 +50,7 @@ jobs:
           token: ${{ secrets.GNU_PUSH_PAT }}
           repository: ${{ env.BINUTILS_REPO }}
           ref: ${{ env.ORIGIN_BRANCH }}
+          fetch-depth: 0
           path: ${{ env.SOURCE_PATH }}/binutils
 
       - name: Start binutils rebase
@@ -72,6 +73,7 @@ jobs:
           token: ${{ secrets.GNU_PUSH_PAT }}
           repository: ${{ env.GCC_REPO }}
           ref: ${{ env.ORIGIN_BRANCH }}
+          fetch-depth: 0
           path: ${{ env.SOURCE_PATH }}/gcc
 
       - name: Start GCC rebase
@@ -94,6 +96,7 @@ jobs:
           token: ${{ secrets.GNU_PUSH_PAT }}
           repository: ${{ env.MINGW_REPO }}
           ref: ${{ env.ORIGIN_BRANCH }}
+          fetch-depth: 0
           path: ${{ env.SOURCE_PATH }}/mingw
 
       - name: Start MinGW rebase
