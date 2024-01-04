@@ -6,6 +6,10 @@ UPSTREAM_URL=$1
 UPSTREAM_BRANCH=$2
 REBASE_BRANCH=$3
 
+git config pull.rebase true
+git config user.name github-actions
+git config user.email github-actions@github.com
+
 # Add and update upstream remote.
 if ! git remote | grep upstream; then
     git remote add upstream $UPSTREAM_URL
@@ -20,9 +24,6 @@ if git show-ref --verify --quiet refs/remotes/origin/$REBASE_BRANCH; then
 else
     git switch -c $REBASE_BRANCH
 fi
-
-git config user.name github-actions
-git config user.email github-actions@github.com
 
 # Create upstream branch from upstream/$UPSTREAM_BRANCH.
 git branch upstream upstream/$UPSTREAM_BRANCH
