@@ -72,7 +72,7 @@ env:
   SOURCE_PATH: ${{ github.workspace }}/code
   ARTIFACT_PATH: ${{ github.workspace }}/artifact
 
-  GITHUB_EVENT_REPOSITORY_NAME: ${{ github.event.repository.full_name }}
+  GITHUB_EVENT_REPOSITORY: ${{ github.event.repository }}
   GITHUB_EVENT_PULL_REQUEST_BASE_REF: ${{ github.event.pull_request.base.ref }}
   GITHUB_EVENT_PULL_REQUEST_HEAD_REF: ${{ github.event.pull_request.head.ref }}
 
