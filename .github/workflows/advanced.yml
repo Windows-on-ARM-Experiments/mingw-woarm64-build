@@ -72,7 +72,7 @@ env:
   SOURCE_PATH: ${{ github.workspace }}/code
   ARTIFACT_PATH: ${{ github.workspace }}/artifact
 
-  GITHUB_EVENT: ${{ github.event }}
+  GITHUB_EVENT: ${{ toJson(github.event) }}
 
 jobs:
   build-toolchain:
