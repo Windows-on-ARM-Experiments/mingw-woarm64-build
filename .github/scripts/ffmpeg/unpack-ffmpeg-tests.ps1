@@ -1,4 +1,4 @@
-. $PSScriptRoot\config.ps1
+. $PSScriptRoot\..\config.ps1
 
 Remove-Item $env:FFMPEG_TESTS_PATH -Recurse -Force -ErrorAction Ignore
 
