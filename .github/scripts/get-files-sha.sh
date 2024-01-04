@@ -13,7 +13,7 @@ get_sha() {
 
 if [ -n "$GITHUB_EVENT_PULL_REQUEST_HEAD_REF" ]; then
     sha=$(curl -s "https://api.github.com/repos/$GITHUB_EVENT_REPOSITORY_FULL_NAME/commits?sha=$GITHUB_EVENT_PULL_REQUEST_BASE_REF&per_page=1&path=$path" | get_sha)
-    sha=$sha-$(curl -s "https://api.github.com/repos/$GITHUB_EVENT_REPOSITORY_FULL_NAME/commits?sha=$GITHUB_EVENT_PULL_REQUEST_BASE_REF&per_page=1&path=$path" | get_sha)
+    sha=$sha-$(curl -s "https://api.github.com/repos/$GITHUB_EVENT_REPOSITORY_FULL_NAME/commits?sha=$GITHUB_EVENT_PULL_REQUEST_HEAD_REF&per_page=1&path=$path" | get_sha)
     echo $sha
     echo sha=$sha >> "$GITHUB_OUTPUT"
     exit 0
