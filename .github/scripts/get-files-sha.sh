@@ -1,9 +1,5 @@
 #!/bin/bash
 
-echo "$GITHUB_EVENT_REPOSITORY_FULL_NAME"
-echo "$GITHUB_EVENT_PULL_REQUEST_BASE_REF"
-echo "$GITHUB_EVENT_PULL_REQUEST_HEAD_REF"
-
 repo_path=$1
 path=${@:2}
 
