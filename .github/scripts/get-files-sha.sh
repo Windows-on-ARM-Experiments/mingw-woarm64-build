@@ -5,6 +5,7 @@ path=${@:2}
 
 git status
 echo $path
+git log -1 --format="%H" $path
 
 if [ -n "$GITHUB_EVENT_PULL_REQUEST_HEAD_REF" ]; then
 
