@@ -3,6 +3,9 @@
 repo_path=$1
 path=${@:2}
 
+git status
+echo $path
+
 if [ -n "$GITHUB_EVENT_PULL_REQUEST_HEAD_REF" ]; then
 
     if ! git rev-parse --verify "$GITHUB_EVENT_PULL_REQUEST_BASE_REF"; then
