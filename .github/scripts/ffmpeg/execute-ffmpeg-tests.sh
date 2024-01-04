@@ -2,7 +2,7 @@
 
 source `dirname ${BASH_SOURCE[0]}`/../config.sh
 
-SOURCE_PATH=$(realpath `dirname ${BASH_SOURCE[0]}`/../../..)
+SOURCE_PATH=$(realpath `dirname ${BASH_SOURCE[0]}`/../../../code)
 
 echo "::group::Test FFmpeg"
     pushd $FFMPEG_TESTS_PATH
