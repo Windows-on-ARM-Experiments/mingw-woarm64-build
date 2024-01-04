@@ -72,6 +72,8 @@ env:
   SOURCE_PATH: ${{ github.workspace }}/code
   ARTIFACT_PATH: ${{ github.workspace }}/artifact
 
+  GITHUB_EVENT: ${{ github.event }}
+
 jobs:
   build-toolchain:
     runs-on: ubuntu-latest
