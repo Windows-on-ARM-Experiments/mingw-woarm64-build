@@ -8,6 +8,7 @@ echo "::group::Test FFmpeg"
     pushd $FFMPEG_TESTS_PATH
 
     mkdir -p tests/data/fate
+    ln -s /usr/bin/base64 tests/base64
 
     IFS=$'\n'
     for i in $(sed '/^@/d;/fate-source/d' fate.log); do
