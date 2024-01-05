@@ -17,7 +17,7 @@ echo "::group::Test FFmpeg"
     if [[ $i =~ ^TEST ]]; then
         test_name=${i##* }
         run_test=$(cat .github/scripts/ffmpeg/skip_tests.txt | grep -q "^$test_name$" && echo 0 || echo 1)
-        [[ $run_test == 1 ]] && echo $i
+        [[ $run_test == 1 ]] && echo TEST $test_name || echo SKIP $test_name
         continue
     fi
 
