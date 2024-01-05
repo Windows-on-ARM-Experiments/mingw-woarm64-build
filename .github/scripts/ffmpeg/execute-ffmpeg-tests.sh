@@ -16,7 +16,7 @@ echo "::group::Test FFmpeg"
     for i in $(sed '/^@/d;/fate-source/d' fate.log); do
     if [[ $i =~ ^TEST ]]; then
         test_name=${i##* }
-        run_test=$(cat .github/scripts/ffmpeg/skip_tests.txt | grep -q "^$test_name$" && echo 0 || echo 1)
+        run_test=$(cat $skip_tests_path | grep -q "^$test_name$" && echo 0 || echo 1)
         [[ $run_test == 1 ]] && echo TEST $test_name || echo SKIP $test_name
         continue
     fi
