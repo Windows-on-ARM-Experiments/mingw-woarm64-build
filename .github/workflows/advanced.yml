@@ -37,6 +37,9 @@ on:
         type: string
 
 env:
+  REPO: ${{ github.repository }}
+  BRANCH: ${{ github.ref }}
+
   BINUTILS_REPO: Windows-on-ARM-Experiments/binutils-woarm64
   BINUTILS_BRANCH: ${{ inputs.binutils_branch || 'woarm64' }}
   BINUTILS_VERSION: binutils-master
@@ -90,6 +93,7 @@ jobs:
             crt: libc
 
     env:
+      GH_TOKEN: ${{ github.token }}
       TARGET: ${{ matrix.arch }}-${{ matrix.platform }}
       CRT: ${{ matrix.crt }}
       TOOLCHAIN_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}
@@ -105,7 +109,7 @@ jobs:
       - name: Get workflow SHA
         id: workflow-sha
         run: |
-          .github/scripts/get-files-sha.sh ${{ github.workspace }} .github/workflows/advanced.yml
+          .github/scripts/get-file-sha.sh ${{ env.REPO }} ${{ env.BRANCH }} .github/workflows/advanced.yml
 
       - name: Get binutils SHA
         id: binutils-sha
@@ -125,12 +129,12 @@ jobs:
       - name: Get binutils scripts SHA
         id: binutils-scripts-sha
         run: |
-          .github/scripts/get-files-sha.sh ${{ github.workspace }} .github/scripts/binutils
+          .github/scripts/get-directory-sha.sh ${{ env.REPO }} ${{ env.BRANCH }} .github/scripts/binutils
   
       - name: Get toolchain scripts SHA
         id: toolchain-scripts-sha
         run: |
-          .github/scripts/get-files-sha.sh ${{ github.workspace }} .github/scripts/toolchain
+          .github/scripts/get-directory-sha.sh ${{ env.REPO }} ${{ env.BRANCH }} .github/scripts/toolchain
 
       - name: Cache toolchain
         id: cache-toolchain
