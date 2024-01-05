@@ -3,7 +3,7 @@
 repo_path=$1
 path=${@:2}
 
-if [ -n "$HEAD_REF" ]; then
+if [ -n "$HEAD_REF2" ]; then
 
     if ! git rev-parse --verify "$BASE_REF"; then
         git fetch origin $BASE_REF
