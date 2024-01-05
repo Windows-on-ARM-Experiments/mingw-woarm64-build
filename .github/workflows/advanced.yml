@@ -245,7 +245,6 @@ jobs:
       toolchain-scripts-sha: ${{ steps.toolchain-scripts-sha.outputs.sha }}
 
   build-aarch64-tests:
-    if: false
     needs: [build-toolchain]
     runs-on: ubuntu-latest
 
@@ -285,7 +284,6 @@ jobs:
           retention-days: 3
 
   execute-aarch64-tests:
-    if: false
     needs: [build-aarch64-tests]
     runs-on: [Windows, GCC, ARM64]
 
@@ -313,7 +311,6 @@ jobs:
           .github/scripts/tests/execute-tests.ps1
 
   build-openblas:
-    if: false
     needs: [build-toolchain]
     runs-on: ubuntu-latest
 
@@ -357,7 +354,6 @@ jobs:
           retention-days: 3
         
   execute-openblas-tests:
-    if: false
     needs: [build-openblas]
     runs-on: [Windows, GCC, ARM64]
 
@@ -385,7 +381,6 @@ jobs:
           C:\Program` Files\Git\bin\bash.exe .github/scripts/openblas/execute-tests.sh
   
   build-zlib:
-    if: false
     needs: [build-toolchain]
     runs-on: ubuntu-latest 
 
@@ -432,7 +427,6 @@ jobs:
           retention-days: 3
 
   build-openssl:
-    if: false
     needs: [build-toolchain, build-zlib]
     runs-on: ubuntu-latest
 
@@ -505,7 +499,6 @@ jobs:
           retention-days: 3
 
   execute-openssl-tests:
-    if: false
     needs: [build-openssl]
     runs-on: [Windows, GCC, ARM64]
 
@@ -551,7 +544,6 @@ jobs:
           .github/scripts/openssl/execute-tests.ps1
 
   build-libjpeg-turbo:
-    if: false
     needs: [build-toolchain]
     runs-on: ubuntu-latest
 
@@ -613,7 +605,6 @@ jobs:
           retention-days: 3
 
   execute-libpeg-turbo-tests:
-    if: false
     needs: [build-libjpeg-turbo]
     runs-on: [Windows, GCC, ARM64]
 
