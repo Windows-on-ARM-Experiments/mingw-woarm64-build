@@ -72,9 +72,6 @@ env:
   SOURCE_PATH: ${{ github.workspace }}/code
   ARTIFACT_PATH: ${{ github.workspace }}/artifact
 
-  BASE_REF: ${{ github.event.pull_request.base.ref }}
-  HEAD_REF: ${{ github.event.pull_request.head.ref }}
-
 jobs:
   build-toolchain:
     runs-on: ubuntu-latest
