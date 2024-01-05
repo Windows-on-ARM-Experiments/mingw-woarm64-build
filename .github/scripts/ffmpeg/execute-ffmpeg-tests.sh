@@ -3,6 +3,7 @@
 source `dirname ${BASH_SOURCE[0]}`/../config.sh
 
 SOURCE_PATH=$(realpath `dirname ${BASH_SOURCE[0]}`/../../../code)
+skip_tests_path=`dirname ${BASH_SOURCE[0]}`/skip_tests.txt
 
 echo "::group::Test FFmpeg"
     pushd $FFMPEG_TESTS_PATH
@@ -13,6 +14,7 @@ echo "::group::Test FFmpeg"
     IFS=$'\n'
     for i in $(sed '/^@/d;/fate-source/d' fate.log); do
     if [[ $i =~ ^TEST ]]; then
+        test_name=${i##* }
         echo $i
         continue
     fi
@@ -24,7 +26,7 @@ echo "::group::Test FFmpeg"
     command=$SOURCE_PATH/$FFMPEG_VERSION/${i#echo @*$FFMPEG_VERSION/}
     command=${command//\/home*ffmpeg/.}
     echo $command
-    eval $command || echo Error
+    eval $command || echo FAILED $test_name
     done
 
     popd
