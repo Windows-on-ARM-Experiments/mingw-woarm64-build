@@ -670,13 +670,6 @@ jobs:
         run: |
           .github/scripts/ffmpeg/pack-tests.sh
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ env.TOOLCHAIN_NAME }}-ffmpeg
-          path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_NAME }}-ffmpeg.zip
-          retention-days: 3
-
       - name: Upload tests artifact
         uses: actions/upload-artifact@v4
         with:
@@ -707,7 +700,7 @@ jobs:
       - name: Download FFmpeg tests
         uses: actions/download-artifact@v4
         with:
-          name: ${{ env.TOOLCHAIN_NAME }}-tests
+          name: ${{ env.TOOLCHAIN_NAME }}-ffmpeg-tests
           path: ${{ env.ARTIFACT_PATH }}
 
       - name: Unpack FFmpeg tests
