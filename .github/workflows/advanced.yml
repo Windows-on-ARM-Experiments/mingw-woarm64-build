@@ -655,7 +655,7 @@ jobs:
         uses: actions/cache/restore@v3
         with:
           path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
-          key: ${{ env.TOOLCHAIN_NAME }}-${{ needs.build-toolchain.outputs.workflow-sha }}-${{ needs.build-toolchain.outputs.binutils-sha }}-${{ needs.build-toolchain.outputs.gcc-sha }}-${{ needs.build-toolchain.outputs.mingw-sha }}
+          key: ${{ env.TOOLCHAIN_NAME }}-${{ needs.build-toolchain.outputs.workflow-sha }}-${{ needs.build-toolchain.outputs.binutils-sha }}-${{ needs.build-toolchain.outputs.gcc-sha }}-${{ needs.build-toolchain.outputs.mingw-sha }}-${{ needs.build-toolchain.outputs.binutils-scripts-sha }}-${{ needs.build-toolchain.outputs.toolchain-scripts-sha }}
           fail-on-cache-miss: true
 
       - name: Unpack toolchain
@@ -664,19 +664,13 @@ jobs:
 
       - name: Build FFmpeg
         run: |
-          .github/scripts/ffmpeg/build-ffmpeg.sh
-
-      - name: Pack FFmpeg
-        if: false
-        run: |
-          .github/scripts/ffmpeg/pack-ffmpeg.sh
+          .github/scripts/ffmpeg/build.sh
 
       - name: Pack FFmpeg tests
         run: |
-          .github/scripts/ffmpeg/pack-ffmpeg-tests.sh
+          .github/scripts/ffmpeg/pack-tests.sh
 
       - name: Upload artifact
-        if: false
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.TOOLCHAIN_NAME }}-ffmpeg
@@ -713,13 +707,13 @@ jobs:
       - name: Download FFmpeg tests
         uses: actions/download-artifact@v4
         with:
-          name: ${{ env.TOOLCHAIN_NAME }}-ffmpeg-tests
+          name: ${{ env.TOOLCHAIN_NAME }}-tests
           path: ${{ env.ARTIFACT_PATH }}
 
       - name: Unpack FFmpeg tests
         run: |
-          .github/scripts/ffmpeg/unpack-ffmpeg-tests.ps1
+          .github/scripts/ffmpeg/unpack-tests.ps1
 
       - name: Execute FFmpeg tests
         run: |
-          C:\Program` Files\Git\bin\bash.exe .github/scripts/ffmpeg/execute-ffmpeg-tests.sh
+          C:\Program` Files\Git\bin\bash.exe .github/scripts/ffmpeg/execute-tests.sh
