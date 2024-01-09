@@ -65,6 +65,10 @@ env:
   LIBJPEG_TURBO_BRANCH: main
   LIBJPEG_TURBO_VERSION: libjpeg-turbo-main
 
+  FFMPEG_REPO: FFmpeg/FFmpeg
+  FFMPEG_BRANCH: master
+  FFMPEG_VERSION: ffmpeg-master
+
   TOOLCHAIN_PATH: ${{ github.workspace }}/cross
   TOOLCHAIN_NAME: aarch64-w64-mingw32-msvcrt
   TOOLCHAIN_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-toolchain.tar.gz
@@ -626,3 +630,87 @@ jobs:
       - name: Execute libjpeg-turbo tests
         run: |
           .github/scripts/libjpeg-turbo/execute-tests.ps1
+
+  build-ffmpeg:
+    needs: [build-toolchain]
+    runs-on: ubuntu-latest
+
+    env:
+      FFMPEG_PATH: ${{ github.workspace }}/ffmpeg
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: ${{ github.workspace }}
+
+      - name: Checkout FFmpeg
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.FFMPEG_REPO }}
+          ref: ${{ env.FFMPEG_BRANCH }}
+          path: ${{ env.SOURCE_PATH }}/${{ env.FFMPEG_VERSION }}
+
+      - name: Download toolchain
+        uses: actions/cache/restore@v3
+        with:
+          path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
+          key: ${{ env.TOOLCHAIN_NAME }}-${{ needs.build-toolchain.outputs.workflow-sha }}-${{ needs.build-toolchain.outputs.binutils-sha }}-${{ needs.build-toolchain.outputs.gcc-sha }}-${{ needs.build-toolchain.outputs.mingw-sha }}-${{ needs.build-toolchain.outputs.binutils-scripts-sha }}-${{ needs.build-toolchain.outputs.toolchain-scripts-sha }}
+          fail-on-cache-miss: true
+
+      - name: Unpack toolchain
+        run: |
+          .github/scripts/toolchain/unpack.sh
+
+      - name: Patch FFmpeg
+        run: |
+          .github/scripts/ffmpeg/patch.sh
+
+      - name: Build FFmpeg
+        run: |
+          .github/scripts/ffmpeg/build.sh
+
+      - name: Pack FFmpeg tests
+        run: |
+          .github/scripts/ffmpeg/pack-tests.sh
+
+      - name: Upload tests artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.TOOLCHAIN_NAME }}-ffmpeg-tests
+          path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_NAME }}-ffmpeg-tests.zip
+          retention-days: 3
+
+  execute-ffmpeg-tests:
+    needs: [build-ffmpeg]
+    runs-on: [Windows, GCC, ARM64]
+
+    env:
+      FFMPEG_TESTS_PATH: ${{ github.workspace }}/ffmpeg-tests
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: ${{ github.workspace }}
+
+      - name: Checkout FFmpeg
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.FFMPEG_REPO }}
+          ref: ${{ env.FFMPEG_BRANCH }}
+          path: ${{ env.SOURCE_PATH }}/${{ env.FFMPEG_VERSION }}
+
+      - name: Download FFmpeg tests
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.TOOLCHAIN_NAME }}-ffmpeg-tests
+          path: ${{ env.ARTIFACT_PATH }}
+
+      - name: Unpack FFmpeg tests
+        run: |
+          .github/scripts/ffmpeg/unpack-tests.ps1
+
+      - name: Execute FFmpeg tests
+        run: |
+          C:\Program` Files\Git\bin\bash.exe .github/scripts/ffmpeg/execute-tests.sh

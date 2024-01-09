@@ -17,3 +17,4 @@ if ( -not $env:ZLIB_PATH ) { $env:ZLIB_PATH = "$PWD\zlib" }
 if ( -not $env:OPENBLAS_TESTS_PATH ) { $env:OPENBLAS_TESTS_PATH = "$PWD\openblas-tests" }
 if ( -not $env:OPENSSL_TESTS_PATH ) { $env:OPENSSL_TESTS_PATH = "$PWD\openssl-tests" }
 if ( -not $env:LIBJPEG_TURBO_TESTS_PATH ) { $env:LIBJPEG_TURBO_TESTS_PATH = "$PWD\libjpeg-turbo-tests" }
+if ( -not $env:FFMPEG_TESTS_PATH ) { $env:FFMPEG_TESTS_PATH = "$PWD\ffmpeg-tests" }
