@@ -10,7 +10,7 @@ echo "::group::Test FFmpeg"
     pushd $FFMPEG_TESTS_PATH
 
     mkdir -p tests/data/fate
-    ln -s /usr/bin/base64 tests/base64
+    [ ! -f tests/base64 ] && ln -s /usr/bin/base64 tests/base64
 
 # fate.log usually contains 3 lines per test
 # TEST <testname>
