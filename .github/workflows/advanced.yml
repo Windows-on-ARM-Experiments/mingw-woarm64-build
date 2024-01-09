@@ -662,6 +662,10 @@ jobs:
         run: |
           .github/scripts/toolchain/unpack.sh
 
+      - name: Patch FFmpeg
+        run: |
+          .github/scripts/ffmpeg/patch.sh
+
       - name: Build FFmpeg
         run: |
           .github/scripts/ffmpeg/build.sh

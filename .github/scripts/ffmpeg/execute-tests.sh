@@ -3,6 +3,7 @@
 source `dirname ${BASH_SOURCE[0]}`/../config.sh
 
 SOURCE_PATH=$(realpath `dirname ${BASH_SOURCE[0]}`/../../../code)
+# path to the file with test names which should be skipped
 SKIP_TESTS_PATH=$(realpath `dirname ${BASH_SOURCE[0]}`/skip_tests.txt)
 
 echo "::group::Test FFmpeg"
@@ -11,26 +12,32 @@ echo "::group::Test FFmpeg"
     mkdir -p tests/data/fate
     ln -s /usr/bin/base64 tests/base64
 
-    run_test=0
+# fate.log usually contains 3 lines per test
+# TEST <testname>
+# echo for command with quotas to execute
+# command without quotas to execute
+
+    SKIPPED_TEST=1
     IFS=$'\n'
     for i in $(sed '/^@/d;/fate-source/d' fate.log); do
         if [[ $i =~ ^TEST ]]; then
-            test_name=${i##* }
-            run_test=$(cat $SKIP_TESTS_PATH | grep -q "^$test_name$" && echo 0 || echo 1)
-            [[ $run_test == 1 ]] && echo TEST $test_name || echo SKIP $test_name
+            TEST_NAME=${i##* }
+            # check if test should be skipped
+            SKIPPED_TEST=$(cat $SKIP_TESTS_PATH | grep -q "^$TEST_NAME$" && echo 1 || echo 0)
+            [[ $SKIPPED_TEST == 1 ]] && echo SKIP $TEST_NAME || echo TEST $TEST_NAME
             continue
         fi
 
-        if [[ $run_test == 0 ]] || [[ ! $i =~ ^echo ]]; then
+        # skip lines related to a test which should be skipped or which do not start with echo
+        if [[ $SKIPPED_TEST == 1 ]] || [[ ! $i =~ ^echo ]]; then
             continue
         fi
 
-        [[ $run_test == 1 ]] && echo $i
-
+        # update the command with local paths 
         command=$SOURCE_PATH/$FFMPEG_VERSION/${i#echo @*$FFMPEG_VERSION/}
         command=${command//\/home*ffmpeg/.}
         echo $command
-        eval $command || { echo FAILED $test_name; exit 1; }
+        eval $command || { echo FAILED $TEST_NAME; exit 1; }
     done
 
     popd
