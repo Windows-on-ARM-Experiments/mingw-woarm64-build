@@ -4,7 +4,7 @@ source `dirname ${BASH_SOURCE[0]}`/../config.sh
 
 SOURCE_PATH=$(realpath `dirname ${BASH_SOURCE[0]}`/../../../code)
 # path to the file with test names which should be skipped
-SKIP_TESTS_PATH=$(realpath `dirname ${BASH_SOURCE[0]}`/skip_tests.txt)
+SKIP_TESTS_PATH=$(realpath `dirname ${BASH_SOURCE[0]}`/skip-tests.txt)
 
 echo "::group::Test FFmpeg"
     pushd $FFMPEG_TESTS_PATH
@@ -35,7 +35,7 @@ echo "::group::Test FFmpeg"
 
         # update the command with local paths 
         command=$SOURCE_PATH/$FFMPEG_VERSION/${i#echo @*$FFMPEG_VERSION/}
-        command=${command//\/home*ffmpeg/.}
+        command=${command//\"\/home*ffmpeg/\".}
         echo $command
         eval $command || { echo FAILED $TEST_NAME; exit 1; }
     done
