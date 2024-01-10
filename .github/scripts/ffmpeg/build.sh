@@ -12,15 +12,20 @@ if [ $RUN_CONFIG = 1 ] || [ ! -f "$FFMPEG_BUILD_PATH/Makefile" ] ; then
     echo "::group::Configure FFmpeg"
         rm -rf $FFMPEG_BUILD_PATH/*
 
-        CFLAGS="-Wno-incompatible-pointer-types" \
+        if [ $DEBUG = 1 ] ; then
+            ADDITIONAL_OPTIONS=" \
+                --enable-debug=3"
+        fi
+
+        CFLAGS="-Wno-incompatible-pointer-types -fno-builtin-sin -fno-builtin-cos" \
         $FFMPEG_SOURCE_PATH/configure \
             --prefix=$FFMPEG_PATH \
             --target-path="." \
             --target-samples="./samples" \
-            --disable-optimizations \
             --arch=aarch64 \
             --target-os=mingw32 \
-            --cross-prefix=aarch64-w64-mingw32-
+            --cross-prefix=aarch64-w64-mingw32- \
+            $ADDITIONAL_OPTIONS
     echo "::endgroup::"
 fi
 
