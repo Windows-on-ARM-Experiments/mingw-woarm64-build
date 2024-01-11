@@ -10,5 +10,5 @@ jobs:
     uses: ./.github/workflows/advanced.yml
     with:
       binutils_branch: 'aarch64-patch-min'
-      gcc_branch: 'aarch64-patch-min-3~15'
+      gcc_branch: 'cfd8e9b5319fda94f85ec013bd902b8cb58aefa8'
       mingw_branch: 'aarch64-patch-min'
