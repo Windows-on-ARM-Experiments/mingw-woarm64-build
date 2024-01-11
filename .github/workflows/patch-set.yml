@@ -9,6 +9,6 @@ jobs:
   build:
     uses: ./.github/workflows/advanced.yml
     with:
-      binutils_branch: 'aarch64-patch-min-2'
-      gcc_branch: 'aarch64-patch-min-2~15'
-      mingw_branch: 'aarch64-patch-min-2'
+      binutils_branch: 'aarch64-patch-min'
+      gcc_branch: 'aarch64-patch-min-3~15'
+      mingw_branch: 'aarch64-patch-min'
