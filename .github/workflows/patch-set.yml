@@ -1,0 +1,13 @@
+name: Patch set test
+
+on:
+  workflow_dispatch:
+
+jobs:
+
+  build:
+    uses: ./.github/workflows/advanced.yml
+    with:
+      binutils_branch: 'aarch64-patch-min-2'
+      gcc_branch: 'aarch64-patch-min-2~15'
+      mingw_branch: 'aarch64-patch-min-2'
