@@ -18,11 +18,11 @@ echo "::group::Build libgfortran"
 make $BUILD_MAKE_OPTIONS all-target-libgfortran
 echo "::endgroup::"
 
-if [ $RUN_INSTALL = 1 ] ; then
-    echo "::group::Install libgfortran"
-    make install-target-libgfortran
-    echo "::endgroup::"
-fi
+# if [ $RUN_INSTALL = 1 ] ; then
+#     echo "::group::Install libgfortran"
+#     make install-target-libgfortran
+#     echo "::endgroup::"
+# fi
 
 echo "::group::Build remaining GCC libraries"
 make $BUILD_MAKE_OPTIONS all
