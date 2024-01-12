@@ -1,9 +1,7 @@
 . $PSScriptRoot\..\config.ps1
 
 Write-Output '::group::Test OpenSSL'
-    $excluded_tests = @(
-       '-test_ssl_new' # something about handshake failure
-    )
+    $excluded_tests = @()
 
     $env:SRCTOP = "$env:SOURCE_PATH\$env:OPENSSL_VERSION"
     $env:BLDTOP = "$env:OPENSSL_TESTS_PATH"
