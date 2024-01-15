@@ -14,11 +14,16 @@ if [ $RUN_CONFIG = 1 ] || [ ! -f "$GCC_BUILD_PATH/Makefile" ] ; then
 
     case $TARGET in
         *mingw*)
-            HOST_OPTION=" \
+            HOST_OPTIONS=" \
                 --enable-threads=win32 \
                 --disable-win32-registry"
             ;;
     esac
+
+    if [ $DEBUG = 1 ] ; then
+        ADDITIONAL_OPTIONS=" \
+            --enable-debug"
+    fi
 
     # REMOVED --libexecdir=/opt/lib
     # REMOVED --with-{gmp,mpfr,mpc,isl}=/usr
@@ -51,7 +56,8 @@ if [ $RUN_CONFIG = 1 ] || [ ! -f "$GCC_BUILD_PATH/Makefile" ] ; then
         --with-system-zlib \
         --with-gnu-as \
         --with-gnu-ld \
-        $HOST_OPTION
+        $HOST_OPTIONS \
+        $ADDITIONAL_OPTIONS
     echo "::endgroup::"
 fi
 
