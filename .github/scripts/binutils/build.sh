@@ -12,9 +12,15 @@ if [ $RUN_CONFIG = 1 ] || [ ! -f "$BINUTILS_BUILD_PATH/Makefile" ] ; then
 
     rm -rf $BINUTILS_BUILD_PATH/*
 
+    if [ $DEBUG = 1 ] ; then
+        ADDITIONAL_OPTIONS=" \
+            --enable-debug"
+    fi
+
     $SOURCE_PATH/$BINUTILS_VERSION/configure \
         --prefix=$TOOLCHAIN_PATH \
-        --target=$TARGET
+        --target=$TARGET \
+        $ADDITIONAL_OPTIONS
     echo "::endgroup::"
 fi
 

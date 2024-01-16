@@ -22,6 +22,10 @@ case "$CRT" in
     ;;
 esac
 
+if [ $DEBUG = 1 ] ; then
+    MINGW_CONF="$MINGW_CONF --enable-debug"
+fi
+
 if [[ $TARGET == *mingw* ]]; then
     BUILD_MINGW=1
 else
