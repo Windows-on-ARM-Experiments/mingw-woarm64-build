@@ -509,6 +509,10 @@ swr-resample_exact_lin_async-dblp-44100-48000
 swr-resample_exact_lin_async-dblp-48000-8000
 swr-resample_exact_lin_async-dblp-48000-44100
 swr-audioconvert
+mov-avif-demux-still-image-1-item
+mov-avif-demux-still-image-multiple-items
+mov-heic-demux-still-image-1-item
+mov-heic-demux-still-image-multiple-items
 mov-channel-description
 mov-mp4-pcm
 mov-mp4-pcm-float
