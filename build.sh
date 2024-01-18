@@ -289,11 +289,11 @@ done
 
 make_folders
 
-if [ $RUN_DOWNLOAD = 1 ] ; then
+if [ "$RUN_DOWNLOAD" = 1 ] ; then
    download_sources
 fi
 
-if [ $RUN_CONFIG = 1 ] ; then
+if [ "$RUN_CONFIG" = 1 ] ; then
     config_binutils
     config_gcc_compiler
     config_mingw_headers
@@ -303,14 +303,14 @@ build_binutils
 build_gcc_compiler
 build_mingw_headers
 
-if [ $RUN_CONFIG = 1 ] ; then
+if [ "$RUN_CONFIG" = 1 ] ; then
     config_mingw_crt
 fi
 
 build_mingw_crt
 build_libgcc
 
-if [ $RUN_CONFIG = 1 ] ; then
+if [ "$RUN_CONFIG" = 1 ] ; then
     config_mingw_libs
 fi
 

@@ -2,7 +2,7 @@
 
 source `dirname ${BASH_SOURCE[0]}`/../config.sh
 
-if [ $RUN_CONFIG = 1 ] ; then
+if [ "$RUN_CONFIG" = 1 ] ; then
     echo "::group::Configure OpenBLAS"
         cd $SOURCE_PATH/$OPENBLAS_VERSION
         make clean

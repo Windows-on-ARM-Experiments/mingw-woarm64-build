@@ -8,11 +8,11 @@ FFMPEG_SOURCE_PATH=$SOURCE_PATH/$FFMPEG_VERSION
 mkdir -p $FFMPEG_BUILD_PATH
 cd $FFMPEG_BUILD_PATH
 
-if [ $RUN_CONFIG = 1 ] || [ ! -f "$FFMPEG_BUILD_PATH/Makefile" ] ; then
+if [ "$RUN_CONFIG" = 1 ] || [ ! -f "$FFMPEG_BUILD_PATH/Makefile" ] ; then
     echo "::group::Configure FFmpeg"
         rm -rf $FFMPEG_BUILD_PATH/*
 
-        if [ $DEBUG = 1 ] ; then
+        if [ "$DEBUG" = 1 ] ; then
             ADDITIONAL_OPTIONS=" \
                 --enable-debug=3"
         fi
