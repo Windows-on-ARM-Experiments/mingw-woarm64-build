@@ -2,6 +2,7 @@
 
 set -e # exit on error
 set -x # echo on
+set -o pipefail # fail of any command in pipeline is an error
 
 GCC_VERSION=${GCC_VERSION:-gcc-master}
 BINUTILS_VERSION=${BINUTILS_VERSION:-binutils-master}

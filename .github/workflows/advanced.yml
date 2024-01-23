@@ -377,8 +377,9 @@ jobs:
           .github/scripts/openblas/unpack-tests.ps1
   
       - name: Execute OpenBLAS tests
+        shell: bash
         run: |
-          C:\Program` Files\Git\bin\bash.exe .github/scripts/openblas/execute-tests.sh
+          .github/scripts/openblas/execute-tests.sh
   
   build-zlib:
     needs: [build-toolchain]
@@ -650,6 +651,7 @@ jobs:
           repository: ${{ env.FFMPEG_REPO }}
           ref: ${{ env.FFMPEG_BRANCH }}
           path: ${{ env.SOURCE_PATH }}/${{ env.FFMPEG_VERSION }}
+          fetch-depth: 0
 
       - name: Download toolchain
         uses: actions/cache/restore@v3
@@ -700,6 +702,12 @@ jobs:
           repository: ${{ env.FFMPEG_REPO }}
           ref: ${{ env.FFMPEG_BRANCH }}
           path: ${{ env.SOURCE_PATH }}/${{ env.FFMPEG_VERSION }}
+          fetch-depth: 0
+
+      - name: Patch FFmpeg
+        shell: bash
+        run: |
+          .github/scripts/ffmpeg/patch.sh
 
       - name: Download FFmpeg tests
         uses: actions/download-artifact@v4
@@ -712,5 +720,6 @@ jobs:
           .github/scripts/ffmpeg/unpack-tests.ps1
 
       - name: Execute FFmpeg tests
+        shell: bash
         run: |
-          C:\Program` Files\Git\bin\bash.exe .github/scripts/ffmpeg/execute-tests.sh
+          .github/scripts/ffmpeg/execute-tests.sh
