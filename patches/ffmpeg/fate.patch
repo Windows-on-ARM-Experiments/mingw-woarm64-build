@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index dbc930270b..b482cc3f4f 100644
+index 78652c47bd..53d13375db 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -17,7 +17,7 @@ vpath %.metal $(SRC_PATH)
@@ -12,10 +12,10 @@ index dbc930270b..b482cc3f4f 100644
  ALLFFLIBS = avcodec avdevice avfilter avformat avutil postproc swscale swresample
  
 diff --git a/configure b/configure
-index c8ae0a061d..78c507ba67 100755
+index a89cfa6d95..aefb6fa23d 100755
 --- a/configure
 +++ b/configure
-@@ -4842,7 +4842,7 @@ probe_cc(){
+@@ -4802,7 +4802,7 @@ probe_cc(){
                  warn "gcc 4.2 is outdated and may miscompile FFmpeg. Please use a newer compiler." ;;
              esac
          fi
@@ -43,7 +43,7 @@ index 67586e4b74..d7432290a0 100644
  doc/%.html: TAG = HTML
  doc/%-all.html: TAG = HTML
 diff --git a/ffbuild/common.mak b/ffbuild/common.mak
-index ac54ac0681..7dd22fb437 100644
+index f52473453e..eddcca2675 100644
 --- a/ffbuild/common.mak
 +++ b/ffbuild/common.mak
 @@ -12,7 +12,7 @@ endif
@@ -98,10 +98,10 @@ index ac54ac0681..7dd22fb437 100644
  $(OBJS):     | $(sort $(dir $(OBJS)))
  $(HOBJS):    | $(sort $(dir $(HOBJS)))
 diff --git a/libavcodec/Makefile b/libavcodec/Makefile
-index bb42095165..53bd75cf80 100644
+index ec57e53e30..fa5dca4fb3 100644
 --- a/libavcodec/Makefile
 +++ b/libavcodec/Makefile
-@@ -1366,15 +1366,15 @@ HOSTPROGS = aacps_tablegen                                              \
+@@ -1350,15 +1350,15 @@ HOSTPROGS = aacps_tablegen                                              \
              sinewin_tablegen                                            \
              sinewin_fixed_tablegen                                      \
  
@@ -121,7 +121,7 @@ index bb42095165..53bd75cf80 100644
  endif
  
  GEN_HEADERS = cbrt_tables.h cbrt_fixed_tables.h aacps_tables.h aacps_fixed_tables.h \
-@@ -1384,7 +1384,7 @@ GEN_HEADERS = cbrt_tables.h cbrt_fixed_tables.h aacps_tables.h aacps_fixed_table
+@@ -1368,7 +1368,7 @@ GEN_HEADERS = cbrt_tables.h cbrt_fixed_tables.h aacps_tables.h aacps_fixed_table
                pcm_tables.h qdm2_tables.h
  GEN_HEADERS := $(addprefix $(SUBDIR), $(GEN_HEADERS))
  
@@ -131,11 +131,11 @@ index bb42095165..53bd75cf80 100644
  
  ifdef CONFIG_HARDCODED_TABLES
 diff --git a/tests/Makefile b/tests/Makefile
-index e89ce7f8e6..a2500c7022 100644
+index f03cf20d8e..cb93ce40b5 100644
 --- a/tests/Makefile
 +++ b/tests/Makefile
 @@ -26,39 +26,40 @@ APITESTSDIR := tests/api
- FATE_OUTDIRS = tests/data tests/data/fate tests/data/filtergraphs tests/data/maps tests/data/lavf tests/data/lavf-fate tests/data/pixfmt tests/vsynth1 $(APITESTSDIR)
+ FATE_OUTDIRS = tests/data tests/data/fate tests/data/filtergraphs tests/data/lavf tests/data/lavf-fate tests/data/pixfmt tests/vsynth1 $(APITESTSDIR)
  OUTDIRS += $(FATE_OUTDIRS)
  
 -$(VREF): tests/videogen$(HOSTEXESUF) | tests/vsynth1
@@ -196,19 +196,19 @@ index e89ce7f8e6..a2500c7022 100644
  
  tests/data/%.sw tests/data/asynth% tests/data/vsynth%.yuv tests/vsynth%/00.pgm tests/data/%.nut: TAG = GEN
  
-@@ -308,9 +309,9 @@ FATE += $(FATE_HW-yes)
+@@ -303,9 +304,9 @@ FATE += $(FATE_HW-yes)
  $(FATE): export PROGSUF = $(PROGSSUF)
  $(FATE): export EXECSUF = $(EXESUF)
  $(FATE): export HOSTEXECSUF = $(HOSTEXESUF)
 -$(FATE): $(FATE_UTILS:%=tests/%$(HOSTEXESUF)) | $(FATE_OUTDIRS)
 +$(FATE): $(FATE_UTILS:%=tests/%$(EXESUF)) | $(FATE_OUTDIRS)
- 	@echo "TEST    $(@:fate-%=%)$(FATE_SUFFIX)"
--	$(Q)$(SRC_PATH)/tests/fate-run.sh $@$(FATE_SUFFIX) "$(TARGET_SAMPLES)" "$(TARGET_EXEC)" "$(TARGET_PATH)" '$(CMD)' '$(CMP)' '$(REF)' '$(FUZZ)' '$(THREADS)' '$(THREAD_TYPE)' '$(CPUFLAGS)' '$(CMP_SHIFT)' '$(CMP_TARGET)' '$(SIZE_TOLERANCE)' '$(CMP_UNIT)' '$(GEN)' '$(HWACCEL)' '$(REPORT)' '$(KEEP_FILES)'
-+	@echo '$$FFMPEG_SOURCE_PATH/tests/fate-run.sh $@$(FATE_SUFFIX) "$(TARGET_SAMPLES)" "$(TARGET_EXEC)" "$(TARGET_PATH)" "$(subst ",\",$(CMD)) " "$(CMP)" "$(REF)" "$(FUZZ)" "$(THREADS)" "$(THREAD_TYPE)" "$(CPUFLAGS)" "$(CMP_SHIFT)" "$(CMP_TARGET)" "$(SIZE_TOLERANCE)" "$(CMP_UNIT)" "$(GEN)" "$(HWACCEL)" "$(REPORT)" "$(KEEP_FILES)"'
+ 	@echo "TEST    $(@:fate-%=%)"
+-	$(Q)$(SRC_PATH)/tests/fate-run.sh $@ "$(TARGET_SAMPLES)" "$(TARGET_EXEC)" "$(TARGET_PATH)" '$(CMD)' '$(CMP)' '$(REF)' '$(FUZZ)' '$(THREADS)' '$(THREAD_TYPE)' '$(CPUFLAGS)' '$(CMP_SHIFT)' '$(CMP_TARGET)' '$(SIZE_TOLERANCE)' '$(CMP_UNIT)' '$(GEN)' '$(HWACCEL)' '$(REPORT)' '$(KEEP_FILES)'
++	@echo '$$FFMPEG_SOURCE_PATH/tests/fate-run.sh $@ "$(TARGET_SAMPLES)" "$(TARGET_EXEC)" "$(TARGET_PATH)" "$(subst ",\",$(CMD)) " "$(CMP)" "$(REF)" "$(FUZZ)" "$(THREADS)" "$(THREAD_TYPE)" "$(CPUFLAGS)" "$(CMP_SHIFT)" "$(CMP_TARGET)" "$(SIZE_TOLERANCE)" "$(CMP_UNIT)" "$(GEN)" "$(HWACCEL)" "$(REPORT)" "$(KEEP_FILES)"'
  
  fate-list:
  	@printf '%s\n' $(sort $(FATE))
-@@ -336,7 +337,7 @@ clean:: testclean
+@@ -331,7 +332,7 @@ clean:: testclean
  testclean::
  	$(RM) -r tests/vsynth1 tests/data tools/lavfi-showfiltfmts$(PROGSSUF)$(EXESUF)
  	$(RM) $(CLEANSUFFIXES:%=tests/%)
@@ -285,7 +285,7 @@ index 8efb1586b8..33e7215df7 100755
  
  if [ $err -gt 128 ]; then
 diff --git a/tests/fate/filter-audio.mak b/tests/fate/filter-audio.mak
-index adf61cf074..6e72017534 100644
+index 445c0f9217..1890f925a8 100644
 --- a/tests/fate/filter-audio.mak
 +++ b/tests/fate/filter-audio.mak
 @@ -206,9 +206,7 @@ fate-filter-compand: CMD = framecrc -auto_conversion_filters -i $(SRC) -frames:a
