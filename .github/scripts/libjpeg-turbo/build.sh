@@ -25,7 +25,6 @@ echo "::endgroup::"
 if [ $RUN_INSTALL = 1 ] ; then
     echo "::group::Install libjpeg-turbo"
         cmake --install $LIBJPEG_TURBO_BUILD_PATH
-
     echo "::endgroup::"
 fi
 

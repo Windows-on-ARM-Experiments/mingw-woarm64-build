@@ -57,6 +57,10 @@ env:
   ZLIB_BRANCH: 'develop'
   ZLIB_VERSION: zlib-develop
 
+  LIBXML2_REPO: GNOME/libxml2
+  LIBXML2_BRANCH: 'master'
+  LIBXML2_VERSION: libxml2-master
+
   OPENSSL_REPO: Windows-on-ARM-Experiments/openssl
   OPENSSL_BRANCH: ${{ inputs.openssl_branch || 'fix-tests' }}
   OPENSSL_VERSION: openssl-master
@@ -237,12 +241,7 @@ jobs:
           retention-days: 3
 
     outputs:
-      workflow-sha: ${{ steps.workflow-sha.outputs.sha }}
-      binutils-sha: ${{ steps.binutils-sha.outputs.sha }}
-      gcc-sha: ${{ steps.gcc-sha.outputs.sha }}
-      mingw-sha: ${{ steps.mingw-sha.outputs.sha }} 
-      binutils-scripts-sha: ${{ steps.binutils-scripts-sha.outputs.sha }}
-      toolchain-scripts-sha: ${{ steps.toolchain-scripts-sha.outputs.sha }}
+      toolchain-cache-key: aarch64-w64-mingw32-msvcrt-${{ steps.workflow-sha.outputs.sha }}-${{ steps.binutils-sha.outputs.sha }}-${{ steps.gcc-sha.outputs.sha }}-${{ steps.mingw-sha.outputs.sha }}-${{ steps.binutils-scripts-sha.outputs.sha }}-${{ steps.toolchain-scripts-sha.outputs.sha }}
 
   build-aarch64-tests:
     needs: [build-toolchain]
@@ -261,7 +260,7 @@ jobs:
         uses: actions/cache/restore@v3
         with:
           path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
-          key: ${{ env.TOOLCHAIN_NAME }}-${{ needs.build-toolchain.outputs.workflow-sha }}-${{ needs.build-toolchain.outputs.binutils-sha }}-${{ needs.build-toolchain.outputs.gcc-sha }}-${{ needs.build-toolchain.outputs.mingw-sha }}-${{ needs.build-toolchain.outputs.binutils-scripts-sha }}-${{ needs.build-toolchain.outputs.toolchain-scripts-sha }}
+          key: ${{ needs.build-toolchain.outputs.toolchain-cache-key }}
           fail-on-cache-miss: true
 
       - name: Unpack toolchain
@@ -331,7 +330,7 @@ jobs:
         uses: actions/cache/restore@v3
         with:
           path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
-          key: ${{ env.TOOLCHAIN_NAME }}-${{ needs.build-toolchain.outputs.workflow-sha }}-${{ needs.build-toolchain.outputs.binutils-sha }}-${{ needs.build-toolchain.outputs.gcc-sha }}-${{ needs.build-toolchain.outputs.mingw-sha }}-${{ needs.build-toolchain.outputs.binutils-scripts-sha }}-${{ needs.build-toolchain.outputs.toolchain-scripts-sha }}
+          key: ${{ needs.build-toolchain.outputs.toolchain-cache-key }}
           fail-on-cache-miss: true
 
       - name: Unpack toolchain
@@ -405,7 +404,7 @@ jobs:
         uses: actions/cache/restore@v3
         with:
           path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
-          key: ${{ env.TOOLCHAIN_NAME }}-${{ needs.build-toolchain.outputs.workflow-sha }}-${{ needs.build-toolchain.outputs.binutils-sha }}-${{ needs.build-toolchain.outputs.gcc-sha }}-${{ needs.build-toolchain.outputs.mingw-sha }}-${{ needs.build-toolchain.outputs.binutils-scripts-sha }}-${{ needs.build-toolchain.outputs.toolchain-scripts-sha }}
+          key: ${{ needs.build-toolchain.outputs.toolchain-cache-key }}
           fail-on-cache-miss: true
 
       - name: Unpack toolchain
@@ -425,6 +424,62 @@ jobs:
         with:
           name: ${{ env.TOOLCHAIN_NAME }}-zlib
           path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_NAME }}-zlib.zip
+          retention-days: 3
+
+  build-libxml2:
+    needs: [build-toolchain, build-zlib]
+    runs-on: ubuntu-latest
+
+    env:
+      ZLIB_PATH: ${{ github.workspace }}/zlib
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: ${{ github.workspace }}
+
+      - name: Checkout libxml2
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.LIBXML2_REPO }}
+          ref: ${{ env.LIBXML2_BRANCH }}
+          path: ${{ env.SOURCE_PATH }}/${{ env.LIBXML2_VERSION }}
+
+      - name: Download toolchain
+        uses: actions/cache/restore@v3
+        with:
+          path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
+          key: ${{ needs.build-toolchain.outputs.toolchain-cache-key }}
+          fail-on-cache-miss: true
+
+      - name: Unpack toolchain
+        run: |
+          .github/scripts/toolchain/unpack.sh
+
+      - name: Download zlib
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.TOOLCHAIN_NAME }}-zlib
+          path: ${{ env.ARTIFACT_PATH }}
+
+      - name: Unpack zlib
+        run: |
+          .github/scripts/zlib/unpack.sh
+
+      - name: Build libxml2
+        run: |
+          .github/scripts/libxml2/build.sh
+
+      - name: Pack libxml2
+        run: |
+          .github/scripts/libxml2/pack.sh
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.TOOLCHAIN_NAME }}-libxml2
+          path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_NAME }}-libxml2.zip
           retention-days: 3
 
   build-openssl:
@@ -456,7 +511,7 @@ jobs:
         uses: actions/cache/restore@v3
         with:
           path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
-          key: ${{ env.TOOLCHAIN_NAME }}-${{ needs.build-toolchain.outputs.workflow-sha }}-${{ needs.build-toolchain.outputs.binutils-sha }}-${{ needs.build-toolchain.outputs.gcc-sha }}-${{ needs.build-toolchain.outputs.mingw-sha }}-${{ needs.build-toolchain.outputs.binutils-scripts-sha }}-${{ needs.build-toolchain.outputs.toolchain-scripts-sha }}
+          key: ${{ needs.build-toolchain.outputs.toolchain-cache-key }}
           fail-on-cache-miss: true
 
       - name: Unpack toolchain
@@ -572,7 +627,7 @@ jobs:
         uses: actions/cache/restore@v3
         with:
           path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
-          key: ${{ env.TOOLCHAIN_NAME }}-${{ needs.build-toolchain.outputs.workflow-sha }}-${{ needs.build-toolchain.outputs.binutils-sha }}-${{ needs.build-toolchain.outputs.gcc-sha }}-${{ needs.build-toolchain.outputs.mingw-sha }}-${{ needs.build-toolchain.outputs.binutils-scripts-sha }}-${{ needs.build-toolchain.outputs.toolchain-scripts-sha }}
+          key: ${{ needs.build-toolchain.outputs.toolchain-cache-key }}
           fail-on-cache-miss: true
 
       - name: Unpack toolchain
@@ -657,7 +712,7 @@ jobs:
         uses: actions/cache/restore@v3
         with:
           path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
-          key: ${{ env.TOOLCHAIN_NAME }}-${{ needs.build-toolchain.outputs.workflow-sha }}-${{ needs.build-toolchain.outputs.binutils-sha }}-${{ needs.build-toolchain.outputs.gcc-sha }}-${{ needs.build-toolchain.outputs.mingw-sha }}-${{ needs.build-toolchain.outputs.binutils-scripts-sha }}-${{ needs.build-toolchain.outputs.toolchain-scripts-sha }}
+          key: ${{ needs.build-toolchain.outputs.toolchain-cache-key }}
           fail-on-cache-miss: true
 
       - name: Unpack toolchain
