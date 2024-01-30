@@ -12,3 +12,108 @@ jobs:
       binutils_branch: 'aarch64-patch-min'
       gcc_branch: 'f67e46fa4cb5b1b70f02531537a829e62df8d3d2'
       mingw_branch: 'aarch64-patch-min'
+
+  build-patch-set1-v6-2-16:
+    uses: ./.github/workflows/advanced.yml
+    with:
+      binutils_branch: 'aarch64-patch-min'
+      gcc_branch: 'f29866c00e0fc83ead8ea377124b14893573f1ca'
+      mingw_branch: 'aarch64-patch-min'
+
+  build-patch-set1-v6-3-16:
+    uses: ./.github/workflows/advanced.yml
+    with:
+      binutils_branch: 'aarch64-patch-min'
+      gcc_branch: 'e6966fde59792e13c02452af626a6a136f43fd24'
+      mingw_branch: 'aarch64-patch-min'
+
+  build-patch-set1-v6-4-16:
+    uses: ./.github/workflows/advanced.yml
+    with:
+      binutils_branch: 'aarch64-patch-min'
+      gcc_branch: 'f8dd554be0760cb0c84565481919b8e5fdeda1d8'
+      mingw_branch: 'aarch64-patch-min'
+
+  build-patch-set1-v6-5-16:
+    uses: ./.github/workflows/advanced.yml
+    with:
+      binutils_branch: 'aarch64-patch-min'
+      gcc_branch: 'f808c315aeefb91cd28678baebc5cc28a894e719'
+      mingw_branch: 'aarch64-patch-min'
+
+  build-patch-set1-v6-6-16:
+    uses: ./.github/workflows/advanced.yml
+    with:
+      binutils_branch: 'aarch64-patch-min'
+      gcc_branch: 'fe2a13c335f9911876aed0611ba07d37568b3d3a'
+      mingw_branch: 'aarch64-patch-min'
+
+  build-patch-set1-v6-7-16:
+    uses: ./.github/workflows/advanced.yml
+    with:
+      binutils_branch: 'aarch64-patch-min'
+      gcc_branch: '4398f3d9dc78ea568dfba1eb87077e474e77e94a'
+      mingw_branch: 'aarch64-patch-min'
+
+  build-patch-set1-v6-8-16:
+    uses: ./.github/workflows/advanced.yml
+    with:
+      binutils_branch: 'aarch64-patch-min'
+      gcc_branch: '39435ffb13adbdc14c69ef4d9dd5affa3347343a'
+      mingw_branch: 'aarch64-patch-min'
+
+  build-patch-set1-v6-9-16:
+    uses: ./.github/workflows/advanced.yml
+    with:
+      binutils_branch: 'aarch64-patch-min'
+      gcc_branch: '51d1d392e1a34a97bdf2bf85a7727163cafa48f6'
+      mingw_branch: 'aarch64-patch-min'
+
+  build-patch-set1-v6-10-16:
+    uses: ./.github/workflows/advanced.yml
+    with:
+      binutils_branch: 'aarch64-patch-min'
+      gcc_branch: 'aa8bffdd54ccebcd460c15ba4ab52127a4b70f27'
+      mingw_branch: 'aarch64-patch-min'
+
+  build-patch-set1-v6-11-16:
+    uses: ./.github/workflows/advanced.yml
+    with:
+      binutils_branch: 'aarch64-patch-min'
+      gcc_branch: 'ebe23ab7a9c1123d66272c4cffc5322f090c38a5'
+      mingw_branch: 'aarch64-patch-min'
+
+  build-patch-set1-v6-12-16:
+    uses: ./.github/workflows/advanced.yml
+    with:
+      binutils_branch: 'aarch64-patch-min'
+      gcc_branch: '966622a64d482233d8a49f2463dd0a2d4b150ff8'
+      mingw_branch: 'aarch64-patch-min'
+
+  build-patch-set1-v6-13-16:
+    uses: ./.github/workflows/advanced.yml
+    with:
+      binutils_branch: 'aarch64-patch-min'
+      gcc_branch: '62f01e7dc7b57a8a95a4978197e033a17db5d188'
+      mingw_branch: 'aarch64-patch-min'
+
+  build-patch-set1-v6-14-16:
+    uses: ./.github/workflows/advanced.yml
+    with:
+      binutils_branch: 'aarch64-patch-min'
+      gcc_branch: '3eb2f171958542c0eac5f53108e1ad68ea5a1ba0'
+      mingw_branch: 'aarch64-patch-min'
+
+  build-patch-set1-v6-15-16:
+    uses: ./.github/workflows/advanced.yml
+    with:
+      binutils_branch: 'aarch64-patch-min'
+      gcc_branch: '9328e51cd24525614c1dfa6052f84443b24aeaa8'
+      mingw_branch: 'aarch64-patch-min'
+
+  build-patch-set1-v6-16-16:
+    uses: ./.github/workflows/advanced.yml
+    with:
+      binutils_branch: 'aarch64-patch-min'
+      gcc_branch: '511ff27f0f5615760955468f368499b5036a4fb8'
+      mingw_branch: 'aarch64-patch-min'
