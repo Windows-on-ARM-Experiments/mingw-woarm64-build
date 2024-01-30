@@ -108,45 +108,7 @@ jobs:
           path: ${{ github.workspace }}
           fetch-depth: 0
 
-      - name: Get workflow SHA
-        id: workflow-sha
-        run: |
-          .github/scripts/get-files-sha.sh ${{ github.workspace }} .github/workflows/advanced.yml
-
-      - name: Get binutils SHA
-        id: binutils-sha
-        run: |
-          .github/scripts/get-repository-sha.sh ${{ env.BINUTILS_REPO }} ${{ env.BINUTILS_BRANCH }}
-
-      - name: Get GCC SHA
-        id: gcc-sha
-        run: |
-          .github/scripts/get-repository-sha.sh ${{ env.GCC_REPO }} ${{ env.GCC_BRANCH }}
-
-      - name: Get MinGW SHA
-        id: mingw-sha
-        run: |
-          .github/scripts/get-repository-sha.sh ${{ env.MINGW_REPO }} ${{ env.MINGW_BRANCH }}
-
-      - name: Get binutils scripts SHA
-        id: binutils-scripts-sha
-        run: |
-          .github/scripts/get-files-sha.sh ${{ github.workspace }} .github/scripts/binutils
-  
-      - name: Get toolchain scripts SHA
-        id: toolchain-scripts-sha
-        run: |
-          .github/scripts/get-files-sha.sh ${{ github.workspace }} .github/scripts/toolchain
-
-      - name: Cache toolchain
-        id: cache-toolchain
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
-          key: ${{ env.TOOLCHAIN_NAME }}-${{ steps.workflow-sha.outputs.sha }}-${{ steps.binutils-sha.outputs.sha }}-${{ steps.gcc-sha.outputs.sha }}-${{ steps.mingw-sha.outputs.sha }}-${{ steps.binutils-scripts-sha.outputs.sha }}-${{ steps.toolchain-scripts-sha.outputs.sha }}
-
       - name: Checkout binutils
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
         uses: actions/checkout@v4
         with:
           repository: ${{ env.BINUTILS_REPO }}
@@ -154,7 +116,6 @@ jobs:
           path: ${{ env.SOURCE_PATH }}/${{ env.BINUTILS_VERSION }}
 
       - name: Checkout GCC
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
         uses: actions/checkout@v4
         with:
           repository: ${{ env.GCC_REPO }}
@@ -162,7 +123,7 @@ jobs:
           path: ${{ env.SOURCE_PATH }}/${{ env.GCC_VERSION }}
 
       - name: Checkout MinGW
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform != 'linux-gnu' }}
+        if: ${{ matrix.platform != 'linux-gnu' }}
         uses: actions/checkout@v4
         with:
           repository: ${{ env.MINGW_REPO }}
@@ -170,77 +131,62 @@ jobs:
           path: ${{ env.SOURCE_PATH }}/${{ env.MINGW_VERSION }}
 
       - name: Install dependencies
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
         run: |
           .github/scripts/install-dependencies.sh
 
       - name: Install libraries
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
         run: |
           .github/scripts/install-libraries.sh
   
       - name: Build binutils
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
         run: |
           .github/scripts/binutils/build.sh
 
       - name: Install cross headers and libraries
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform == 'linux-gnu' }}
+        if: ${{ matrix.platform == 'linux-gnu' }}
         run: |
           .github/scripts/binutils/install-cross-headers-libs.sh
 
       - name: Build MinGW headers
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform != 'linux-gnu' }}
+        if: ${{ matrix.platform != 'linux-gnu' }}
         run: |
           .github/scripts/toolchain/build-mingw-headers.sh
 
       - name: Build GCC
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
         run: |
           .github/scripts/toolchain/build-gcc.sh
 
       - name: Build MinGW CRT
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform != 'linux-gnu' }}
+        if: ${{ matrix.platform != 'linux-gnu' }}
         run: |
           .github/scripts/toolchain/build-mingw-crt.sh
 
       - name: Build libgcc
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
         run: |
           .github/scripts/toolchain/build-libgcc.sh
 
       - name: Build MinGW
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform != 'linux-gnu' }}
+        if: ${{ matrix.platform != 'linux-gnu' }}
         run: |
           .github/scripts/toolchain/build-mingw.sh
 
       - name: Build GCC libs
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
         run: |
           .github/scripts/toolchain/build-gcc-libs.sh
 
       - name: Pack toolchain
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && env.TOOLCHAIN_NAME == 'aarch64-w64-mingw32-msvcrt' }}
+        if: ${{ env.TOOLCHAIN_NAME == 'aarch64-w64-mingw32-msvcrt' }}
         run: |
           .github/scripts/toolchain/pack.sh
 
       - name: Pack toolchain mock
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && env.TOOLCHAIN_NAME != 'aarch64-w64-mingw32-msvcrt' }}
+        if: ${{ env.TOOLCHAIN_NAME != 'aarch64-w64-mingw32-msvcrt' }}
         run: |
           .github/scripts/toolchain/pack-mock.sh
           
       - name: Upload artifact
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.TOOLCHAIN_PACKAGE_NAME }}
           path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
           retention-days: 3
-
-    outputs:
-      workflow-sha: ${{ steps.workflow-sha.outputs.sha }}
-      binutils-sha: ${{ steps.binutils-sha.outputs.sha }}
-      gcc-sha: ${{ steps.gcc-sha.outputs.sha }}
-      mingw-sha: ${{ steps.mingw-sha.outputs.sha }} 
-      binutils-scripts-sha: ${{ steps.binutils-scripts-sha.outputs.sha }}
-      toolchain-scripts-sha: ${{ steps.toolchain-scripts-sha.outputs.sha }}
