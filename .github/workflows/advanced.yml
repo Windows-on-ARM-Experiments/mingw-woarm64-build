@@ -185,7 +185,6 @@ jobs:
           key: ${{ env.TOOLCHAIN_NAME }}-${{ steps.workflow-sha.outputs.sha }}-${{ steps.binutils-sha.outputs.sha }}-${{ steps.gcc-sha.outputs.sha }}-${{ steps.mingw-sha.outputs.sha }}-${{ steps.binutils-scripts-sha.outputs.sha }}-${{ steps.toolchain-scripts-sha.outputs.sha }}
 
       - name: Checkout binutils
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
         uses: actions/checkout@v4
         with:
           repository: ${{ env.BINUTILS_REPO }}
@@ -193,7 +192,6 @@ jobs:
           path: ${{ env.SOURCE_PATH }}/binutils
 
       - name: Checkout GCC
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
         uses: actions/checkout@v4
         with:
           repository: ${{ env.GCC_REPO }}
@@ -232,7 +230,6 @@ jobs:
           git clone ${{ env.COCOM_REPO }} -b ${{ env.COCOM_BRANCH }} cocom
 
       - name: Install dependencies
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
         run: |
           .github/scripts/install-dependencies.sh
 
@@ -247,7 +244,6 @@ jobs:
           .github/scripts/toolchain/patch-cygwin.sh 1
 
       - name: Install libraries
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
         run: |
           .github/scripts/install-libraries.sh
 
@@ -266,7 +262,6 @@ jobs:
           restore-keys: advanced-gcc-ccache-
 
       - name: Build binutils
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
         run: |
           .github/scripts/binutils/build.sh
 
