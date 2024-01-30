@@ -6,9 +6,9 @@ on:
 
 jobs:
 
-  build:
+  build-patch-set1-v6-1-16:
     uses: ./.github/workflows/advanced.yml
     with:
       binutils_branch: 'aarch64-patch-min'
-      gcc_branch: 'cfd8e9b5319fda94f85ec013bd902b8cb58aefa8'
+      gcc_branch: 'f67e46fa4cb5b1b70f02531537a829e62df8d3d2'
       mingw_branch: 'aarch64-patch-min'
