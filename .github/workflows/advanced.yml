@@ -65,7 +65,7 @@ env:
   LIBJPEG_TURBO_VERSION: libjpeg-turbo-main
 
   FFMPEG_REPO: FFmpeg/FFmpeg
-  FFMPEG_BRANCH: master
+  FFMPEG_BRANCH: release/6.1
   FFMPEG_VERSION: ffmpeg-master
 
   TOOLCHAIN_PATH: ${{ github.workspace }}/cross

@@ -2,6 +2,7 @@
 
 set -e # exit on error
 set -x # echo on
+set -o pipefail # fail of any command in pipeline is an error
 
 GCC_VERSION=${GCC_VERSION:-gcc-master}
 BINUTILS_VERSION=${BINUTILS_VERSION:-binutils-master}
@@ -49,6 +50,7 @@ TESTS_PACKAGE_NAME=${TESTS_PACKAGE_NAME:-$TOOLCHAIN_NAME-tests.tar.gz}
 FFMPEG_PATH=${FFMPEG_PATH:-~/ffmpeg}
 FFMPEG_TESTS_PATH=${FFMPEG_TESTS_PATH:-~/ffmpeg-tests}
 
+DEBUG=${DEBUG:-0}
 RUN_CONFIG=${RUN_CONFIG:-1}
 RUN_INSTALL=${RUN_INSTALL:-1}
 
