@@ -184,9 +184,3 @@ jobs:
         run: |
           .github/scripts/toolchain/pack-mock.sh
           
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ env.TOOLCHAIN_PACKAGE_NAME }}
-          path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
-          retention-days: 3
