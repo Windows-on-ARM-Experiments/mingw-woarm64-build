@@ -82,7 +82,7 @@ jobs:
     strategy:
       matrix:
         arch: [aarch64, x86_64]
-        platform: [linux-gnu]
+        platform: [w64-mingw32, linux-gnu]
         crt: [msvcrt, ucrt, libc]
         exclude:
           - platform: linux-gnu
@@ -91,6 +91,8 @@ jobs:
             crt: ucrt
           - platform: w64-mingw32
             crt: libc
+          - arch: aarch64
+            platform: w64-mingw32
 
     env:
       TARGET: ${{ matrix.arch }}-${{ matrix.platform }}
