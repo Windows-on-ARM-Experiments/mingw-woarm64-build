@@ -39,7 +39,7 @@ on:
         description: 'OpenSSL branch to test'
         required: false
         default: 'fix-tests'
-      validate_toolchain_only:
+      validate_only_toolchain_build:
         description: 'Only validate toolchain build'
         type: boolean
         required: false
