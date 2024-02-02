@@ -27,7 +27,7 @@ on:
         description: 'OpenSSL branch to test'
         required: false
         default: 'fix-tests'
-      validate_only_toolchain_build:
+      inputs.validate_only_toolchain_build:
         description: 'Only validate toolchain build'
         type: boolean
         required: false
@@ -40,7 +40,7 @@ on:
         type: string
       mingw_branch:
         type: string
-      validate_only_toolchain_build:
+      inputs.validate_only_toolchain_build:
         type: boolean
         required: false
         default: false
@@ -102,7 +102,7 @@ jobs:
           - platform: w64-mingw32
             crt: libc
           - arch: aarch64
-            if: $${ validate_only_toolchain_build }}
+            if: $${ inputs.validate_only_toolchain_build }}
             platform: w64-mingw32
     env:
       TARGET: ${{ matrix.arch }}-${{ matrix.platform }}
@@ -149,7 +149,7 @@ jobs:
           .github/scripts/get-files-sha.sh ${{ github.workspace }} .github/scripts/toolchain
 
       - name: Cache toolchain
-        if: ${{ !validate_only_toolchain_build }}
+        if: ${{ !inputs.validate_only_toolchain_build }}
         id: cache-toolchain
         uses: actions/cache@v3
         with:
@@ -241,7 +241,7 @@ jobs:
           .github/scripts/toolchain/pack-mock.sh
           
       - name: Upload artifact
-        if: ${{ !validate_only_toolchain_build && steps.cache-toolchain.outputs.cache-hit != 'true' }}
+        if: ${{ !inputs.validate_only_toolchain_build && steps.cache-toolchain.outputs.cache-hit != 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.TOOLCHAIN_PACKAGE_NAME }}
@@ -257,7 +257,7 @@ jobs:
       toolchain-scripts-sha: ${{ steps.toolchain-scripts-sha.outputs.sha }}
 
   build-aarch64-tests:
-    if: ${{ !validate_only_toolchain_build }}
+    if: ${{ !inputs.validate_only_toolchain_build }}
     needs: [build-toolchain]
     runs-on: ubuntu-latest
 
@@ -324,7 +324,7 @@ jobs:
           .github/scripts/tests/execute-tests.ps1
 
   build-openblas:
-    if: ${{ !validate_only_toolchain_build }}
+    if: ${{ !inputs.validate_only_toolchain_build }}
     needs: [build-toolchain]
     runs-on: ubuntu-latest
 
@@ -395,7 +395,7 @@ jobs:
           C:\Program` Files\Git\bin\bash.exe .github/scripts/openblas/execute-tests.sh
   
   build-zlib:
-    if: ${{ !validate_only_toolchain_build }}
+    if: ${{ !inputs.validate_only_toolchain_build }}
     needs: [build-toolchain]
     runs-on: ubuntu-latest 
 
@@ -442,7 +442,7 @@ jobs:
           retention-days: 3
 
   build-openssl:
-    if: ${{ !validate_only_toolchain_build }}
+    if: ${{ !inputs.validate_only_toolchain_build }}
     needs: [build-toolchain, build-zlib]
     runs-on: ubuntu-latest
 
@@ -560,7 +560,7 @@ jobs:
           .github/scripts/openssl/execute-tests.ps1
 
   build-libjpeg-turbo:
-    if: ${{ !validate_only_toolchain_build }}
+    if: ${{ !inputs.validate_only_toolchain_build }}
     needs: [build-toolchain]
     runs-on: ubuntu-latest
 
@@ -649,7 +649,7 @@ jobs:
           .github/scripts/libjpeg-turbo/execute-tests.ps1
 
   build-ffmpeg:
-    if: ${{ !validate_only_toolchain_build }}
+    if: ${{ !inputs.validate_only_toolchain_build }}
     needs: [build-toolchain]
     runs-on: ubuntu-latest
 
