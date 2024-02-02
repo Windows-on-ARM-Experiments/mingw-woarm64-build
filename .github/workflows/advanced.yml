@@ -27,7 +27,7 @@ on:
         description: 'OpenSSL branch to test'
         required: false
         default: 'fix-tests'
-      inputs.validate_only_toolchain_build:
+      validate_only_toolchain_build:
         description: 'Only validate toolchain build'
         type: boolean
         required: false
@@ -40,7 +40,7 @@ on:
         type: string
       mingw_branch:
         type: string
-      inputs.validate_only_toolchain_build:
+      validate_only_toolchain_build:
         type: boolean
         required: false
         default: false
@@ -102,7 +102,7 @@ jobs:
           - platform: w64-mingw32
             crt: libc
           - arch: aarch64
-            if: $${ inputs.validate_only_toolchain_build }}
+            if: $${ validate_only_toolchain_build }}
             platform: w64-mingw32
     env:
       TARGET: ${{ matrix.arch }}-${{ matrix.platform }}
