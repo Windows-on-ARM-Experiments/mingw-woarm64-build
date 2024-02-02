@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+  pull_request:
   workflow_dispatch:
     inputs:
       binutils_branch:
@@ -26,6 +27,11 @@ on:
         description: 'OpenSSL branch to test'
         required: false
         default: 'fix-tests'
+      validate_toolchain_only:
+        description: 'Only validate toolchain build'
+        type: boolean
+        required: false
+        default: false
   workflow_call:
     inputs:
       binutils_branch:
@@ -34,6 +40,10 @@ on:
         type: string
       mingw_branch:
         type: string
+      validate_toolchain_only:
+        type: boolean
+        required: false
+        default: false
 
 env:
   BINUTILS_REPO: Windows-on-ARM-Experiments/binutils-woarm64
@@ -65,7 +75,7 @@ env:
   LIBJPEG_TURBO_VERSION: libjpeg-turbo-main
 
   FFMPEG_REPO: FFmpeg/FFmpeg
-  FFMPEG_BRANCH: release/6.1
+  FFMPEG_BRANCH: master
   FFMPEG_VERSION: ffmpeg-master
 
   TOOLCHAIN_PATH: ${{ github.workspace }}/cross
@@ -92,8 +102,8 @@ jobs:
           - platform: w64-mingw32
             crt: libc
           - arch: aarch64
+            if: $${ validate_toolchain_only }}
             platform: w64-mingw32
-
     env:
       TARGET: ${{ matrix.arch }}-${{ matrix.platform }}
       CRT: ${{ matrix.crt }}
@@ -108,7 +118,46 @@ jobs:
           path: ${{ github.workspace }}
           fetch-depth: 0
 
+      - name: Get workflow SHA
+        id: workflow-sha
+        run: |
+          .github/scripts/get-files-sha.sh ${{ github.workspace }} .github/workflows/advanced.yml
+
+      - name: Get binutils SHA
+        id: binutils-sha
+        run: |
+          .github/scripts/get-repository-sha.sh ${{ env.BINUTILS_REPO }} ${{ env.BINUTILS_BRANCH }}
+
+      - name: Get GCC SHA
+        id: gcc-sha
+        run: |
+          .github/scripts/get-repository-sha.sh ${{ env.GCC_REPO }} ${{ env.GCC_BRANCH }}
+
+      - name: Get MinGW SHA
+        id: mingw-sha
+        run: |
+          .github/scripts/get-repository-sha.sh ${{ env.MINGW_REPO }} ${{ env.MINGW_BRANCH }}
+
+      - name: Get binutils scripts SHA
+        id: binutils-scripts-sha
+        run: |
+          .github/scripts/get-files-sha.sh ${{ github.workspace }} .github/scripts/binutils
+  
+      - name: Get toolchain scripts SHA
+        id: toolchain-scripts-sha
+        run: |
+          .github/scripts/get-files-sha.sh ${{ github.workspace }} .github/scripts/toolchain
+
+      - name: Cache toolchain
+        if: ${{ !validate_toolchain_only }}
+        id: cache-toolchain
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
+          key: ${{ env.TOOLCHAIN_NAME }}-${{ steps.workflow-sha.outputs.sha }}-${{ steps.binutils-sha.outputs.sha }}-${{ steps.gcc-sha.outputs.sha }}-${{ steps.mingw-sha.outputs.sha }}-${{ steps.binutils-scripts-sha.outputs.sha }}-${{ steps.toolchain-scripts-sha.outputs.sha }}
+
       - name: Checkout binutils
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
         uses: actions/checkout@v4
         with:
           repository: ${{ env.BINUTILS_REPO }}
@@ -116,6 +165,7 @@ jobs:
           path: ${{ env.SOURCE_PATH }}/${{ env.BINUTILS_VERSION }}
 
       - name: Checkout GCC
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
         uses: actions/checkout@v4
         with:
           repository: ${{ env.GCC_REPO }}
@@ -123,7 +173,7 @@ jobs:
           path: ${{ env.SOURCE_PATH }}/${{ env.GCC_VERSION }}
 
       - name: Checkout MinGW
-        if: ${{ matrix.platform != 'linux-gnu' }}
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform != 'linux-gnu' }}
         uses: actions/checkout@v4
         with:
           repository: ${{ env.MINGW_REPO }}
@@ -131,56 +181,554 @@ jobs:
           path: ${{ env.SOURCE_PATH }}/${{ env.MINGW_VERSION }}
 
       - name: Install dependencies
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
         run: |
           .github/scripts/install-dependencies.sh
 
       - name: Install libraries
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
         run: |
           .github/scripts/install-libraries.sh
   
       - name: Build binutils
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
         run: |
           .github/scripts/binutils/build.sh
 
       - name: Install cross headers and libraries
-        if: ${{ matrix.platform == 'linux-gnu' }}
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform == 'linux-gnu' }}
         run: |
           .github/scripts/binutils/install-cross-headers-libs.sh
 
       - name: Build MinGW headers
-        if: ${{ matrix.platform != 'linux-gnu' }}
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform != 'linux-gnu' }}
         run: |
           .github/scripts/toolchain/build-mingw-headers.sh
 
       - name: Build GCC
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
         run: |
           .github/scripts/toolchain/build-gcc.sh
 
       - name: Build MinGW CRT
-        if: ${{ matrix.platform != 'linux-gnu' }}
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform != 'linux-gnu' }}
         run: |
           .github/scripts/toolchain/build-mingw-crt.sh
 
       - name: Build libgcc
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
         run: |
           .github/scripts/toolchain/build-libgcc.sh
 
       - name: Build MinGW
-        if: ${{ matrix.platform != 'linux-gnu' }}
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform != 'linux-gnu' }}
         run: |
           .github/scripts/toolchain/build-mingw.sh
 
       - name: Build GCC libs
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
         run: |
           .github/scripts/toolchain/build-gcc-libs.sh
 
       - name: Pack toolchain
-        if: ${{ env.TOOLCHAIN_NAME == 'aarch64-w64-mingw32-msvcrt' }}
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && env.TOOLCHAIN_NAME == 'aarch64-w64-mingw32-msvcrt' }}
         run: |
           .github/scripts/toolchain/pack.sh
 
       - name: Pack toolchain mock
-        if: ${{ env.TOOLCHAIN_NAME != 'aarch64-w64-mingw32-msvcrt' }}
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && env.TOOLCHAIN_NAME != 'aarch64-w64-mingw32-msvcrt' }}
         run: |
           .github/scripts/toolchain/pack-mock.sh
           
+      - name: Upload artifact
+        if: ${{ !validate_toolchain_only && steps.cache-toolchain.outputs.cache-hit != 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.TOOLCHAIN_PACKAGE_NAME }}
+          path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
+          retention-days: 3
+
+    outputs:
+      workflow-sha: ${{ steps.workflow-sha.outputs.sha }}
+      binutils-sha: ${{ steps.binutils-sha.outputs.sha }}
+      gcc-sha: ${{ steps.gcc-sha.outputs.sha }}
+      mingw-sha: ${{ steps.mingw-sha.outputs.sha }} 
+      binutils-scripts-sha: ${{ steps.binutils-scripts-sha.outputs.sha }}
+      toolchain-scripts-sha: ${{ steps.toolchain-scripts-sha.outputs.sha }}
+
+  build-aarch64-tests:
+    if: ${{ !validate_toolchain_only }}
+    needs: [build-toolchain]
+    runs-on: ubuntu-latest
+
+    env:
+      TESTS_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-tests.tar.gz
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: ${{ github.workspace }}
+
+      - name: Download toolchain
+        uses: actions/cache/restore@v3
+        with:
+          path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
+          key: ${{ env.TOOLCHAIN_NAME }}-${{ needs.build-toolchain.outputs.workflow-sha }}-${{ needs.build-toolchain.outputs.binutils-sha }}-${{ needs.build-toolchain.outputs.gcc-sha }}-${{ needs.build-toolchain.outputs.mingw-sha }}-${{ needs.build-toolchain.outputs.binutils-scripts-sha }}-${{ needs.build-toolchain.outputs.toolchain-scripts-sha }}
+          fail-on-cache-miss: true
+
+      - name: Unpack toolchain
+        run: |
+          .github/scripts/toolchain/unpack.sh
+  
+      - name: Build aarch64-tests
+        run: |
+          .github/scripts/tests/build.sh
+
+      - name: Pack tests
+        run: |
+          tar czf ${{ env.TESTS_PACKAGE_NAME }} -C tests/build/bin/ .
+
+      - name: Upload build-aarch64-mingw-tests
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.TESTS_PACKAGE_NAME }}
+          path: ${{ env.TESTS_PACKAGE_NAME }}
+          retention-days: 3
+
+  execute-aarch64-tests:
+    needs: [build-aarch64-tests]
+    runs-on: [Windows, GCC, ARM64]
+
+    env:
+      TESTS_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-tests.tar.gz
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: ${{ github.workspace }}
+
+      - name: Download ${{ env.TOOLCHAIN_NAME }} tests
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.TESTS_PACKAGE_NAME }}
+          path: ${{ env.ARTIFACT_PATH }}
+
+      - name: Unpack tests
+        run: |
+          tar xzf ${{ env.ARTIFACT_PATH }}\${{ env.TESTS_PACKAGE_NAME }} -C ${{ env.ARTIFACT_PATH }}
+
+      - name: Execute ${{ env.TOOLCHAIN_NAME }} tests
+        run:
+          .github/scripts/tests/execute-tests.ps1
+
+  build-openblas:
+    if: ${{ !validate_toolchain_only }}
+    needs: [build-toolchain]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: ${{ github.workspace }}
+
+      - name: Checkout OpenBLAS
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.OPENBLAS_REPO }}
+          ref: ${{ env.OPENBLAS_BRANCH }}
+          path: ${{ env.SOURCE_PATH }}/${{ env.OPENBLAS_VERSION }}
+
+      - name: Download toolchain
+        uses: actions/cache/restore@v3
+        with:
+          path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
+          key: ${{ env.TOOLCHAIN_NAME }}-${{ needs.build-toolchain.outputs.workflow-sha }}-${{ needs.build-toolchain.outputs.binutils-sha }}-${{ needs.build-toolchain.outputs.gcc-sha }}-${{ needs.build-toolchain.outputs.mingw-sha }}-${{ needs.build-toolchain.outputs.binutils-scripts-sha }}-${{ needs.build-toolchain.outputs.toolchain-scripts-sha }}
+          fail-on-cache-miss: true
+
+      - name: Unpack toolchain
+        run: |
+          .github/scripts/toolchain/unpack.sh
+    
+      - name: Build OpenBLAS
+        run: |
+          .github/scripts/openblas/build.sh
+
+      - name: Pack OpenBLAS tests
+        run: |
+          .github/scripts/openblas/pack-tests.sh
+  
+      - name: Upload tests artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.TOOLCHAIN_NAME }}-openblas-tests
+          path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_NAME }}-openblas-tests.zip
+          retention-days: 3
+        
+  execute-openblas-tests:
+    needs: [build-openblas]
+    runs-on: [Windows, GCC, ARM64]
+
+    env:
+      OPENBLAS_TESTS_PATH: ${{ github.workspace }}/openblas-tests
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: ${{ github.workspace }}
+
+      - name: Download OpenBLAS tests
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.TOOLCHAIN_NAME }}-openblas-tests
+          path: ${{ env.ARTIFACT_PATH }}
+
+      - name: Unpack OpenBLAS tests
+        run: |
+          .github/scripts/openblas/unpack-tests.ps1
+  
+      - name: Execute OpenBLAS tests
+        run: |
+          C:\Program` Files\Git\bin\bash.exe .github/scripts/openblas/execute-tests.sh
+  
+  build-zlib:
+    if: ${{ !validate_toolchain_only }}
+    needs: [build-toolchain]
+    runs-on: ubuntu-latest 
+
+    env:
+      ZLIB_PATH: ${{ github.workspace }}/zlib
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: ${{ github.workspace }}
+
+      - name: Checkout zlib
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.ZLIB_REPO }}
+          ref: ${{ env.ZLIB_BRANCH }}
+          path: ${{ env.SOURCE_PATH }}/${{ env.ZLIB_VERSION }}
+
+      - name: Download toolchain
+        uses: actions/cache/restore@v3
+        with:
+          path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
+          key: ${{ env.TOOLCHAIN_NAME }}-${{ needs.build-toolchain.outputs.workflow-sha }}-${{ needs.build-toolchain.outputs.binutils-sha }}-${{ needs.build-toolchain.outputs.gcc-sha }}-${{ needs.build-toolchain.outputs.mingw-sha }}-${{ needs.build-toolchain.outputs.binutils-scripts-sha }}-${{ needs.build-toolchain.outputs.toolchain-scripts-sha }}
+          fail-on-cache-miss: true
+
+      - name: Unpack toolchain
+        run: |
+          .github/scripts/toolchain/unpack.sh
+  
+      - name: Build zlib
+        run: |
+          .github/scripts/zlib/build.sh
+
+      - name: Pack zlib
+        run: |
+          .github/scripts/zlib/pack.sh
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.TOOLCHAIN_NAME }}-zlib
+          path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_NAME }}-zlib.zip
+          retention-days: 3
+
+  build-openssl:
+    if: ${{ !validate_toolchain_only }}
+    needs: [build-toolchain, build-zlib]
+    runs-on: ubuntu-latest
+
+    env:
+      ZLIB_PATH: ${{ github.workspace }}/zlib
+      OPENSSL_PATH: ${{ github.workspace }}/openssl
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: ${{ github.workspace }}
+
+      - name: Checkout OpenSSL
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.OPENSSL_REPO }}
+          ref: ${{ env.OPENSSL_BRANCH }}
+          path: ${{ env.SOURCE_PATH }}/${{ env.OPENSSL_VERSION }}
+
+      - name: Install OpenSSL dependencies
+        run: |
+          .github/scripts/openssl/install-dependencies.sh
+
+      - name: Download toolchain
+        uses: actions/cache/restore@v3
+        with:
+          path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
+          key: ${{ env.TOOLCHAIN_NAME }}-${{ needs.build-toolchain.outputs.workflow-sha }}-${{ needs.build-toolchain.outputs.binutils-sha }}-${{ needs.build-toolchain.outputs.gcc-sha }}-${{ needs.build-toolchain.outputs.mingw-sha }}-${{ needs.build-toolchain.outputs.binutils-scripts-sha }}-${{ needs.build-toolchain.outputs.toolchain-scripts-sha }}
+          fail-on-cache-miss: true
+
+      - name: Unpack toolchain
+        run: |
+          .github/scripts/toolchain/unpack.sh
+
+      - name: Download zlib
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.TOOLCHAIN_NAME }}-zlib
+          path: ${{ env.ARTIFACT_PATH }}
+
+      - name: Unpack zlib
+        run: |
+          .github/scripts/zlib/unpack.sh
+
+      - name: Build OpenSSL
+        run: |
+          .github/scripts/openssl/build.sh
+
+      - name: Pack OpenSSL
+        run: |
+          .github/scripts/openssl/pack.sh
+
+      - name: Pack OpenSSL tests
+        run: |
+          .github/scripts/openssl/pack-tests.sh
+    
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.TOOLCHAIN_NAME }}-openssl
+          path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_NAME }}-openssl.zip
+          retention-days: 3
+
+      - name: Upload tests artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.TOOLCHAIN_NAME }}-openssl-tests
+          path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_NAME }}-openssl-tests.zip
+          retention-days: 3
+
+  execute-openssl-tests:
+    needs: [build-openssl]
+    runs-on: [Windows, GCC, ARM64]
+
+    env:
+      ZLIB_PATH: ${{ github.workspace }}/zlib
+      OPENSSL_TESTS_PATH: ${{ github.workspace }}/openssl-tests
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: ${{ github.workspace }}
+
+      - name: Checkout OpenSSL
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.OPENSSL_REPO }}
+          ref: ${{ env.OPENSSL_BRANCH }}
+          path: ${{ env.SOURCE_PATH }}/${{ env.OPENSSL_VERSION }}
+
+      - name: Download OpenSSL tests
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.TOOLCHAIN_NAME }}-openssl-tests
+          path: ${{ env.ARTIFACT_PATH }}
+
+      - name: Unpack OpenSSL tests
+        run: |
+          .github/scripts/openssl/unpack-tests.ps1
+
+      - name: Download zlib
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.TOOLCHAIN_NAME }}-zlib
+          path: ${{ env.ARTIFACT_PATH }}
+  
+      - name: Unpack zlib
+        run: |
+          .github/scripts/zlib/unpack.ps1
+  
+      - name: Execute OpenSSL tests
+        run: |
+          .github/scripts/openssl/execute-tests.ps1
+
+  build-libjpeg-turbo:
+    if: ${{ !validate_toolchain_only }}
+    needs: [build-toolchain]
+    runs-on: ubuntu-latest
+
+    env:
+      LIBJPEG_TURBO_PATH: ${{ github.workspace }}/libjpeg-turbo
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: ${{ github.workspace }}
+
+      - name: Checkout libjpeg-turbo
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.LIBJPEG_TURBO_REPO }}
+          ref: ${{ env.LIBJPEG_TURBO_BRANCH }}
+          path: ${{ env.SOURCE_PATH }}/${{ env.LIBJPEG_TURBO_VERSION }}
+
+      - name: Patch libjpeg-turbo
+        run: |
+          .github/scripts/libjpeg-turbo/patch.sh
+
+      - name: Download toolchain
+        uses: actions/cache/restore@v3
+        with:
+          path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
+          key: ${{ env.TOOLCHAIN_NAME }}-${{ needs.build-toolchain.outputs.workflow-sha }}-${{ needs.build-toolchain.outputs.binutils-sha }}-${{ needs.build-toolchain.outputs.gcc-sha }}-${{ needs.build-toolchain.outputs.mingw-sha }}-${{ needs.build-toolchain.outputs.binutils-scripts-sha }}-${{ needs.build-toolchain.outputs.toolchain-scripts-sha }}
+          fail-on-cache-miss: true
+
+      - name: Unpack toolchain
+        run: |
+          .github/scripts/toolchain/unpack.sh
+
+      - name: Build libjpeg-turbo
+        run: |
+          .github/scripts/libjpeg-turbo/build.sh
+
+      - name: Pack libjpeg-turbo
+        run: |
+          .github/scripts/libjpeg-turbo/pack.sh
+
+      - name: Pack libjpeg-turbo tests
+        run: |
+          .github/scripts/libjpeg-turbo/pack-tests.sh
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.TOOLCHAIN_NAME }}-libjpeg-turbo
+          path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_NAME }}-libjpeg-turbo.zip
+          retention-days: 3
+
+      - name: Upload tests artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.TOOLCHAIN_NAME }}-libjpeg-turbo-tests
+          path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_NAME }}-libjpeg-turbo-tests.zip
+          retention-days: 3
+
+  execute-libpeg-turbo-tests:
+    needs: [build-libjpeg-turbo]
+    runs-on: [Windows, GCC, ARM64]
+
+    env:
+      LIBJPEG_TURBO_TESTS_PATH: ${{ github.workspace }}/libjpeg-turbo-tests
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: ${{ github.workspace }}
+
+      - name: Download libjpeg-turbo tests
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.TOOLCHAIN_NAME }}-libjpeg-turbo-tests
+          path: ${{ env.ARTIFACT_PATH }}
+
+      - name: Unpack libjpeg-turbo tests
+        run: |
+          .github/scripts/libjpeg-turbo/unpack-tests.ps1
+
+      - name: Execute libjpeg-turbo tests
+        run: |
+          .github/scripts/libjpeg-turbo/execute-tests.ps1
+
+  build-ffmpeg:
+    if: ${{ !validate_toolchain_only }}
+    needs: [build-toolchain]
+    runs-on: ubuntu-latest
+
+    env:
+      FFMPEG_PATH: ${{ github.workspace }}/ffmpeg
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: ${{ github.workspace }}
+
+      - name: Checkout FFmpeg
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.FFMPEG_REPO }}
+          ref: ${{ env.FFMPEG_BRANCH }}
+          path: ${{ env.SOURCE_PATH }}/${{ env.FFMPEG_VERSION }}
+
+      - name: Download toolchain
+        uses: actions/cache/restore@v3
+        with:
+          path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
+          key: ${{ env.TOOLCHAIN_NAME }}-${{ needs.build-toolchain.outputs.workflow-sha }}-${{ needs.build-toolchain.outputs.binutils-sha }}-${{ needs.build-toolchain.outputs.gcc-sha }}-${{ needs.build-toolchain.outputs.mingw-sha }}-${{ needs.build-toolchain.outputs.binutils-scripts-sha }}-${{ needs.build-toolchain.outputs.toolchain-scripts-sha }}
+          fail-on-cache-miss: true
+
+      - name: Unpack toolchain
+        run: |
+          .github/scripts/toolchain/unpack.sh
+
+      - name: Patch FFmpeg
+        run: |
+          .github/scripts/ffmpeg/patch.sh
+
+      - name: Build FFmpeg
+        run: |
+          .github/scripts/ffmpeg/build.sh
+
+      - name: Pack FFmpeg tests
+        run: |
+          .github/scripts/ffmpeg/pack-tests.sh
+
+      - name: Upload tests artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.TOOLCHAIN_NAME }}-ffmpeg-tests
+          path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_NAME }}-ffmpeg-tests.zip
+          retention-days: 3
+
+  execute-ffmpeg-tests:
+    needs: [build-ffmpeg]
+    runs-on: [Windows, GCC, ARM64]
+
+    env:
+      FFMPEG_TESTS_PATH: ${{ github.workspace }}/ffmpeg-tests
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: ${{ github.workspace }}
+
+      - name: Checkout FFmpeg
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.FFMPEG_REPO }}
+          ref: ${{ env.FFMPEG_BRANCH }}
+          path: ${{ env.SOURCE_PATH }}/${{ env.FFMPEG_VERSION }}
+
+      - name: Download FFmpeg tests
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.TOOLCHAIN_NAME }}-ffmpeg-tests
+          path: ${{ env.ARTIFACT_PATH }}
+
+      - name: Unpack FFmpeg tests
+        run: |
+          .github/scripts/ffmpeg/unpack-tests.ps1
+
+      - name: Execute FFmpeg tests
+        run: |
+          C:\Program` Files\Git\bin\bash.exe .github/scripts/ffmpeg/execute-tests.sh
