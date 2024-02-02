@@ -91,7 +91,6 @@ jobs:
 
     strategy:
       matrix:
-        if: ${{ inputs.validate_only_toolchain_build }}
         arch: [aarch64, x86_64]
         platform: [w64-mingw32, linux-gnu]
         crt: [msvcrt, ucrt, libc]
