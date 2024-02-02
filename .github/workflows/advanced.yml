@@ -102,7 +102,7 @@ jobs:
           - platform: w64-mingw32
             crt: libc
           - arch: aarch64
-            if: $${ validate_only_toolchain_build }}
+            if: ${{ inputs.validate_only_toolchain_build }}
             platform: w64-mingw32
     env:
       TARGET: ${{ matrix.arch }}-${{ matrix.platform }}
