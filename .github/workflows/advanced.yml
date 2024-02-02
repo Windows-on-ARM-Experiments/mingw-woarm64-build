@@ -120,7 +120,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        if: ${{ inputs.validate_only_toolchain_build }}
         arch: [aarch64, x86_64]
         platform: [w64-mingw32, pc-linux-gnu, pc-cygwin]
         crt: [msvcrt, ucrt, libc]
