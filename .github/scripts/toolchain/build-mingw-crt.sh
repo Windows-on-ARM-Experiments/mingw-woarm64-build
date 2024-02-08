@@ -19,7 +19,8 @@ if [ "$RUN_CONFIG" = 1 ] || [ ! -f "$MINGW_BUILD_PATH/Makefile" ] ; then
         case $PLATFORM in
             *mingw*)
                 TARGET_OPTIONS="$TARGET_OPTIONS \
-                    --with-sysroot=$TOOLCHAIN_PATH"
+                    --enable-wildcard \
+                    --disable-dependency-tracking"
                 ;;
         esac
 
@@ -28,7 +29,8 @@ if [ "$RUN_CONFIG" = 1 ] || [ ! -f "$MINGW_BUILD_PATH/Makefile" ] ; then
             --build=$BUILD \
             --host=$TARGET \
             $HOST_OPTIONS \
-            $TARGET_OPTIONS
+            $TARGET_OPTIONS \
+            CFLAGS="$MINGW_CFLAGS"
     echo "::endgroup::"
 fi
 

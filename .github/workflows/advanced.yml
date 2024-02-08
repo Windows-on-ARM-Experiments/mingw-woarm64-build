@@ -14,7 +14,7 @@ on:
       gcc_branch:
         description: 'GCC branch to build'
         required: false
-        default: 'woarm64'
+        default: 'fix-enable-shared'
       mingw_branch:
         description: 'Mingw branch to build'
         required: false
@@ -47,7 +47,7 @@ env:
   BINUTILS_VERSION: binutils-master
 
   GCC_REPO: Windows-on-ARM-Experiments/gcc-woarm64
-  GCC_BRANCH: ${{ inputs.gcc_branch || 'woarm64' }}
+  GCC_BRANCH: ${{ inputs.gcc_branch || 'fix-enable-shared' }}
   GCC_VERSION: gcc-master
 
   MINGW_REPO: Windows-on-ARM-Experiments/mingw-woarm64
@@ -222,7 +222,7 @@ jobs:
       - name: Build MinGW
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform != 'pc-linux-gnu' }}
         run: |
-          .github/scripts/toolchain/build-mingw.sh
+          .github/scripts/toolchain/build-mingw-winpthreads.sh
 
       - name: Build GCC libs
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}

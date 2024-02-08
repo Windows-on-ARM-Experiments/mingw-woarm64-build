@@ -41,37 +41,39 @@ if [ "$RUN_CONFIG" = 1 ] || [ ! -f "$GCC_BUILD_PATH/Makefile" ] ; then
                 ;;
         esac
 
+        # ADDED --includedir=$TOOLCHAIN_PATH/$TARGET/include
         # REMOVED --libexecdir=/opt/lib
-        # REMOVED --with-{gmp,mpfr,mpc,isl}=/usr
         $SOURCE_PATH/$GCC_VERSION/configure \
             --prefix=$TOOLCHAIN_PATH \
             --build=$BUILD \
             --host=$HOST \
             --target=$TARGET \
             --includedir=$TOOLCHAIN_PATH/$TARGET/include \
+            --libexecdir=$TOOLCHAIN_PATH/lib \
+            --disable-bootstrap \
             --enable-languages=c,lto,c++,fortran \
             --enable-shared \
             --enable-static \
             --enable-graphite \
             --enable-fully-dynamic-string \
-            --enable-libstdcxx-filesystem-ts=yes \
-            --enable-libstdcxx-time=yes \
+            --enable-libstdcxx-filesystem-ts \
+            --enable-libstdcxx-time \
+            --disable-libstdcxx-pch \
+            --disable-libstdcxx-debug \
             --enable-cloog-backend=isl \
             --enable-version-specific-runtime-libs \
+            --disable-isl-version-check \
             --enable-lto \
             --enable-libgomp \
-            --enable-checking=release \
+            --disable-libssp \
             --disable-multilib \
-            --disable-shared \
+            --enable-checking=release \
             --disable-rpath \
             --disable-werror \
             --disable-symvers \
-            --disable-libstdcxx-pch \
-            --disable-libstdcxx-debug \
-            --disable-isl-version-check \
-            --disable-bootstrap \
             --with-libiconv \
             --with-system-zlib \
+            --with-{gmp,mpfr,mpc,isl}=/usr \
             --with-gnu-as \
             --with-gnu-ld \
             $HOST_OPTIONS \

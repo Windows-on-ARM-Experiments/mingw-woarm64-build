@@ -19,8 +19,8 @@ if [ "$RUN_CONFIG" = 1 ] || [ ! -f "$MINGW_BUILD_PATH/Makefile" ] ; then
         case $PLATFORM in
             *mingw*)
                 TARGET_OPTIONS="$TARGET_OPTIONS \
-                    --disable-shared \
-                    --with-libraries=libmangle,pseh,winpthreads"
+                    --enable-wildcard \
+                    --disable-dependency-tracking"
                 ;;
         esac
 
