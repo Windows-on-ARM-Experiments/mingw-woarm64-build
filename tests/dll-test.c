@@ -7,11 +7,14 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <complex.h>
 
 // Declare imported function.
 // These functions were exported from the dll using __declspec( dllexport )
 __declspec(dllimport) int __cdecl add_c_export(int a, int b);
 __declspec(dllimport) int __stdcall add_std_export(int a, int b);
+__declspec(dllimport) _Complex double __cdecl complex_add_c_export(_Complex double a, _Complex double b);
+__declspec(dllimport) _Complex double __stdcall complex_add_std_export(_Complex double a, _Complex double b);
 
 // These functions were exported via a def file.
 int __cdecl add_c_def(int a, int b);
@@ -40,6 +43,19 @@ int check_dll()
     return 5;
   if (test_func_pointer(add_c_def) != 29)
     return 6;
+
+  _Complex double a = 1.0 + 2.0 * I;
+  _Complex double b = 3.0 + 4.0 * I;
+  _Complex double c = complex_add_c_export(a, b);
+  if (c != 4.000000 + 6.000000 * I) {
+    return 7;
+  }
+
+  _Complex double d = complex_add_std_export(a, b);
+  if (c != 4.000000 + 6.000000 * I) {
+    return 8;
+  }
+
   return 0;
 }
 
