@@ -74,7 +74,7 @@ jobs:
     uses: ./.github/workflows/advanced.yml
     with:
       binutils_branch: 'aarch64-patch-min'
-      gcc_branch: 'd0aeb27fbda7cf4d63054925e79a1e80b6efd44f'
+      gcc_branch: 'e598097cbd25527cbbf4aa441a71e9001f862244'
       mingw_branch: 'aarch64-patch-min'
       validate_only_toolchain_build: true
 
@@ -82,7 +82,7 @@ jobs:
     uses: ./.github/workflows/advanced.yml
     with:
       binutils_branch: 'aarch64-patch-min'
-      gcc_branch: 'b9bf815d8d2fcedcb7eda09d87a4145fcc1b08b0'
+      gcc_branch: 'a6ef7666fbefc1576d4535046012ffa176b12140'
       mingw_branch: 'aarch64-patch-min'
       validate_only_toolchain_build: true
 
@@ -90,7 +90,7 @@ jobs:
     uses: ./.github/workflows/advanced.yml
     with:
       binutils_branch: 'aarch64-patch-min'
-      gcc_branch: '7e12e03175466cc1bb01069d1c5869ed09d3c482'
+      gcc_branch: '391702b930cdda1dd720dc3eb1f8538dcb1a1263'
       mingw_branch: 'aarch64-patch-min'
       validate_only_toolchain_build: true
 
@@ -98,7 +98,7 @@ jobs:
     uses: ./.github/workflows/advanced.yml
     with:
       binutils_branch: 'aarch64-patch-min'
-      gcc_branch: '4585def74c5832c5f3b3bfef8e9a2b536f5327dc'
+      gcc_branch: '78f9e82902db430a48f9eb8a12a4ea90de4a644e'
       mingw_branch: 'aarch64-patch-min'
       validate_only_toolchain_build: true
 
@@ -106,7 +106,7 @@ jobs:
     uses: ./.github/workflows/advanced.yml
     with:
       binutils_branch: 'aarch64-patch-min'
-      gcc_branch: '55c8c633009c5d27fd796ab83b2adf9a367182d1'
+      gcc_branch: 'fb7798518d5ec5215620e34e458cedabe39e6314'
       mingw_branch: 'aarch64-patch-min'
       validate_only_toolchain_build: true
 
@@ -114,7 +114,7 @@ jobs:
     uses: ./.github/workflows/advanced.yml
     with:
       binutils_branch: 'aarch64-patch-min'
-      gcc_branch: '01f4794639cc07495a2cb1ae0ab7a4475de7d41b'
+      gcc_branch: 'f286dc0870ae7a4af13feca7c057ef6b311cc924'
       mingw_branch: 'aarch64-patch-min'
       validate_only_toolchain_build: true
 
@@ -122,6 +122,6 @@ jobs:
     uses: ./.github/workflows/advanced.yml
     with:
       binutils_branch: 'aarch64-patch-min'
-      gcc_branch: '0de70ccaf4105acdf969265253eff4292b51e7eb'
+      gcc_branch: '1e2be79e29c5add35c8593efb3bc0f8f98f501ea'
       mingw_branch: 'aarch64-patch-min'
       validate_only_toolchain_build: true
