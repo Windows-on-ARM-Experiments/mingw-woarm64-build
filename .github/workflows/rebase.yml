@@ -37,7 +37,7 @@ env:
 jobs:
   start-binutils-rebase:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -180,3 +180,32 @@ jobs:
         working-directory: ${{ env.SOURCE_PATH }}/mingw
         run: |
           ${{ github.workspace }}/.github/scripts/rebase-finish.sh ${{ env.REBASE_BRANCH }} ${{ env.ORIGIN_BRANCH }}
+
+  deploy:
+    needs: [build]
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      id-token: write
+
+    environment:
+      name: release
+      url: ${{steps.create-release.outputs.url }}
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.build.outputs.toolchain-package-name }}
+
+      - name: Create tag
+        run: |
+          echo "TAG=$(date --rfc-3339=date)" >> ${GITHUB_ENV}
+
+      - name: Create release
+        id: create-release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ${{ needs.build.outputs.toolchain-package-name }}
+          tag_name: ${{ env.TAG }}
