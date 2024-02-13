@@ -14,15 +14,15 @@ LIBJPEG_TURBO_VERSION=${LIBJPEG_TURBO_VERSION:-libjpeg-turbo-main}
 FFMPEG_VERSION=${FFMPEG_VERSION:-ffmpeg-master}
 
 TARGET=${TARGET:-aarch64-w64-mingw32}
-if [[ $TARGET == *mingw* ]]; then
+if [[ "$TARGET" == *mingw* ]]; then
     CRT=${CRT:-msvcrt}
 else
     CRT=${CRT:-libc}
 fi
 TOOLCHAIN_NAME=${TOOLCHAIN_NAME:-$TARGET-$CRT}
 
-if [[ ($TARGET == *mingw* && ($CRT != "msvcrt" && $CRT != "ucrt")) ||
-    ($TARGET == *linux* && $CRT != "libc") ]]; then
+if [[ ("$TARGET" == *mingw* && ("$CRT" != "msvcrt" && "$CRT" != "ucrt")) ||
+    ("$TARGET" == *linux* && "$CRT" != "libc") ]]; then
     echo "Unsupported target $TARGET with CRT $CRT!"
     exit 1
 fi

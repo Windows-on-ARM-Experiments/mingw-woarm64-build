@@ -6,7 +6,7 @@ LIBXML2_BUILD_PATH=$BUILD_PATH/libxml2
 
 cd $SOURCE_PATH/$LIBXML2_VERSION
 
-if [ $RUN_CONFIG = 1 ] || [ ! -f $LIBXML2_BUILD_PATH/CMakeCache.txt ] ; then
+if [ "$RUN_CONFIG" = 1 ] || [ ! -f $LIBXML2_BUILD_PATH/CMakeCache.txt ] ; then
     echo "::group::Configure libxml2"
         rm -f $LIBXML2_BUILD_PATH/CMakeCache.txt
         cmake -G"Unix Makefiles" \
@@ -26,7 +26,7 @@ echo "::group::Build libxml2"
     cmake --build $LIBXML2_BUILD_PATH ${BUILD_MAKE_OPTIONS//V=1/-v}
 echo "::endgroup::"
 
-if [ $RUN_INSTALL = 1 ] ; then
+if [ "$RUN_INSTALL" = 1 ] ; then
     echo "::group::Install libxml2"
         cmake --install $LIBXML2_BUILD_PATH
     echo "::endgroup::"
