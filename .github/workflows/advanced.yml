@@ -44,6 +44,11 @@ on:
         type: boolean
         required: false
         default: false
+    outputs:
+      toolchain-package-name:
+        value: ${{ jobs.build-toolchain.outputs.toolchain-package-name }}
+      toolchain-cache-key:
+        value: ${{ jobs.build-toolchain.outputs.toolchain-cache-key }}
 
 env:
   BINUTILS_REPO: Windows-on-ARM-Experiments/binutils-woarm64
@@ -109,6 +114,7 @@ jobs:
     env:
       TARGET: ${{ matrix.arch }}-${{ matrix.platform }}
       CRT: ${{ matrix.crt }}
+      PACK_TOOLCHAIN: ${{ matrix.arch == 'aarch64' && matrix.platform == 'w64-mingw32' && matrix.crt == 'msvcrt' }}
       TOOLCHAIN_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}
       TOOLCHAIN_PACKAGE_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}-toolchain.tar.gz
       TESTS_PACKAGE_NAME: ${{ matrix.arch }}-${{ matrix.crt }}-tests.tar.gz
@@ -153,7 +159,7 @@ jobs:
       - name: Cache toolchain
         if: ${{ !inputs.validate_only_toolchain_build }}
         id: cache-toolchain
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
           key: ${{ env.TOOLCHAIN_NAME }}-${{ steps.workflow-sha.outputs.sha }}-${{ steps.binutils-sha.outputs.sha }}-${{ steps.gcc-sha.outputs.sha }}-${{ steps.mingw-sha.outputs.sha }}-${{ steps.binutils-scripts-sha.outputs.sha }}-${{ steps.toolchain-scripts-sha.outputs.sha }}
@@ -233,17 +239,17 @@ jobs:
           .github/scripts/toolchain/build-gcc-libs.sh
 
       - name: Pack toolchain
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && env.TOOLCHAIN_NAME == 'aarch64-w64-mingw32-msvcrt' }}
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && env.PACK_TOOLCHAIN == 'true' }}
         run: |
           .github/scripts/toolchain/pack.sh
 
       - name: Pack toolchain mock
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && env.TOOLCHAIN_NAME != 'aarch64-w64-mingw32-msvcrt' }}
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && env.PACK_TOOLCHAIN != 'true' }}
         run: |
           .github/scripts/toolchain/pack-mock.sh
           
       - name: Upload artifact
-        if: ${{ !inputs.validate_only_toolchain_build && steps.cache-toolchain.outputs.cache-hit != 'true' }}
+        if: ${{ !inputs.validate_only_toolchain_build && (steps.cache-toolchain.outputs.cache-hit != 'true' || env.PACK_TOOLCHAIN == 'true')}}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.TOOLCHAIN_PACKAGE_NAME }}
@@ -251,4 +257,6 @@ jobs:
           retention-days: 3
 
     outputs:
-      toolchain-cache-key: aarch64-w64-mingw32-msvcrt-${{ steps.workflow-sha.outputs.sha }}-${{ steps.binutils-sha.outputs.sha }}-${{ steps.gcc-sha.outputs.sha }}-${{ steps.mingw-sha.outputs.sha }}-${{ steps.binutils-scripts-sha.outputs.sha }}-${{ steps.toolchain-scripts-sha.outputs.sha }}
+      toolchain-package-name: ${{ env.PACK_TOOLCHAIN == 'true' && env.TOOLCHAIN_PACKAGE_NAME || '' }}
+      toolchain-cache-key: ${{ env.PACK_TOOLCHAIN == 'true' && format('{0}-{1}-{2}-{3}-{4}-{5}-{6}', env.TOOLCHAIN_NAME, steps.workflow-sha.outputs.sha, steps.binutils-sha.outputs.sha, steps.gcc-sha.outputs.sha, steps.mingw-sha.outputs.sha, steps.binutils-scripts-sha.outputs.sha, steps.toolchain-scripts-sha.outputs.sha) || '' }}
+
