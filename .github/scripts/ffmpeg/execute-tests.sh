@@ -27,7 +27,7 @@ echo "::group::Test FFmpeg"
     IFS=$'\n'
     SKIP=1
     for i in $(cat fate.log); do
-        if [[ $i =~ ^(TEST) ]]; then
+        if [[ "$i" =~ ^(TEST) ]]; then
             SKIP=0
             TEST_NAME=${i##* }
             COMMAND_NAME=$i
@@ -41,20 +41,20 @@ echo "::group::Test FFmpeg"
             done
 
             # Check if test should be skipped by filter.
-            if [[ $FILTER_TESTS != "" && $TEST_NAME =~ $FILTER_TESTS ]]; then
+            if [[ "$FILTER_TESTS" != "" && "$TEST_NAME" =~ $FILTER_TESTS ]]; then
                 SKIP=1
             fi
 
             # Check if test should be included.
-            if [[ $INCLUDE_TESTS != "" && $TEST_NAME =~ $INCLUDE_TESTS ]]; then
+            if [[ "$INCLUDE_TESTS" != "" && "$TEST_NAME" =~ $INCLUDE_TESTS ]]; then
                 SKIP=0
             fi
 
-            [[ $SKIP == 1 ]] && echo SKIP $TEST_NAME || echo TEST $TEST_NAME
+            [[ "$SKIP" == 1 ]] && echo SKIP $TEST_NAME || echo TEST $TEST_NAME
             continue
         fi
 
-        if [[ $i =~ ^(GEN|COPY) ]]; then
+        if [[ "$i" =~ ^(GEN|COPY) ]]; then
             SKIP=0
             COMMAND_NAME=$i
             echo $COMMAND_NAME
@@ -62,7 +62,7 @@ echo "::group::Test FFmpeg"
         fi
 
         # If test was skipped in previous line.
-        if [[ $SKIP == 1 ]]; then
+        if [[ "$SKIP" == 1 ]]; then
             continue
         fi
 
