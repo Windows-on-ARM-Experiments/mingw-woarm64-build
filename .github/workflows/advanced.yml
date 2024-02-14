@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+  pull_request:
   workflow_dispatch:
     inputs:
       binutils_branch:
@@ -46,15 +47,15 @@ on:
 
 env:
   BINUTILS_REPO: Windows-on-ARM-Experiments/binutils-woarm64
-  BINUTILS_BRANCH: ${{ inputs.binutils_branch || 'woarm64' }}
+  BINUTILS_BRANCH: ${{ inputs.binutils_branch || 'aarch64-patch-stage1-v1' }}
   BINUTILS_VERSION: binutils-master
 
   GCC_REPO: Windows-on-ARM-Experiments/gcc-woarm64
-  GCC_BRANCH: ${{ inputs.gcc_branch || 'woarm64' }}
+  GCC_BRANCH: ${{ inputs.gcc_branch || 'aarch64-patch-stage1-v8' }}
   GCC_VERSION: gcc-master
 
   MINGW_REPO: Windows-on-ARM-Experiments/mingw-woarm64
-  MINGW_BRANCH: ${{ inputs.mingw_branch || 'woarm64' }}
+  MINGW_BRANCH: ${{ inputs.mingw_branch || 'aarch64-patch-stage1-v1' }}
   MINGW_VERSION: mingw-w64-master
 
   OPENBLAS_REPO: OpenMathLib/OpenBLAS.git
@@ -104,8 +105,6 @@ jobs:
             crt: ucrt
           - platform: w64-mingw32
             crt: libc
-          - arch: aarch64
-            platform: w64-mingw32
 
     env:
       TARGET: ${{ matrix.arch }}-${{ matrix.platform }}
