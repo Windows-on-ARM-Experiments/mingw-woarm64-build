@@ -4,7 +4,7 @@ if (NOT DEFINED ENV{TARGET})
   set(ENV{TARGET} "aarch64-w64-mingw32") 
 endif()
 if (NOT DEFINED ENV{TOOLCHAIN_PATH}) 
-  set(ENV{TOOLCHAIN_PATH} "$ENV{HOME}/cross") 
+  set(ENV{TOOLCHAIN_PATH} "$ENV{HOME}/cross-aarch64-w64-mingw32-msvcrt") 
 endif()
 
 set(CMAKE_C_COMPILER "$ENV{TOOLCHAIN_PATH}/bin/$ENV{TARGET}-gcc")
