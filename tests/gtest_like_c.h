@@ -45,6 +45,6 @@ struct Test {
 #define DECLARE_TEST(GROUP, NAME) \
     {#GROUP, #NAME, TEST_NAME(GROUP, NAME)} 
 
-int gtest_like_c_run_tests(const struct Test* tests, size_t num_tests);
+int gtest_like_c_run_tests(const struct Test* tests, size_t num_tests, const char* gtest_filter);
 
 #endif // GTEST_LIKE_C_H
