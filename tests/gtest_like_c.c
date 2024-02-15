@@ -1,7 +1,5 @@
 #include "gtest_like_c.h"
 
-#define MIN(a, b) ((a) < (b) ? (a) : (b))
-
 jmp_buf gtest_jmp;
 
 int gtest_like_c_run_tests(const struct Test* tests, size_t num_tests, const char* gtest_filter) {
@@ -17,7 +15,7 @@ int gtest_like_c_run_tests(const struct Test* tests, size_t num_tests, const cha
             strncat(full_test_name, ".", sizeof(full_test_name) - 1);
             strncat(full_test_name, tests[i].test_name, sizeof(full_test_name) - 1);
 
-            if (strncmp(gtest_filter, full_test_name, MIN(strlen(gtest_filter), sizeof(full_test_name) - 1))) {
+            if (strncmp(gtest_filter, full_test_name, strlen(gtest_filter))) {
                 ++filtered_tests;
                 continue;
             }

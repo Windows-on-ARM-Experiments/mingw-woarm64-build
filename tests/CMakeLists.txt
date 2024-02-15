@@ -8,7 +8,7 @@ if (NOT DEFINED ENV{TOOLCHAIN_PATH})
 endif()
 
 set(CMAKE_C_COMPILER "$ENV{TOOLCHAIN_PATH}/bin/$ENV{TARGET}-gcc")
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fopenmp")
+#set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fopenmp")
 set(CMAKE_RANLIB "$ENV{TOOLCHAIN_PATH}/bin/$ENV{TARGET}-ranlib")
 
 cmake_minimum_required(VERSION 3.14)
@@ -27,6 +27,7 @@ add_executable(
   main.c
   math-test.c
   nested-functions-test.c
+  omp-test.c
   pdata-test.c
   sjlj-test.c
   sscanf-double.c
