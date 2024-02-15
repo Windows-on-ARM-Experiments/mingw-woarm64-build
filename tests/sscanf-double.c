@@ -2,6 +2,8 @@
    Tests reading double from a string
 */
 
+#include "gtest_like_c.h"
+
 #include <stdio.h>
 
 int sscanf_double()
@@ -14,4 +16,9 @@ int sscanf_double()
         return 0;
 
     return 1;
+}
+
+TEST(Aarch64MinGW, SscanfDoubleTest)
+{
+    ASSERT_TRUE(sscanf_double());
 }

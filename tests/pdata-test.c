@@ -1,3 +1,5 @@
+#include "gtest_like_c.h"
+
 #define UNICODE 1
 #define _UNICODE 1
 
@@ -62,3 +64,11 @@ int count_stack_frames()
 {
     return level1();
 }
+
+TEST(Aarch64MinGW, TestUnwindStack)
+{
+    GTEST_SKIP();
+    
+    ASSERT_EQ(count_stack_frames(), 22);
+}
+

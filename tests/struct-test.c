@@ -2,6 +2,8 @@
    Tests data in a structure is addressed correctrly
 */
 
+#include "gtest_like_c.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -47,4 +49,9 @@ int check_struct()
                   b->d == 44;
 
     return success;
+}
+
+TEST(Aarch64MinGW, StructTest)
+{
+    ASSERT_TRUE(check_struct());
 }
