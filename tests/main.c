@@ -10,6 +10,7 @@ TEST(Aarch64MinGW, NestedFunction);
 TEST(Aarch64MinGW, OmpTest);
 TEST(Aarch64MinGW, TestUnwindStack);
 TEST(Aarch64MinGW, SJLJTest);
+TEST(Aarch64MinGW, SscanfDoubleTest);
 TEST(Aarch64MinGW, StructTest);
 TEST(Aarch64MinGW, TestVaList);
 TEST(Aarch64MinGW, TestSPrintf);
@@ -46,6 +47,7 @@ int main(int argc, char **argv) {
         DECLARE_TEST(Aarch64MinGW, OmpTest),
         DECLARE_TEST(Aarch64MinGW, TestUnwindStack),
         DECLARE_TEST(Aarch64MinGW, SJLJTest),
+        DECLARE_TEST(Aarch64MinGW, SscanfDoubleTest),
         DECLARE_TEST(Aarch64MinGW, StructTest),
         DECLARE_TEST(Aarch64MinGW, TestVaList),
         DECLARE_TEST(Aarch64MinGW, TestSPrintf),
