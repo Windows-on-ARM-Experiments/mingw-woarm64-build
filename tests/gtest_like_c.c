@@ -9,31 +9,29 @@ int gtest_like_c_run_tests(const struct Test* tests, size_t num_tests, const cha
 
     for (int i = 0; i < num_tests; i++) {
 
-        if (gtest_filter) {
-            char full_test_name[256];
-            strncpy(full_test_name, tests[i].group_name, sizeof(full_test_name) - 1);
-            strncat(full_test_name, ".", sizeof(full_test_name) - 1);
-            strncat(full_test_name, tests[i].test_name, sizeof(full_test_name) - 1);
+        char full_test_name[256];
+        strncpy(full_test_name, tests[i].group_name, sizeof(full_test_name) - 1);
+        strncat(full_test_name, ".", sizeof(full_test_name) - 1);
+        strncat(full_test_name, tests[i].test_name, sizeof(full_test_name) - 1);
 
-            if (strncmp(gtest_filter, full_test_name, strlen(gtest_filter))) {
-                ++filtered_tests;
-                continue;
-            }
+        if (gtest_filter && strncmp(gtest_filter, full_test_name, strlen(gtest_filter))) {
+            ++filtered_tests;
+            continue;
         }
 
         switch (setjmp(gtest_jmp))
         {
         case TEST_PASSED:
-            printf("[ RUN      ] %s.%s\n", tests[i].group_name, tests[i].test_name);
+            printf("[ RUN      ] %s\n", full_test_name);
             tests[i].fn_test();
-            printf("[       OK ] %s.%s\n", tests[i].group_name, tests[i].test_name);
+            printf("[       OK ] %s\n", full_test_name);
             ++passed_tests;
             break;
         case TEST_FAILED:
-            printf("[   FAILED ] %s.%s\n", tests[i].group_name, tests[i].test_name);
+            printf("[   FAILED ] %s\n", full_test_name);
             break;
         case TEST_SKIPPED:
-            printf("[  SKIPPED ] %s.%s\n", tests[i].group_name, tests[i].test_name);
+            printf("[  SKIPPED ] %s\n", full_test_name);
             ++skipped_tests;
             break;
         }

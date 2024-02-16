@@ -34,7 +34,7 @@ enum {TEST_PASSED, TEST_FAILED, TEST_SKIPPED};
     }
 
 #define GTEST_SKIP() \
-    longjmp(gtest_jmp, TEST_SKIPPED);
+    longjmp(gtest_jmp, TEST_SKIPPED)
 
 struct Test {
     const char* group_name;
