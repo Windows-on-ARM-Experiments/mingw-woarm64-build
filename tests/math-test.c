@@ -1,3 +1,5 @@
+#include "gtest_like_c.h"
+
 #include <stdio.h>
 
 _Float128 foo(_Float128 x)
@@ -33,4 +35,9 @@ void math_test()
     baz(1.2Q);
 
     printf("ok\n");
+}
+
+TEST(Aarch64MinGW, MathTest)
+{
+    math_test();
 }

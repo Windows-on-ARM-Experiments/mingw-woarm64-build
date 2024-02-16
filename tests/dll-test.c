@@ -3,6 +3,8 @@
    IMPORT_API must be defined externally
 */
 
+#include "gtest_like_c.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -39,4 +41,9 @@ int check_dll()
   if (test_func_pointer(add_c_def) != 29)
     return 6;
   return 0;
+}
+
+TEST(Aarch64MinGW, DllTest)
+{
+    ASSERT_EQ(check_dll(), 0);
 }
