@@ -8,7 +8,7 @@ echo "::group::Build libgcc"
 make $BUILD_MAKE_OPTIONS all-target-libgcc
 echo "::endgroup::"
 
-if [ $RUN_INSTALL = 1 ] ; then
+if [ "$RUN_INSTALL" = 1 ] ; then
     echo "::group::Install libgcc"
     make install-target-libgcc
     echo "::endgroup::"

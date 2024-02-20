@@ -1,3 +1,5 @@
+#include "gtest_like_c.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -24,4 +26,9 @@ void sjlj_test()
     {
         printf("setjmp %d\n", val);
     }
+}
+
+TEST(Aarch64MinGW, SJLJTest)
+{
+    sjlj_test();
 }

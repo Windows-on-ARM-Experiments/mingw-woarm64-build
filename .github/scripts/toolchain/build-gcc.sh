@@ -7,7 +7,7 @@ GCC_BUILD_PATH=$BUILD_PATH/gcc
 mkdir -p $GCC_BUILD_PATH
 cd $GCC_BUILD_PATH
 
-if [ $RUN_CONFIG = 1 ] || [ ! -f "$GCC_BUILD_PATH/Makefile" ] ; then
+if [ "$RUN_CONFIG" = 1 ] || [ ! -f "$GCC_BUILD_PATH/Makefile" ] ; then
     echo "::group::Configure GCC"
 
     rm -rf $GCC_BUILD_PATH/*
@@ -20,7 +20,7 @@ if [ $RUN_CONFIG = 1 ] || [ ! -f "$GCC_BUILD_PATH/Makefile" ] ; then
             ;;
     esac
 
-    if [ $DEBUG = 1 ] ; then
+    if [ "$DEBUG" = 1 ] ; then
         ADDITIONAL_OPTIONS=" \
             --enable-debug"
     fi
@@ -65,7 +65,7 @@ echo "::group::Build GCC"
     make $BUILD_MAKE_OPTIONS all-gcc
 echo "::endgroup::"
 
-if [ $RUN_INSTALL = 1 ] ; then
+if [ "$RUN_INSTALL" = 1 ] ; then
     echo "::group::Install GCC"
         make install-gcc
     echo "::endgroup::"

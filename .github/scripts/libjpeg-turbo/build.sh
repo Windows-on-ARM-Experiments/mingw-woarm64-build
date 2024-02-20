@@ -6,7 +6,7 @@ LIBJPEG_TURBO_BUILD_PATH=$BUILD_PATH/libjpeg-turbo
 
 cd $SOURCE_PATH/$LIBJPEG_TURBO_VERSION
 
-if [ $RUN_CONFIG = 1 ] || [ ! -f $LIBJPEG_TURBO_BUILD_PATH/CMakeCache.txt ] ; then
+if [ "$RUN_CONFIG" = 1 ] || [ ! -f $LIBJPEG_TURBO_BUILD_PATH/CMakeCache.txt ] ; then
     echo "::group::Configure libjpeg-turbo"
         rm -f $LIBJPEG_TURBO_BUILD_PATH/CMakeCache.txt
         cmake -G"Unix Makefiles" \
@@ -22,7 +22,7 @@ echo "::group::Build libjpeg-turbo"
     (cd $LIBJPEG_TURBO_BUILD_PATH && ctest -R "^.*-cp$" )
 echo "::endgroup::"
 
-if [ $RUN_INSTALL = 1 ] ; then
+if [ "$RUN_INSTALL" = 1 ] ; then
     echo "::group::Install libjpeg-turbo"
         cmake --install $LIBJPEG_TURBO_BUILD_PATH
     echo "::endgroup::"

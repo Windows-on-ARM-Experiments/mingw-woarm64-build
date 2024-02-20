@@ -1,17 +1,19 @@
+#include "gtest_like_c.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include <gtest/gtest.h>
+#include <stdint.h>
 
-static constexpr uint32_t FNV_PRIME_32 = 16777619u;
-static constexpr uint32_t OFFSET_BASIS_32 = 2166136261u;
+static uint32_t FNV_PRIME_32 = 16777619u;
+static uint32_t OFFSET_BASIS_32 = 2166136261u;
 
 // simple fnv like hash.
 // Good enough to guarantee uniqueness.
 static uint32_t fnv1a(uint32_t hash, const char *data)
 {
-    const auto *p = reinterpret_cast<const uint8_t *>(data);
+    const uint8_t *p = (const uint8_t *)(data);
 
     while (*p != 0)
     {
