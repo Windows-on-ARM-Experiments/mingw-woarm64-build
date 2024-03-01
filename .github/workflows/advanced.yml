@@ -55,7 +55,7 @@ env:
   MINGW_VERSION: mingw-w64-master
 
   OPENBLAS_REPO: OpenMathLib/OpenBLAS.git
-  OPENBLAS_BRANCH: ${{ inputs.openblas_branch || 'develop' }}
+  OPENBLAS_BRANCH: ${{ inputs.openblas_branch || 'release-0.3.0' }}
   OPENBLAS_VERSION: openblas-develop
 
   ZLIB_REPO: madler/zlib
