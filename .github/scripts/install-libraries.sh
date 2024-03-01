@@ -6,9 +6,11 @@ MPFR_VERSION=mpfr-4.1.0
 GMP_VERSION=gmp-6.2.1
 MPC_VERSION=mpc-1.2.1
 ISL_VERSION=isl-0.24
-WGET_OPTIONS="-nc -P downloads"
+WGET_OPTIONS="-nc -P $DOWNLOADS_PATH"
 
 echo "::group::Install libraries"
+    mkdir -p $DOWNLOADS_PATH
+
     # Download packages
     wget $WGET_OPTIONS https://gcc.gnu.org/pub/gcc/infrastructure/$MPFR_VERSION.tar.bz2
     wget $WGET_OPTIONS https://gcc.gnu.org/pub/gcc/infrastructure/$GMP_VERSION.tar.bz2
@@ -17,7 +19,7 @@ echo "::group::Install libraries"
 
     # Extract everything
     cd $SOURCE_PATH
-    for f in ../downloads/*.tar*; do tar xf $f --skip-old-files; done
+    for f in $DOWNLOADS_PATH/*.tar*; do tar xf $f --skip-old-files; done
 
     # Symbolic links for binutils dependencies
     cd $SOURCE_PATH/$BINUTILS_VERSION

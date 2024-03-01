@@ -1,0 +1,136 @@
+name: Test toolchain
+
+on:
+  workflow_dispatch:
+    inputs:
+      binutils_branch_baseline:
+        description: 'Baseline Binutils branch'
+        required: false
+        default: 'upstream'
+      binutils_branch_changes:
+        description: 'Changes Binutils branch'
+        required: false
+        default: 'upstream'
+      gcc_branch_baseline:
+        description: 'Baseline GCC branch'
+        required: false
+        default: 'upstream'
+      gcc_branch_changes:
+        description: 'Changes GCC branch'
+        required: false
+        default: 'upstream'
+      mingw_branch_baseline:
+        description: 'Baseline MinGW branch'
+        required: false
+        default: 'upstream'
+      mingw_branch_changes:
+        description: 'Changes MinGW branch'
+        required: false
+        default: 'upstream'
+      arch:
+        description: 'Architecture to build for'
+        required: false
+        default: 'x86_64'
+      platform:
+        description: 'Platform to build for'
+        required: false
+        default: 'w64-mingw32'
+      crt:
+        description: 'C runtime to build for'
+        required: false
+        default: 'msvcrt'
+  workflow_call:
+    inputs:
+      binutils_branch_baseline:
+        type: string
+      binutils_branch_changes:
+        type: string
+      gcc_branch_baseline:
+        type: string
+      gcc_branch_changes:
+        type: string
+      mingw_branch_baseline:
+        type: string
+      mingw_branch_changes:
+        type: string
+      arch:
+        type: string
+      platform:
+        type: string
+      crt:
+        type: string
+
+env:
+  GCC_REPO: Windows-on-ARM-Experiments/gcc-woarm64
+  GCC_BRANCH: ${{ inputs.gcc_branch_changes || 'woarm64' }}
+  GCC_VERSION: gcc-master
+
+  SOURCE_PATH: ${{ github.workspace }}/code
+  ARTIFACT_PATH: ${{ github.workspace }}/artifact
+
+jobs:
+  build-and-test-baseline:
+    name: Build and test baseline
+    uses: ./.github/workflows/build-and-test-toolchain.yml
+    with:
+      binutils_branch: ${{ inputs.binutils_branch_baseline }}
+      gcc_branch: ${{ inputs.gcc_branch_baseline || 'aarch64-patch-stage1-v11-upstream' }}
+      mingw_branch: ${{ inputs.mingw_branch_baseline }}
+      arch: ${{ inputs.arch }}
+      platform: ${{ inputs.platform }}
+      crt: ${{ inputs.crt }}
+      tag: baseline
+
+  build-and-test-changes:
+    name: Build and test changes
+    uses: ./.github/workflows/build-and-test-toolchain.yml
+    with:
+      binutils_branch: ${{ inputs.binutils_branch_changes }}
+      gcc_branch: ${{ inputs.gcc_branch_test || 'aarch64-patch-stage1-v11' }}
+      mingw_branch: ${{ inputs.mingw_branch_test }}
+      arch: ${{ inputs.arch }}
+      platform: ${{ inputs.platform }}
+      crt: ${{ inputs.crt }}
+      tag: changes
+
+  compare-test-results:
+    name: Compare test results
+    needs: [build-and-test-baseline, build-and-test-changes]
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: ${{ github.workspace }}
+ 
+      - name: Checkout GCC
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.GCC_REPO }}
+          ref: ${{ env.GCC_BRANCH }}
+          sparse-checkout: 'contrib'
+          path: ${{ env.SOURCE_PATH }}/${{ env.GCC_VERSION }}
+
+      - name: Download baseline artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: gcc-tests-baseline
+          path: ${{ env.ARTIFACT_PATH }}/gcc-tests-baseline
+
+      - name: Download changes artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: gcc-tests-changes
+          path: ${{ env.ARTIFACT_PATH }}/gcc-tests-changes
+
+      - name: Compare results
+        run: |
+          .github/scripts/toolchain/compare-gcc-results.sh baseline changes
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gcc-tests-results
+          path: ${{ env.ARTIFACT_PATH }}/gcc-tests-results
+          retention-days: 3
