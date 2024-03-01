@@ -103,7 +103,8 @@ jobs:
             crt: libc
 
     env:
-      TARGET: ${{ matrix.arch }}-${{ matrix.platform }}
+      ARCH: ${{ matrix.arch }}
+      PLATFORM: ${{ matrix.platform }}
       CRT: ${{ matrix.crt }}
       PACK_TOOLCHAIN: ${{ matrix.arch == 'aarch64' && matrix.platform == 'w64-mingw32' && matrix.crt == 'msvcrt' }}
       TOOLCHAIN_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}

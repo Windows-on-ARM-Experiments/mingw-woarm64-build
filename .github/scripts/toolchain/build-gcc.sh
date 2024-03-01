@@ -12,7 +12,7 @@ if [ "$RUN_CONFIG" = 1 ] || [ ! -f "$GCC_BUILD_PATH/Makefile" ] ; then
 
     rm -rf $GCC_BUILD_PATH/*
 
-    case $TARGET in
+    case $PLATFORM in
         *mingw*)
             HOST_OPTIONS=" \
                 --enable-threads=win32 \
