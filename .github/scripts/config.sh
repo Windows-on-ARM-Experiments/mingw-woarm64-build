@@ -20,8 +20,8 @@ if [[ "$PLATFORM" =~ mingw ]]; then
 else
     CRT=${CRT:-libc}
 fi
-BUILD=x86_64-pc-linux-gnu
-HOST=x86_64-pc-linux-gnu
+BUILD=${BUILD:-x86_64-pc-linux-gnu}
+HOST=${HOST:-x86_64-pc-linux-gnu}
 TARGET=$ARCH-$PLATFORM
 TOOLCHAIN_NAME=${TOOLCHAIN_NAME:-$ARCH-$PLATFORM-$CRT}
 
