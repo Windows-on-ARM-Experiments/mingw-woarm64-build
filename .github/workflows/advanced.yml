@@ -122,9 +122,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        arch: [aarch64, x86_64]
-        platform: [w64-mingw32, pc-linux-gnu, pc-cygwin]
-        crt: [msvcrt, ucrt, libc]
+        arch: [x86_64]
+        platform: [w64-mingw32]
+        crt: [msvcrt]
         exclude:
           - platform: w64-mingw32
             crt: libc
@@ -323,6 +323,11 @@ jobs:
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform == 'pc-cygwin' }}
         run: |
           .github/scripts/toolchain/build-cygwin.sh 2
+
+      - name: Execute GCC tests
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
+        run: |
+          .github/scripts/toolchain/execute-gcc-tests.sh
 
       - name: Pack toolchain
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && env.PACK_TOOLCHAIN == 'true' }}

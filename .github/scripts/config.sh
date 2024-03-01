@@ -16,7 +16,7 @@ OPENSSL_VERSION=${OPENSSL_VERSION:-openssl-master}
 LIBJPEG_TURBO_VERSION=${LIBJPEG_TURBO_VERSION:-libjpeg-turbo-main}
 FFMPEG_VERSION=${FFMPEG_VERSION:-ffmpeg-master}
 
-ARCH=${ARCH:-aarch64}
+ARCH=${ARCH:-x86_64}
 PLATFORM=${PLATFORM:-w64-mingw32}
 if [[ "$PLATFORM" =~ (mingw|cygwin) ]]; then
     CRT=${CRT:-msvcrt}

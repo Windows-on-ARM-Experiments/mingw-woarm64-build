@@ -11,9 +11,11 @@ echo "::group::Execute GCC tests"
         rm $FILE
     done
 
+    winetricks nocrashdialog
+
     cd $GCC_BUILD_PATH
-    make $BUILD_MAKE_OPTIONS -k check \
-        RUNTESTFLAGS="--target_board wsl-sim" \
+    make -j4 -k check \
+        RUNTESTFLAGS="--target_board wine-sim" \
         DEJAGNU="$DEJAGNU_FILE" \
         CHECK_TEST_FRAMEWORK=1 \
         || echo "Error"

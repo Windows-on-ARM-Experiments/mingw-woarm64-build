@@ -1,0 +1,10 @@
+set SIM "wine64"
+set tmpdir /tmp
+
+load_generic_config "sim"
+
+set_board_info target_install {x86_64-w64-mingw32}
+
+load_base_board_description "basic-sim";
+
+setup_sim ""
