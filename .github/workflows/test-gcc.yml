@@ -1,0 +1,85 @@
+name: Build and test GCC
+
+on:
+  workflow_dispatch:
+    inputs:
+      binutils_branch:
+        description: 'Binutils branch to build'
+        required: false
+        default: 'woarm64'
+      gcc_branch:
+        description: 'GCC branch to build'
+        required: false
+        default: 'woarm64'
+      mingw_branch:
+        description: 'Mingw branch to build'
+        required: false
+        default: 'woarm64'
+
+env:
+  BINUTILS_REPO: Windows-on-ARM-Experiments/binutils-woarm64
+  BINUTILS_BRANCH: ${{ inputs.binutils_branch }}
+  BINUTILS_VERSION: binutils
+
+  GCC_REPO: Windows-on-ARM-Experiments/gcc-woarm64
+  GCC_BRANCH: ${{ inputs.gcc_branch }}
+  GCC_VERSION: gcc
+
+  MINGW_REPO: Windows-on-ARM-Experiments/mingw-woarm64
+  MINGW_BRANCH: ${{ inputs.mingw_branch }}
+  MINGW_VERSION: mingw-w64-master
+
+  SOURCE_PATH: ${{ github.workspace }}/code
+
+jobs:
+  build-and-test:
+    runs-on: windows-latest
+
+    defaults:
+        run:
+          shell: msys2 {0}
+
+    env:
+      BUILD: x86_64-w64-mingw32
+      HOST: x86_64-w64-mingw32
+      ARCH: x86_64
+      PLATFORM: w64-mingw32
+      CRT: msvcrt
+
+    steps:
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          install: base-devel mingw-w64-x86_64-toolchain flex bison texinfo zlib-devel mpfr-devel gmp-devel mpc-devel isl-devel dejagnu
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Checkout binutils
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.BINUTILS_REPO }}
+          ref: ${{ env.BINUTILS_BRANCH }}
+          path: ${{ env.SOURCE_PATH }}/${{ env.BINUTILS_VERSION }}
+
+      - name: Checkout GCC
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.GCC_REPO }}
+          ref: ${{ env.GCC_BRANCH }}
+          path: ${{ env.SOURCE_PATH }}/${{ env.GCC_VERSION }}
+
+      - name: Checkout MinGW
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.MINGW_REPO }}
+          ref: ${{ env.MINGW_BRANCH }}
+          path: ${{ env.SOURCE_PATH }}/${{ env.MINGW_VERSION }}
+
+      - name: Build toolchain
+        run: |
+          .github/scripts/build.sh
+          
+      - name: Execute GCC tests
+        run: |
+          .github/scripts/toolchain/execute-gcc-tests.sh
