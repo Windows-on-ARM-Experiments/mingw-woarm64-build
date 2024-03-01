@@ -69,16 +69,23 @@ CCACHE_LIB_DIR=/usr/lib/ccache
 TOOLCHAIN_CCACHE_LIB_DIR=$TOOLCHAIN_PATH/lib/ccache
 
 DEBUG=${DEBUG:-0} # Enable debug build.
-CCACHE=${CCACHE:-0} # Enable usage of ccache.
+TEST=${TEST:-1} # Test the toolchain.
+CCACHE=${CCACHE:-1} # Enable usage of ccache.
 RUN_BOOTSTRAP=${RUN_BOOTSTRAP:-0} # Bootstrap dependencies during the build.
-UPDATE_SOURCES=${UPDATE_SOURCES:-0} # Update source code repositories.
-RESET_SOURCES=${RESET_SOURCES:-0} # Reset source code repositories before update.
+UPDATE_SOURCES=${UPDATE_SOURCES:-1} # Update source code repositories.
+RESET_SOURCES=${RESET_SOURCES:-1} # Reset source code repositories before update.
 APPLY_PATCHES=${APPLY_PATCHES:-1} # Patch source repositories for targets requiring it.
 RUN_CONFIG=${RUN_CONFIG:-1} # Run configuration step.
 RUN_INSTALL=${RUN_INSTALL:-1} # Run installation step.
 DELETE_BUILD=${DELETE_BUILD:-0} # Delete build folders after successful builds.
 
-PATH="$PATH:$TOOLCHAIN_PATH/bin"
+if [[ -n "$MSYSTEM" ]]; then
+    export MSYS=winsymlinks
+    PATH="$TOOLCHAIN_PATH/bin:$TOOLCHAIN_PATH/lib/gcc/$TARGET/15.0.0:/opt/bin:$PATH"
+else
+    PATH="$PATH:$TOOLCHAIN_PATH/bin"
+fi
+
 if [[ "$CCACHE" = 1 ]]; then
     PATH=$CCACHE_LIB_DIR:$TOOLCHAIN_CCACHE_LIB_DIR:$PATH
     export CCACHE_DIR=$CCACHE_DIR_PATH
