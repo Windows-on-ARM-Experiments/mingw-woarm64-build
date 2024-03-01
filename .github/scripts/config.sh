@@ -13,17 +13,21 @@ OPENSSL_VERSION=${OPENSSL_VERSION:-openssl-master}
 LIBJPEG_TURBO_VERSION=${LIBJPEG_TURBO_VERSION:-libjpeg-turbo-main}
 FFMPEG_VERSION=${FFMPEG_VERSION:-ffmpeg-master}
 
-TARGET=${TARGET:-aarch64-w64-mingw32}
-if [[ "$TARGET" == *mingw* ]]; then
+ARCH=${ARCH:-aarch64}
+PLATFORM=${PLATFORM:-w64-mingw32}
+if [[ "$PLATFORM" =~ mingw ]]; then
     CRT=${CRT:-msvcrt}
 else
     CRT=${CRT:-libc}
 fi
-TOOLCHAIN_NAME=${TOOLCHAIN_NAME:-$TARGET-$CRT}
+BUILD=x86_64-pc-linux-gnu
+HOST=x86_64-pc-linux-gnu
+TARGET=$ARCH-$PLATFORM
+TOOLCHAIN_NAME=${TOOLCHAIN_NAME:-$ARCH-$PLATFORM-$CRT}
 
-if [[ ("$TARGET" == *mingw* && ("$CRT" != "msvcrt" && "$CRT" != "ucrt")) ||
-    ("$TARGET" == *linux* && "$CRT" != "libc") ]]; then
-    echo "Unsupported target $TARGET with CRT $CRT!"
+if [[ ("$PLATFORM" =~ mingw && !("$CRT" =~ (msvcrt|ucrt))) ||
+    ("$PLATFORM" =~ linux && "$CRT" != "libc") ]]; then
+    echo "Unsupported target $PLATFORM with CRT $CRT!"
     exit 1
 fi
 
@@ -57,4 +61,4 @@ DEBUG=${DEBUG:-0}
 RUN_CONFIG=${RUN_CONFIG:-1}
 RUN_INSTALL=${RUN_INSTALL:-1}
 
-PATH=$TOOLCHAIN_PATH/bin:$PATH
+PATH=$PATH:$TOOLCHAIN_PATH/bin

@@ -4,9 +4,11 @@ if ( -not $env:OPENBLAS_VERSION ) { $env:OPENBLAS_VERSION = "openblas-develop" }
 if ( -not $env:OPENSSL_VERSION ) { $env:OPENSSL_VERSION = "openssl-master" }
 if ( -not $env:LIBJPEG_TURBO_VERSION) { $env:LIBJPEG_TURBO_VERSION="libjpeg-turbo-main" }
 
-if ( -not $env:TARGET ) { $env:TARGET = "aarch64-w64-mingw32" }
+if ( -not $env:ARCH ) { $env:ARCH = "aarch64" }
+if ( -not $env:PLATFORM ) { $env:PLATFORM = "w64-mingw32" }
 if ( -not $env:CRT ) { $env:CRT = "msvcrt" }
-if ( -not $env:TOOLCHAIN_NAME ) { $env:TOOLCHAIN_NAME = "$TARGET-$CRT" }
+if ( -not $env:TARGET ) { $env:TARGET = "$ARCH-$PLATFORM" }
+if ( -not $env:TOOLCHAIN_NAME ) { $env:TOOLCHAIN_NAME = "$ARCH-$PLATFORM-$CRT" }
 
 if ( -not $env:SOURCE_PATH ) { $env:SOURCE_PATH= "$PWD\code" }
 if ( -not $env:BUILD_PATH ) { $env:BUILD_PATH = "$PWD\build-$env:TOOLCHAIN_NAME" }
