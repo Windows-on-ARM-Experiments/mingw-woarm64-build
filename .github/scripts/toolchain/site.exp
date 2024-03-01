@@ -1,0 +1,6 @@
+# Make sure we look in the right place for the board description files.
+if ![info exists boards_dir] {
+    set boards_dir {}
+}
+
+lappend boards_dir "[file dirname $env(DEJAGNU)]"
