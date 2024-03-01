@@ -10,8 +10,16 @@ echo "::group::Install libraries"
 
     # Symbolic links for binutils dependencies
     cd $SOURCE_PATH/$BINUTILS_VERSION
-    ln -sf $SOURCE_PATH/$GCC_VERSION/gmp gmp
-    ln -sf $SOURCE_PATH/$GCC_VERSION/mpfr mpfr
+    if [ -z "$MSYSTEM" ]; then
+        ln -sf $SOURCE_PATH/$GCC_VERSION/gmp gmp
+        ln -sf $SOURCE_PATH/$GCC_VERSION/mpfr mpfr
+        ln -sf $SOURCE_PATH/$GCC_VERSION/isl isl
+    else
+        mkdir -p gmp mpfr isl
+        cp -rf $SOURCE_PATH/$GCC_VERSION/gmp/* gmp
+        cp -rf $SOURCE_PATH/$GCC_VERSION/mpfr/* mpfr
+        cp -rf $SOURCE_PATH/$GCC_VERSION/isl/* isl
+    fi
 
 echo "::endgroup::"
 

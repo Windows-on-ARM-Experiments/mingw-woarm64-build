@@ -13,9 +13,8 @@ echo "::group::Execute GCC tests"
 
     cd $GCC_BUILD_PATH
     make $BUILD_MAKE_OPTIONS -k check \
-        RUNTESTFLAGS="--target_board wsl-sim" \
+        RUNTESTFLAGS="--host_board dummy --target_board dummy" \
         DEJAGNU="$DEJAGNU_FILE" \
-        CHECK_TEST_FRAMEWORK=1 \
         || echo "Error"
 
     mkdir -p $TEST_RESULTS_PATH

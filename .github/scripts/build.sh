@@ -2,21 +2,7 @@
 
 source `dirname ${BASH_SOURCE[0]}`/config.sh
 
-if [ "$CCACHE" = 1 ] ; then
-  mkdir -p $TOOLCHAIN_PATH/lib/ccache
-  pushd $TOOLCHAIN_PATH/lib/ccache
-    if ! [ -f $TARGET-gcc ]; then
-      ln -s /usr/bin/ccache $TARGET-gcc
-    fi
-    if ! [ -f $TARGET-g++ ]; then
-      ln -s /usr/bin/ccache $TARGET-g++
-    fi
-  popd
-
-  ccache -z
-fi
-
-if [ "$RUN_BOOTSTRAP" = 1 ]; then
+if [[ "$RUN_BOOTSTRAP" = 1 && -z "$MSYSTEM" ]]; then
     .github/scripts/install-dependencies.sh
 fi
 
@@ -29,8 +15,16 @@ if [[ "$PLATFORM" =~ cygwin ]]; then
     .github/scripts/toolchain/patch-cygwin.sh 1
 fi
 
+if [[ "$PLATFORM" =~ mingw && ! -z "$MSYSTEM" ]]; then
+    .github/scripts/toolchain/patch-msys2.sh
+fi
+
 if [ "$RUN_BOOTSTRAP" = 1 ]; then
     .github/scripts/install-libraries.sh
+fi
+
+if [ "$CCACHE" = 1 ] ; then
+    ccache -s
 fi
 
 .github/scripts/binutils/build.sh
@@ -77,7 +71,7 @@ if [[ "$PLATFORM" =~ cygwin ]]; then
 fi
 
 if [ "$CCACHE" = 1 ] ; then
-  ccache -s
+    ccache -s
 fi
 
 echo 'Success!'

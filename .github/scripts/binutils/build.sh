@@ -33,9 +33,10 @@ if [ "$RUN_CONFIG" = 1 ] || [ ! -f "$BINUTILS_BUILD_PATH/Makefile" ] ; then
                     lt_cv_deplibs_check_method=pass_all"
                 ;;
             *mingw*)
+                # CHANGED: --enable-lto to --disable-lto
                 TARGET_OPTIONS="$TARGET_OPTIONS \
-                    --enable-lto \
                     --enable-64-bit-bfd \
+                    --disable-lto \
                     --disable-werror \
                     --with-libiconv-prefix=$TOOLCHAIN_PATH \
                     --with-system-zlib"
@@ -48,17 +49,18 @@ if [ "$RUN_CONFIG" = 1 ] || [ ! -f "$BINUTILS_BUILD_PATH/Makefile" ] ; then
             --host=$HOST \
             --target=$TARGET \
             $HOST_OPTIONS \
-            $TARGET_OPTIONS
+            $TARGET_OPTIONS \
+            LDFLAGS="$LDFLAGS"
     echo "::endgroup::"
 fi
 
 echo "::group::Build binutils"
-    make $BUILD_MAKE_OPTIONS
+    $BUILD_MAKE $BUILD_MAKE_OPTIONS
 echo "::endgroup::"
 
 if [ "$RUN_INSTALL" = 1 ] ; then
     echo "::group::Install binutils"
-        make install
+        $INSTALL_MAKE $INSTALL_MAKE_OPTIONS install
     echo "::endgroup::"
 fi
 

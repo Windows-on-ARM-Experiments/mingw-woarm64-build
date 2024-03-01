@@ -1,0 +1,39 @@
+--- a/gcc/Makefile.in
++++ b/gcc/Makefile.in
+@@ -2935,6 +2935,9 @@ gtyp-input.list: s-gtyp-input ; @true
+ s-gtyp-input: Makefile
+ 	@: $(call write_entries_to_file,$(GTFILES),tmp-gi.list)
+ 	$(SHELL) $(srcdir)/../move-if-change tmp-gi.list gtyp-input.list
++	sed -e 's|^/c/|C:/|' -e 's|^/d/|D:/|' gtyp-input.list > gtyp-input.list.tmp
++	mv gtyp-input.list.tmp gtyp-input.list
++	cat gtyp-input.list
+ 	$(STAMP) s-gtyp-input
+ 
+ s-gtype: $(EXTRA_GTYPE_DEPS) build/gengtype$(build_exeext) \
+--- a/gcc/config.gcc
++++ b/gcc/config.gcc
+@@ -2280,7 +2280,10 @@ i[34567]86-*-mingw* | x86_64-*-mingw*)
+ 			tmake_file="${tmake_file} i386/t-mingw-w32"
+ 			;;
+ 	esac
+-        native_system_header_dir=/mingw/include
++	# Don't ignore values passed in to configure via --native-system-header-dir
++	if test x$native_system_header_dir = x ; then
++		native_system_header_dir=/mingw/include
++	fi
+ 	target_gtfiles="$target_gtfiles \$(srcdir)/config/mingw/winnt.cc"
+ 	target_gtfiles="$target_gtfiles \$(srcdir)/config/mingw/winnt-dll.cc"
+ 	extra_options="${extra_options} mingw/cygming.opt mingw/mingw.opt"
+--- a/libgfortran/runtime/error.c
++++ b/libgfortran/runtime/error.c
+@@ -24,8 +24,8 @@ see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
+ 
+ 
+ #include "libgfortran.h"
+-#include "io.h"
+-#include "async.h"
++#include "../io/io.h"
++#include "../io/async.h"
+ 
+ #include <assert.h>
+ #include <string.h>

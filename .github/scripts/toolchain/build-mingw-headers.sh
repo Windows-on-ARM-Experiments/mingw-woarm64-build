@@ -50,15 +50,20 @@ if [ "$RUN_CONFIG" = 1 ] || [ ! -f "$MINGW_HEADERS_BUILD_PATH/Makefile" ] ; then
 fi
 
 echo "::group::Build MinGW headers"
-    make $BUILD_MAKE_OPTIONS
+    $BUILD_MAKE $BUILD_MAKE_OPTIONS
 echo "::endgroup::"
 
 if [ "$RUN_INSTALL" = 1 ] ; then
     echo "::group::Install MinGW headers"
-        make install
+        $INSTALL_MAKE $INSTALL_MAKE_OPTIONS install
 
         # Symlink for gcc
-        ln -sf $TOOLCHAIN_PATH/$TARGET $TOOLCHAIN_PATH/mingw
+        if [ -z "$MSYSTEM" ]; then
+            ln -sf $TOOLCHAIN_PATH/$TARGET $TOOLCHAIN_PATH/mingw
+        else
+            mkdir -p $TOOLCHAIN_PATH/mingw
+            cp -rf $TOOLCHAIN_PATH/$TARGET/* $TOOLCHAIN_PATH/mingw
+        fi
     echo "::endgroup::"
 fi
 

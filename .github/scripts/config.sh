@@ -16,15 +16,15 @@ OPENSSL_VERSION=${OPENSSL_VERSION:-openssl-master}
 LIBJPEG_TURBO_VERSION=${LIBJPEG_TURBO_VERSION:-libjpeg-turbo-main}
 FFMPEG_VERSION=${FFMPEG_VERSION:-ffmpeg-master}
 
-ARCH=${ARCH:-aarch64}
+ARCH=${ARCH:-x86_64}
 PLATFORM=${PLATFORM:-w64-mingw32}
 if [[ "$PLATFORM" =~ (mingw|cygwin) ]]; then
     CRT=${CRT:-msvcrt}
 else
     CRT=${CRT:-libc}
 fi
-BUILD=x86_64-pc-linux-gnu
-HOST=x86_64-pc-linux-gnu
+BUILD=${BUILD:-x86_64-w64-mingw32}
+HOST=${HOST:-$ARCH-$PLATFORM}
 TARGET=$ARCH-$PLATFORM
 TOOLCHAIN_NAME=${TOOLCHAIN_NAME:-$ARCH-$PLATFORM-$CRT}
 
@@ -40,6 +40,7 @@ PATCHES_PATH=${PATCHES_PATH:-$PWD/patches}
 BUILD_PATH=${BUILD_PATH:-$PWD/build-$TOOLCHAIN_NAME}
 ARTIFACT_PATH=${ARTIFACT_PATH:-$PWD/artifact}
 BUILD_MAKE_OPTIONS=${BUILD_MAKE_OPTIONS:-V=1 -j$(nproc)}
+INSTALL_MAKE_OPTIONS=${INSTALL_MAKE_OPTIONS:-V=1 -j1}
 TOOLCHAIN_PATH=${TOOLCHAIN_PATH:-~/cross-$TOOLCHAIN_NAME}
 TOOLCHAIN_FILE=${TOOLCHAIN_FILE:-$PWD/.github/cmake/$TARGET.cmake}
 TOOLCHAIN_PACKAGE_NAME=${TOOLCHAIN_PACKAGE_NAME:-$TOOLCHAIN_NAME-toolchain.tar.gz}
@@ -63,15 +64,21 @@ FFMPEG_PATH=${FFMPEG_PATH:-~/ffmpeg}
 FFMPEG_TESTS_PATH=${FFMPEG_TESTS_PATH:-~/ffmpeg-tests}
 
 DEBUG=${DEBUG:-0} # Enable debug build.
-CCACHE=${CCACHE:-0} # Enable usage of ccache.
-RUN_BOOTSTRAP=${RUN_BOOTSTRAP:-0} # Bootstrap dependencies during the build.
+CCACHE=${CCACHE:-1} # Enable usage of ccache.
+RUN_BOOTSTRAP=${RUN_BOOTSTRAP:-1} # Bootstrap dependencies during the build.
 UPDATE_SOURCES=${UPDATE_SOURCES:-0} # Update source code repositories.
 RESET_SOURCES=${RESET_SOURCES:-0} # Reset source code repositories before update.
 RUN_CONFIG=${RUN_CONFIG:-1} # Run configuration step.
 RUN_INSTALL=${RUN_INSTALL:-1} # Run installation step.
 
-PATH=$PATH:$TOOLCHAIN_PATH/bin
-
-if [ "$CCACHE" = 1 ]; then
-    PATH=/usr/lib/ccache:$TOOLCHAIN_PATH/lib/ccache:$PATH
+if [ -z "$MSYSTEM" ]; then
+    BUILD_MAKE=make
+    INSTALL_MAKE=make
+    PATH=$PATH:$TOOLCHAIN_PATH/bin
+else
+    MSYS=winsymlinks
+    BUILD_MAKE=make
+    INSTALL_MAKE=make
+    LDFLAGS="-L/opt/lib/gcc/$TARGET/lib/ $LDFLAGS"
+    PATH="/usr/lib/ccache/bin:$TOOLCHAIN_PATH/bin:/opt/$BUILD/bin:/opt/$TARGET/bin:/opt/bin:$PATH"
 fi

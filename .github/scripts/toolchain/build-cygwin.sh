@@ -42,12 +42,12 @@ if [ "$RUN_CONFIG" = 1 ] || [ ! -f "$CYGWIN_BUILD_PATH/Makefile" ] ; then
 fi
 
 echo "::group::Build Cygwin"
-    make $BUILD_MAKE_OPTIONS
+    $BUILD_MAKE $BUILD_MAKE_OPTIONS
 echo "::endgroup::"
 
 if [ "$RUN_INSTALL" = 1 ] ; then
     echo "::group::Install Cygwin"
-        make install
+        $INSTALL_MAKE $INSTALL_MAKE_OPTIONS install
     echo "::endgroup::"
 fi
 
