@@ -7,8 +7,10 @@ STAGE=$1
 echo "::group::Patch Cygwin GCC"
     cd $SOURCE_PATH/$GCC_VERSION
 
-    git reset --hard
-    git clean -fdx
+    if [[ "$RESET_SOURCES" = 1 ]]; then
+        git reset --hard HEAD
+        git clean -fdx
+    fi
 
     PATCH_DIR=$SOURCE_PATH/cygwin-packages/gcc
     patch -p1 -i $PATCH_DIR/0001-Cygwin-use-SysV-ABI-on-x86_64.patch
@@ -28,8 +30,10 @@ echo "::endgroup::"
 echo "::group::Patch Cygwin"
     cd $SOURCE_PATH/$CYGWIN_VERSION
 
-    git reset --hard
-    git clean -fdx
+    if [[ "$RESET_SOURCES" = 1 ]]; then
+        git reset --hard HEAD
+        git clean -fdx
+    fi
 
     PATCH_DIR=$PATCHES_PATH/cygwin
     if [[ "$STAGE" = "1" ]]; then

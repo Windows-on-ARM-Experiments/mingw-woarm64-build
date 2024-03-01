@@ -23,8 +23,8 @@ if [[ "$PLATFORM" =~ (mingw|cygwin) ]]; then
 else
     CRT=${CRT:-libc}
 fi
-BUILD=x86_64-pc-linux-gnu
-HOST=x86_64-pc-linux-gnu
+BUILD=${BUILD:-x86_64-pc-linux-gnu}
+HOST=${HOST:-x86_64-pc-linux-gnu}
 TARGET=$ARCH-$PLATFORM
 TOOLCHAIN_NAME=${TOOLCHAIN_NAME:-$ARCH-$PLATFORM-$CRT}
 
@@ -63,15 +63,24 @@ FFMPEG_PATH=${FFMPEG_PATH:-~/ffmpeg}
 FFMPEG_TESTS_PATH=${FFMPEG_TESTS_PATH:-~/ffmpeg-tests}
 
 DEBUG=${DEBUG:-0} # Enable debug build.
-CCACHE=${CCACHE:-0} # Enable usage of ccache.
+TEST=${TEST:-1} # Test the toolchain.
+CCACHE=${CCACHE:-1} # Enable usage of ccache.
 RUN_BOOTSTRAP=${RUN_BOOTSTRAP:-0} # Bootstrap dependencies during the build.
-UPDATE_SOURCES=${UPDATE_SOURCES:-0} # Update source code repositories.
-RESET_SOURCES=${RESET_SOURCES:-0} # Reset source code repositories before update.
+UPDATE_SOURCES=${UPDATE_SOURCES:-1} # Update source code repositories.
+RESET_SOURCES=${RESET_SOURCES:-1} # Reset source code repositories before update.
+RUN_PATCH=${RUN_PATCH:-1} # Patch source repositories for targets requiring it.
 RUN_CONFIG=${RUN_CONFIG:-1} # Run configuration step.
 RUN_INSTALL=${RUN_INSTALL:-1} # Run installation step.
 
-PATH=$PATH:$TOOLCHAIN_PATH/bin
-
-if [[ "$CCACHE" = 1 ]]; then
-    PATH=/usr/lib/ccache:$TOOLCHAIN_PATH/lib/ccache:$PATH
+if [[ -n "$MSYSTEM" ]]; then
+    export MSYS=winsymlinks
+    PATH="$TOOLCHAIN_PATH/bin:$TOOLCHAIN_PATH/lib/gcc/$TARGET/15.0.0:/opt/bin:$PATH"
+    if [[ "$CCACHE" = 1 ]]; then
+        PATH="/usr/lib/ccache/bin:$PATH"
+    fi
+else
+    PATH=$PATH:$TOOLCHAIN_PATH/bin
+    if [[ "$CCACHE" = 1 ]]; then
+        PATH="/usr/lib/ccache:$TOOLCHAIN_PATH/lib/ccache:$PATH"
+    fi
 fi

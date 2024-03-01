@@ -2,38 +2,49 @@
 
 source `dirname ${BASH_SOURCE[0]}`/config.sh
 
-if [[ "$CCACHE" = 1 ]]; then
-  mkdir -p $TOOLCHAIN_PATH/lib/ccache
-  pushd $TOOLCHAIN_PATH/lib/ccache
-    if ! [ -f $TARGET-gcc ]; then
-      ln -s /usr/bin/ccache $TARGET-gcc
-    fi
-    if ! [ -f $TARGET-g++ ]; then
-      ln -s /usr/bin/ccache $TARGET-g++
-    fi
-  popd
-
-  ccache -z
-fi
-
 if [[ "$RUN_BOOTSTRAP" = 1 ]]; then
     .github/scripts/install-dependencies.sh
+fi
+
+if [[ "$CCACHE" = 1 ]]; then
+    .github/scripts/enable-ccache.sh
 fi
 
 if [[ "$UPDATE_SOURCES" = 1 ]]; then
     .github/scripts/update-sources.sh
 fi
 
-if [[ "$PLATFORM" =~ cygwin ]]; then
-    .github/scripts/binutils/patch-cygwin.sh 1
-    .github/scripts/toolchain/patch-cygwin.sh 1
+mkdir -p $TOOLCHAIN_PATH
+mkdir -p $BUILD_PATH/gcc
+
+if [[ "$RUN_PATCH" = 1 ]]; then
+    case "$PLATFORM" in
+        *cygwin*)
+            .github/scripts/binutils/patch-cygwin.sh 1
+            .github/scripts/toolchain/patch-cygwin.sh 1
+            ;;
+        *mingw*)
+            if [[ -n "$MSYSTEM" ]]; then
+                if [[ "$TEST" = 0 ]]; then
+                    .github/scripts/binutils/patch-msys2.sh
+                fi
+                .github/scripts/toolchain/patch-msys2.sh
+            fi
+            ;;
+    esac
 fi
 
-if [[ "$RUN_BOOTSTRAP" = 1 ]]; then
+if [[ "$RUN_BOOTSTRAP" = 1 || "$RESET_SOURCES" = 1 ]]; then
     .github/scripts/install-libraries.sh
 fi
 
-.github/scripts/binutils/build.sh
+if [[ "$CCACHE" = 1 ]]; then
+    ccache -sv
+fi
+
+if [[ "$TEST" = 0 ]]; then
+  .github/scripts/binutils/build.sh
+fi
 
 if [[ "$PLATFORM" =~ linux ]]; then
     .github/scripts/toolchain/install-cross-headers-libs.sh
@@ -45,7 +56,7 @@ if [[ "$PLATFORM" =~ cygwin ]]; then
     .github/scripts/toolchain/install-cygwin-headers.sh
 fi
 
-if [[ "$BUILD" != "$TARGET" ]]; then
+if [[ "$BUILD" != "$HOST" && "$TEST" = 0 ]]; then
     .github/scripts/toolchain/build-gcc-stage1.sh
 fi
 
@@ -58,26 +69,34 @@ fi
 if [[ "$PLATFORM" =~ cygwin ]]; then
     .github/scripts/toolchain/build-cocom.sh
     .github/scripts/toolchain/build-cygwin.sh 1
-
-    .github/scripts/binutils/patch-cygwin.sh 2
-    .github/scripts/toolchain/patch-cygwin.sh 2
 fi
 
-if [[ "$RUN_BOOTSTRAP" = 1 ]]; then
+if [[ "$RUN_PATCH" = 1 ]]; then
+    case "$PLATFORM" in
+        *cygwin*)
+            .github/scripts/binutils/patch-cygwin.sh 2
+            .github/scripts/toolchain/patch-cygwin.sh 2
+            ;;
+    esac
+fi
+
+if [[ "$RUN_BOOTSTRAP" = 1 || "$RESET_SOURCES" = 1 ]]; then
     .github/scripts/install-libraries.sh
 fi
 
 .github/scripts/toolchain/build-gcc.sh
 
-if [[ "$PLATFORM" =~ (mingw|cygwin) ]]; then
-    .github/scripts/toolchain/build-mingw.sh
-fi
-if [[ "$PLATFORM" =~ cygwin ]]; then
-    .github/scripts/toolchain/build-cygwin.sh 2
+if [[ "$TEST" = 0 ]]; then
+  if [[ "$PLATFORM" =~ (mingw|cygwin) ]]; then
+      .github/scripts/toolchain/build-mingw.sh
+  fi
+  if [[ "$PLATFORM" =~ cygwin ]]; then
+      .github/scripts/toolchain/build-cygwin.sh 2
+  fi
 fi
 
 if [[ "$CCACHE" = 1 ]]; then
-    ccache -s
+    ccache -sv
 fi
 
 echo 'Success!'

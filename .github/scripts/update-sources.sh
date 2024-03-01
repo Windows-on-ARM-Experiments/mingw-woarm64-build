@@ -7,15 +7,21 @@ function update_repository() {
     REPOSITORY=$2
     BRANCH=$3
     if [[ ! -d $DIRECTORY ]]; then
-        git clone $REPOSITORY -b $BRANCH --single-branch --depth 1 $DIRECTORY
-        git submodule init
-        git submodule update
+        if [[ -n "$MSYSTEM" ]]; then
+          CONFIG="--config core.autocrlf=false --config core.eol=lf"
+        fi
+        git clone $REPOSITORY -b $BRANCH $CONFIG --single-branch --depth 1 $DIRECTORY
+        pushd $DIRECTORY
+            git config pull.rebase true
+            git submodule init
+            git submodule update
+        popd
     else
         pushd $DIRECTORY
             if [[ "$RESET_SOURCES" = 1 ]]; then
-                git reset --hard
-                git clean -fdx
+                git reset --hard HEAD
                 git switch $BRANCH
+                git clean -fdx
             fi
             git pull
             git submodule update
@@ -27,7 +33,9 @@ echo "::group::Update source code repositories"
     mkdir -p "$SOURCE_PATH"
 
     cd "$SOURCE_PATH"
-    update_repository "$BINUTILS_VERSION" https://github.com/Windows-on-ARM-Experiments/binutils-woarm64.git woarm64
+    if [[ "$TEST" = 0 ]]; then
+        update_repository "$BINUTILS_VERSION" https://github.com/Windows-on-ARM-Experiments/binutils-woarm64.git woarm64
+    fi
     update_repository "$GCC_VERSION" https://github.com/Windows-on-ARM-Experiments/gcc-woarm64.git woarm64
     update_repository "$MINGW_VERSION" https://github.com/Windows-on-ARM-Experiments/mingw-woarm64.git woarm64
     if [[ "$PLATFORM" =~ cygwin ]]; then 
