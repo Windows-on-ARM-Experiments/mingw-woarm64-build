@@ -19,6 +19,8 @@ if [ "$RUN_CONFIG" = 1 ] || [ ! -f "$BINUTILS_BUILD_PATH/Makefile" ] ; then
 
     $SOURCE_PATH/$BINUTILS_VERSION/configure \
         --prefix=$TOOLCHAIN_PATH \
+        --build=$BUILD \
+        --host=$HOST \
         --target=$TARGET \
         $ADDITIONAL_OPTIONS
     echo "::endgroup::"

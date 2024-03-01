@@ -3,8 +3,9 @@
 source `dirname ${BASH_SOURCE[0]}`/../config.sh
 
 echo "::group::Install cross headers and libraries"
-    [ -d /usr/$TARGET/include ] && cp -r /usr/$TARGET/include $TOOLCHAIN_PATH/$TARGET
-    [ -d /usr/$TARGET/lib ] && cp -r /usr/$TARGET/lib $TOOLCHAIN_PATH/$TARGET
+    PREFIX=/usr/${TARGET//pc-/}
+    [ -d $PREFIX/include ] && cp -r $PREFIX/include $TOOLCHAIN_PATH/$TARGET
+    [ -d $PREFIX/lib ] && cp -r $PREFIX/lib $TOOLCHAIN_PATH/$TARGET
 echo "::endgroup::"
 
 echo 'Success!'

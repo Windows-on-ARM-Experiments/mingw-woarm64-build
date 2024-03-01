@@ -90,6 +90,8 @@ config_binutils()
     cd $BUILD_DIR/binutils
     ../../code/$BINUTILS_VERSION/configure \
         --prefix=$INSTALL_PATH \
+        --build=$BUILD \
+        --host=$HOST \
         --target=$TARGET
     cd ../..
     echo "::endgroup::"
@@ -113,6 +115,8 @@ config_gcc_compiler()
     # REMOVED --with-{gmp,mpfr,mpc,isl}=/usr
     ../../code/$GCC_VERSION/configure \
         --prefix=$INSTALL_PATH \
+        --build=$BUILD \
+        --host=$HOST \
         --target=$TARGET \
         --enable-languages=c,lto,c++,fortran \
         --enable-shared \
@@ -161,6 +165,7 @@ config_mingw_headers()
     cd $BUILD_DIR/mingw-headers
     ../../code/$MINGW_VERSION/mingw-w64-headers/configure \
         --prefix=$INSTALL_PATH/$TARGET \
+        --build=$BUILD \
         --host=$TARGET \
         --with-default-msvcrt=msvcrt
     cd ../..
@@ -184,7 +189,8 @@ config_mingw_crt()
     echo "::group::Configure MinGW CRT"
     cd $BUILD_DIR/mingw
     ../../code/$MINGW_VERSION/mingw-w64-crt/configure \
-        --build=x86_64-linux-gnu \
+        --build=$BUILD \
+        --host=$TARGET \
         --with-sysroot=$INSTALL_PATH \
         --prefix=$INSTALL_PATH/$TARGET \
         --host=$TARGET \
@@ -214,6 +220,7 @@ config_mingw_libs()
     cd $BUILD_DIR/mingw
     ../../code/$MINGW_VERSION/configure \
         --prefix=$INSTALL_PATH/$TARGET \
+        --build=$BUILD \
         --host=$TARGET \
         --enable-libarm64 \
         --disable-lib32 \
