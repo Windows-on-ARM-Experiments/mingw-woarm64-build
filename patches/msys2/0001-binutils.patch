@@ -1,0 +1,36 @@
+--- a/gnulib/import/setenv.c
++++ b/gnulib/import/setenv.c
+@@ -219,7 +219,7 @@ __add_to_environ (const char *name, const char *value, const char *combined,
+ 
+       new_environ[size + 1] = NULL;
+ 
+-      last_environ = __environ = new_environ;
++      last_environ = new_environ;
+     }
+   else if (replace)
+     {
+@@ -310,13 +310,9 @@ clearenv (void)
+   if (__environ == last_environ && __environ != NULL)
+     {
+       /* We allocated this environment so we can free it.  */
+-      free (__environ);
+       last_environ = NULL;
+     }
+ 
+-  /* Clear the environment pointer removes the whole environment.  */
+-  __environ = NULL;
+-
+   UNLOCK;
+ 
+   return 0;
+--- a/libiberty/setenv.c
++++ b/libiberty/setenv.c
+@@ -133,7 +133,7 @@ setenv (const char *name, const char *value, int replace)
+ 
+       new_environ[size + 1] = NULL;
+ 
+-      last_environ = __environ = new_environ;
++      last_environ = new_environ;
+     }
+   else if (replace)
+     {

@@ -1,0 +1,11 @@
+--- a/etc/pacman.conf
++++ b/etc/pacman.conf
+@@ -21,7 +21,7 @@
+ Architecture = auto
+ 
+ # Pacman won't upgrade packages listed in IgnorePkg and members of IgnoreGroup
+-#IgnorePkg   =
++IgnorePkg    = pacman pacman-mirrors msys2-runtime msys2-keyring filesystem mintty
+ #IgnoreGroup =
+ 
+ #NoUpgrade   =

@@ -1,0 +1,282 @@
+name: Build and test GCC (MSYS2 cross-compiler)
+
+on:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      binutils_branch:
+        description: 'Binutils branch to build'
+        required: false
+        default: 'woarm64'
+      gcc_branch:
+        description: 'GCC branch to build'
+        required: false
+        default: 'woarm64'
+      mingw_branch:
+        description: 'Mingw branch to build'
+        required: false
+        default: 'woarm64'
+      gcc_module:
+        description: 'GCC module to test'
+        required: false
+        default: 'gcc'
+      gcc_test_filter:
+        description: 'GCC test filter'
+        required: false
+        default: 'compile.exp=pr39423-1.c'
+
+env:
+  BINUTILS_REPO: Windows-on-ARM-Experiments/binutils-woarm64
+  BINUTILS_BRANCH: ${{ inputs.binutils_branch }}
+  BINUTILS_VERSION: binutils
+
+  GCC_REPO: Windows-on-ARM-Experiments/gcc-woarm64
+  GCC_BRANCH: ${{ inputs.gcc_branch }}
+  GCC_VERSION: gcc
+
+  MINGW_REPO: Windows-on-ARM-Experiments/mingw-woarm64
+  MINGW_BRANCH: ${{ inputs.mingw_branch }}
+  MINGW_VERSION: mingw-w64-master
+
+  TOOLCHAIN_PATH: ${{ github.workspace }}/toolchain
+  SOURCE_PATH: ${{ github.workspace }}/code
+  BUILD_PATH: ${{ github.workspace }}/build
+  ARTIFACT_PATH: ${{ github.workspace }}/artifact
+
+  BUILD: x86_64-pc-msys
+  HOST: x86_64-pc-msys
+  ARCH: aarch64
+  PLATFORM: w64-mingw32
+  CRT: msvcrt
+
+defaults:
+  run:
+    shell: msys2 {0}
+
+jobs:
+  build-toolchain:
+    runs-on: windows-latest
+    timeout-minutes: 240
+
+    env:
+      RUN_BOOTSTRAP: 1
+      UPDATE_SOURCES: 1
+      CCACHE: 1
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MSYS
+          update: true
+          cache: true
+
+      - name: Setup packages repository
+        run: |
+          `cygpath "${{ github.workspace }}"`/.github/scripts/setup-repository.sh
+
+      - name: Get cache key
+        id: get-cache-key
+        run: |
+          echo "timestamp=$(date -u --iso-8601=seconds)" >> "$GITHUB_OUTPUT"
+          DIR=`cygpath "${{ github.workspace }}"`
+          echo "CCACHE_DIR=$DIR/ccache" >> "$GITHUB_ENV"
+
+      - name: Restore Ccache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ github.workspace }}/ccache
+          key: test-gcc-ccache-${{ steps.get-cache-key.outputs.timestamp }}
+          restore-keys: test-gcc-ccache-
+
+      - name: Build toolchain
+        run: |
+          TOOLCHAIN_PATH=`cygpath "${{ env.TOOLCHAIN_PATH }}"`
+          SOURCE_PATH=`cygpath "${{ env.SOURCE_PATH }}"`
+          BUILD_PATH=`cygpath "${{ env.BUILD_PATH }}"`
+          ARTIFACT_PATH=`cygpath "${{ env.ARTIFACT_PATH }}"`
+          `cygpath "${{ github.workspace }}"`/.github/scripts/build.sh
+
+      - name: Save Ccache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ github.workspace }}/ccache
+          key: test-gcc-ccache-${{ steps.get-cache-key.outputs.timestamp }}
+
+      - name: Compress toolchain
+        run: |
+          pushd `cygpath "${{ env.TOOLCHAIN_PATH }}"`
+            tar -czf `cygpath "${{ github.workspace }}"`/toolchain.tar.gz .
+          popd
+
+      - name: Upload toolchain
+        uses: actions/upload-artifact@v4
+        with:
+          name: toolchain
+          retention-days: 1
+          path: toolchain.tar.gz
+
+      - name: Compress build folder
+        run: |
+          pushd `cygpath "${{ env.BUILD_PATH }}"`/gcc
+            tar -czf `cygpath "${{ github.workspace }}"`/build.tar.gz .
+          popd
+
+      - name: Upload build folder
+        uses: actions/upload-artifact@v4
+        with:
+          name: build
+          retention-days: 1
+          path: build.tar.gz
+
+      - name: Compress source folder
+        run: |
+          pushd `cygpath "${{ env.SOURCE_PATH }}"`/${{ env.GCC_VERSION }}
+            tar -czf `cygpath "${{ github.workspace }}"`/source.tar.gz .
+          popd
+
+      - name: Upload source folder
+        uses: actions/upload-artifact@v4
+        with:
+          name: source
+          retention-days: 1
+          path: source.tar.gz
+
+  test-toolchain:
+    needs: build-toolchain
+    runs-on: [Windows, ARM64, Blackhex]
+    timeout-minutes: 1440
+
+    env:
+      CCACHE: 1
+
+    steps:
+      - name: Kill MSYS2 processes
+        shell: powershell
+        run: |
+          tasklist
+          taskkill /t /f /im conftest.exe
+          taskkill /t /f /im expect.exe
+          taskkill /t /f /im cc1.exe
+          taskkill /t /f /im pacman.exe
+          taskkill /t /f /im make.exe
+          taskkill /t /f /im wc.exe
+          taskkill /t /f /im gpg.exe
+          taskkill /t /f /im gpg-agent.exe
+          taskkill /t /f /im bash.exe
+          taskkill /t /f /im sh.exe
+          tasklist
+          exit 0
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MSYS
+          update: false
+          cache: false
+
+      - name: Pacman hang workaround
+        run: |
+          `cygpath "${{ github.workspace }}"`/.github/scripts/pacman-workaround.sh
+
+      - name: Setup packages repository
+        run: |
+          `cygpath "${{ github.workspace }}"`/.github/scripts/setup-repository.sh
+
+      - name: Install dependencies
+        run: |
+          `cygpath "${{ github.workspace }}"`/.github/scripts/install-dependencies.sh
+
+      - name: Get cache key
+        id: get-cache-key
+        run: |
+          echo "timestamp=$(date -u --iso-8601=seconds)" >> "$GITHUB_OUTPUT"
+          DIR=`cygpath "${{ github.workspace }}"`
+          echo "CCACHE_DIR=$DIR/ccache" >> "$GITHUB_ENV"
+
+      - name: Enable Ccache
+        id: enable-ccache
+        run: |
+          `cygpath "${{ github.workspace }}"`/.github/scripts/enable-ccache.sh
+
+      - name: Restore Ccache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ github.workspace }}/ccache
+          key: test-gcc-ccache-${{ steps.get-cache-key.outputs.timestamp }}
+          restore-keys: test-gcc-ccache-
+
+      - name: Download source folder
+        uses: actions/download-artifact@v4
+        with:
+          name: source
+
+      - name: Decompress source folder
+        run: |
+          mkdir -p `cygpath "${{ env.SOURCE_PATH }}"`/${{ env.GCC_VERSION }}
+          pushd `cygpath "${{ env.SOURCE_PATH }}"`/${{ env.GCC_VERSION }}
+            tar -xzf `cygpath "${{ github.workspace }}"`/source.tar.gz
+          popd
+
+      - name: Download build folder
+        uses: actions/download-artifact@v4
+        with:
+          name: build
+
+      - name: Decompress build folder
+        run: |
+          mkdir -p `cygpath "${{ env.BUILD_PATH }}"`/gcc
+          pushd `cygpath "${{ env.BUILD_PATH }}"`/gcc
+            tar -xzf `cygpath "${{ github.workspace }}"`/build.tar.gz
+          popd
+
+      - name: Download toolchain
+        uses: actions/download-artifact@v4
+        with:
+          name: toolchain
+
+      - name: Decompress toolchain folder
+        run: |
+          mkdir -p `cygpath "${{ env.TOOLCHAIN_PATH }}"`
+          pushd `cygpath "${{ env.TOOLCHAIN_PATH }}"`
+            tar -xzf `cygpath "${{ github.workspace }}"`/toolchain.tar.gz
+          popd
+
+      - name: Execute GCC tests
+        run: |
+          TOOLCHAIN_PATH=`cygpath "${{ env.TOOLCHAIN_PATH }}"`
+          SOURCE_PATH=`cygpath "${{ env.SOURCE_PATH }}"`
+          BUILD_PATH=`cygpath "${{ env.BUILD_PATH }}"`
+          ARTIFACT_PATH=`cygpath "${{ env.ARTIFACT_PATH }}"`
+          `cygpath "${{ github.workspace }}"`/.github/scripts/toolchain/execute-gcc-tests.sh \
+              "results" "${{ inputs.gcc_module }}" "${{ inputs.gcc_test_filter }}"
+
+      - name: Create summary
+        if: always()
+        run: |
+          TOOLCHAIN_PATH=`cygpath "${{ env.TOOLCHAIN_PATH }}"`
+          SOURCE_PATH=`cygpath "${{ env.SOURCE_PATH }}"`
+          BUILD_PATH=`cygpath "${{ env.BUILD_PATH }}"`
+          ARTIFACT_PATH=`cygpath "${{ env.ARTIFACT_PATH }}"`
+          `cygpath "${{ github.workspace }}"`/.github/scripts/toolchain/create-gcc-summary.sh \
+              "results" >> "$GITHUB_STEP_SUMMARY"
+  
+      - name: Save Ccache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ github.workspace }}/ccache
+          key: test-gcc-ccache-${{ steps.get-cache-key.outputs.timestamp }}
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gcc-tests-results
+          path: ${{ env.ARTIFACT_PATH }}/gcc-tests-results
+          retention-days: 30

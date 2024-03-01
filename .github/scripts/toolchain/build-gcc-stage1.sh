@@ -44,8 +44,11 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$GCC_BUILD_PATH/Makefile" ]]; then
                     --with-system-zlib"
                 ;;
             *mingw*)
+                # ADDED: --enable-decimal-float=no
                 TARGET_OPTIONS="$TARGET_OPTIONS \
+                    --libexecdir=$TOOLCHAIN_PATH/lib \
                     --enable-languages=c \
+                    --enable-decimal-float=no \
                     --disable-isl-version-check \
                     --disable-rpath \
                     --disable-win32-registry \

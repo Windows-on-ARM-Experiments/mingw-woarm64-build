@@ -59,6 +59,11 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$GCC_BUILD_PATH/Makefile" ]]; then
                     --without-libintl-prefix"
                 ;;
             *mingw*)
+                # ADDED: --enable-plugin
+                # REMOVED: --with-gmp=$TOOLCHAIN_PATH
+                # REMOVED: --with-mpfr=$TOOLCHAIN_PATH
+                # REMOVED: --with-mpc=$TOOLCHAIN_PATH
+                # REMOVED: --with-isl=$TOOLCHAIN_PATH
                 TARGET_OPTIONS="$TARGET_OPTIONS \
                     --libexecdir=$TOOLCHAIN_PATH/lib \
                     --enable-threads=win32 \
@@ -69,6 +74,7 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$GCC_BUILD_PATH/Makefile" ]]; then
                     --enable-cloog-backend=isl \
                     --enable-version-specific-runtime-libs \
                     --enable-lto \
+                    --enable-plugin \
                     --enable-libgomp \
                     --enable-checking=release \
                     --disable-libstdcxx-pch \
@@ -96,6 +102,18 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$GCC_BUILD_PATH/Makefile" ]]; then
                 ;;
         esac
 
+        case "$HOST" in
+           aarch64-w64-mingw32)
+                # REMOVED: --enable-languages=fortran
+                HOST_OPTIONS="$HOST_OPTIONS \
+                    --enable-languages=c,c++,lto"
+                ;;
+           *)
+                HOST_OPTIONS="$HOST_OPTIONS \
+                    --enable-languages=c,c++,lto,fortran"
+                ;;
+        esac
+
         $SOURCE_PATH/gcc/configure \
             --prefix=$TOOLCHAIN_PATH \
             --build=$BUILD \
@@ -103,7 +121,6 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$GCC_BUILD_PATH/Makefile" ]]; then
             --target=$TARGET \
             --enable-static \
             --enable-shared \
-            --enable-languages=c,c++,lto,fortran \
             --disable-bootstrap \
             --disable-multilib \
             --with-gnu-as \

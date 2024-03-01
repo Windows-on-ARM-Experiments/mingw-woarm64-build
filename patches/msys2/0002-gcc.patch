@@ -1,0 +1,93 @@
+--- a/config/gcc-plugin.m4
++++ b/config/gcc-plugin.m4
+@@ -108,7 +108,7 @@ AC_DEFUN([GCC_ENABLE_PLUGINS],
+      esac
+      AC_MSG_CHECKING([for -fPIC -shared])
+      AC_TRY_LINK(
+-       [extern int X;],[return X == 0;],
++       [int X;],[return X == 0;],
+        [AC_MSG_RESULT([yes]); have_pic_shared=yes],
+        [AC_MSG_RESULT([no]); have_pic_shared=no])
+      if test x"$have_pic_shared" != x"yes" -o x"$ac_cv_search_dlopen" = x"no"; then
+--- a/gcc/configure
++++ b/gcc/configure
+@@ -34069,8 +34083,8 @@ $as_echo_n "checking for -rdynamic... " >&6; }
+ 	   plugin_rdynamic=yes
+ 	   pluginlibs="-rdynamic"
+ 	 else
+-	   plugin_rdynamic=no
+-	   enable_plugin=no
++	   plugin_rdynamic=yes
++	   enable_plugin=yes
+ 	 fi
+ 	 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $plugin_rdynamic" >&5
+ $as_echo "$plugin_rdynamic" >&6; }
+@@ -34165,7 +34179,7 @@ fi
+ $as_echo_n "checking for -fPIC -shared... " >&6; }
+      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+ /* end confdefs.h.  */
+-extern int X;
++int X;
+ int
+ main ()
+ {
+--- a/libcc1/configure
++++ b/libcc1/configure
+@@ -15248,8 +15259,8 @@ $as_echo_n "checking for -rdynamic... " >&6; }
+ 	   plugin_rdynamic=yes
+ 	   pluginlibs="-rdynamic"
+ 	 else
+-	   plugin_rdynamic=no
+-	   enable_plugin=no
++	   plugin_rdynamic=yes
++	   enable_plugin=yes
+ 	 fi
+ 	 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $plugin_rdynamic" >&5
+ $as_echo "$plugin_rdynamic" >&6; }
+@@ -15344,7 +15355,7 @@ fi
+ $as_echo_n "checking for -fPIC -shared... " >&6; }
+      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+ /* end confdefs.h.  */
+-extern int X;
++int X;
+ int
+ main ()
+ {
+--- a/gcc/config.gcc
++++ b/gcc/config.gcc
+@@ -2280,7 +2280,10 @@ i[34567]86-*-mingw* | x86_64-*-mingw*)
+ 			tmake_file="${tmake_file} i386/t-mingw-w32"
+ 			;;
+ 	esac
+-        native_system_header_dir=/mingw/include
++	# Don't ignore values passed in to configure via --native-system-header-dir
++	if test x$native_system_header_dir = x ; then
++		native_system_header_dir=/mingw/include
++	fi
+ 	target_gtfiles="$target_gtfiles \$(srcdir)/config/mingw/winnt.cc"
+ 	target_gtfiles="$target_gtfiles \$(srcdir)/config/mingw/winnt-dll.cc"
+ 	extra_options="${extra_options} mingw/cygming.opt mingw/mingw.opt"
+--- a/libgfortran/runtime/error.c
++++ b/libgfortran/runtime/error.c
+@@ -24,8 +24,8 @@ see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
+ 
+ 
+ #include "libgfortran.h"
+-#include "io.h"
+-#include "async.h"
++#include "../io/io.h"
++#include "../io/async.h"
+ 
+ #include <assert.h>
+ #include <string.h>
+--- a/libiberty/setenv.c
++++ b/libiberty/setenv.c
+@@ -133,7 +133,7 @@ setenv (const char *name, const char *value, int replace)
+ 
+       new_environ[size + 1] = NULL;
+ 
+-      last_environ = __environ = new_environ;
++      last_environ = new_environ;
+     }
+   else if (replace)
+     {

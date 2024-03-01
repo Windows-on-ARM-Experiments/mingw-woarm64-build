@@ -9,6 +9,9 @@ echo "::group::Add $TARGET toolchain to ccache"
         ln -sf /usr/bin/ccache $TARGET-gcc
         ln -sf /usr/bin/ccache $TARGET-g++
         ln -sf /usr/bin/ccache $TARGET-c++
+        if [[ -n "$MSYSTEM" ]]; then
+            ln -sf /usr/bin/true makeinfo
+        fi
     popd
 
     ls -al $CCACHE_LIB_DIR
@@ -17,6 +20,7 @@ echo "::group::Add $TARGET toolchain to ccache"
     which $BUILD-gcc || true
     which $HOST-gcc || true
     which $TARGET-gcc || true
+    which makeinfo
 
     if ccache -svv 2>&1 | grep -qv "invalid option"; then
         CCACHE_STATISTICS="-svv"

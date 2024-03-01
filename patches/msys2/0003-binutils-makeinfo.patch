@@ -1,0 +1,56 @@
+--- a/bfd/doc/bfd.texi
++++ b/bfd/doc/bfd.texi
+@@ -196,11 +196,6 @@ IEEE-695.
+ @chapter BFD Front End
+ 
+ @menu
+-* typedef bfd::
+-* Error reporting::
+-* Initialization::
+-* Threading::
+-* Miscellaneous::
+ * Memory Usage::
+ * Sections::
+ * Symbols::
+@@ -220,7 +215,7 @@ IEEE-695.
+ @include bfdt.texi
+ @include bfdio.texi
+ 
+-@node Memory Usage, Sections, Miscellaneous, BFD front end
++@node Memory Usage, Sections, BFD front end
+ @section Memory Usage
+ BFD keeps all of its internal structures in obstacks. There is one obstack
+ per open BFD file, into which the current state is stored. When a BFD is
+--- a/gas/doc/as.texi
++++ b/gas/doc/as.texi
+@@ -12,7 +12,7 @@
+ @setfilename as.info
+ @c ---config---
+ @macro gcctabopt{body}
+-@code{\body\}
++@code \body\
+ @end macro
+ @c defaults, config file may override:
+ @set have-stabs
+--- a/gprofng/doc/gp-macros.texi
++++ b/gprofng/doc/gp-macros.texi
+@@ -60,7 +60,7 @@ gprofng
+ @end macro
+ 
+ @macro gcctabopt{body}
+-@code{\body\}
++@code \body\
+ @end macro
+ 
+ @macro ManPageStart{headername}
+--- a/ld/ld.texi
++++ b/ld/ld.texi
+@@ -11,7 +11,7 @@
+ @c @smallbook
+ 
+ @macro gcctabopt{body}
+-@code{\body\}
++@code \body\
+ @end macro
+ 
+ @c man begin NAME

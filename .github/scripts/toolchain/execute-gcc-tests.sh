@@ -4,6 +4,11 @@ CCACHE=0 # Disable ccache for testing.
 
 source `dirname ${BASH_SOURCE[0]}`/../config.sh
 
+# Add target binutils to path.
+if [[ -n "$MSYSTEM" && "$TEST" = 1 ]]; then
+    PATH="/opt/$TARGET/bin:$PATH"
+fi
+
 TAG=$1
 MODULE=$2
 FILTER=$3

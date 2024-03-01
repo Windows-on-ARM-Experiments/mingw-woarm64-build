@@ -1,0 +1,13 @@
+--- a/etc/pacman.conf
++++ b/etc/pacman.conf
+@@ -70,6 +70,10 @@
+ # Server = https://repo.msys2.org/staging/
+ # SigLevel = Never
+ 
++[woarm64]
++Server = https://windows-on-arm-experiments.github.io/msys2-woarm64-build/x86_64
++SigLevel = Optional
++
+ [clangarm64]
+ Include = /etc/pacman.d/mirrorlist.mingw
+ 

@@ -1,0 +1,159 @@
+name: Build and test GCC
+
+on:
+  workflow_dispatch:
+    inputs:
+      binutils_branch:
+        description: 'Binutils branch to build'
+        required: false
+        default: 'woarm64'
+      gcc_branch:
+        description: 'GCC branch to build'
+        required: false
+        default: 'woarm64'
+      mingw_branch:
+        description: 'Mingw branch to build'
+        required: false
+        default: 'woarm64'
+
+env:
+  BINUTILS_REPO: Windows-on-ARM-Experiments/binutils-woarm64
+  BINUTILS_BRANCH: ${{ inputs.binutils_branch }}
+  BINUTILS_VERSION: binutils
+
+  GCC_REPO: Windows-on-ARM-Experiments/gcc-woarm64
+  GCC_BRANCH: ${{ inputs.gcc_branch }}
+  GCC_VERSION: gcc
+
+  MINGW_REPO: Windows-on-ARM-Experiments/mingw-woarm64
+  MINGW_BRANCH: ${{ inputs.mingw_branch }}
+  MINGW_VERSION: mingw-w64-master
+
+  TOOLCHAIN_PATH: ${{ github.workspace }}/toolchain
+  SOURCE_PATH: ${{ github.workspace }}/code
+  BUILD_PATH: ${{ github.workspace }}/build
+  ARTIFACT_PATH: ${{ github.workspace }}/artifact
+
+  BUILD: x86_64-pc-msys
+  HOST: x86_64-pc-msys
+  ARCH: aarch64
+  PLATFORM: w64-mingw32
+  CRT: msvcrt
+
+defaults:
+  run:
+    shell: msys2 {0}
+
+jobs:
+  build-and-test-toolchain:
+    runs-on: [Windows, ARM64, Blackhex]
+    timeout-minutes: 1440
+
+    env:
+      RUN_BOOTSTRAP: 1
+      UPDATE_SOURCES: 1
+      CCACHE: 1
+
+    steps:
+      - name: Kill MSYS2 processes
+        shell: powershell
+        run: |
+          tasklist
+          taskkill /t /f /im conftest.exe
+          taskkill /t /f /im expect.exe
+          taskkill /t /f /im cc1.exe
+          taskkill /t /f /im pacman.exe
+          taskkill /t /f /im make.exe
+          taskkill /t /f /im wc.exe
+          taskkill /t /f /im gpg.exe
+          taskkill /t /f /im gpg-agent.exe
+          taskkill /t /f /im bash.exe
+          taskkill /t /f /im sh.exe
+          tasklist
+          exit 0
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MSYS
+          update: false
+          cache: false
+
+      - name: Pacman hang workaround
+        run: |
+          `cygpath "${{ github.workspace }}"`/.github/scripts/pacman-workaround.sh
+
+      - name: Setup packages repository
+        run: |
+          `cygpath "${{ github.workspace }}"`/.github/scripts/setup-repository.sh
+
+      - name: Get cache key
+        id: get-cache-key
+        run: |
+          echo "timestamp=$(date -u --iso-8601=seconds)" >> "$GITHUB_OUTPUT"
+          DIR=`cygpath "${{ github.workspace }}"`
+          echo "CCACHE_DIR=$DIR/ccache" >> "$GITHUB_ENV"
+
+      - name: Restore Ccache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ github.workspace }}/ccache
+          key: test-gcc-ccache-${{ steps.get-cache-key.outputs.timestamp }}
+          restore-keys: test-gcc-ccache-
+
+      - name: Build toolchain
+        run: |
+          TOOLCHAIN_PATH=`cygpath "${{ env.TOOLCHAIN_PATH }}"`
+          SOURCE_PATH=`cygpath "${{ env.SOURCE_PATH }}"`
+          BUILD_PATH=`cygpath "${{ env.BUILD_PATH }}"`
+          ARTIFACT_PATH=`cygpath "${{ env.ARTIFACT_PATH }}"`
+          `cygpath "${{ github.workspace }}"`/.github/scripts/build.sh
+
+      - name: Execute GCC tests
+        run: |
+          TOOLCHAIN_PATH=`cygpath "${{ env.TOOLCHAIN_PATH }}"`
+          SOURCE_PATH=`cygpath "${{ env.SOURCE_PATH }}"`
+          BUILD_PATH=`cygpath "${{ env.BUILD_PATH }}"`
+          ARTIFACT_PATH=`cygpath "${{ env.ARTIFACT_PATH }}"`
+          `cygpath "${{ github.workspace }}"`/.github/scripts/toolchain/execute-gcc-tests.sh results gcc-c
+
+      - name: Create summary
+        if: always()
+        run: |
+          TOOLCHAIN_PATH=`cygpath "${{ env.TOOLCHAIN_PATH }}"`
+          SOURCE_PATH=`cygpath "${{ env.SOURCE_PATH }}"`
+          BUILD_PATH=`cygpath "${{ env.BUILD_PATH }}"`
+          ARTIFACT_PATH=`cygpath "${{ env.ARTIFACT_PATH }}"`
+          `cygpath "${{ github.workspace }}"`/.github/scripts/toolchain/create-gcc-summary.sh results >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Save Ccache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ github.workspace }}/ccache
+          key: test-gcc-ccache-${{ steps.get-cache-key.outputs.timestamp }}
+
+      - name: Compress build folder
+        if: failure()
+        run: |
+          pushd `cygpath "${{ env.BUILD_PATH }}"`/gcc
+            tar -czf `cygpath "${{ github.workspace }}"`/build.tar.gz .
+          popd
+
+      - name: Upload build folder
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build
+          retention-days: 1
+          path: build.tar.gz
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gcc-tests-results
+          path: ${{ env.ARTIFACT_PATH }}/gcc-tests-results
+          retention-days: 30

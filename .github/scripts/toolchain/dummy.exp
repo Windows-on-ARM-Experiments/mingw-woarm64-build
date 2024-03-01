@@ -1,0 +1,38 @@
+set_board_info compiler "[find_gcc]"
+
+proc ${board}_load { board prog args } {
+   warning "Load: board: $board, prog: $prog, args: $args"
+   
+   return [list "xfail" $prog $args]
+}
+
+proc ${board}_download { board srcfile dstfile } {
+  verbose "Download: board: $board, srcfile: $srcfile, dstfile: $dstfile"
+
+  if { "$srcfile" != "$dstfile" } {
+    set ret [catch "exec cp $srcfile $dstfile" output]
+  }
+
+  return $dstfile
+}
+
+proc ${board}_upload { board srcfile dstfile} {
+  verbose "Upload: board: $board, srcfile: $srcfile, dstfile: $dstfile"
+
+  if { "$srcfile" != "$dstfile" } {
+    set ret [catch "exec cp $srcfile $dstfile" output]
+  }
+
+  return $dstfile
+}  
+
+proc ${board}_exec { board prog args inp outp } {
+  verbose "Exec: board: $board, prog: $prog, args: $args, inp: $inp, outp: $outp"
+
+  set status [catch "exec bash -c \"$prog $args\"" output]
+  if { $status != 0 } {
+    warning "Exec: Command '$prog $args' failed with status $status: $output"
+  }
+
+  return [list $status $output]
+}
