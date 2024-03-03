@@ -11,11 +11,17 @@ if [ "$RUN_CONFIG" = 1 ] || [ ! -f "$MINGW_HEADERS_BUILD_PATH/Makefile" ] ; then
     echo "::group::Configure MinGW headers"
         rm -rf $MINGW_HEADERS_BUILD_PATH/*
 
+        if [ "$DEBUG" = 1 ] ; then
+            HOST_OPTIONS="$HOST_OPTIONS \
+                --enable-debug"
+        fi
+
         $SOURCE_PATH/$MINGW_VERSION/mingw-w64-headers/configure \
             --prefix=$TOOLCHAIN_PATH/$TARGET \
             --build=$BUILD \
             --host=$TARGET \
-            $MINGW_CONF
+            $HOST_OPTIONS \
+            $TARGET_OPTIONS
     echo "::endgroup::"
 fi
 
