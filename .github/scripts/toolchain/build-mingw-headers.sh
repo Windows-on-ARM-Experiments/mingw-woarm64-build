@@ -14,6 +14,7 @@ if [ "$RUN_CONFIG" = 1 ] || [ ! -f "$MINGW_HEADERS_BUILD_PATH/Makefile" ] ; then
 
     $SOURCE_PATH/$MINGW_VERSION/mingw-w64-headers/configure \
         --prefix=$TOOLCHAIN_PATH/$TARGET \
+        --build=$BUILD \
         --host=$TARGET \
         $MINGW_CONF
     echo "::endgroup::"

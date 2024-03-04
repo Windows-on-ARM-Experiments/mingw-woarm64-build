@@ -14,6 +14,7 @@ if [ "$RUN_CONFIG" = 1 ] || [ ! -f "$MINGW_BUILD_PATH/Makefile" ] ; then
 
     $SOURCE_PATH/$MINGW_VERSION/configure \
         --prefix=$TOOLCHAIN_PATH/$TARGET \
+        --build=$BUILD \
         --host=$TARGET \
         --disable-shared \
         --with-libraries=libmangle,pseh,winpthreads \

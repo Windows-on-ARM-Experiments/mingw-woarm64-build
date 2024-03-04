@@ -14,7 +14,7 @@ if [ "$RUN_CONFIG" = 1 ] || [ ! -f "$MINGW_BUILD_PATH/Makefile" ] ; then
 
     $SOURCE_PATH/$MINGW_VERSION/mingw-w64-crt/configure \
         --prefix=$TOOLCHAIN_PATH/$TARGET \
-        --build=x86_64-linux-gnu \
+        --build=$BUILD \
         --host=$TARGET \
         --with-sysroot=$TOOLCHAIN_PATH \
         --disable-shared \
