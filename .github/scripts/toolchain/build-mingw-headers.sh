@@ -9,28 +9,26 @@ cd $MINGW_HEADERS_BUILD_PATH
 
 if [ "$RUN_CONFIG" = 1 ] || [ ! -f "$MINGW_HEADERS_BUILD_PATH/Makefile" ] ; then
     echo "::group::Configure MinGW headers"
+        rm -rf $MINGW_HEADERS_BUILD_PATH/*
 
-    rm -rf $MINGW_HEADERS_BUILD_PATH/*
-
-    $SOURCE_PATH/$MINGW_VERSION/mingw-w64-headers/configure \
-        --prefix=$TOOLCHAIN_PATH/$TARGET \
-        --build=$BUILD \
-        --host=$TARGET \
-        $MINGW_CONF
+        $SOURCE_PATH/$MINGW_VERSION/mingw-w64-headers/configure \
+            --prefix=$TOOLCHAIN_PATH/$TARGET \
+            --build=$BUILD \
+            --host=$TARGET \
+            $MINGW_CONF
     echo "::endgroup::"
 fi
 
 echo "::group::Build MinGW headers"
-make $BUILD_MAKE_OPTIONS
+    make $BUILD_MAKE_OPTIONS
 echo "::endgroup::"
 
 if [ "$RUN_INSTALL" = 1 ] ; then
     echo "::group::Install MinGW headers"
-    make install
+        make install
 
-    # Symlink for gcc
-    ln -sf $TOOLCHAIN_PATH/$TARGET $TOOLCHAIN_PATH/mingw
-
+        # Symlink for gcc
+        ln -sf $TOOLCHAIN_PATH/$TARGET $TOOLCHAIN_PATH/mingw
     echo "::endgroup::"
 fi
 
