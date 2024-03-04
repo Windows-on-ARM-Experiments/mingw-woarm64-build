@@ -197,7 +197,7 @@ jobs:
       - name: Install cross headers and libraries
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform == 'pc-linux-gnu' }}
         run: |
-          .github/scripts/binutils/install-cross-headers-libs.sh
+          .github/scripts/toolchain/install-cross-headers-libs.sh
 
       - name: Build MinGW headers
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform != 'pc-linux-gnu' }}
