@@ -11,13 +11,25 @@ if [ "$RUN_CONFIG" = 1 ] || [ ! -f "$MINGW_BUILD_PATH/Makefile" ] ; then
     echo "::group::Configure MinGW libraries"
         rm -rf $MINGW_BUILD_PATH/*
 
+        if [ "$DEBUG" = 1 ] ; then
+            HOST_OPTIONS="$HOST_OPTIONS \
+                --enable-debug"
+        fi
+
+        case $PLATFORM in
+            *mingw*)
+                TARGET_OPTIONS="$TARGET_OPTIONS \
+                    --disable-shared \
+                    --with-libraries=libmangle,pseh,winpthreads"
+                ;;
+        esac
+
         $SOURCE_PATH/$MINGW_VERSION/configure \
             --prefix=$TOOLCHAIN_PATH/$TARGET \
             --build=$BUILD \
             --host=$TARGET \
-            --disable-shared \
-            --with-libraries=libmangle,pseh,winpthreads \
-            $MINGW_CONF
+            $HOST_OPTIONS \
+            $TARGET_OPTIONS
     echo "::endgroup::"
 fi
 

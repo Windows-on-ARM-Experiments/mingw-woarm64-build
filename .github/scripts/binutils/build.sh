@@ -12,7 +12,7 @@ if [ "$RUN_CONFIG" = 1 ] || [ ! -f "$BINUTILS_BUILD_PATH/Makefile" ] ; then
         rm -rf $BINUTILS_BUILD_PATH/*
 
         if [ "$DEBUG" = 1 ] ; then
-            ADDITIONAL_OPTIONS=" \
+            HOST_OPTIONS="$HOST_OPTIONS \
                 --enable-debug"
         fi
 
@@ -21,7 +21,8 @@ if [ "$RUN_CONFIG" = 1 ] || [ ! -f "$BINUTILS_BUILD_PATH/Makefile" ] ; then
             --build=$BUILD \
             --host=$HOST \
             --target=$TARGET \
-            $ADDITIONAL_OPTIONS
+            $HOST_OPTIONS \
+            $TARGET_OPTIONS
     echo "::endgroup::"
 fi
 

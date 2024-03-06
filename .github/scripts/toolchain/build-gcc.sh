@@ -11,18 +11,35 @@ if [ "$RUN_CONFIG" = 1 ] || [ ! -f "$GCC_BUILD_PATH/Makefile" ] ; then
     echo "::group::Configure GCC"
         rm -rf $GCC_BUILD_PATH/*
 
+        if [ "$DEBUG" = 1 ] ; then
+            HOST_OPTIONS="$HOST_OPTIONS \
+                --enable-debug"
+        fi
+
+        case $ARCH in
+            x86_64)
+                TARGET_OPTIONS="$TARGET_OPTIONS \
+                    --with-arch=nocona \
+                    --with-tune=generic"
+                ;;
+            aarch64)
+                TARGET_OPTIONS="$TARGET_OPTIONS \
+                    --with-arch=armv8-a \
+                    --with-tune=cortex-a53"
+                ;;
+        esac
+
         case $PLATFORM in
+            *linux*)
+                TARGET_OPTIONS="$TARGET_OPTIONS \
+                    --enable-threads=posix"
+                ;;
             *mingw*)
-                HOST_OPTIONS=" \
+                TARGET_OPTIONS="$TARGET_OPTIONS \
                     --enable-threads=win32 \
                     --disable-win32-registry"
                 ;;
         esac
-
-        if [ "$DEBUG" = 1 ] ; then
-            ADDITIONAL_OPTIONS=" \
-                --enable-debug"
-        fi
 
         # REMOVED --libexecdir=/opt/lib
         # REMOVED --with-{gmp,mpfr,mpc,isl}=/usr
@@ -58,7 +75,7 @@ if [ "$RUN_CONFIG" = 1 ] || [ ! -f "$GCC_BUILD_PATH/Makefile" ] ; then
             --with-gnu-as \
             --with-gnu-ld \
             $HOST_OPTIONS \
-            $ADDITIONAL_OPTIONS
+            $TARGET_OPTIONS
     echo "::endgroup::"
 fi
 

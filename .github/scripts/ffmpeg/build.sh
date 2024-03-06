@@ -13,7 +13,7 @@ if [ "$RUN_CONFIG" = 1 ] || [ ! -f "$FFMPEG_BUILD_PATH/Makefile" ] ; then
         rm -rf $FFMPEG_BUILD_PATH/*
 
         if [ "$DEBUG" = 1 ] ; then
-            ADDITIONAL_OPTIONS=" \
+            HOST_OPTIONS=" \
                 --enable-debug=3"
         fi
 
@@ -25,7 +25,7 @@ if [ "$RUN_CONFIG" = 1 ] || [ ! -f "$FFMPEG_BUILD_PATH/Makefile" ] ; then
             --arch=aarch64 \
             --target-os=mingw32 \
             --cross-prefix=aarch64-w64-mingw32- \
-            $ADDITIONAL_OPTIONS
+            $HOST_OPTIONS
     echo "::endgroup::"
 fi
 
