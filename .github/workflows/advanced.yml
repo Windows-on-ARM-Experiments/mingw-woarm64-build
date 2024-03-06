@@ -51,7 +51,7 @@ env:
   GCC_VERSION: gcc-master
 
   MINGW_REPO: Windows-on-ARM-Experiments/mingw-woarm64
-  MINGW_BRANCH: ${{ inputs.mingw_branch || 'aarch64-patch-stage1-v1' }}
+  MINGW_BRANCH: ${{ inputs.mingw_branch || 'aarch64-patch-stage2-v1' }}
   MINGW_VERSION: mingw-w64-master
 
   OPENBLAS_REPO: OpenMathLib/OpenBLAS.git
