@@ -54,5 +54,6 @@ int main(int argc, char **argv) {
         DECLARE_TEST(Aarch64MinGW, TestVaArgPack)
     };
 
+    setvbuf(stdout, NULL, _IONBF, 0);
     return gtest_like_c_run_tests(tests, sizeof(tests) / sizeof(tests[0]), gtest_filter);
 }
