@@ -1,0 +1,135 @@
+name: Build toolchain
+
+on:
+  workflow_dispatch:
+    inputs:
+      binutils_branch:
+        description: 'Binutils branch to build'
+        required: false
+        default: 'woarm64'
+      gcc_branch:
+        description: 'GCC branch to build'
+        required: false
+        default: 'woarm64'
+      mingw_branch:
+        description: 'MinGW branch to build'
+        required: false
+        default: 'woarm64'
+      arch:
+        description: 'Architecture to build for'
+        required: false
+        default: 'x86_64'
+      platform:
+        description: 'Platform to build for'
+        required: false
+        default: 'w64-mingw32'
+      crt:
+        description: 'C runtime to build for'
+        required: false
+        default: 'msvcrt'
+      tag:
+        description: 'Tag to use for the artifact'
+        required: true
+  workflow_call:
+    inputs:
+      binutils_branch:
+        type: string
+      gcc_branch:
+        type: string
+      mingw_branch:
+        type: string
+      arch:
+        type: string
+      platform:
+        type: string
+      crt:
+        type: string
+      tag:
+        type: string
+
+env:
+  BINUTILS_REPO: Windows-on-ARM-Experiments/binutils-woarm64
+  BINUTILS_BRANCH: ${{ inputs.binutils_branch || 'woarm64' }}
+  BINUTILS_VERSION: binutils
+
+  GCC_REPO: Windows-on-ARM-Experiments/gcc-woarm64
+  GCC_BRANCH: ${{ inputs.gcc_branch || 'woarm64' }}
+  GCC_VERSION: gcc
+
+  MINGW_REPO: Windows-on-ARM-Experiments/mingw-woarm64
+  MINGW_BRANCH: ${{ inputs.mingw_branch || 'woarm64' }}
+  MINGW_VERSION: mingw-w64
+
+  ARCH: ${{ inputs.arch || 'x86_64' }}
+  PLATFORM: ${{ inputs.platform || 'w64-mingw32' }}
+  CRT: ${{ inputs.crt || 'msvcrt' }}
+
+  SOURCE_PATH: ~/code
+  DOWNLOADS_PATH: ~/downloads
+  ARTIFACT_PATH: ~/artifacts
+
+jobs:
+  build-and-test-toolchain:
+    name: Build and test toolchain
+    runs-on: windows-latest
+
+    defaults:
+      run:
+        shell: wsl-bash {0}
+
+    steps:
+      - name: Setup WSL
+        uses: Windows-on-ARM-Experiments/setup-wsl@master
+        with:
+          distribution: Ubuntu-22.04
+          additional-packages:
+            git
+
+      - name: Checkout repository
+        run: |
+          git clone --depth=1 https://github.com/Windows-on-ARM-Experiments/mingw-woarm64-build.git -b ${{ github.head_ref }} .
+
+      - name: Setup WSL environment
+        run: |
+          echo " \
+            export BINUTILS_VERSION=${{ env.BINUTILS_VERSION }}
+            export GCC_VERSION=${{ env.GCC_VERSION }}
+            export MINGW_VERSION=${{ env.MINGW_VERSION }}
+            export ARCH=${{ env.ARCH }}
+            export PLATFORM=${{ env.PLATFORM }}
+            export CRT=${{ env.CRT }}
+            export TOOLCHAIN_NAME=${{ env.ARCH }}-${{ env.PLATFORM }}-${{ env.CRT }}
+            export SOURCE_PATH=${{ env.SOURCE_PATH }}
+            export DOWNLOADS_PATH=${{ env.DOWNLOADS_PATH }}
+            export ARTIFACT_PATH=${{ env.ARTIFACT_PATH }}
+            export RUN_BOOTSTRAP=1
+          " > environment.sh
+
+      - name: Checkout binutils
+        run: |
+          git clone --depth=1 https://github.com/${{ env.BINUTILS_REPO }}.git -b ${{ env.BINUTILS_BRANCH }} ${{ env.SOURCE_PATH }}/${{ env.BINUTILS_VERSION }}
+
+      - name: Checkout GCC
+        run: |
+          git clone --depth=1 https://github.com/${{ env.GCC_REPO }}.git -b ${{ env.GCC_BRANCH }} ${{ env.SOURCE_PATH }}/${{ env.GCC_VERSION }}
+
+      - name: Checkout MinGW
+        run: |
+          git clone --depth=1 https://github.com/${{ env.MINGW_REPO }}.git -b ${{ env.MINGW_BRANCH }} ${{ env.SOURCE_PATH }}/${{ env.MINGW_VERSION }}
+
+      - name: Build toolchain
+        run: |
+          source environment.sh
+          .github/scripts/build.sh
+
+      - name: Execute GCC tests
+        run: |
+          source environment.sh
+          .github/scripts/toolchain/execute-gcc-tests.sh ${{ inputs.tag }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gcc-tests-${{ inputs.tag }}
+          path: \\wsl.localhost\Ubuntu\root\artifacts\gcc-tests-${{ inputs.tag }}
+          retention-days: 3
