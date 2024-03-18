@@ -146,8 +146,6 @@ jobs:
             crt: ucrt
           - platform: pc-cygwin
             crt: libc
-          - platform: pc-cygwin
-            arch: aarch64
 
     env:
       ARCH: ${{ matrix.arch }}
