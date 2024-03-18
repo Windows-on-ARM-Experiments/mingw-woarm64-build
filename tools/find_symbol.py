@@ -38,7 +38,7 @@ def help():
 
 
 def main(argv):
-    target = "aarch64-w64-mingw32"
+    target = "aarch64-pc-cygwin"
     directory = "."
     symbol = ""
     try:
