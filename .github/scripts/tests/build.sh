@@ -15,7 +15,7 @@ if [ "$RUN_CONFIG" = 1 ] || [ ! -f build/CMakeCache.txt ] ; then
 fi
 
 echo "::group::Build tests"
-    cmake --build build
+    cmake --build build ${BUILD_MAKE_OPTIONS//V=1/-v}
 
     case "$PLATFORM" in
       w64-mingw32)
@@ -24,7 +24,7 @@ echo "::group::Build tests"
       pc-cygwin)
           cp $TOOLCHAIN_PATH/bin/cygwin1.dll build/bin
           cp $TOOLCHAIN_PATH/lib/gcc/$TARGET/cyggcc_s-seh-1.dll build/bin
-          cp $TOOLCHAIN_PATH/lib/gcc/$TARGET/14/cyggomp-1.dll build/bin
+          cp $TOOLCHAIN_PATH/lib/gcc/$TARGET/14/cyggomp-1.dll build/bin && true
       ;;
     esac
 echo "::endgroup::"

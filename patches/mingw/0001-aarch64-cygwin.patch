@@ -1,0 +1,26 @@
+diff --git a/mingw-w64-headers/crt/_cygwin.h b/mingw-w64-headers/crt/_cygwin.h
+index 78452cf2b..9f6a312a7 100644
+--- a/mingw-w64-headers/crt/_cygwin.h
++++ b/mingw-w64-headers/crt/_cygwin.h
+@@ -29,7 +29,7 @@
+    The Cygwin-targeting gcc does not define it by default, same as
+    with _WIN32.  Therefore we set it here.  The result is that _WIN64
+    is only defined if Windows headers are included. */
+-#ifdef __x86_64__
++#if defined(__x86_64__) || defined(__aarch64__)
+ #define _WIN64
+ #endif
+ 
+diff --git a/mingw-w64-headers/crt/corecrt.h b/mingw-w64-headers/crt/corecrt.h
+index abb720885..37957d75a 100644
+--- a/mingw-w64-headers/crt/corecrt.h
++++ b/mingw-w64-headers/crt/corecrt.h
+@@ -41,7 +41,7 @@ typedef unsigned int size_t;
+ #ifndef _SSIZE_T_DEFINED
+ #define _SSIZE_T_DEFINED
+ #undef ssize_t
+-#ifdef _WIN64
++#if defined(_WIN64) && !defined(__aarch64__)
+ __MINGW_EXTENSION typedef __int64 ssize_t;
+ #else
+ typedef int ssize_t;

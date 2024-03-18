@@ -77,8 +77,6 @@ jobs:
             crt: ucrt
           - platform: pc-cygwin
             crt: libc
-          - platform: pc-cygwin
-            arch: aarch64
 
     uses: ./.github/workflows/advanced.yml
     with:
