@@ -21,8 +21,14 @@ if [ "$RUN_BOOTSTRAP" = 1 ]; then
 fi
 
 if [[ "$PLATFORM" =~ cygwin ]]; then
-    .github/scripts/binutils/patch-cygwin.sh 1
-    .github/scripts/toolchain/patch-cygwin.sh 1
+    .github/scripts/binutils/patch-cygwin-binutils.sh
+fi
+.github/scripts/binutils/build.sh
+
+if [[ "$PLATFORM" =~ cygwin ]]; then
+  .github/scripts/toolchain/patch-cygwin-gcc.sh
+  .github/scripts/toolchain/patch-cygwin-mingw.sh
+  .github/scripts/toolchain/patch-cygwin.sh 1
 fi
 
 if [ "$RUN_BOOTSTRAP" = 1 ]; then
@@ -54,9 +60,6 @@ fi
 if [[ "$PLATFORM" =~ cygwin ]]; then
     .github/scripts/toolchain/build-cocom.sh
     .github/scripts/toolchain/build-cygwin.sh 1
-
-    .github/scripts/binutils/patch-cygwin.sh 2
-    .github/scripts/toolchain/patch-cygwin.sh 2
 fi
 
 if [ "$RUN_BOOTSTRAP" = 1 ]; then
@@ -69,6 +72,7 @@ if [[ "$PLATFORM" =~ (mingw|cygwin) ]]; then
     .github/scripts/toolchain/build-mingw.sh
 fi
 if [[ "$PLATFORM" =~ cygwin ]]; then
+    .github/scripts/toolchain/patch-cygwin.sh 2
     .github/scripts/toolchain/build-cygwin.sh 2
 fi
 
