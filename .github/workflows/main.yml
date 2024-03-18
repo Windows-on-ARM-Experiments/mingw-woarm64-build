@@ -21,7 +21,7 @@ on:
         default: 'woarm64'
 env:
   BINUTILS_BRANCH: ${{ inputs.binutils_branch || 'woarm64' }}
-  GCC_BRANCH: ${{ inputs.gcc_branch || 'woarm64' }}
+  GCC_BRANCH: ${{ inputs.gcc_branch || 'fix-d' }}
   MINGW_BRANCH: ${{ inputs.mingw_branch || 'woarm64' }}
 
   BUILD_PATH: ${{ github.workspace }}/build
