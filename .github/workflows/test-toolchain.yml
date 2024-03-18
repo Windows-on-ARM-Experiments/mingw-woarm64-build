@@ -133,4 +133,4 @@ jobs:
         with:
           name: gcc-tests-results
           path: ${{ env.ARTIFACT_PATH }}/gcc-tests-results
-          retention-days: 3
+          retention-days: 30

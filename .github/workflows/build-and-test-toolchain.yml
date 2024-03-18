@@ -132,4 +132,4 @@ jobs:
         with:
           name: gcc-tests-${{ inputs.tag }}
           path: \\wsl.localhost\Ubuntu\root\artifacts\gcc-tests-${{ inputs.tag }}
-          retention-days: 3
+          retention-days: 30
