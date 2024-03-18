@@ -49,7 +49,7 @@ if [ "$RUN_CONFIG" = 1 ] || [ ! -f "$GCC_BUILD_PATH/Makefile" ] ; then
             --host=$HOST \
             --target=$TARGET \
             --includedir=$TOOLCHAIN_PATH/$TARGET/include \
-            --enable-languages=c,lto,c++,fortran \
+            --enable-languages=c \
             --enable-shared \
             --enable-static \
             --enable-graphite \
