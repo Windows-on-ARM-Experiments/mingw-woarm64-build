@@ -2,7 +2,7 @@ diff --git a/winsup/configure b/winsup/configure
 index e146cb7..e71d678 100755
 --- a/winsup/configure
 +++ b/winsup/configure
-@@ -3938,150 +3938,6 @@ main (void)
+@@ -3940,150 +3940,6 @@ main (void)
  _ACEOF
  ac_clean_files_save=$ac_clean_files
  ac_clean_files="$ac_clean_files a.out a.out.dSYM a.exe b.out"

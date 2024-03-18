@@ -1,0 +1,374 @@
+--- a/c++tools/configure
++++ b/c++tools/configure
+@@ -2816,7 +2816,7 @@ if test "$ac_test_CXXFLAGS" = set; then
+   CXXFLAGS=$ac_save_CXXFLAGS
+ elif test $ac_cv_prog_cxx_g = yes; then
+   if test "$GXX" = yes; then
+-    CXXFLAGS="-g -O2"
++    CXXFLAGS="-g -Og"
+   else
+     CXXFLAGS="-g"
+   fi
+--- a/config.guess
++++ b/config.guess
+@@ -911,6 +911,9 @@ EOF
+     i*:UWIN*:*)
+ 	echo "$UNAME_MACHINE"-pc-uwin
+ 	exit ;;
++    aarch64:CYGWIN*:*:*)
++	echo aarch64-pc-cygwin
++	exit ;;
+     amd64:CYGWIN*:*:* | x86_64:CYGWIN*:*:*)
+ 	echo x86_64-pc-cygwin
+ 	exit ;;
+--- a/config/acinclude.m4
++++ b/config/acinclude.m4
+@@ -24,7 +24,7 @@ dnl normal versions of a library), tasteless as that idea is.
+   if test "$ac_test_CXXFLAGS" = set; then
+     CXXFLAGS="$ac_save_CXXFLAGS"
+   elif test $ac_cv_prog_cxx_g = yes; then
+-    CXXFLAGS="-g -O2"
++    CXXFLAGS="-g -Og"
+   else
+     CXXFLAGS="-O2"
+   fi
+--- a/fixincludes/mkfixinc.sh
++++ b/fixincludes/mkfixinc.sh
+@@ -11,6 +11,7 @@ target=fixinc.sh
+ 
+ # Check for special fix rules for particular targets
+ case $machine in
++    aarch64-*-cygwin* | \
+     i?86-*-cygwin* | \
+     i?86-*-mingw32* | \
+     x86_64-*-mingw32* | \
+--- a/gcc/config.build
++++ b/gcc/config.build
+@@ -53,7 +53,7 @@ case $build in
+   hppa*64*-*-hpux11* )
+     build_install_headers_dir=install-headers-cpio
+     ;;
+-  i[34567]86-*-cygwin* | x86_64-*-cygwin* )
++  i[34567]86-*-cygwin* | x86_64-*-cygwin* | aarch64-*-cygwin*)
+     build_xm_file=i386/xm-cygwin.h
+     build_exeext=.exe
+     ;;
+--- a/gcc/config.gcc
++++ b/gcc/config.gcc
+@@ -1189,7 +1189,6 @@ case ${target} in
+ aarch64*-*-elf | aarch64*-*-fuchsia* | aarch64*-*-rtems*)
+ 	tm_file="${tm_file} elfos.h newlib-stdint.h"
+ 	tm_file="${tm_file} aarch64/aarch64-elf.h aarch64/aarch64-errata.h aarch64/aarch64-elf-raw.h"
+-	tmake_file="${tmake_file} aarch64/t-aarch64"
+ 	case $target in
+ 	aarch64-*-elf*)
+ 		use_gcc_stdint=wrap
+@@ -1227,19 +1226,19 @@ aarch64*-*-elf | aarch64*-*-fuchsia* | aarch64*-*-rtems*)
+ aarch64*-*-freebsd*)
+ 	tm_file="${tm_file} elfos.h ${fbsd_tm_file}"
+ 	tm_file="${tm_file} aarch64/aarch64-elf.h aarch64/aarch64-errata.h aarch64/aarch64-freebsd.h"
+-	tmake_file="${tmake_file} aarch64/t-aarch64 aarch64/t-aarch64-freebsd"
++	tmake_file="${tmake_file} aarch64/t-aarch64-freebsd"
+ 	tm_defines="${tm_defines}  TARGET_DEFAULT_ASYNC_UNWIND_TABLES=1"
+ 	;;
+ aarch64*-*-netbsd*)
+ 	tm_file="${tm_file} elfos.h ${nbsd_tm_file}"
+ 	tm_file="${tm_file} aarch64/aarch64-elf.h aarch64/aarch64-errata.h aarch64/aarch64-netbsd.h"
+-	tmake_file="${tmake_file} aarch64/t-aarch64 aarch64/t-aarch64-netbsd"
++	tmake_file="${tmake_file} aarch64/t-aarch64-netbsd"
+ 	extra_options="${extra_options} netbsd.opt netbsd-elf.opt"
+ 	;;
+ aarch64*-*-linux*)
+ 	tm_file="${tm_file} elfos.h gnu-user.h linux.h glibc-stdint.h"
+ 	tm_file="${tm_file} aarch64/aarch64-elf.h aarch64/aarch64-errata.h aarch64/aarch64-linux.h"
+-	tmake_file="${tmake_file} aarch64/t-aarch64 aarch64/t-aarch64-linux"
++	tmake_file="${tmake_file} aarch64/t-aarch64-linux"
+ 	tm_defines="${tm_defines}  TARGET_DEFAULT_ASYNC_UNWIND_TABLES=1"
+ 	case $target in
+ 	aarch64_be-*)
+@@ -1271,6 +1270,36 @@ aarch64*-*-gnu*)
+         tmake_file="${tmake_file} aarch64/t-aarch64"
+         tm_defines="${tm_defines}  TARGET_DEFAULT_ASYNC_UNWIND_TABLES=1"
+ 	;;
++aarch64-*-cygwin*)
++	need_64bit_isa=yes
++	tm_file="${tm_file} aarch64/aarch64-abi-ms.h"
++	tm_file="${tm_file} aarch64/aarch64-coff.h"
++	tm_file="${tm_file} aarch64/cygming.h"
++	tm_file="${tm_file} i386/cygwin.h"
++	tm_file="${tm_file} i386/cygwin-w64.h"
++	tm_file="${tm_file} i386/cygwin-stdint.h"
++	tm_file="${tm_file} mingw/winnt.h"
++	tm_file="${tm_file} mingw/winnt-dll.h"
++	xm_file=i386/xm-cygwin.h
++	tmake_file="${tmake_file} aarch64/t-aarch64"
++	target_gtfiles="$target_gtfiles \$(srcdir)/config/mingw/winnt.cc"
++	target_gtfiles="$target_gtfiles \$(srcdir)/config/mingw/winnt-dll.cc"
++	extra_options="${extra_options} mingw/cygming.opt i386/cygwin.opt"
++	extra_objs="${extra_objs} winnt.o winnt-stubs.o winnt-dll.o"
++	c_target_objs="${c_target_objs} winnt-c.o msformat-c.o"
++	cxx_target_objs="${cxx_target_objs} winnt-c.o winnt-cxx.o msformat-c.o"
++	d_target_objs="${d_target_objs} cygwin-d.o winnt-d.o"
++	target_has_targetcm="yes"
++	target_has_targetdm="yes"
++	tmake_file="${tmake_file} t-winnt mingw/t-cygming t-slibgcc"
++	aarch64_multilibs="llp64"
++	if test x$enable_threads = xyes; then
++		thread_file='posix'
++	fi
++	default_use_cxa_atexit=yes
++	use_gcc_stdint=wrap
++	tm_defines="${tm_defines} TARGET_64BIT=1 TARGET_CYGWIN64=1 TARGET_AARCH64_MS_ABI=1"
++	;;
+ aarch64-*-mingw*)
+ 	tm_file="${tm_file} aarch64/aarch64-abi-ms.h"
+ 	tm_file="${tm_file} aarch64/aarch64-coff.h"
+--- a/gcc/config.host
++++ b/gcc/config.host
+@@ -227,7 +227,7 @@ case ${host} in
+         ;;
+     esac
+     ;;
+-  i[34567]86-*-cygwin* | x86_64-*-cygwin*)
++  i[34567]86-*-cygwin* | x86_64-*-cygwin* | aarch64-*-cygwin*)
+     host_xm_file=i386/xm-cygwin.h
+     out_host_hook_obj=host-cygwin.o
+     host_xmake_file="${host_xmake_file} i386/x-cygwin"
+--- a/gcc/config/aarch64/aarch64.h
++++ b/gcc/config/aarch64/aarch64.h
+@@ -150,14 +150,17 @@
+ #define MALLOC_ABI_ALIGNMENT  128
+ 
+ /* Defined by the ABI */
++#undef WCHAR_TYPE
+ #define WCHAR_TYPE "unsigned int"
++#undef WCHAR_TYPE_SIZE
+ #define WCHAR_TYPE_SIZE			32
+ 
+ /* Using long long breaks -ansi and -std=c90, so these will need to be
+    made conditional for an LLP64 ABI.  */
+-
++#undef SIZE_TYPE
+ #define SIZE_TYPE	"long unsigned int"
+ 
++#undef PTRDIFF_TYPE
+ #define PTRDIFF_TYPE	"long int"
+ 
+ #define PCC_BITFIELD_TYPE_MATTERS	1
+--- a/gcc/config/aarch64/cygming.h
++++ b/gcc/config/aarch64/cygming.h
+@@ -51,12 +51,18 @@ along with GCC; see the file COPYING3.  If not see
+ #undef TARGET_PECOFF
+ #define TARGET_PECOFF 1
+ 
+-// #if ! defined (USE_MINGW64_LEADING_UNDERSCORES)
+-// #undef USER_LABEL_PREFIX
+-// #define USER_LABEL_PREFIX (TARGET_64BIT ? "" : "_")
++#if ! defined (USE_MINGW64_LEADING_UNDERSCORES)
++#undef USER_LABEL_PREFIX
++#define USER_LABEL_PREFIX (TARGET_64BIT ? "" : "_")
+ 
+-// #undef LOCAL_LABEL_PREFIX
+-// #define LOCAL_LABEL_PREFIX (TARGET_64BIT ? "." : "")
++#undef LOCAL_LABEL_PREFIX
++#define LOCAL_LABEL_PREFIX (TARGET_64BIT ? "." : "")
++
++#undef ASM_GENERATE_INTERNAL_LABEL
++#define ASM_GENERATE_INTERNAL_LABEL(BUF,PREFIX,NUMBER)  \
++  sprintf ((BUF), "*%s%s%ld", LOCAL_LABEL_PREFIX, \
++	   (PREFIX), (long)(NUMBER))
++#endif
+ 
+ #include <stdbool.h>
+ #ifdef __MINGW32__
+--- a/gcc/config/i386/cygwin-w64.h
++++ b/gcc/config/i386/cygwin-w64.h
+@@ -50,7 +50,11 @@ along with GCC; see the file COPYING3.  If not see
+ 
+ #undef SUB_LINK_SPEC
+ #undef SUB_LINK_ENTRY
++#if defined(TARGET_AARCH64)
++#define SUB_LINK_SPEC "-m aarch64pe"
++#else
+ #define SUB_LINK_SPEC "%{" SPEC_64 ":-m i386pep} %{" SPEC_32 ":-m i386pe}"
++#endif
+ #define SUB_LINK_ENTRY "%{" SPEC_64 ":" SUB_LINK_ENTRY64 "} %{" SPEC_32 ":" SUB_LINK_ENTRY32 "}"
+ 
+ #undef MULTILIB_DEFAULTS
+--- a/gcc/configure
++++ b/gcc/configure
+@@ -29026,7 +29026,7 @@ fi
+ 
+     ;;
+ 
+-  i[34567]86-*-* | x86_64-*-*)
++  i[34567]86-*-* | x86_64-*-* | aarch64-*-*)
+     case $target_os in
+       cygwin*)
+ 	# Full C++ conformance when using a shared libstdc++-v3 requires some
+--- a/gcc/configure.ac
++++ b/gcc/configure.ac
+@@ -4793,7 +4793,7 @@ foo:
+     ;;
+ 
+ changequote(,)dnl
+-  i[34567]86-*-* | x86_64-*-*)
++  i[34567]86-*-* | x86_64-*-* | aarch64-*-*)
+ changequote([,])dnl
+     case $target_os in
+       cygwin*)
+--- a/libgcc/config.host
++++ b/libgcc/config.host
+@@ -865,6 +865,32 @@ i[34567]86-*-solaris2* | x86_64-*-solaris2*)
+ 	;;
+ i[4567]86-wrs-vxworks*|x86_64-wrs-vxworks*)
+ 	;;
++aarch64-*-cygwin*)
++	extra_parts="crtbegin.o crtbeginS.o crtend.o crtfastmath.o"
++	if test x$enable_vtable_verify = xyes; then
++		extra_parts="$extra_parts vtv_start.o vtv_end.o vtv_start_preinit.o vtv_end_preinit.o"
++	fi
++	# This has to match the logic for DWARF2_UNWIND_INFO in gcc/config/i386/cygming.h
++	if test x$ac_cv_sjlj_exceptions = xyes; then
++		tmake_eh_file="i386/t-sjlj-eh"
++	elif test "${host_address}" = 32; then
++	        # biarch -m32 with --disable-sjlj-exceptions
++	     	tmake_eh_file="i386/t-dw2-eh"
++	else
++		tmake_eh_file="i386/t-seh-eh"
++	fi
++	# Shared libgcc DLL install dir depends on cross/native build.
++	if test x${build} = x${host} ; then
++		tmake_dlldir_file="i386/t-dlldir"
++	else
++		tmake_dlldir_file="i386/t-dlldir-x"
++	fi
++	# FIXME - dj - t-chkstk used to be in here, need a 64-bit version of that
++	tmake_file="${tmake_file} ${tmake_eh_file} ${tmake_dlldir_file} i386/t-slibgcc-cygming i386/t-cygming i386/t-cygwin i386/t-chkstk t-dfprules"
++	tmake_file="${tmake_file} ${cpu_type}/t-aarch64"
++	tmake_file="${tmake_file} ${cpu_type}/t-lse"
++	tmake_file="${tmake_file} ${cpu_type}/t-softfp t-softfp t-crtfm"
++	;;
+ i[34567]86-*-cygwin*)
+ 	extra_parts="crtbegin.o crtbeginS.o crtend.o crtfastmath.o"
+ 	if test x$enable_vtable_verify = xyes; then
+--- a/libgcc/config/aarch64/aarch64-asm.h
++++ b/libgcc/config/aarch64/aarch64-asm.h
+@@ -24,7 +24,15 @@
+ 
+ #include "auto-target.h"
+ 
+ #define L(label) .L ## label
++
++#ifdef __GCC_HAVE_DWARF2_CFI_ASM
++# define cfi_startproc()		.cfi_startproc
++# define cfi_endproc()			.cfi_endproc
++#else
++# define cfi_startproc()
++# define cfi_endproc()
++#endif
+ 
+ /* Marking variant PCS symbol references is important for PLT calls
+    otherwise it is for documenting the PCS in the symbol table.  */
+--- a/libgcc/config/i386/cygwin.S
++++ b/libgcc/config/i386/cygwin.S
+@@ -23,7 +23,11 @@
+  * <http://www.gnu.org/licenses/>.
+  */
+ 
++#if defined(__i386__) || defined(__x86_64__)
+ #include "i386-asm.h"
++#elif defined(__aarch64__)
++#include "../aarch64/aarch64-asm.h"
++#endif
+ 
+ #ifdef HAVE_AS_CFI_SECTIONS
+ 	.cfi_sections	.debug_frame
+@@ -37,7 +41,7 @@
+ 
+ 	.global ___chkstk
+ 	.global	__alloca
+-#ifdef __x86_64__
++#if defined(__x86_64__)
+ /* __alloca is a normal function call, which uses %rcx as the argument.  */
+ 	cfi_startproc()
+ __alloca:
+@@ -74,7 +78,7 @@ ___chkstk:
+ 	pushq	%r11
+ 	ret
+ 	cfi_endproc()
+-#else
++#elif defined(__i386__)
+ 	cfi_startproc()
+ ___chkstk:
+ __alloca:
+@@ -103,6 +107,14 @@ __alloca:
+ 	pushl	4(%eax)
+ 	ret
+ 	cfi_endproc()
++#elif defined(__aarch64__)
++	cfi_startproc()
++___chkstk:
++__alloca:
++	// TODO
++	cfi_endproc()
++#else
++	#error "Unsupported architecture"
+ #endif /* __x86_64__ */
+ #endif /* L_chkstk */
+ 
+@@ -111,7 +123,7 @@ __alloca:
+    We avoid clobbering any registers.  Unlike ___chkstk, it just probes the
+    stack and does no stack allocation.  */
+ 	.global ___chkstk_ms
+-#ifdef __x86_64__
++#if defined(__x86_64__)
+ 	cfi_startproc()
+ ___chkstk_ms:
+ 	pushq	%rcx			/* save temps */
+@@ -137,7 +149,7 @@ ___chkstk_ms:
+ 	cfi_pop(%rcx)
+ 	ret
+ 	cfi_endproc()
+-#else
++#elif defined(__i386__)
+ 	cfi_startproc()
+ ___chkstk_ms:
+ 	pushl	%ecx			/* save temp */
+@@ -163,5 +175,12 @@ ___chkstk_ms:
+ 	cfi_pop(%ecx)
+ 	ret
+ 	cfi_endproc()
++#elif defined(__aarch64__)
++	cfi_startproc()
++___chkstk_ms:
++	// TODO
++	cfi_endproc()
++#else
++	#error "Unsupported architecture"
+ #endif /* __x86_64__ */
+ #endif /* L_chkstk_ms */
+--- a/libgcc/unwind-seh.c
++++ b/libgcc/unwind-seh.c
+@@ -147,7 +147,7 @@ void *
+ _Unwind_FindEnclosingFunction (void *pc)
+ {
+   PRUNTIME_FUNCTION entry;
+-  ULONG64 ImageBase;
++  DWORD_PTR ImageBase;
+ 
+   entry = RtlLookupFunctionEntry ((ULONG64)pc, &ImageBase, NULL);
+ 
+--- a/libstdc++-v3/src/c++20/tzdb.cc
++++ b/libstdc++-v3/src/c++20/tzdb.cc
+@@ -70,8 +70,8 @@ namespace __gnu_cxx
+ #else
+   [[gnu::weak]] const char* zoneinfo_dir_override();
+ 
+-#if defined(__APPLE__) || defined(__hpux__) \
+-  || (defined(__VXWORKS__) && !defined(__RTP__))
++#if defined(__APPLE__) || defined(__hpux__) || defined(__aarch64__) \
++  || (defined(__VXWORKS__) && !defined(__RTP__))
+   // Need a weak definition for Mach-O et al.
+   [[gnu::weak]] const char* zoneinfo_dir_override()
+   {

@@ -19,6 +19,12 @@ echo "::group::Patch Cygwin binutils"
 
     PATCH_DIR=$SOURCE_PATH/cygwin-packages/binutils
     patch -p2 -i $PATCH_DIR/binutils-2.43-cygwin-config-rpath.patch
+
+    case "$ARCH" in
+        aarch64)
+            patch -p1 -i $PATCHES_PATH/binutils/0001-aarch64-cygwin.patch
+        ;;
+    esac
 echo "::endgroup::"
 
 echo 'Success!'

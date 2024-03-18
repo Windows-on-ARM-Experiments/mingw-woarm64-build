@@ -17,7 +17,9 @@ fi
 if [[ "$APPLY_PATCHES" = 1 ]]; then
     case "$PLATFORM" in
         *cygwin*)
-            $ROOT_PATH/.github/scripts/binutils/patch-cygwin.sh 1
+            $ROOT_PATH/.github/scripts/binutils/patch-cygwin-binutils.sh 1
+            $ROOT_PATH/.github/scripts/toolchain/patch-cygwin-gcc.sh 1
+            $ROOT_PATH/.github/scripts/toolchain/patch-cygwin-mingw.sh 1
             $ROOT_PATH/.github/scripts/toolchain/patch-cygwin.sh 1
             ;;
     esac
@@ -61,8 +63,8 @@ fi
 if [[ "$APPLY_PATCHES" = 1 ]]; then
     case "$PLATFORM" in
         *cygwin*)
-            $ROOT_PATH/.github/scripts/binutils/patch-cygwin.sh 2
-            $ROOT_PATH/.github/scripts/toolchain/patch-cygwin.sh 2
+            $ROOT_PATH/.github/scripts/toolchain/patch-cygwin-gcc.sh 2
+            $ROOT_PATH/.github/scripts/toolchain/patch-cygwin-mingw.sh 2
             ;;
     esac
 fi
@@ -76,6 +78,15 @@ $ROOT_PATH/.github/scripts/toolchain/build-gcc.sh
 if [[ "$PLATFORM" =~ (mingw|cygwin) ]]; then
     $ROOT_PATH/.github/scripts/toolchain/build-mingw.sh
 fi
+
+if [[ "$APPLY_PATCHES" = 1 ]]; then
+    case "$PLATFORM" in
+        *cygwin*)
+            $ROOT_PATH/.github/scripts/toolchain/patch-cygwin.sh 2
+            ;;
+    esac
+fi
+
 if [[ "$PLATFORM" =~ cygwin ]]; then
     $ROOT_PATH/.github/scripts/toolchain/build-cygwin.sh 2
 fi

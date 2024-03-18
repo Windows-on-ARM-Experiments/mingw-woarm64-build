@@ -104,13 +104,15 @@ env:
   PLATFORM: w64-mingw32
   CRT: msvcrt
   TOOLCHAIN_PATH: ${{ github.workspace }}/cross
-  TOOLCHAIN_NAME: aarch64-w64-mingw32-msvcrt
-  TOOLCHAIN_ARTIFACT_NAME: aarch64-w64-mingw32-msvcrt-toolchain
-  TOOLCHAIN_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-toolchain.tar.gz
-  RUNTIME_ARTIFACT_NAME: aarch64-w64-mingw32-msvcrt-toolchain
-  RUNTIME_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-runtime.tar.gz
-  TESTS_ARTIFACT_NAME: aarch64-w64-mingw32-msvcrt-tests
-  TESTS_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-tests.tar.gz
+#  TOOLCHAIN_NAME: aarch64-w64-mingw32-msvcrt
+#  TOOLCHAIN_ARTIFACT_NAME: aarch64-w64-mingw32-msvcrt-toolchain
+#  TOOLCHAIN_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-toolchain.tar.gz
+#  RUNTIME_ARTIFACT_NAME: aarch64-w64-mingw32-msvcrt-toolchain
+#  RUNTIME_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-runtime.tar.gz
+#  TESTS_ARTIFACT_NAME: aarch64-w64-mingw32-msvcrt-tests
+# TESTS_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-tests.tar.gz
+  TOOLCHAIN_NAME: ${{ inputs.arch }}-${{ inputs.platform }}-${{ inputs.crt }}
+  TOOLCHAIN_PACKAGE_NAME: ${{ inputs.arch }}-${{ inputs.platform }}-${{ inputs.crt }}-toolchain.tar.gz
 
   SOURCE_PATH: ${{ github.workspace }}/code
   BUILD_PATH: ${{ github.workspace }}/build
@@ -142,8 +144,6 @@ jobs:
             crt: ucrt
           - platform: pc-cygwin
             crt: libc
-          - platform: pc-cygwin
-            arch: aarch64
 
     env:
       ARCH: ${{ matrix.arch }}
@@ -244,11 +244,13 @@ jobs:
       - name: Patch binutils stage1
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform == 'pc-cygwin' }}
         run: |
-          .github/scripts/binutils/patch-cygwin.sh 1
+          .github/scripts/binutils/patch-cygwin-binutils.sh 1
 
       - name: Patch toolchain stage1
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform == 'pc-cygwin' }}
         run: |
+          .github/scripts/toolchain/patch-cygwin-gcc.sh 1
+          .github/scripts/toolchain/patch-cygwin-mingw.sh 1
           .github/scripts/toolchain/patch-cygwin.sh 1
 
       - name: Install libraries
@@ -312,7 +314,8 @@ jobs:
       - name: Patch toolchain stage2
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform == 'pc-cygwin' }}
         run: |
-          .github/scripts/toolchain/patch-cygwin.sh 2
+          .github/scripts/toolchain/patch-cygwin-gcc.sh 2
+          .github/scripts/toolchain/patch-cygwin-mingw.sh 2
 
       - name: Install libraries
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
@@ -328,6 +331,11 @@ jobs:
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform != 'pc-linux-gnu' }}
         run: |
           .github/scripts/toolchain/build-mingw.sh
+
+      - name: Patch Cygwin stage2
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && inputs.platform == 'pc-cygwin' }}
+        run: |
+          .github/scripts/toolchain/patch-cygwin.sh 2
 
       - name: Build Cygwin stage2
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform == 'pc-cygwin' }}
