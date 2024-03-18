@@ -23,6 +23,22 @@ echo "::group::Patch Cygwin GCC"
     patch -p1 -i $PATCH_DIR/0011-Cygwin-define-STD_UNIX.patch
     patch -p1 -i $PATCH_DIR/0101-Cygwin-enable-libgccjit-not-just-for-MingW.patch
     patch -p1 -i $PATCH_DIR/0102-Cygwin-testsuite-fixes-for-libgccjit.patch
+
+    case "$ARCH" in
+        aarch64)
+            patch -p1 -i $PATCHES_PATH/gcc/0001-aarch64-cygwin.patch
+            patch -p1 -i $PATCHES_PATH/gcc/0002-cygming-extern.patch
+        ;;
+    esac
+echo "::endgroup::"
+
+echo echo "::group::Patch MinGW"
+    cd $SOURCE_PATH/$MINGW_VERSION
+
+    git reset --hard
+    git clean -fdx
+
+    patch -p1 -i $PATCHES_PATH/mingw/0001-aarch64-cygwin.patch
 echo "::endgroup::"
 
 echo "::group::Patch Cygwin"
@@ -36,13 +52,15 @@ echo "::group::Patch Cygwin"
         patch -p1 -i $PATCH_DIR/0001-before-autogen.patch
     fi
 
+    patch -p1 -i $PATCHES_PATH/cygwin/0003-master.patch
+    patch -p1 -i $PATCHES_PATH/cygwin/0004-aarch64-cygwin.patch
+
     (cd winsup && ./autogen.sh)
 
     if [ "$STAGE" = "1" ]; then
         patch -p1 -i $PATCH_DIR/0002-after-autogen.patch
     fi
 
-    patch -p1 -i $PATCHES_PATH/cygwin/0003-master.patch
 echo "::endgroup::"
 
 echo 'Success!'

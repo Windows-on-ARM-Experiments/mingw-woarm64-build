@@ -53,15 +53,38 @@ index 9efdd4c..a6c204d 100644
  
 -cygserver utils testsuite: cygwin
 +cygserver: cygwin
-diff --git a/winsup/cygserver/Makefile.am b/winsup/cygserver/Makefile.am
-index ec7a622..0249a62 100644
 --- a/winsup/cygserver/Makefile.am
 +++ b/winsup/cygserver/Makefile.am
-@@ -12,7 +12,6 @@ cygserver_flags=$(cxxflags_common) -Wimplicit-fallthrough=5 -Werror -DSYSCONFDIR
+@@ -12,32 +12,8 @@ cygserver_flags=$(cxxflags_common) -Wimplicit-fallthrough=5 -Werror -DSYSCONFDIR
  AM_CXXFLAGS = $(CFLAGS)
  
  noinst_LIBRARIES = libcygserver.a
 -sbin_PROGRAMS = cygserver
  bin_SCRIPTS = cygserver-config
  
- cygserver_SOURCES = \
+-cygserver_SOURCES = \
+-	bsd_helper.cc \
+-	bsd_log.cc \
+-	bsd_mutex.cc \
+-	client.cc \
+-	cygserver.cc \
+-	msg.cc \
+-	process.cc \
+-	pwdgrp.cc \
+-	sem.cc \
+-	setpwd.cc \
+-	shm.cc \
+-	sysv_msg.cc \
+-	sysv_sem.cc \
+-	sysv_shm.cc \
+-	threaded_queue.cc \
+-	transport.cc \
+-	transport_pipes.cc
+-
+-cygserver_CXXFLAGS = $(cygserver_flags) -D__OUTSIDE_CYGWIN__
+-cygserver_LDADD = -lntdll
+-cygserver_LDFLAGS = -static -static-libgcc
+-
+ # Note: the objects in libcygserver are built without -D__OUTSIDE_CYGWIN__,
+ # unlike cygserver.exe
+ 

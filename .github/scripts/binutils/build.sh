@@ -25,7 +25,6 @@ if [ "$RUN_CONFIG" = 1 ] || [ ! -f "$BINUTILS_BUILD_PATH/Makefile" ] ; then
                     --enable-host-shared \
                     --enable-64-bit-bfd \
                     --enable-install-libiberty \
-                    --enable-targets=x86_64-pep \
                     --with-sysroot=$TOOLCHAIN_PATH \
                     --with-build-sysroot=$TOOLCHAIN_PATH \
                     --with-system-zlib \
@@ -39,6 +38,18 @@ if [ "$RUN_CONFIG" = 1 ] || [ ! -f "$BINUTILS_BUILD_PATH/Makefile" ] ; then
                     --disable-werror \
                     --with-libiconv-prefix=$TOOLCHAIN_PATH \
                     --with-system-zlib"
+                ;;
+        esac
+
+        case "$ARCH-$PLATFORM" in
+            x86_64-*cygwin*)
+                TARGET_OPTIONS="$TARGET_OPTIONS \
+                    --enable-targets=x86_64-pep"
+                ;;
+            aarch64-*cygwin*)
+                TARGET_OPTIONS="$TARGET_OPTIONS \
+                    --enable-targets=aarch64-pep \
+                    --disable-sim"
                 ;;
         esac
 
