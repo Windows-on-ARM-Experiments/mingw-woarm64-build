@@ -24,6 +24,10 @@ env:
   GCC_BRANCH: ${{ inputs.gcc_branch || 'woarm64' }}
   MINGW_BRANCH: ${{ inputs.mingw_branch || 'woarm64' }}
 
+  ARCH: aarch64
+  PLATFORM: w64-mingw32
+  CRT: msvcrt
+
   BUILD_PATH: ${{ github.workspace }}/build
   CCACHE_DIR_PATH: ${{ github.workspace }}/ccache
   TOOLCHAIN_PATH: ${{ github.workspace }}/cross
