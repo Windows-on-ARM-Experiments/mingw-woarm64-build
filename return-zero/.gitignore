@@ -1,0 +1,6 @@
+*.exe
+*.dll
+*.o
+*.S
+*.objdump
+*.dumpbin

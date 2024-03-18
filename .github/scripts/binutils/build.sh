@@ -39,6 +39,18 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$BINUTILS_BUILD_PATH/Makefile" ]]; then
                 ;;
         esac
 
+        case "$ARCH-$PLATFORM" in
+            x86_64-*cygwin*)
+                TARGET_OPTIONS="$TARGET_OPTIONS \
+                    --enable-targets=x86_64-pep"
+                ;;
+            aarch64-*cygwin*)
+                TARGET_OPTIONS="$TARGET_OPTIONS \
+                    --enable-targets=aarch64-pep \
+                    --disable-sim"
+                ;;
+        esac
+
         $SOURCE_PATH/binutils/configure \
             --prefix=$TOOLCHAIN_PATH \
             --build=$BUILD \

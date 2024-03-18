@@ -1,0 +1,186 @@
+diff --git a/bfd/config.bfd b/bfd/config.bfd
+index 6553aac1e99d..c3be7e0fe585 100644
+--- a/bfd/config.bfd
++++ b/bfd/config.bfd
+@@ -248,7 +248,7 @@ case "${targ}" in
+     targ_selvecs="aarch64_elf64_be_vec aarch64_elf32_le_vec aarch64_elf32_be_vec arm_elf32_le_vec arm_elf32_be_vec aarch64_pei_le_vec aarch64_pe_le_vec"
+     want64=true
+     ;;
+-  aarch64-*-pe* | aarch64-*-mingw*)
++  aarch64-*-pe* | aarch64-*-mingw* | aarch64-*-cygwin*)
+     targ_defvec=aarch64_pe_le_vec
+     targ_selvecs="aarch64_pe_le_vec aarch64_pei_le_vec aarch64_elf64_le_vec aarch64_elf64_be_vec aarch64_elf32_le_vec aarch64_elf32_be_vec arm_elf32_le_vec arm_elf32_be_vec pdb_vec"
+     want64=true
+diff --git a/binutils/configure b/binutils/configure
+index 2b9f52720c3e..654476cd2e1d 100755
+--- a/binutils/configure
++++ b/binutils/configure
+@@ -16426,7 +16426,7 @@ do
+     esac
+ 
+     case $targ in
+-    aarch64-*-mingw*)
++    aarch64-*-mingw* | aarch64-*-cygwin*)
+ 	BUILD_DLLTOOL='$(DLLTOOL_PROG)$(EXEEXT)'
+ 	if test -z "$DLLTOOL_DEFAULT"; then
+ 	    DLLTOOL_DEFAULT="-DDLLTOOL_DEFAULT_AARCH64"
+diff --git a/binutils/configure.ac b/binutils/configure.ac
+index dac72c1bdd4d..28a51bdd7e93 100644
+--- a/binutils/configure.ac
++++ b/binutils/configure.ac
+@@ -369,7 +369,7 @@ changequote([,])dnl
+     esac
+ 
+     case $targ in
+-    aarch64-*-mingw*)
++    aarch64-*-mingw*| aarch64-*-cygwin* )
+ 	BUILD_DLLTOOL='$(DLLTOOL_PROG)$(EXEEXT)'
+ 	if test -z "$DLLTOOL_DEFAULT"; then
+ 	    DLLTOOL_DEFAULT="-DDLLTOOL_DEFAULT_AARCH64"
+diff --git a/config.guess b/config.guess
+index cdfc4392047c..91a44145ed1a 100755
+--- a/config.guess
++++ b/config.guess
+@@ -951,6 +951,9 @@ EOF
+     i*:UWIN*:*)
+ 	GUESS=$UNAME_MACHINE-pc-uwin
+ 	;;
++    aarch64:CYGWIN*:*:*)
++	GUESS=aarch64-pc-cygwin
++	;;
+     amd64:CYGWIN*:*:* | x86_64:CYGWIN*:*:*)
+ 	GUESS=x86_64-pc-cygwin
+ 	;;
+diff --git a/gas/configure.tgt b/gas/configure.tgt
+index 7c66734e362b..94fa2407f416 100644
+--- a/gas/configure.tgt
++++ b/gas/configure.tgt
+@@ -138,7 +138,7 @@ case ${generic_target} in
+   aarch64*-*-netbsd*)			fmt=elf em=nbsd;;
+   aarch64*-*-nto*)			fmt=elf;;
+   aarch64*-*-openbsd*)			fmt=elf;;
+-  aarch64*-*-pe* | aarch64*-*-mingw*)	fmt=coff em=pepaarch64 ;;
++  aarch64*-*-pe* | aarch64*-*-mingw* | aarch64*-*-cygwin*)	fmt=coff em=pepaarch64 ;;
+   alpha-*-*vms*)			fmt=evax ;;
+   alpha-*-osf*)				fmt=ecoff ;;
+   alpha-*-linux*ecoff*)			fmt=ecoff ;;
+diff --git a/gdb/configure.host b/gdb/configure.host
+index da71675b201b..05debc74ab3c 100644
+--- a/gdb/configure.host
++++ b/gdb/configure.host
+@@ -81,6 +81,7 @@ case "${host}" in
+ 
+ aarch64*-*-linux*)	gdb_host=linux ;;
+ aarch64*-*-freebsd*)	gdb_host=fbsd ;;
++aarch64*-*-cygwin*)	gdb_host=cygwin64 ;;
+ 
+ alpha*-*-linux*)	gdb_host=alpha-linux ;;
+ alpha*-*-netbsdaout* | alpha*-*-knetbsdaout*-gnu)
+diff --git a/gdbserver/configure.srv b/gdbserver/configure.srv
+index 9e861a75088a..c986da39f051 100644
+--- a/gdbserver/configure.srv
++++ b/gdbserver/configure.srv
+@@ -66,6 +66,13 @@ case "${gdbserver_host}" in
+ 			srv_tgtobj="${srv_tgtobj} nat/netbsd-nat.o"
+ 			srv_tgtobj="${srv_tgtobj} arch/aarch64-insn.o arch/aarch64.o"
+ 			;;
++  aarch64-*-cygwin*)	srv_regobj=""
++			srv_tgtobj="aarch64-low.o nat/aarch64-dregs.o"
++			srv_tgtobj="${srv_tgtobj} nat/aarch64-xstate.o aarch64-fp.o"
++			srv_tgtobj="${srv_tgtobj} win32-low.o win32-aarch64-low.o"
++			srv_tgtobj="${srv_tgtobj} nat/windows-nat.o"
++			srv_tgtobj="${srv_tgtobj} arch/aarch64.o"
++			;;
+   arc*-*-linux*)
+ 			srv_regobj=""
+ 			srv_tgtobj="linux-arc-low.o arch/arc.o $srv_linux_obj"
+diff --git a/ld/configure.tgt b/ld/configure.tgt
+index 27b63e5112ad..f6a5d0feab9e 100644
+--- a/ld/configure.tgt
++++ b/ld/configure.tgt
+@@ -127,7 +127,7 @@ aarch64-*-haiku*)	targ_emul=aarch64haiku
+ aarch64-*-nto*)		targ_emul=aarch64nto
+ 			targ_extra_emuls="aarch64elf aarch64elf32 aarch64elf32b aarch64elfb armelf armelfb"
+ 			;;
+-aarch64-*-pe* | aarch64-*-mingw*)
++aarch64-*-pe* | aarch64-*-mingw* | aarch64-*-cygwin*)
+ 			targ_emul=aarch64pe
+ 			targ_extra_emuls=arm64pe
+ 			targ_extra_ofiles="deffilep.o pep-dll-aarch64.o pe-dll.o pdb.o"
+@@ -1145,7 +1145,7 @@ spu-*-elf*)
+   NATIVE_LIB_DIRS='/lib'
+   ;;
+ 
+-i[03-9x]86-*-cygwin* | x86_64-*-cygwin*)
++aarch64-*-cygwin* | i[03-9x]86-*-cygwin* | x86_64-*-cygwin*)
+   NATIVE_LIB_DIRS='/usr/lib /usr/lib/w32api'
+   ;;
+ 
+diff --git a/ld/emultempl/pe.em b/ld/emultempl/pe.em
+index 9ab5e6ef481c..0a2ff3f7fb48 100644
+--- a/ld/emultempl/pe.em
++++ b/ld/emultempl/pe.em
+@@ -69,6 +69,7 @@ fragment <<EOF
+ EOF
+ 
+ case ${target} in
++  aarch64-*-mingw* | aarch64-*-pe* | aarch64-*-cygwin | \
+   x86_64-*-mingw* | x86_64-*-pe | x86_64-*-pep | x86_64-*-cygwin | \
+   i[3-7]86-*-mingw32* | i[3-7]86-*-cygwin* | i[3-7]86-*-winnt | i[3-7]86-*-pe)
+ fragment <<EOF
+@@ -126,9 +126,8 @@ fragment <<EOF
+ #define DEFAULT_PSEUDO_RELOC_VERSION 1
+ #endif
+ 
+-#define DEFAULT_DLL_CHARACTERISTICS	(${cygwin_behavior} ? 0 : \
+-					   IMAGE_DLL_CHARACTERISTICS_DYNAMIC_BASE \
+-					 | IMAGE_DLL_CHARACTERISTICS_NX_COMPAT)
++#define DEFAULT_DLL_CHARACTERISTICS	(   IMAGE_DLL_CHARACTERISTICS_DYNAMIC_BASE \
++					  | IMAGE_DLL_CHARACTERISTICS_NX_COMPAT)
+ 
+ #if defined(TARGET_IS_i386pe) || ! defined(DLL_SUPPORT)
+ #define	PE_DEF_SUBSYSTEM		IMAGE_SUBSYSTEM_WINDOWS_CUI
+diff --git a/ld/emultempl/pep.em b/ld/emultempl/pep.em
+index 5c9dddfc9369..2b282e130879 100644
+--- a/ld/emultempl/pep.em
++++ b/ld/emultempl/pep.em
+@@ -78,9 +78,9 @@ fragment <<EOF
+ EOF
+ 
+ case ${target} in
++  aarch64-*-mingw* | aarch64-*-pe* | aarch64-*-cygwin | \
+   x86_64-*-mingw* | x86_64-*-pe | x86_64-*-pep | x86_64-*-cygwin | \
+-  i[3-7]86-*-mingw32* | i[3-7]86-*-cygwin* | i[3-7]86-*-winnt | i[3-7]86-*-pe | \
+-  aarch64-*-mingw* | aarch64-*-pe* )
++  i[3-7]86-*-mingw32* | i[3-7]86-*-cygwin* | i[3-7]86-*-winnt | i[3-7]86-*-pe)
+ fragment <<EOF
+ #include "pdb.h"
+ EOF
+@@ -126,10 +126,9 @@ fragment <<EOF
+ #define DLL_SUPPORT
+ #endif
+ 
+-#define DEFAULT_DLL_CHARACTERISTICS	(${cygwin_behavior} ? 0 : \
+-					   IMAGE_DLL_CHARACTERISTICS_DYNAMIC_BASE \
+-					 | IMAGE_DLL_CHARACTERISTICS_HIGH_ENTROPY_VA \
+-  					 | IMAGE_DLL_CHARACTERISTICS_NX_COMPAT)
++#define DEFAULT_DLL_CHARACTERISTICS	(   IMAGE_DLL_CHARACTERISTICS_DYNAMIC_BASE \
++					  | IMAGE_DLL_CHARACTERISTICS_HIGH_ENTROPY_VA \
++  					  | IMAGE_DLL_CHARACTERISTICS_NX_COMPAT)
+ 
+ #if defined(TARGET_IS_i386pep) || defined(COFF_WITH_peAArch64) || ! defined(DLL_SUPPORT)
+ #define	PE_DEF_SUBSYSTEM		IMAGE_SUBSYSTEM_WINDOWS_CUI
+diff --git a/readline/readline/support/config.guess b/readline/readline/support/config.guess
+index cc7a81070119..9c9b836c8ba4 100755
+--- a/readline/readline/support/config.guess
++++ b/readline/readline/support/config.guess
+@@ -915,6 +915,9 @@ EOF
+     i*:UWIN*:*)
+ 	echo "$UNAME_MACHINE"-pc-uwin
+ 	exit ;;
++    aarch64:CYGWIN*:*:*)
++	echo aarch64-pc-cygwin
++	;;
+     amd64:CYGWIN*:*:* | x86_64:CYGWIN*:*:*)
+ 	echo x86_64-pc-cygwin
+ 	exit ;;
