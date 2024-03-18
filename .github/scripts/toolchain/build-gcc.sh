@@ -91,6 +91,7 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$GCC_BUILD_PATH/Makefile" ]]; then
                 ;;
         esac
 
+        # REMOVED: --enable-languages=ada,go,jit
         $SOURCE_PATH/gcc/configure \
             --prefix=$TOOLCHAIN_PATH \
             --build=$BUILD \
@@ -98,7 +99,7 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$GCC_BUILD_PATH/Makefile" ]]; then
             --target=$TARGET \
             --enable-static \
             --enable-shared \
-            --enable-languages=c,c++,lto,fortran \
+            --enable-languages=c,c++,d,fortran,lto,m2,objc,obj-c++ \
             --disable-bootstrap \
             --disable-multilib \
             --with-gnu-as \
