@@ -13,6 +13,12 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$CYGWIN_BUILD_PATH/Makefile" ]]; then
     echo "::group::Configure Cygwin"
         rm -rf $CYGWIN_BUILD_PATH/*
 
+        if [ "$DEBUG" = 1 ] ; then
+            HOST_OPTIONS="$HOST_OPTIONS \
+                --enable-debug \
+                --disable-lto"
+        fi
+
         (cd $CYGWIN_SOURCE_PATH/winsup && ./autogen.sh)
         if [[ "$STAGE" = "1" ]]; then
             (cd $CYGWIN_SOURCE_PATH && patch -p1 -i $PATCHES_PATH/cygwin/0001-fix-autogen.patch)
@@ -33,6 +39,7 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$CYGWIN_BUILD_PATH/Makefile" ]]; then
             --with-sysroot=$TOOLCHAIN_PATH \
             --with-build-sysroot=$TOOLCHAIN_PATH \
             --with-cross-bootstrap \
+            $HOST_OPTIONS \
             $TARGET_OPTIONS
     echo "::endgroup::"
 fi
