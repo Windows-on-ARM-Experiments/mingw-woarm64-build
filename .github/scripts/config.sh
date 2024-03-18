@@ -5,7 +5,7 @@ set -x # echo on
 set -o pipefail # fail of any command in pipeline is an error
 
 ARCH=${ARCH:-aarch64}
-PLATFORM=${PLATFORM:-w64-mingw32}
+PLATFORM=${PLATFORM:-pc-cygwin}
 if [[ "$PLATFORM" =~ (mingw|cygwin) ]]; then
     CRT=${CRT:-msvcrt}
 else
@@ -60,8 +60,8 @@ TOOLCHAIN_CCACHE_LIB_DIR=$TOOLCHAIN_PATH/lib/ccache
 DEBUG=${DEBUG:-0} # Enable debug build.
 CCACHE=${CCACHE:-0} # Enable usage of ccache.
 RUN_BOOTSTRAP=${RUN_BOOTSTRAP:-0} # Bootstrap dependencies during the build.
-UPDATE_SOURCES=${UPDATE_SOURCES:-0} # Update source code repositories.
-RESET_SOURCES=${RESET_SOURCES:-0} # Reset source code repositories before update.
+UPDATE_SOURCES=${UPDATE_SOURCES:-1} # Update source code repositories.
+RESET_SOURCES=${RESET_SOURCES:-1} # Reset source code repositories before update.
 APPLY_PATCHES=${APPLY_PATCHES:-1} # Patch source repositories for targets requiring it.
 RUN_CONFIG=${RUN_CONFIG:-1} # Run configuration step.
 RUN_INSTALL=${RUN_INSTALL:-1} # Run installation step.
