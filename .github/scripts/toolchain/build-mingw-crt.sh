@@ -89,6 +89,8 @@ if [[ "$RUN_INSTALL" = 1 ]]; then
                     ln -fs w32api/libuserenv.a .
                     ln -fs w32api/libnetapi32.a .
                     ln -fs w32api/libdbghelp.a .
+                    ln -fs w32api/libonecore.a .
+                    ln -fs w32api/libpdh.a .
                 popd
                 ;;
         esac
