@@ -17,6 +17,21 @@ if [ "$RUN_CONFIG" = 1 ] || [ ! -f "$BINUTILS_BUILD_PATH/Makefile" ] ; then
         fi
 
         case "$PLATFORM" in
+            *cygwin*)
+                TARGET_OPTIONS="$TARGET_OPTIONS \
+                    --disable-bootstrap \
+                    --enable-static \
+                    --enable-shared \
+                    --enable-host-shared \
+                    --enable-64-bit-bfd \
+                    --enable-install-libiberty \
+                    --enable-targets=x86_64-pep \
+                    --with-sysroot=$TOOLCHAIN_PATH \
+                    --with-build-sysroot=$TOOLCHAIN_PATH \
+                    --with-system-zlib \
+                    --with-gcc-major-version-only \
+                    lt_cv_deplibs_check_method=pass_all"
+                ;;
             *mingw*)
                 TARGET_OPTIONS="$TARGET_OPTIONS \
                     --enable-lto \

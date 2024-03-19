@@ -36,6 +36,10 @@ if [ "$RUN_CONFIG" = 1 ] || [ ! -f "$MINGW_BUILD_PATH/Makefile" ] ; then
         esac
 
         case "$PLATFORM" in
+            *cygwin*)
+                TARGET_OPTIONS="$TARGET_OPTIONS \
+                    --enable-w32api"
+                ;;
             *mingw*)
                 TARGET_OPTIONS="$TARGET_OPTIONS \
                     --enable-wildcard \
