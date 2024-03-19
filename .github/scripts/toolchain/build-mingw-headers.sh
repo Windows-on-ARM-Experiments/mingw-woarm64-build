@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source `dirname ${BASH_SOURCE[0]}`/../config-mingw.sh
+source `dirname ${BASH_SOURCE[0]}`/../config.sh
 
 MINGW_HEADERS_BUILD_PATH=$BUILD_PATH/mingw-headers
 
@@ -15,6 +15,26 @@ if [ "$RUN_CONFIG" = 1 ] || [ ! -f "$MINGW_HEADERS_BUILD_PATH/Makefile" ] ; then
             HOST_OPTIONS="$HOST_OPTIONS \
                 --enable-debug"
         fi
+
+        case "$PLATFORM" in
+            *mingw*)
+                TARGET_OPTIONS="$TARGET_OPTIONS \
+                    --enable-sdk=all"
+                ;;
+        esac
+
+        case "$CRT" in
+            ucrt)
+                TARGET_OPTIONS="$TARGET_OPTIONS \
+                    --with-default-win32-winnt=0x603 \
+                    --with-default-msvcrt=ucrt"
+            ;;
+            msvcrt)
+                TARGET_OPTIONS="$TARGET_OPTIONS \
+                    --with-default-win32-winnt=0x601 \
+                    --with-default-msvcrt=msvcrt"
+            ;;
+        esac
 
         $SOURCE_PATH/$MINGW_VERSION/mingw-w64-headers/configure \
             --prefix=$TOOLCHAIN_PATH/$TARGET \
