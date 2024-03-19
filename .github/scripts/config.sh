@@ -7,6 +7,8 @@ set -o pipefail # fail of any command in pipeline is an error
 GCC_VERSION=${GCC_VERSION:-gcc-master}
 BINUTILS_VERSION=${BINUTILS_VERSION:-binutils-master}
 MINGW_VERSION=${MINGW_VERSION:-mingw-w64-master}
+CYGWIN_VERSION=${CYGWIN_VERSION:-cygwin-master}
+COCOM_VERSION=${COCOM_VERSION:-cocom-master}
 OPENBLAS_VERSION=${OPENBLAS_VERSION:-openblas-develop}
 ZLIB_VERSION=${ZLIB_VERSION:-zlib-develop}
 LIBXML2_VERSION=${LIBXML2_VERSION:-libxml2-master}
@@ -16,7 +18,7 @@ FFMPEG_VERSION=${FFMPEG_VERSION:-ffmpeg-master}
 
 ARCH=${ARCH:-aarch64}
 PLATFORM=${PLATFORM:-w64-mingw32}
-if [[ "$PLATFORM" =~ mingw ]]; then
+if [[ "$PLATFORM" =~ (mingw|cygwin) ]]; then
     CRT=${CRT:-msvcrt}
 else
     CRT=${CRT:-libc}
@@ -26,7 +28,7 @@ HOST=x86_64-pc-linux-gnu
 TARGET=$ARCH-$PLATFORM
 TOOLCHAIN_NAME=${TOOLCHAIN_NAME:-$ARCH-$PLATFORM-$CRT}
 
-if [[ ("$PLATFORM" =~ mingw && !("$CRT" =~ (msvcrt|ucrt))) ||
+if [[ ("$PLATFORM" =~ (mingw|cygwin) && !("$CRT" =~ (msvcrt|ucrt))) ||
     ("$PLATFORM" =~ linux && "$CRT" != "libc") ]]; then
     echo "Unsupported target $PLATFORM with CRT $CRT!"
     exit 1

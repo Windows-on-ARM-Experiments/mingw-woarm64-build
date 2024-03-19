@@ -36,6 +36,10 @@ if [ "$RUN_CONFIG" = 1 ] || [ ! -f "$MINGW_BUILD_PATH/Makefile" ] ; then
         esac
 
         case "$PLATFORM" in
+            *cygwin*)
+                TARGET_OPTIONS="$TARGET_OPTIONS \
+                    --enable-w32api"
+                ;;
             *mingw*)
                 TARGET_OPTIONS="$TARGET_OPTIONS \
                     --enable-wildcard \
@@ -71,6 +75,25 @@ echo "::endgroup::"
 if [ "$RUN_INSTALL" = 1 ] ; then
     echo "::group::Install MinGW CRT"
         make install
+
+        case "$PLATFORM" in
+            *cygwin*)
+                pushd $TOOLCHAIN_PATH/$TARGET/lib
+                    ln -fs w32api/libkernel32.a .
+                    ln -fs w32api/libuser32.a .
+                    ln -fs w32api/libadvapi32.a .
+                    ln -fs w32api/libshell32.a .
+                    ln -fs w32api/libgdi32.a .
+                    ln -fs w32api/libcomdlg32.a .
+                    ln -fs w32api/libntdll.a .
+                    ln -fs w32api/libnetapi32.a .
+                    ln -fs w32api/libpsapi.a .
+                    ln -fs w32api/libuserenv.a .
+                    ln -fs w32api/libnetapi32.a .
+                    ln -fs w32api/libdbghelp.a .
+                popd
+                ;;
+        esac
     echo "::endgroup::"
 fi
 

@@ -1,0 +1,19 @@
+diff --git a/newlib/libc/include/stdlib.h b/newlib/libc/include/stdlib.h
+index fd89f5ba7..ea91715da 100644
+--- a/newlib/libc/include/stdlib.h
++++ b/newlib/libc/include/stdlib.h
+@@ -221,14 +222,12 @@ char *	ecvtbuf (double, int, int*, int*, char *);
+ char *	fcvtbuf (double, int, int*, int*, char *);
+ char *	ecvtf (float,int,int *,int *);
+ #endif
+-#ifndef __CYGWIN__
+ char *	__itoa (int, char *, int);
+ char *	__utoa (unsigned, char *, int);
+ # if __MISC_VISIBLE
+ char *	itoa (int, char *, int);
+ char *	utoa (unsigned, char *, int);
+ # endif
+-#endif
+ #if __POSIX_VISIBLE
+ int	rand_r (unsigned *__seed);
+ #endif

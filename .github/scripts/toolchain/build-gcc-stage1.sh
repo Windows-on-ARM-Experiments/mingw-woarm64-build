@@ -35,6 +35,14 @@ if [ "$RUN_CONFIG" = 1 ] || [ ! -f "$GCC_BUILD_PATH/Makefile" ] ; then
                     --enable-languages=c,lto \
                     --enable-threads=posix"
                 ;;
+            *cygwin*)
+                TARGET_OPTIONS="$TARGET_OPTIONS \
+                    --enable-languages=c,c++,lto \
+                    --disable-__cxa_atexit \
+                    --enable-threads=posix \
+                    --with-dwarf2 \
+                    --with-system-zlib"
+                ;;
             *mingw*)
                 TARGET_OPTIONS="$TARGET_OPTIONS \
                     --enable-languages=c \
