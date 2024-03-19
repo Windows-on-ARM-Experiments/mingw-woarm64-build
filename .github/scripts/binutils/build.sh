@@ -16,6 +16,17 @@ if [ "$RUN_CONFIG" = 1 ] || [ ! -f "$BINUTILS_BUILD_PATH/Makefile" ] ; then
                 --enable-debug"
         fi
 
+        case "$PLATFORM" in
+            *mingw*)
+                TARGET_OPTIONS="$TARGET_OPTIONS \
+                    --enable-lto \
+                    --enable-64-bit-bfd \
+                    --disable-werror \
+                    --with-libiconv-prefix=$TOOLCHAIN_PATH \
+                    --with-system-zlib"
+                ;;
+        esac
+
         $SOURCE_PATH/$BINUTILS_VERSION/configure \
             --prefix=$TOOLCHAIN_PATH \
             --build=$BUILD \

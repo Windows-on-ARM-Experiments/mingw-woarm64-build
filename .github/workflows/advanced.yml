@@ -16,7 +16,7 @@ on:
         required: false
         default: 'woarm64'
       mingw_branch:
-        description: 'Mingw branch to build'
+        description: 'MinGW branch to build'
         required: false
         default: 'woarm64'
       openblas_branch:
@@ -90,6 +90,7 @@ jobs:
     runs-on: ubuntu-latest
 
     strategy:
+      fail-fast: false
       matrix:
         arch: [aarch64, x86_64]
         platform: [w64-mingw32, pc-linux-gnu]
@@ -204,30 +205,30 @@ jobs:
         run: |
           .github/scripts/toolchain/build-mingw-headers.sh
 
-      - name: Build GCC
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
+      - name: Build GCC stage1
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform != 'pc-linux-gnu' }}
         run: |
-          .github/scripts/toolchain/build-gcc.sh
+          .github/scripts/toolchain/build-gcc-stage1.sh
 
       - name: Build MinGW CRT
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform != 'pc-linux-gnu' }}
         run: |
           .github/scripts/toolchain/build-mingw-crt.sh
 
-      - name: Build libgcc
+      - name: Build MinGW winpthreads
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform != 'pc-linux-gnu' }}
+        run: |
+          .github/scripts/toolchain/build-mingw-winpthreads.sh
+  
+      - name: Build GCC stage2
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
         run: |
-          .github/scripts/toolchain/build-libgcc.sh
+          .github/scripts/toolchain/build-gcc.sh
 
       - name: Build MinGW
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform != 'pc-linux-gnu' }}
         run: |
           .github/scripts/toolchain/build-mingw.sh
-
-      - name: Build GCC libs
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
-        run: |
-          .github/scripts/toolchain/build-gcc-libs.sh
 
       - name: Pack toolchain
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && env.PACK_TOOLCHAIN == 'true' }}
