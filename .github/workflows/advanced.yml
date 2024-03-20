@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - wo-stage1-compiler
   pull_request:
   workflow_dispatch:
     inputs:
