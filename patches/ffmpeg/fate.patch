@@ -11,19 +11,6 @@ index 78652c47bd..53d13375db 100644
  
  ALLFFLIBS = avcodec avdevice avfilter avformat avutil postproc swscale swresample
  
-diff --git a/configure b/configure
-index a89cfa6d95..aefb6fa23d 100755
---- a/configure
-+++ b/configure
-@@ -4802,7 +4802,7 @@ probe_cc(){
-                 warn "gcc 4.2 is outdated and may miscompile FFmpeg. Please use a newer compiler." ;;
-             esac
-         fi
--        _cflags_speed='-O3'
-+        _cflags_speed='-O2'
-         _cflags_size='-Os'
-     elif $_cc --version 2>/dev/null | grep -q ^icc; then
-         _type=icc
 diff --git a/doc/Makefile b/doc/Makefile
 index 67586e4b74..d7432290a0 100644
 --- a/doc/Makefile
