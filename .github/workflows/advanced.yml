@@ -91,9 +91,9 @@ jobs:
 
     strategy:
       matrix:
-        arch: [aarch64]
-        platform: [w64-mingw32]
-        crt: [msvcrt]
+        arch: [aarch64, x86_64]
+        platform: [w64-mingw32, pc-linux-gnu]
+        crt: [msvcrt, ucrt, libc]
         exclude:
           - platform: pc-linux-gnu
             crt: msvcrt
