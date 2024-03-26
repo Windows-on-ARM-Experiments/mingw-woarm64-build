@@ -22,7 +22,7 @@ on:
       cygwin_branch:
         description: 'Cygwin branch to build'
         required: false
-        default: 'woarm64'
+        default: 'main'
       cygwin_packages_branch:
         description: 'Cygwin packages branch to build'
         required: false
@@ -30,7 +30,7 @@ on:
       cocom_branch:
         description: 'COCOM branch to build'
         required: false
-        default: 'main'
+        default: 'master'
       openblas_branch:
         description: 'OpenBLAS branch to test'
         required: false
@@ -73,7 +73,7 @@ env:
   MINGW_VERSION: mingw-w64-master
 
   CYGWIN_REPO: Windows-on-ARM-Experiments/newlib-cygwin
-  CYGWIN_BRANCH: ${{ inputs.cygwin_branch || 'woarm64' }}
+  CYGWIN_BRANCH: ${{ inputs.cygwin_branch || 'main' }}
   CYGWIN_VERSION: cygwin-master
 
   CYGWIN_PACKAGES_REPO: Windows-on-ARM-Experiments/cygwin-packages
