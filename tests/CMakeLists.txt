@@ -31,6 +31,7 @@ add_executable(
   math-test.c
   nested-functions-test.c
   omp-test.c
+  printf-double.c
   pdata-test.c
   sjlj-test.c
   sscanf-double.c
