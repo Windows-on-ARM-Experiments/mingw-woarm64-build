@@ -22,7 +22,7 @@ on:
       cygwin_branch:
         description: 'Cygwin branch to build'
         required: false
-        default: 'woarm64'
+        default: 'main'
       cygwin_packages_branch:
         description: 'Cygwin packages branch to build'
         required: false
@@ -30,7 +30,7 @@ on:
       cocom_branch:
         description: 'COCOM branch to build'
         required: false
-        default: 'main'
+        default: 'master'
       openblas_branch:
         description: 'OpenBLAS branch to test'
         required: false
@@ -72,8 +72,8 @@ env:
   MINGW_BRANCH: ${{ inputs.mingw_branch || 'woarm64' }}
   MINGW_VERSION: mingw-w64-master
 
-  CYGWIN_REPO: Windows-on-ARM-Experiments/newlib-cygwin
-  CYGWIN_BRANCH: ${{ inputs.cygwin_branch || 'woarm64' }}
+  CYGWIN_REPO: https://cygwin.com/git/newlib-cygwin.git
+  CYGWIN_BRANCH: ${{ inputs.cygwin_branch || 'main' }}
   CYGWIN_VERSION: cygwin-master
 
   CYGWIN_PACKAGES_REPO: Windows-on-ARM-Experiments/cygwin-packages
@@ -122,22 +122,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        arch: [aarch64, x86_64]
-        platform: [w64-mingw32, pc-linux-gnu, pc-cygwin]
-        crt: [msvcrt, ucrt, libc]
-        exclude:
-          - platform: w64-mingw32
-            crt: libc
-          - platform: pc-linux-gnu
-            crt: msvcrt
-          - platform: pc-linux-gnu
-            crt: ucrt
-          - platform: pc-cygwin
-            crt: ucrt
-          - platform: pc-cygwin
-            crt: libc
-          - platform: pc-cygwin
-            arch: aarch64
+        arch: [aarch64]
+        platform: [pc-cygwin]
+        crt: [msvcrt]
 
     env:
       ARCH: ${{ matrix.arch }}

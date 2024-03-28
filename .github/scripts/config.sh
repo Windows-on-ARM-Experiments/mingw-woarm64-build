@@ -17,7 +17,7 @@ LIBJPEG_TURBO_VERSION=${LIBJPEG_TURBO_VERSION:-libjpeg-turbo-main}
 FFMPEG_VERSION=${FFMPEG_VERSION:-ffmpeg-master}
 
 ARCH=${ARCH:-aarch64}
-PLATFORM=${PLATFORM:-w64-mingw32}
+PLATFORM=${PLATFORM:-pc-cygwin}
 if [[ "$PLATFORM" =~ (mingw|cygwin) ]]; then
     CRT=${CRT:-msvcrt}
 else
