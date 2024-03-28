@@ -8,6 +8,7 @@ TEST(Aarch64MinGW, DllTest);
 TEST(Aarch64MinGW, MathTest);
 TEST(Aarch64MinGW, NestedFunction);
 TEST(Aarch64MinGW, OmpTest);
+TEST(Aarch64MinGW, PrintfDoubleTest);
 TEST(Aarch64MinGW, TestUnwindStack);
 TEST(Aarch64MinGW, SJLJTest);
 TEST(Aarch64MinGW, SscanfDoubleTest);
@@ -45,6 +46,7 @@ int main(int argc, char **argv) {
         DECLARE_TEST(Aarch64MinGW, MathTest),
         DECLARE_TEST(Aarch64MinGW, NestedFunction),
         DECLARE_TEST(Aarch64MinGW, OmpTest),
+        DECLARE_TEST(Aarch64MinGW, PrintfDoubleTest),
         DECLARE_TEST(Aarch64MinGW, TestUnwindStack),
         DECLARE_TEST(Aarch64MinGW, SJLJTest),
         DECLARE_TEST(Aarch64MinGW, SscanfDoubleTest),
