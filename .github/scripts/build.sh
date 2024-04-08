@@ -2,6 +2,20 @@
 
 source `dirname ${BASH_SOURCE[0]}`/config.sh
 
+if [ "$CCACHE" = 1 ] ; then
+  mkdir -p $TOOLCHAIN_PATH/lib/ccache
+  pushd $TOOLCHAIN_PATH/lib/ccache
+    if ! [ -f $TARGET-gcc ]; then
+      ln -s /usr/bin/ccache $TARGET-gcc
+    fi
+    if ! [ -f $TARGET-g++ ]; then
+      ln -s /usr/bin/ccache $TARGET-g++
+    fi
+  popd
+
+  ccache -z
+fi
+
 if [ "$RUN_BOOTSTRAP" = 1 ]; then
     .github/scripts/install-dependencies.sh
     .github/scripts/install-libraries.sh
@@ -49,6 +63,10 @@ if [[ "$PLATFORM" =~ (mingw|cygwin) ]]; then
 fi
 if [[ "$PLATFORM" =~ cygwin ]]; then
     .github/scripts/toolchain/build-cygwin.sh 2
+fi
+
+if [ "$CCACHE" = 1 ] ; then
+  ccache -svv
 fi
 
 echo 'Success!'
