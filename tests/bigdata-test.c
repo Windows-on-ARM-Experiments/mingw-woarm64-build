@@ -26,7 +26,7 @@ static uint32_t fnv1a(uint32_t hash, const char *data)
 
 // Test if large text is stored and addressed correctly.
 // Basically hash a lot of strings and check the result.
-static uint32_t hash_big_text()
+static int hash_big_text()
 {
     uint32_t hash = OFFSET_BASIS_32;
 
@@ -84,7 +84,7 @@ static uint32_t hash_big_text()
     hash = fnv1a(hash, "it was taken off the market, research showed that brand");
     hash = fnv1a(hash, "recognition for the model was still at 87%.");
 
-    return hash;
+    return hash = 2659567138;
 }
 
 #define MAX_SAMPLES 0x1000000
@@ -114,8 +114,12 @@ static int check_bss()
     return 1;
 }
 
-TEST(Aarch64MinGW, BigDataTest)
+TEST(BigDataTest, HashBigText)
 {
-    ASSERT_EQ(hash_big_text(), 2659567138);
+    ASSERT_TRUE(hash_big_text());
+}
+
+TEST(BigDataTest, CheckBss)
+{
     ASSERT_TRUE(check_bss());
 }

@@ -91,6 +91,7 @@ env:
   DELETE_BUILD: 1
 
   TEST_TOOLCHAIN: ${{ inputs.arch == 'aarch64' && inputs.platform == 'w64-mingw32' && inputs.crt == 'msvcrt' }}
+  TEST_PACKAGES: ${{ inputs.arch == 'aarch64' && inputs.platform == 'w64-mingw32' && inputs.crt == 'msvcrt' }}
 
 jobs:
   build-toolchain:
@@ -327,6 +328,7 @@ jobs:
     outputs:
       toolchain-cache-key: ${{ env.TEST_TOOLCHAIN == 'true' && format('{0}-{1}-{2}-{3}-{4}-{5}-{6}', env.TOOLCHAIN_NAME, steps.workflow-sha.outputs.sha, steps.binutils-sha.outputs.sha, steps.gcc-sha.outputs.sha, steps.mingw-sha.outputs.sha, steps.binutils-scripts-sha.outputs.sha, steps.toolchain-scripts-sha.outputs.sha) || '' }}
       test-toolchain: ${{ env.TEST_TOOLCHAIN == 'true' }}
+      test-packages: ${{ env.TEST_PACKAGES == 'true' }}
 
   build-tests:
     needs: [build-toolchain]
@@ -392,7 +394,7 @@ jobs:
 
   build-openblas:
     needs: [build-toolchain]
-    if: ${{ needs.build-toolchain.outputs.test-toolchain == 'true' }}
+    if: ${{ needs.build-toolchain.outputs.test-packages == 'true' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -436,7 +438,7 @@ jobs:
         
   execute-openblas-tests:
     needs: [build-toolchain, build-openblas]
-    if: ${{ needs.build-toolchain.outputs.test-toolchain == 'true' }}
+    if: ${{ needs.build-toolchain.outputs.test-packages == 'true' }}
     runs-on: [Windows, GCC, ARM64]
 
     steps:
@@ -462,7 +464,7 @@ jobs:
   
   build-zlib:
     needs: [build-toolchain]
-    if: ${{ needs.build-toolchain.outputs.test-toolchain == 'true' }}
+    if: ${{ needs.build-toolchain.outputs.test-packages == 'true' }}
     runs-on: ubuntu-latest 
 
     steps:
@@ -506,7 +508,7 @@ jobs:
 
   build-libxml2:
     needs: [build-toolchain, build-zlib]
-    if: ${{ needs.build-toolchain.outputs.test-toolchain == 'true' }}
+    if: ${{ needs.build-toolchain.outputs.test-packages == 'true' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -560,7 +562,7 @@ jobs:
 
   build-openssl:
     needs: [build-toolchain, build-zlib]
-    if: ${{ needs.build-toolchain.outputs.test-toolchain == 'true' }}
+    if: ${{ needs.build-toolchain.outputs.test-packages == 'true' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -629,7 +631,7 @@ jobs:
 
   execute-openssl-tests:
     needs: [build-toolchain, build-openssl]
-    if: ${{ needs.build-toolchain.outputs.test-toolchain == 'true' }}
+    if: ${{ needs.build-toolchain.outputs.test-packages == 'true' }}
     runs-on: [Windows, GCC, ARM64]
 
     steps:
@@ -671,7 +673,7 @@ jobs:
 
   build-libjpeg-turbo:
     needs: [build-toolchain]
-    if: ${{ needs.build-toolchain.outputs.test-toolchain == 'true' }}
+    if: ${{ needs.build-toolchain.outputs.test-packages == 'true' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -730,7 +732,7 @@ jobs:
 
   execute-libpeg-turbo-tests:
     needs: [build-toolchain, build-libjpeg-turbo]
-    if: ${{ needs.build-toolchain.outputs.test-toolchain == 'true' }}
+    if: ${{ needs.build-toolchain.outputs.test-packages == 'true' }}
     runs-on: [Windows, GCC, ARM64]
 
     steps:
@@ -755,7 +757,7 @@ jobs:
 
   build-ffmpeg:
     needs: [build-toolchain]
-    if: ${{ needs.build-toolchain.outputs.test-toolchain == 'true' }}
+    if: ${{ needs.build-toolchain.outputs.test-packages == 'true' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -804,7 +806,7 @@ jobs:
 
   execute-ffmpeg-tests:
     needs: [build-toolchain, build-ffmpeg]
-    if: ${{ needs.build-toolchain.outputs.test-toolchain == 'true' }}
+    if: ${{ needs.build-toolchain.outputs.test-packages == 'true' }}
     runs-on: [Windows, GCC, ARM64]
 
     steps:

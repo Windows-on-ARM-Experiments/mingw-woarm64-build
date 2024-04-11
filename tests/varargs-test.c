@@ -7,7 +7,7 @@ static void va_list_print(char *buf, size_t length, const char *fmt, ...)
 {
     va_list argv;
     va_start(argv, fmt);
-    register int retval = _vsnprintf(buf, length, fmt, argv);
+    register int retval = vsnprintf(buf, length, fmt, argv);
     va_end(argv);
 }
 
