@@ -13,9 +13,13 @@
 __declspec(dllimport) int __cdecl add_c_export(int a, int b);
 __declspec(dllimport) int __stdcall add_std_export(int a, int b);
 
+#if !defined(__CYGWIN__)
+
 // These functions were exported via a def file.
 int __cdecl add_c_def(int a, int b);
 int __stdcall add_std_def(int a, int b);
+
+#endif
 
 // call a pointer to a function
 int test_func_pointer(int __cdecl (*f)(int, int))
@@ -32,14 +36,18 @@ int check_dll()
     return 1;
   if (add_std_export(7, 3) != 10)
     return 2;
+#if !defined(__CYGWIN__)
   if (add_c_def(7, 3) != 10)
     return 3;
   if (add_std_def(7, 3) != 10)
     return 4;
+#endif
   if (test_func_pointer(add_c_export) != 29)
     return 5;
+#if !defined(__CYGWIN__)
   if (test_func_pointer(add_c_def) != 29)
     return 6;
+#endif
   return 0;
 }
 

@@ -2,7 +2,8 @@
 
 #include <getopt.h>
 
-TEST(Aarch64MinGW, BigDataTest);
+TEST(BigDataTest, HashBigText);
+TEST(BigDataTest, CheckBss);
 TEST(Aarch64MinGW, CHKSTKTest);
 TEST(Aarch64MinGW, DllTest);
 TEST(Aarch64MinGW, LargeAlignmentTest);
@@ -45,7 +46,8 @@ int main(int argc, char **argv) {
     }
 
     struct Test tests[] = {
-        DECLARE_TEST(Aarch64MinGW, BigDataTest),
+        DECLARE_TEST(BigDataTest, HashBigText),
+        DECLARE_TEST(BigDataTest, CheckBss),
         DECLARE_TEST(Aarch64MinGW, CHKSTKTest),
         DECLARE_TEST(Aarch64MinGW, DllTest),
         DECLARE_TEST(Aarch64MinGW, LargeAlignmentTest),
