@@ -1,6 +1,7 @@
 name: Test toolchain
 
 on:
+  pull_request:
   workflow_dispatch:
     inputs:
       binutils_branch_baseline:
