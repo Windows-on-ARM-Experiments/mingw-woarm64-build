@@ -101,6 +101,8 @@ jobs:
             crt: ucrt
           - platform: w64-mingw32
             crt: libc
+          - arch: aarch64
+            platform: w64-mingw32
 
     env:
       ARCH: ${{ matrix.arch }}
