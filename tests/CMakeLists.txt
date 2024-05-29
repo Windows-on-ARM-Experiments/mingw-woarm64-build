@@ -15,14 +15,14 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fopenmp")
 set(CMAKE_RANLIB "$ENV{TOOLCHAIN_PATH}/bin/$ENV{TARGET}-ranlib")
 
 cmake_minimum_required(VERSION 3.14)
-project(aarch64_mingw_tests)
+project("$ENV{TARGET}-tests")
 
 enable_testing()
 
 add_library(simple-dll SHARED dll.c)
 
 add_executable(
-  aarch64-mingw-tests.exe
+  "$ENV{TARGET}-tests.exe"
   bigdata-test.c
   chkstk-test.c
   dll-test.c
@@ -40,10 +40,10 @@ add_executable(
 )
 
 target_link_libraries(
-  aarch64-mingw-tests.exe
+  "$ENV{TARGET}-tests.exe"
   simple-dll
 )
 
 set_target_properties(simple-dll PROPERTIES SUFFIX ".dll")
 set_target_properties(simple-dll PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
-set_target_properties(aarch64-mingw-tests.exe PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+set_target_properties("$ENV{TARGET}-tests.exe" PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
