@@ -18,12 +18,15 @@ fi
 
 if [ "$RUN_BOOTSTRAP" = 1 ]; then
     .github/scripts/install-dependencies.sh
-    .github/scripts/install-libraries.sh
 fi
 
 if [[ "$PLATFORM" =~ cygwin ]]; then
     .github/scripts/binutils/patch-cygwin.sh 1
     .github/scripts/toolchain/patch-cygwin.sh 1
+fi
+
+if [ "$RUN_BOOTSTRAP" = 1 ]; then
+    .github/scripts/install-libraries.sh
 fi
 
 .github/scripts/binutils/build.sh
@@ -54,6 +57,10 @@ if [[ "$PLATFORM" =~ cygwin ]]; then
 
     .github/scripts/binutils/patch-cygwin.sh 2
     .github/scripts/toolchain/patch-cygwin.sh 2
+fi
+
+if [ "$RUN_BOOTSTRAP" = 1 ]; then
+    .github/scripts/install-libraries.sh
 fi
 
 .github/scripts/toolchain/build-gcc.sh

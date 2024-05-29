@@ -80,11 +80,7 @@ if [ "$RUN_CONFIG" = 1 ] || [ ! -f "$GCC_BUILD_PATH/Makefile" ] ; then
                     --disable-werror \
                     --disable-symvers \
                     --with-libiconv \
-                    --with-system-zlib \
-                    --with-gmp=$TOOLCHAIN_PATH \
-                    --with-mpfr=$TOOLCHAIN_PATH \
-                    --with-mpc=$TOOLCHAIN_PATH \
-                    --with-isl=$TOOLCHAIN_PATH"
+                    --with-system-zlib"
                 ;;
         esac
 
