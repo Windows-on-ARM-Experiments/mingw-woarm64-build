@@ -244,25 +244,25 @@ jobs:
         run: |
           .github/scripts/install-dependencies.sh
 
-      - name: Install libraries
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
-        run: |
-          .github/scripts/install-libraries.sh
-
       - name: Patch binutils stage1
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform == 'pc-cygwin' }}
         run: |
           .github/scripts/binutils/patch-cygwin.sh 1
 
-      - name: Build binutils
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
-        run: |
-          .github/scripts/binutils/build.sh
-
       - name: Patch toolchain stage1
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform == 'pc-cygwin' }}
         run: |
           .github/scripts/toolchain/patch-cygwin.sh 1
+
+      - name: Install libraries
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
+        run: |
+          .github/scripts/install-libraries.sh
+
+      - name: Build binutils
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
+        run: |
+          .github/scripts/binutils/build.sh
 
       - name: Install cross headers and libraries
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform == 'pc-linux-gnu' }}
@@ -308,6 +308,11 @@ jobs:
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform == 'pc-cygwin' }}
         run: |
           .github/scripts/toolchain/patch-cygwin.sh 2
+
+      - name: Install libraries
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
+        run: |
+          .github/scripts/install-libraries.sh
 
       - name: Build GCC stage2
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
