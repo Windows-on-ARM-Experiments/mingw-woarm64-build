@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+  pull_request:
   workflow_dispatch:
     inputs:
       binutils_branch:
@@ -19,25 +20,20 @@ on:
         required: false
         default: 'woarm64'
 env:
-  BINUTILS_BRANCH: ${{ inputs.binutils_branch }}
-  GCC_BRANCH: ${{ inputs.gcc_branch }}
-  MINGW_BRANCH: ${{ inputs.mingw_branch }}
+  BINUTILS_BRANCH: ${{ inputs.binutils_branch || 'woarm64' }}
+  GCC_BRANCH: ${{ inputs.gcc_branch || 'woarm64' }}
+  MINGW_BRANCH: ${{ inputs.mingw_branch || 'woarm64' }}
+
+  TOOLCHAIN_PATH: ${{ github.workspace }}/cross
 
 jobs:
-  run-script:
+  build-toolchain:
     runs-on: ubuntu-latest
-
-    env:
-      INSTALL_PATH: ${{ github.workspace }}/cross
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
         
-      - name: Install Dependencies
-        run: |
-          .github/scripts/install-dependencies.sh
-
       - name: Run Build
         run: |
           ./build.sh
@@ -46,5 +42,5 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: main-aarch64-w64-mingw32-toolchain
-          path: ${{ env.INSTALL_PATH }}
+          path: ${{ env.TOOLCHAIN_PATH }}
           retention-days: 1

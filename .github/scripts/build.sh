@@ -20,6 +20,10 @@ if [ "$RUN_BOOTSTRAP" = 1 ]; then
     .github/scripts/install-dependencies.sh
 fi
 
+if [ "$UPDATE_SOURCES" = 1 ]; then
+    .github/scripts/update_sources.sh
+fi
+
 if [[ "$PLATFORM" =~ cygwin ]]; then
     .github/scripts/binutils/patch-cygwin.sh 1
     .github/scripts/toolchain/patch-cygwin.sh 1
@@ -73,7 +77,7 @@ if [[ "$PLATFORM" =~ cygwin ]]; then
 fi
 
 if [ "$CCACHE" = 1 ] ; then
-  ccache -svv
+  ccache -s
 fi
 
 echo 'Success!'
