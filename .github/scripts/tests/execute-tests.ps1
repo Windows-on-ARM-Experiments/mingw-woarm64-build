@@ -1,5 +1,5 @@
 . $PSScriptRoot\..\config.ps1
 
 Write-Output '::group::Test toolchain'
-    & $env:ARTIFACT_PATH\aarch64-mingw-tests.exe
+    & $env:ARTIFACT_PATH\$env:TARGET-tests.exe
 Write-Output "::endgroup::"

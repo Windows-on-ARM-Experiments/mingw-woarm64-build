@@ -17,14 +17,14 @@ LIBJPEG_TURBO_VERSION=${LIBJPEG_TURBO_VERSION:-libjpeg-turbo-main}
 FFMPEG_VERSION=${FFMPEG_VERSION:-ffmpeg-master}
 
 ARCH=${ARCH:-aarch64}
-PLATFORM=${PLATFORM:-w64-mingw32}
+PLATFORM=${PLATFORM:-pc-cygwin}
 if [[ "$PLATFORM" =~ (mingw|cygwin) ]]; then
     CRT=${CRT:-msvcrt}
 else
     CRT=${CRT:-libc}
 fi
-BUILD=x86_64-pc-linux-gnu
-HOST=x86_64-pc-linux-gnu
+BUILD=`gcc -dumpmachine`
+HOST=`gcc -dumpmachine`
 TARGET=$ARCH-$PLATFORM
 TOOLCHAIN_NAME=${TOOLCHAIN_NAME:-$ARCH-$PLATFORM-$CRT}
 

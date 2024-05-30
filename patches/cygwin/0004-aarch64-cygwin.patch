@@ -1,0 +1,2758 @@
+diff --git a/Makefile.in b/Makefile.in
+index 25f82d37f..32885d043 100644
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -364,7 +364,7 @@ BUILD_PREFIX_1 = @BUILD_PREFIX_1@
+ 
+ # Flags to pass to stage2 and later makes.  They are defined
+ # here so that they can be overridden by Makefile fragments.
+-BOOT_CFLAGS= -g -O2
++BOOT_CFLAGS= -g -Og
+ BOOT_LDFLAGS=
+ BOOT_ADAFLAGS= -gnatpg
+ 
+@@ -584,7 +584,7 @@ CXXFLAGS_FOR_TARGET = @CXXFLAGS_FOR_TARGET@
+ LIBCFLAGS_FOR_TARGET = $(CFLAGS_FOR_TARGET)
+ LIBCXXFLAGS_FOR_TARGET = $(CXXFLAGS_FOR_TARGET) -fno-implicit-templates
+ LDFLAGS_FOR_TARGET = @LDFLAGS_FOR_TARGET@
+-GOCFLAGS_FOR_TARGET = -O2 -g
++GOCFLAGS_FOR_TARGET = -Og -g
+ 
+ FLAGS_FOR_TARGET = @FLAGS_FOR_TARGET@
+ SYSROOT_CFLAGS_FOR_TARGET = @SYSROOT_CFLAGS_FOR_TARGET@
+diff --git a/Makefile.tpl b/Makefile.tpl
+index 21e12e897..8c3e0cebc 100644
+--- a/Makefile.tpl
++++ b/Makefile.tpl
+@@ -367,7 +367,7 @@ BUILD_PREFIX_1 = @BUILD_PREFIX_1@
+ 
+ # Flags to pass to stage2 and later makes.  They are defined
+ # here so that they can be overridden by Makefile fragments.
+-BOOT_CFLAGS= -g -O2
++BOOT_CFLAGS= -g -Og
+ BOOT_LDFLAGS=
+ BOOT_ADAFLAGS= -gnatpg
+ 
+@@ -517,7 +517,7 @@ CXXFLAGS_FOR_TARGET = @CXXFLAGS_FOR_TARGET@
+ LIBCFLAGS_FOR_TARGET = $(CFLAGS_FOR_TARGET)
+ LIBCXXFLAGS_FOR_TARGET = $(CXXFLAGS_FOR_TARGET) -fno-implicit-templates
+ LDFLAGS_FOR_TARGET = @LDFLAGS_FOR_TARGET@
+-GOCFLAGS_FOR_TARGET = -O2 -g
++GOCFLAGS_FOR_TARGET = -Og -g
+ 
+ FLAGS_FOR_TARGET = @FLAGS_FOR_TARGET@
+ SYSROOT_CFLAGS_FOR_TARGET = @SYSROOT_CFLAGS_FOR_TARGET@
+diff --git a/config.guess b/config.guess
+index 1972fda8e..f7c9844b8 100755
+--- a/config.guess
++++ b/config.guess
+@@ -911,6 +911,9 @@ EOF
+     i*:UWIN*:*)
+ 	echo "$UNAME_MACHINE"-pc-uwin
+ 	exit ;;
++    aarch64:CYGWIN*:*:*)
++	echo aarch64-pc-cygwin
++	exit ;;
+     amd64:CYGWIN*:*:* | x86_64:CYGWIN*:*:*)
+ 	echo x86_64-pc-cygwin
+ 	exit ;;
+diff --git a/config/acinclude.m4 b/config/acinclude.m4
+index 8242b2c7a..5760acac8 100644
+--- a/config/acinclude.m4
++++ b/config/acinclude.m4
+@@ -24,7 +24,7 @@ dnl normal versions of a library), tasteless as that idea is.
+   if test "$ac_test_CXXFLAGS" = set; then
+     CXXFLAGS="$ac_save_CXXFLAGS"
+   elif test $ac_cv_prog_cxx_g = yes; then
+-    CXXFLAGS="-g -O2"
++    CXXFLAGS="-g -Og"
+   else
+     CXXFLAGS="-O2"
+   fi
+@@ -121,7 +121,7 @@ dnl normal versions of a library), tasteless as that idea is.
+   if test "$ac_test_CFLAGS" = set; then
+     CFLAGS="$ac_save_CFLAGS"
+   elif test $ac_cv_prog_cc_g = yes; then
+-    CFLAGS="-g -O2"
++    CFLAGS="-g -Og"
+   else
+     CFLAGS="-O2"
+   fi
+diff --git a/config/dfp.m4 b/config/dfp.m4
+index 5b29089ce..714bee6b2 100644
+--- a/config/dfp.m4
++++ b/config/dfp.m4
+@@ -22,8 +22,8 @@ Valid choices are 'yes', 'bid', 'dpd', and 'no'.]) ;;
+   case $1 in
+     powerpc*-*-linux* | i?86*-*-linux* | x86_64*-*-linux* | s390*-*-linux* | \
+     i?86*-*-elfiamcu | i?86*-*-gnu* | \
+-    i?86*-*-mingw* | x86_64*-*-mingw* | \
+-    i?86*-*-cygwin* | x86_64*-*-cygwin*)
++    aarch64-*-mingw* | i?86*-*-mingw* | x86_64*-*-mingw* | \
++    aarch64-*-cygwin* | i?86*-*-cygwin* | x86_64*-*-cygwin*)
+       enable_decimal_float=yes
+       ;;
+     *)
+diff --git a/configure b/configure
+index 947715305..4164e33ff 100755
+--- a/configure
++++ b/configure
+@@ -4800,7 +4800,7 @@ if test "$ac_test_CFLAGS" = set; then
+   CFLAGS=$ac_save_CFLAGS
+ elif test $ac_cv_prog_cc_g = yes; then
+   if test "$GCC" = yes; then
+-    CFLAGS="-g -O2"
++    CFLAGS="-g -Og"
+   else
+     CFLAGS="-g"
+   fi
+@@ -5147,7 +5147,7 @@ if test "$ac_test_CXXFLAGS" = set; then
+   CXXFLAGS=$ac_save_CXXFLAGS
+ elif test $ac_cv_prog_cxx_g = yes; then
+   if test "$GXX" = yes; then
+-    CXXFLAGS="-g -O2"
++    CXXFLAGS="-g -Og"
+   else
+     CXXFLAGS="-g"
+   fi
+@@ -6853,7 +6853,7 @@ fi
+ # CFLAGS_FOR_TARGET and CXXFLAGS_FOR_TARGET.
+ if test "x$CFLAGS_FOR_TARGET" = x; then
+   if test "x${is_cross_compiler}" = xyes; then
+-    CFLAGS_FOR_TARGET="-g -O2"
++    CFLAGS_FOR_TARGET="-g -Og"
+   else
+     CFLAGS_FOR_TARGET=$CFLAGS
+     case " $CFLAGS " in
+@@ -6870,7 +6870,7 @@ fi
+ 
+ if test "x$CXXFLAGS_FOR_TARGET" = x; then
+   if test "x${is_cross_compiler}" = xyes; then
+-    CXXFLAGS_FOR_TARGET="-g -O2"
++    CXXFLAGS_FOR_TARGET="-g -Og"
+   else
+     CXXFLAGS_FOR_TARGET=$CXXFLAGS
+     case " $CXXFLAGS " in
+diff --git a/configure.ac b/configure.ac
+index 05ddf6987..48b830f37 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -869,7 +869,7 @@ case "${target}" in
+   i[[3456789]]86-*-mingw*)
+     noconfigdirs="$noconfigdirs ${libgcj}"
+     ;;
+-  x86_64-*-mingw*)
++  aarch64-*-mingw* | x86_64-*-mingw*)
+     noconfigdirs="$noconfigdirs ${libgcj}"
+     ;;
+   mmix-*-*)
+@@ -2381,7 +2381,7 @@ AC_SUBST(DEBUG_PREFIX_CFLAGS_FOR_TARGET)
+ # CFLAGS_FOR_TARGET and CXXFLAGS_FOR_TARGET.
+ if test "x$CFLAGS_FOR_TARGET" = x; then
+   if test "x${is_cross_compiler}" = xyes; then
+-    CFLAGS_FOR_TARGET="-g -O2"
++    CFLAGS_FOR_TARGET="-g -Og"
+   else
+     CFLAGS_FOR_TARGET=$CFLAGS
+     case " $CFLAGS " in
+@@ -2398,7 +2398,7 @@ AC_SUBST(CFLAGS_FOR_TARGET)
+ 
+ if test "x$CXXFLAGS_FOR_TARGET" = x; then
+   if test "x${is_cross_compiler}" = xyes; then
+-    CXXFLAGS_FOR_TARGET="-g -O2"
++    CXXFLAGS_FOR_TARGET="-g -Og"
+   else
+     CXXFLAGS_FOR_TARGET=$CXXFLAGS
+     case " $CXXFLAGS " in
+@@ -3225,7 +3225,7 @@ case " $target_configdirs " in
+ esac
+ 
+ case "$target" in
+-  x86_64-*mingw* | *-w64-mingw*)
++  aarch64-*mingw* | x86_64-*mingw* | *-w64-mingw*)
+   # MinGW-w64 does not use newlib, nor does it use winsup. It may,
+   # however, use a symlink named 'mingw' in ${prefix} .
+     FLAGS_FOR_TARGET=$FLAGS_FOR_TARGET' -L${prefix}/${target}/lib -L${prefix}/mingw/lib -isystem ${prefix}/${target}/include -isystem ${prefix}/mingw/include'
+diff --git a/libgloss/config/default.mh b/libgloss/config/default.mh
+index 64dc02f05..df0f1a96f 100644
+--- a/libgloss/config/default.mh
++++ b/libgloss/config/default.mh
+@@ -4,7 +4,7 @@ NEWLIB_LDFLAGS = `if [ -d ${objroot}/newlib ]; then echo -B${objroot}/newlib/ -L
+ INCLUDES = -I. -I$(srcdir)/.. -I$(objdir)/.. -idirafter $(srcroot)/include
+ # Note that when building the library, ${MULTILIB} is not the way multilib
+ # options are passed; they're passed in $(CFLAGS).
+-CFLAGS_FOR_TARGET = -O2 -g ${MULTILIB} ${INCLUDES} ${NEWLIB_CFLAGS}
++CFLAGS_FOR_TARGET = -Og -g ${MULTILIB} ${INCLUDES} ${NEWLIB_CFLAGS}
+ LDFLAGS_FOR_TARGET = ${MULTILIB} ${NEWLIB_LDFLAGS}
+ AR_FLAGS = rc
+ 
+diff --git a/libgloss/config/dos.mh b/libgloss/config/dos.mh
+index c5874cb42..0046963eb 100644
+--- a/libgloss/config/dos.mh
++++ b/libgloss/config/dos.mh
+@@ -4,7 +4,7 @@ NEWLIB_LDFLAGS = `if [ -d ${objroot}/newlib ]; then echo -B${objroot}/newlib/; f
+ INCLUDES = -I.
+ # Note that when building the library, ${MULTILIB} is not the way multilib
+ # options are passed; they're passed in $(CFLAGS).
+-CFLAGS_FOR_TARGET = -O2 -g ${MULTILIB} ${INCLUDES} ${NEWLIB_CFLAGS}
++CFLAGS_FOR_TARGET = -Og -g ${MULTILIB} ${INCLUDES} ${NEWLIB_CFLAGS}
+ LDFLAGS_FOR_TARGET = ${MULTILIB} ${NEWLIB_LDFLAGS}
+ ARFLAGS_FOR_TARGET = qc
+ 
+diff --git a/libgloss/config/ppc.mh b/libgloss/config/ppc.mh
+index d1bfd7588..d8a957360 100644
+--- a/libgloss/config/ppc.mh
++++ b/libgloss/config/ppc.mh
+@@ -8,7 +8,7 @@ CFLAGS_MRELOCATABLE = -mrelocatable-lib -mno-eabi
+ INCLUDES = -I. -I$(srcdir)/.. -I$(objdir)/..
+ # Note that when building the library, ${MULTILIB} is not the way multilib
+ # options are passed; they're passed in $(CFLAGS).
+-CFLAGS_FOR_TARGET = -O2 -g ${MULTILIB} ${INCLUDES} ${NEWLIB_CFLAGS}
++CFLAGS_FOR_TARGET = -Og -g ${MULTILIB} ${INCLUDES} ${NEWLIB_CFLAGS}
+ LDFLAGS_FOR_TARGET = ${MULTILIB} ${NEWLIB_LDFLAGS}
+ AR_FLAGS = qc
+ 
+diff --git a/libgloss/configure b/libgloss/configure
+index a49f58638..473fc1cf5 100755
+--- a/libgloss/configure
++++ b/libgloss/configure
+@@ -4064,7 +4064,7 @@ if test "$ac_test_CFLAGS" = set; then
+   CFLAGS=$ac_save_CFLAGS
+ elif test $ac_cv_prog_cc_g = yes; then
+   if test "$GCC" = yes; then
+-    CFLAGS="-g -O2"
++    CFLAGS="-g -Og"
+   else
+     CFLAGS="-g"
+   fi
+diff --git a/libtool.m4 b/libtool.m4
+index a216bb14e..3c4b0be97 100644
+--- a/libtool.m4
++++ b/libtool.m4
+@@ -7074,7 +7074,7 @@ AC_DEFUN([LT_PROG_GCJ],
+ [m4_ifdef([AC_PROG_GCJ], [AC_PROG_GCJ],
+   [m4_ifdef([A][M_PROG_GCJ], [A][M_PROG_GCJ],
+     [AC_CHECK_TOOL(GCJ, gcj,)
+-      test "x${GCJFLAGS+set}" = xset || GCJFLAGS="-g -O2"
++      test "x${GCJFLAGS+set}" = xset || GCJFLAGS="-g -Og"
+       AC_SUBST(GCJFLAGS)])])[]dnl
+ ])
+ 
+diff --git a/newlib/configure b/newlib/configure
+index 6a542bb88..03975ab53 100755
+--- a/newlib/configure
++++ b/newlib/configure
+@@ -3989,7 +3989,7 @@ if test "$ac_test_CFLAGS" = set; then
+   CFLAGS=$ac_save_CFLAGS
+ elif test $ac_cv_prog_cc_g = yes; then
+   if test "$GCC" = yes; then
+-    CFLAGS="-g -O2"
++    CFLAGS="-g -Og"
+   else
+     CFLAGS="-g"
+   fi
+diff --git a/newlib/libc/ctype/ctype_.c b/newlib/libc/ctype/ctype_.c
+index 32ce4f318..7bb9db13f 100644
+--- a/newlib/libc/ctype/ctype_.c
++++ b/newlib/libc/ctype/ctype_.c
+@@ -95,21 +95,29 @@ char _ctype_b[128 + 256] = {
+ /* For backward compatibility */
+ char __EXPORT *__ctype_ptr__ = DEFAULT_CTYPE_PTR;
+ 
+-#    ifdef __x86_64__
++#if defined(__x86_64__)
+ __asm__ ("					\n\
+         .data					\n\
+ 	.globl  _ctype_				\n\
+ 	.set    _ctype_,_ctype_b+127		\n\
+ 	.text                                   \n\
+ ");
+-#    else
++#elif defined(__i386__)
+ __asm__ ("					\n\
+         .data					\n\
+ 	.globl  __ctype_			\n\
+ 	.set    __ctype_,__ctype_b+127		\n\
+ 	.text                                   \n\
+ ");
+-#    endif
++#elif defined(__aarch64__)
++// TODO
++__asm__ ("					\n\
++        .data					\n\
++	.globl  _ctype_				\n\
++	.set    _ctype_,_ctype_b+127		\n\
++	.text                                   \n\
++");
++#endif
+ #  else /* !__CYGWIN__ */
+ 
+ const char _ctype_[1 + 256] = {
+diff --git a/newlib/libc/machine/aarch64/asmdefs.h b/newlib/libc/machine/aarch64/asmdefs.h
+index 131b95e1f..da1df3da6 100644
+--- a/newlib/libc/machine/aarch64/asmdefs.h
++++ b/newlib/libc/machine/aarch64/asmdefs.h
+@@ -59,9 +59,19 @@
+ GNU_PROPERTY (FEATURE_1_AND, FEATURE_1_BTI|FEATURE_1_PAC)
+ #endif
+ 
++#ifdef __ELF__
++#define HIDDEN(name) .hidden name
++#define SYMBOL_SIZE(name) .size name, .-name
++#define SYMBOL_TYPE(name, _type) .type name, _type
++#else
++#define HIDDEN(name)
++#define SYMBOL_SIZE(name)
++#define SYMBOL_TYPE(name, _type)
++#endif
++
+ #define ENTRY_ALIGN(name, alignment)	\
+   .global name;		\
+-  .type name,%function;	\
++  SYMBOL_TYPE(name, %function);	\
+   .align alignment;		\
+   name:			\
+   .cfi_startproc;	\
+@@ -70,13 +80,13 @@ GNU_PROPERTY (FEATURE_1_AND, FEATURE_1_BTI|FEATURE_1_PAC)
+ #define ENTRY(name)	ENTRY_ALIGN(name, 6)
+ 
+ #define ENTRY_ALIAS(name)	\
+-  .global name;		\
+-  .type name,%function;	\
++  .global name;			\
++  SYMBOL_TYPE(name, %function);	\
+   name:
+ 
+ #define END(name)	\
+   .cfi_endproc;		\
+-  .size name, .-name;
++  SYMBOL_SIZE(name);
+ 
+ #define L(l) .L ## l
+ 
+diff --git a/newlib/libc/machine/aarch64/machine/fenv-fp.h b/newlib/libc/machine/aarch64/machine/fenv-fp.h
+index d8ec3fc76..6404351cd 100644
+--- a/newlib/libc/machine/aarch64/machine/fenv-fp.h
++++ b/newlib/libc/machine/aarch64/machine/fenv-fp.h
+@@ -26,6 +26,36 @@
+  * $FreeBSD$
+  */
+ 
++__fenv_static __inline int
++fedisableexcept(int __mask)
++{
++	fenv_t __old_r, __new_r;
++
++	__mrs_fpcr(__old_r);
++	__new_r = __old_r & ~((__mask & FE_ALL_EXCEPT) << _FPUSW_SHIFT);
++	__msr_fpcr(__new_r);
++	return ((__old_r >> _FPUSW_SHIFT) & FE_ALL_EXCEPT);
++}
++
++__fenv_static __inline int
++feenableexcept(int __mask)
++{
++	fenv_t __old_r, __new_r;
++
++	__mrs_fpcr(__old_r);
++	__new_r = __old_r | ((__mask & FE_ALL_EXCEPT) << _FPUSW_SHIFT);
++	__msr_fpcr(__new_r);
++	return ((__old_r >> _FPUSW_SHIFT) & FE_ALL_EXCEPT);
++}
++
++__fenv_static __inline int
++fegetexcept(void)
++{
++	fenv_t __r;
++
++	__mrs_fpcr(__r);
++	return ((__r & _ENABLE_MASK) >> _FPUSW_SHIFT);
++}
+ 
+ __fenv_static __inline int
+ feclearexcept(int __excepts)
+diff --git a/newlib/libc/machine/aarch64/memcpy.S b/newlib/libc/machine/aarch64/memcpy.S
+index 248e7843a..9fd708610 100644
+--- a/newlib/libc/machine/aarch64/memcpy.S
++++ b/newlib/libc/machine/aarch64/memcpy.S
+@@ -56,7 +56,6 @@
+    The loop tail is handled by always copying 64 bytes from the end.
+ */
+ 
+-ENTRY_ALIAS (memmove)
+ ENTRY (memcpy)
+ 	PTR_ARG (0)
+ 	PTR_ARG (1)
+diff --git a/newlib/libc/machine/aarch64/rawmemchr.S b/newlib/libc/machine/aarch64/rawmemchr.S
+index 26da81005..97374282e 100644
+--- a/newlib/libc/machine/aarch64/rawmemchr.S
++++ b/newlib/libc/machine/aarch64/rawmemchr.S
+@@ -34,13 +34,15 @@
+ /* See rawmemchr-stub.c.  */
+ #else
+ 
++#include "asmdefs.h"
++
+ #define L(l) .L ## l
+ 
+ 	.macro def_fn f p2align=0
+ 	.text
+ 	.p2align \p2align
+ 	.global \f
+-	.type \f, %function
++	SYMBOL_TYPE(\f, %function)
+ \f:
+ 	.endm
+ 
+@@ -63,6 +65,6 @@ L(do_strlen):
+ 	ret	x15
+ 	.cfi_endproc
+ 
+-	.size   rawmemchr, . - rawmemchr
++	SYMBOL_SIZE(rawmemchr)
+ #endif
+ 
+diff --git a/newlib/libc/machine/aarch64/setjmp.S b/newlib/libc/machine/aarch64/setjmp.S
+index 0856145bf..bba8d668a 100644
+--- a/newlib/libc/machine/aarch64/setjmp.S
++++ b/newlib/libc/machine/aarch64/setjmp.S
+@@ -26,6 +26,8 @@
+    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  */
+ 
++#include "asmdefs.h"
++
+ #define GPR_LAYOUT			\
+ 	REG_PAIR (x19, x20,  0);	\
+ 	REG_PAIR (x21, x22, 16);	\
+@@ -43,7 +45,7 @@
+ 
+ // int setjmp (jmp_buf)
+ 	.global	setjmp
+-	.type	setjmp, %function
++	SYMBOL_TYPE(setjmp, %function)
+ setjmp:
+ 	mov	x16, sp
+ #define REG_PAIR(REG1, REG2, OFFS)	stp REG1, REG2, [x0, OFFS]
+@@ -54,11 +56,11 @@ setjmp:
+ #undef REG_ONE
+ 	mov	w0, #0
+ 	ret
+-	.size	setjmp, .-setjmp
++	SYMBOL_SIZE(setjmp)
+ 
+ // void longjmp (jmp_buf, int) __attribute__ ((noreturn))
+ 	.global	longjmp
+-	.type	longjmp, %function
++	SYMBOL_TYPE(longjmp, %function)
+ longjmp:
+ #define REG_PAIR(REG1, REG2, OFFS)	ldp REG1, REG2, [x0, OFFS]
+ #define REG_ONE(REG1, OFFS)		ldr REG1, [x0, OFFS]
+@@ -71,4 +73,4 @@ longjmp:
+ 	cinc	w0, w1, eq
+ 	// use br not ret, as ret is guaranteed to mispredict
+ 	br	x30
+-	.size	longjmp, .-longjmp
++	SYMBOL_SIZE(longjmp)
+diff --git a/newlib/libc/machine/aarch64/sys/fenv.h b/newlib/libc/machine/aarch64/sys/fenv.h
+index 6b0879269..793b88b52 100644
+--- a/newlib/libc/machine/aarch64/sys/fenv.h
++++ b/newlib/libc/machine/aarch64/sys/fenv.h
+@@ -61,7 +61,14 @@ typedef	__uint64_t	fexcept_t;
+ 			 FE_UPWARD | FE_TOWARDZERO)
+ #define	_ROUND_SHIFT	22
+ 
+-
++/* Only Solaris and QNX implement fegetprec/fesetprec.  As Solaris, use the
++   values defined by http://www.open-std.org/jtc1/sc22//WG14/www/docs/n752.htm
++   QNX defines different values. */
++#if __MISC_VISIBLE
++#define FE_FLTPREC	(0)
++#define FE_DBLPREC	(2)
++#define FE_LDBLPREC	(3)
++#endif
+ 
+ /* Default floating-point environment */
+ extern const fenv_t	*_fe_dfl_env;
+@@ -77,44 +84,18 @@ extern const fenv_t	*_fe_dfl_env;
+ #define	__mrs_fpsr(__r)	__asm __volatile("mrs %0, fpsr" : "=r" (__r))
+ #define	__msr_fpsr(__r)	__asm __volatile("msr fpsr, %0" : : "r" (__r))
+ 
+-
+-#if __BSD_VISIBLE
+-
+-/* We currently provide no external definitions of the functions below. */
+-
+-static inline int
+-feenableexcept(int __mask)
+-{
+-	fenv_t __old_r, __new_r;
+-
+-	__mrs_fpcr(__old_r);
+-	__new_r = __old_r | ((__mask & FE_ALL_EXCEPT) << _FPUSW_SHIFT);
+-	__msr_fpcr(__new_r);
+-	return ((__old_r >> _FPUSW_SHIFT) & FE_ALL_EXCEPT);
+-}
+-
+-static inline int
+-fedisableexcept(int __mask)
+-{
+-	fenv_t __old_r, __new_r;
+-
+-	__mrs_fpcr(__old_r);
+-	__new_r = __old_r & ~((__mask & FE_ALL_EXCEPT) << _FPUSW_SHIFT);
+-	__msr_fpcr(__new_r);
+-	return ((__old_r >> _FPUSW_SHIFT) & FE_ALL_EXCEPT);
+-}
+-
+-static inline int
+-fegetexcept(void)
+-{
+-	fenv_t __r;
+-
+-	__mrs_fpcr(__r);
+-	return ((__r & _ENABLE_MASK) >> _FPUSW_SHIFT);
+-}
+-
+-#endif /* __BSD_VISIBLE */
+-
+-
++#if __GNU_VISIBLE
++/*  If possible, the GNU C Library defines a macro FE_NOMASK_ENV which
++   represents an environment where every exception raised causes a trap
++   to occur. You can test for this macro using #ifdef. It is only defined
++   if _GNU_SOURCE is defined.  */
++extern const fenv_t *_fe_nomask_env;
++#define FE_NOMASK_ENV (_fe_nomask_env)
++
++/* These are GNU extensions defined in glibc.  */
++int feenableexcept (int __excepts);
++int fedisableexcept (int __excepts);
++int fegetexcept (void);
++#endif /* __GNU_VISIBLE */
+ 
+ #endif	/* !_FENV_H_ */
+diff --git a/newlib/libm/machine/aarch64/fenv.c b/newlib/libm/machine/aarch64/fenv.c
+index 3ffe23441..8c883e32d 100644
+--- a/newlib/libm/machine/aarch64/fenv.c
++++ b/newlib/libm/machine/aarch64/fenv.c
+@@ -55,3 +55,68 @@ extern inline int feupdateenv(const fenv_t *__envp);
+ extern inline int feenableexcept(int __mask);
+ extern inline int fedisableexcept(int __mask);
+ extern inline int fegetexcept(void);
++
++/* These are writable so we can initialise them at startup.  */
++static fenv_t fe_nomask_env;
++
++/* These pointers provide the outside world with read-only access to them.  */
++const fenv_t *_fe_nomask_env = &fe_nomask_env;
++
++/*  Mask and shift amount for precision bits.  */
++#define FE_CW_PREC_MASK		(0x0300)
++#define FE_CW_PREC_SHIFT	(8)
++
++/*  Returns the currently selected precision, represented by one of the
++   values of the defined precision macros.  */
++int
++fegetprec (void)
++{
++  unsigned short cw;
++
++  /* Get control word.  */
++  // TODO
++  //__asm__ volatile ("fnstcw %0" : "=m" (cw) : );
++
++  return (cw & FE_CW_PREC_MASK) >> FE_CW_PREC_SHIFT;
++}
++
++/* http://www.open-std.org/jtc1/sc22//WG14/www/docs/n752.htm:
++
++   The fesetprec function establishes the precision represented by its
++   argument prec.  If the argument does not match a precision macro, the
++   precision is not changed.
++
++   The fesetprec function returns a nonzero value if and only if the
++   argument matches a precision macro (that is, if and only if the requested
++   precision can be established). */
++int
++fesetprec (int prec)
++{
++  unsigned short cw;
++
++  /* Will succeed for any valid value of the input parameter.  */
++  switch (prec)
++    {
++    case FE_FLTPREC:
++    case FE_DBLPREC:
++    case FE_LDBLPREC:
++      break;
++    default:
++      return 0;
++    }
++
++  /* Get control word.  */
++  // TODO
++  //__asm__ volatile ("fnstcw %0" : "=m" (cw) : );
++
++  /* Twiddle bits.  */
++  cw &= ~FE_CW_PREC_MASK;
++  cw |= (prec << FE_CW_PREC_SHIFT);
++
++  /* Set back into FPU state.  */
++  // TODO
++  //__asm__ volatile ("fldcw %0" :: "m" (cw));
++
++  /* Indicate success.  */
++  return 1;
++}
+diff --git a/winsup/configure.ac b/winsup/configure.ac
+index 9b9b59dbc..18adf3d97 100644
+--- a/winsup/configure.ac
++++ b/winsup/configure.ac
+@@ -69,12 +69,14 @@ DLL_ENTRY="dll_entry"
+ 
+ case "$target_cpu" in
+    x86_64)	;;
++   aarch64)	;;
+    *)		AC_MSG_ERROR([Invalid target processor "$target_cpu"]) ;;
+ esac
+ 
+ AC_SUBST(DLL_ENTRY)
+ 
+ AM_CONDITIONAL(TARGET_X86_64, [test $target_cpu = "x86_64"])
++AM_CONDITIONAL(TARGET_AARCH64, [test $target_cpu = "aarch64"])
+ 
+ AC_ARG_ENABLE(doc,
+ 	      [AS_HELP_STRING([--disable-doc], [do not build documentation])],,
+diff --git a/winsup/cygwin/Makefile.am b/winsup/cygwin/Makefile.am
+index 376c79fc3..793258fd6 100644
+--- a/winsup/cygwin/Makefile.am
++++ b/winsup/cygwin/Makefile.am
+@@ -63,6 +66,20 @@ TARGET_FILES= \
+ 	x86_64/wmempcpy.S
+ endif
+ 
++if TARGET_AARCH64
++TARGET_FILES= \
++	aarch64/bcopy.S \
++	aarch64/memchr.S \
++	aarch64/memcpy.c \
++	aarch64/memmove.c \
++	aarch64/mempcpy.S \
++	aarch64/memset.S \
++	aarch64/swab.S \
++	aarch64/wmemcpy.S \
++	aarch64/wmemmove.S \
++	aarch64/wmempcpy.S
++endif
++
+ LIB_FILES= \
+ 	lib/_cygwin_crt0_common.cc \
+ 	lib/atexit.c \
+@@ -598,7 +615,6 @@ $(LDSCRIPT): $(LDSCRIPT).in
+ $(NEW_DLL_NAME): $(LDSCRIPT) libdll.a $(VERSION_OFILES) $(LIBSERVER)\
+ 		  $(newlib_build)/libm.a $(newlib_build)/libc.a
+ 	$(AM_V_CXXLD)$(CXX) $(CXXFLAGS) \
+-	-mno-use-libstdc-wrappers \
+ 	-Wl,--gc-sections -nostdlib -Wl,-T$(LDSCRIPT) \
+ 	-Wl,--dynamicbase -static \
+ 	$${SOURCE_DATE_EPOCH:+-Wl,--no-insert-timestamp} \
+@@ -609,7 +625,7 @@ $(NEW_DLL_NAME): $(LDSCRIPT) libdll.a $(VERSION_OFILES) $(LIBSERVER)\
+ 	$(LIBSERVER) \
+ 	$(newlib_build)/libm.a \
+ 	$(newlib_build)/libc.a \
+-	-lgcc -lkernel32 -lntdll -Wl,-Map,cygwin.map
++	-lgcc -luser32 -lkernel32 -lonecore -lpdh -lntdll -Wl,-Map,cygwin.map
+ 	@$(MKDIR_P) ${target_builddir}/winsup/testsuite/testinst/bin/
+ 	$(AM_V_at)$(INSTALL_PROGRAM) $(NEW_DLL_NAME) ${target_builddir}/winsup/testsuite/testinst/bin/$(DLL_NAME)
+ 
+diff --git a/winsup/cygwin/aarch64/bcopy.S b/winsup/cygwin/aarch64/bcopy.S
+new file mode 100644
+index 000000000..e69de29bb
+diff --git a/winsup/cygwin/aarch64/memchr.S b/winsup/cygwin/aarch64/memchr.S
+new file mode 100644
+index 000000000..e69de29bb
+diff --git a/winsup/cygwin/aarch64/memcpy.c b/winsup/cygwin/aarch64/memcpy.c
+new file mode 100644
+index 000000000..58b1e4056
+--- /dev/null
++++ b/winsup/cygwin/aarch64/memcpy.c
+@@ -0,0 +1,12 @@
++/* Public domain.  */
++#include <stddef.h>
++
++void *
++memcpy (void *dest, const void *src, size_t len)
++{
++  char *d = dest;
++  const char *s = src;
++  while (len--)
++    *d++ = *s++;
++  return dest;
++}
+diff --git a/winsup/cygwin/aarch64/memmove.c b/winsup/cygwin/aarch64/memmove.c
+new file mode 100644
+index 000000000..fd06bb602
+--- /dev/null
++++ b/winsup/cygwin/aarch64/memmove.c
+@@ -0,0 +1,20 @@
++/* Public domain.  */
++#include <stddef.h>
++
++void *
++memmove (void *dest, const void *src, size_t len)
++{
++  char *d = dest;
++  const char *s = src;
++  if (d < s)
++    while (len--)
++      *d++ = *s++;
++  else
++    {
++      const char *lasts = s + (len-1);
++      char *lastd = d + (len-1);
++      while (len--)
++        *lastd-- = *lasts--;
++    }
++  return dest;
++}
+diff --git a/winsup/cygwin/aarch64/mempcpy.S b/winsup/cygwin/aarch64/mempcpy.S
+new file mode 100644
+index 000000000..e69de29bb
+diff --git a/winsup/cygwin/aarch64/memset.S b/winsup/cygwin/aarch64/memset.S
+new file mode 100644
+index 000000000..e69de29bb
+diff --git a/winsup/cygwin/aarch64/swab.S b/winsup/cygwin/aarch64/swab.S
+new file mode 100644
+index 000000000..e69de29bb
+diff --git a/winsup/cygwin/aarch64/wmemcpy.S b/winsup/cygwin/aarch64/wmemcpy.S
+new file mode 100644
+index 000000000..e69de29bb
+diff --git a/winsup/cygwin/aarch64/wmemmove.S b/winsup/cygwin/aarch64/wmemmove.S
+new file mode 100644
+index 000000000..e69de29bb
+diff --git a/winsup/cygwin/aarch64/wmempcpy.S b/winsup/cygwin/aarch64/wmempcpy.S
+new file mode 100644
+index 000000000..e69de29bb
+diff --git a/winsup/cygwin/autoload.cc b/winsup/cygwin/autoload.cc
+index c262c7efb..b5bdbaa18 100644
+--- a/winsup/cygwin/autoload.cc
++++ b/winsup/cygwin/autoload.cc
+@@ -67,7 +67,7 @@ bool NO_COPY wsock_started;
+ /* LoadDLLprime is used to prime the DLL info information, providing an
+    additional initialization routine to call prior to calling the first
+    function.  */
+-#ifdef __x86_64__
++#if defined(__x86_64__)
+ #define LoadDLLprime(dllname, init_also, no_resolve_on_fork) __asm__ ("	\n\
+ .ifndef " #dllname "_primed				\n\
+   .section	.data_cygwin_nocopy,\"w\"		\n\
+@@ -83,6 +83,9 @@ bool NO_COPY wsock_started;
+   .set		" #dllname "_primed, 1			\n\
+ .endif							\n\
+ ");
++#elif defined(__aarch64__)
++  // TODO
++  #define LoadDLLprime(dllname, init_also, no_resolve_on_fork) __asm__ ("");
+ #else
+ #error unimplemented for this target
+ #endif
+@@ -97,7 +100,7 @@ bool NO_COPY wsock_started;
+   LoadDLLfuncEx3(name, dllname, notimp, err, 0)
+ 
+ /* Main DLL setup stuff. */
+-#ifdef __x86_64__
++#if defined(__x86_64__)
+ #define LoadDLLfuncEx3(name, dllname, notimp, err, no_resolve_on_fork) \
+   LoadDLLprime (dllname, dll_func_load, no_resolve_on_fork) \
+   __asm__ ("						\n\
+@@ -123,6 +126,10 @@ _win32_" #name ":					\n\
+   .asciz	\"" #name "\"				\n\
+   .text							\n\
+ ");
++#elif defined(__aarch64__)
++#define LoadDLLfuncEx3(name, dllname, notimp, err, no_resolve_on_fork) \
++  // TODO
++  LoadDLLprime (dllname, dll_func_load, no_resolve_on_fork) __asm__ ("");
+ #else
+ #error unimplemented for this target
+ #endif
+@@ -141,7 +148,7 @@ extern "C" void dll_chain () __asm__ ("dll_chain");
+ 
+ extern "C" {
+ 
+-#ifdef __x86_64__
++#if defined(__x86_64__)
+ __asm__ ("								\n\
+ 	 .section .rdata,\"r\"							\n\
+ msg1:									\n\
+@@ -203,6 +210,8 @@ dll_chain:								\n\
+ 	push	%rax		# Restore 'return address'		\n\
+ 	jmp	*%rdx		# Jump to next init function		\n\
+ ");
++#elif defined(__aarch64__)
++  // TODO
+ #else
+ #error unimplemented for this target
+ #endif
+@@ -260,7 +269,7 @@ dll_load (HANDLE& handle, PWCHAR name)
+ #define RETRY_COUNT 10
+ 
+ /* The standard DLL initialization routine. */
+-#ifdef __x86_64__
++#if defined(__x86_64__)
+ 
+ /* On x86_64, we need assembler wrappers for std_dll_init and wsock_init.
+    In the x86_64 ABI it's no safe bet that frame[1] (aka 8(%rbp)) contains
+@@ -300,6 +309,13 @@ _" #func ":								\n\
+ 
+ INIT_WRAPPER (std_dll_init)
+ 
++#elif defined(__aarch64__)
++
++// TODO
++#define INIT_WRAPPER(func) __asm__ ("");
++
++INIT_WRAPPER (std_dll_init)
++
+ #else
+ #error unimplemented for this target
+ #endif
+@@ -360,7 +376,7 @@ std_dll_init (struct func_info *func)
+ 
+ /* Initialization function for winsock stuff. */
+ 
+-#ifdef __x86_64__
++#if defined(__x86_64__) || defined(__aarch64__)
+ /* See above comment preceeding std_dll_init. */
+ INIT_WRAPPER (wsock_init)
+ #else
+diff --git a/winsup/cygwin/create_posix_thread.cc b/winsup/cygwin/create_posix_thread.cc
+index 8e06099e4..5ff5ad01b 100644
+--- a/winsup/cygwin/create_posix_thread.cc
++++ b/winsup/cygwin/create_posix_thread.cc
+@@ -75,7 +75,7 @@ pthread_wrapper (PVOID arg)
+   /* Initialize new _cygtls. */
+   _my_tls.init_thread (wrapper_arg.stackbase - __CYGTLS_PADSIZE__,
+ 		       (DWORD (*)(void*, void*)) wrapper_arg.func);
+-#ifdef __x86_64__
++#if defined(__x86_64__)
+   __asm__ ("\n\
+ 	   leaq  %[WRAPPER_ARG], %%rbx	# Load &wrapper_arg into rbx	\n\
+ 	   movq  (%%rbx), %%r12		# Load thread func into r12	\n\
+@@ -99,6 +99,8 @@ pthread_wrapper (PVOID arg)
+ 	   call  *%%r12			# Call thread func		\n"
+ 	   : : [WRAPPER_ARG] "o" (wrapper_arg),
+ 	       [CYGTLS] "i" (__CYGTLS_PADSIZE__));
++#elif defined(__aarch64__)
++  // TODO
+ #else
+ #error unimplemented for this target
+ #endif
+@@ -206,7 +208,7 @@ class thread_allocator
+ public:
+   thread_allocator () : current (THREAD_STORAGE_HIGH)
+   {
+-    alloc_func = wincap.has_extended_mem_api () ? &_alloc : &_alloc_old;
++    alloc_func = wincap.has_extended_mem_api () ? &thread_allocator::_alloc : &thread_allocator::_alloc_old;
+   }
+   PVOID alloc (SIZE_T size)
+   {
+diff --git a/winsup/cygwin/cygwin.sc.in b/winsup/cygwin/cygwin.sc.in
+index 69526f5d8..3322810cc 100644
+--- a/winsup/cygwin/cygwin.sc.in
++++ b/winsup/cygwin/cygwin.sc.in
+@@ -1,6 +1,9 @@
+ #ifdef __x86_64__
+ OUTPUT_FORMAT(pei-x86-64)
+ SEARCH_DIR("/usr/x86_64-pc-cygwin/lib/w32api"); SEARCH_DIR("=/usr/lib/w32api");
++#elif __aarch64__
++OUTPUT_FORMAT(pei-aarch64-little)
++SEARCH_DIR("/usr/aarch64-pc-cygwin/lib/w32api"); SEARCH_DIR("=/usr/lib/w32api");
+ #else
+ #error unimplemented for this target
+ #endif
+@@ -17,7 +20,7 @@ SECTIONS
+     *(SORT(.text$*))
+     *(.glue_7t)
+     *(.glue_7)
+-#ifdef __x86_64__
++#if defined(__x86_64__) || defined(__aarch64__)
+     . = ALIGN(8);
+      ___CTOR_LIST__ = .; __CTOR_LIST__ = .;
+ 			LONG (-1); LONG (-1); *(SORT(.ctors.*)); *(.ctors); *(.ctor); LONG (0); LONG (0);
+diff --git a/winsup/cygwin/dcrt0.cc b/winsup/cygwin/dcrt0.cc
+index f4c09befd..18ead1902 100644
+--- a/winsup/cygwin/dcrt0.cc
++++ b/winsup/cygwin/dcrt0.cc
+@@ -1020,6 +1020,7 @@ _dll_crt0 ()
+      anyway, we now always move the main thread stack to the stack area
+      reserved for pthread stacks.  This allows a reproducible stack space
+      under our own control and avoids collision with the OS. */
++#if !defined(__aarch64__)
+   if (!dynamically_loaded)
+     {
+       if (__in_forkee != FORKING)
+@@ -1030,7 +1031,7 @@ _dll_crt0 ()
+ 	  PVOID stackaddr = create_new_main_thread_stack (allocationbase);
+ 	  if (stackaddr)
+ 	    {
+-#ifdef __x86_64__
++#if defined(__x86_64__)
+ 	      /* Set stack pointer to new address.  Set frame pointer to
+ 	         stack pointer and subtract 32 bytes for shadow space. */
+ 	      __asm__ ("\n\
+@@ -1050,6 +1051,7 @@ _dll_crt0 ()
+       else
+ 	fork_info->alloc_stack ();
+     }
++#endif
+ 
+   fesetenv (FE_DFL_ENV);
+   _main_tls = &_my_tls;
+diff --git a/winsup/cygwin/exceptions.cc b/winsup/cygwin/exceptions.cc
+index a2a6f9d4c..b0feecbf1 100644
+--- a/winsup/cygwin/exceptions.cc
++++ b/winsup/cygwin/exceptions.cc
+@@ -28,25 +28,9 @@ details. */
+ #include "ntdll.h"
+ #include "exception.h"
+ #include "posix_timer.h"
++#include "register.h"
+ #include "gcc_seh.h"
+ 
+-/* Define macros for CPU-agnostic register access.  The _CX_foo
+-   macros are for access into CONTEXT, the _MC_foo ones for access into
+-   mcontext. The idea is to access the registers in terms of their job,
+-   not in terms of their name on the given target. */
+-#ifdef __x86_64__
+-#define _CX_instPtr	Rip
+-#define _CX_stackPtr	Rsp
+-#define _CX_framePtr	Rbp
+-/* For special register access inside mcontext. */
+-#define _MC_retReg	rax
+-#define _MC_instPtr	rip
+-#define _MC_stackPtr	rsp
+-#define _MC_uclinkReg	rbx	/* MUST be callee-saved reg */
+-#else
+-#error unimplemented for this target
+-#endif
+-
+ #define CALL_HANDLER_RETRY_OUTER 10
+ #define CALL_HANDLER_RETRY_INNER 10
+ #define DUMPSTACK_FRAME_LIMIT    32
+@@ -230,7 +214,7 @@ cygwin_exception::dump_exception ()
+ 	}
+     }
+ 
+-#ifdef __x86_64__
++#if defined(__x86_64__)
+   if (exception_name)
+     small_printf ("Exception: %s at rip=%012X\r\n", exception_name, ctx->Rip);
+   else
+@@ -250,6 +234,10 @@ cygwin_exception::dump_exception ()
+   small_printf ("cs=%04x ds=%04x es=%04x fs=%04x gs=%04x ss=%04x\r\n",
+ 		ctx->SegCs, ctx->SegDs, ctx->SegEs, ctx->SegFs,
+ 		ctx->SegGs, ctx->SegSs);
++#elif defined(__aarch64__)
++  // TODO
++  if (exception_name)
++    small_printf ("Exception: %s at pc=%012X\r\n", exception_name, ctx->Pc);
+ #else
+ #error unimplemented for this target
+ #endif
+@@ -1614,6 +1602,7 @@ done:
+ 
+ }
+ 
++#if defined(__x86_64__)
+ static void
+ altstack_wrapper (int sig, siginfo_t *siginfo, ucontext_t *sigctx,
+ 		  void (*handler) (int, siginfo_t *, void *))
+@@ -1664,6 +1653,7 @@ altstack_wrapper (int sig, siginfo_t *siginfo, ucontext_t *sigctx,
+ 	teb->Tib.StackLimit = old_limit;
+     }
+ }
++#endif
+ 
+ int
+ _cygtls::call_signal_handler ()
+@@ -1721,7 +1711,7 @@ _cygtls::call_signal_handler ()
+ 	      __unwind_single_frame ((PCONTEXT) &context.uc_mcontext);
+ 	      if (stackptr > stack)
+ 		{
+-#ifdef __x86_64__
++#if defined(__x86_64__) || defined(__aarch64__)
+ 		  context.uc_mcontext.rip = retaddr ();
+ #else
+ #error unimplemented for this target
+@@ -1785,14 +1775,13 @@ _cygtls::call_signal_handler ()
+ 
+ 	    If the current code does not work as expected in the "usual"
+ 	    POSIX circumstances, this problem must be revisited. */
+-
++#if defined(__x86_64__)
+ 	  /* Compute new stackbase.  We start from the high address, aligned
+ 	     to 16 byte. */
+ 	  uintptr_t new_sp = ((uintptr_t) _my_tls.altstack.ss_sp
+ 			      + _my_tls.altstack.ss_size) & ~0xf;
+ 	  /* In assembler: Save regs on new stack, move to alternate stack,
+ 	     call thisfunc, revert stack regs. */
+-#ifdef __x86_64__
+ 	  /* Clobbered regs: rcx, rdx, r8, r9, r10, r11, rbp, rsp */
+ 	  __asm__ ("\n\
+ 		   movq  %[NEW_SP], %%rax  # Load alt stack into rax	\n\
+@@ -1830,6 +1819,8 @@ _cygtls::call_signal_handler ()
+ 		       [FUNC]	"o" (thisfunc),
+ 		       [WRAPPER] "o" (altstack_wrapper)
+ 		   : "memory");
++#elif defined(__aarch64__)
++  // TODO
+ #else
+ #error unimplemented for this target
+ #endif
+@@ -1936,7 +1927,7 @@ swapcontext (ucontext_t *oucp, const ucontext_t *ucp)
+ /* Trampoline function to set the context to uc_link.  The pointer to the
+    address of uc_link is stored in a callee-saved register, referenced by
+    _MC_uclinkReg from the C code.  If uc_link is NULL, call exit. */
+-#ifdef __x86_64__
++#if defined(__x86_64__)
+ /* _MC_uclinkReg == %rbx */
+ __asm__ ("				\n\
+ 	.global	__cont_link_context	\n\
+@@ -1957,7 +1948,15 @@ __cont_link_context:			\n\
+ 	nop				\n\
+ 	.seh_endproc			\n\
+ 	");
+-
++#elif defined(__aarch64__)
++  // TODO
++  __asm__ ("				\n\
++	.global	__cont_link_context	\n\
++	.seh_proc __cont_link_context	\n\
++__cont_link_context:			\n\
++	.seh_endprologue		\n\
++	.seh_endproc			\n\
++	");
+ #else
+ #error unimplemented for this target
+ #endif
+@@ -2004,7 +2003,7 @@ makecontext (ucontext_t *ucp, void (*func) (void), int argc, ...)
+        providing pointer values to func without additional porting effort. */
+   va_start (ap, argc);
+   for (int i = 0; i < argc; ++i)
+-#ifdef __x86_64__
++#if defined(__x86_64__)
+     switch (i)
+       {
+       case 0:
+@@ -2023,6 +2022,8 @@ makecontext (ucontext_t *ucp, void (*func) (void), int argc, ...)
+ 	sp[i + 1] = va_arg (ap, uintptr_t);
+ 	break;
+       }
++#elif defined(__aarch64__)
++  // TODO
+ #else
+ #error unimplemented for this target
+ #endif
+diff --git a/winsup/cygwin/fhandler/termios.cc b/winsup/cygwin/fhandler/termios.cc
+index d106955dc..0478936e0 100644
+--- a/winsup/cygwin/fhandler/termios.cc
++++ b/winsup/cygwin/fhandler/termios.cc
+@@ -722,7 +722,7 @@ is_console_app (const WCHAR *filename)
+ }
+ 
+ int
+-fhandler_termios::ioctl (int cmd, void *varg)
++fhandler_termios::ioctl (unsigned int cmd, void *varg)
+ {
+   if (cmd != TIOCSCTTY)
+     return 1;		/* Not handled by this function */
+diff --git a/winsup/cygwin/fork.cc b/winsup/cygwin/fork.cc
+index 0742ab363..2b884c182 100644
+--- a/winsup/cygwin/fork.cc
++++ b/winsup/cygwin/fork.cc
+@@ -628,9 +628,11 @@ dofork (void **proc, bool *with_forkables)
+     ischild = !!setjmp (grouped.ch.jmp);
+ 
+     volatile char * volatile stackp;
+-#ifdef __x86_64__
++#if defined(__x86_64__)
+     __asm__ volatile ("movq %%rsp,%0": "=r" (stackp));
+-#else
++#elif defined(__aarch64__)
++  // TODO
++#else
+ #error unimplemented for this target
+ #endif
+ 
+diff --git a/winsup/cygwin/include/cygwin/config.h b/winsup/cygwin/include/cygwin/config.h
+index 2a7083278..527145c25 100644
+--- a/winsup/cygwin/include/cygwin/config.h
++++ b/winsup/cygwin/include/cygwin/config.h
+@@ -36,8 +36,10 @@ __attribute__((__gnu_inline__))
+ extern inline struct _reent *__getreent (void)
+ {
+   register char *ret;
+-#ifdef __x86_64__
++#if defined(__x86_64__)
+   __asm __volatile__ ("movq %%gs:8,%0" : "=r" (ret));
++#elif defined(__aarch64__)
++  __asm __volatile__("ldr %0, [x18, #0x8]" : "=r" (ret));
+ #else
+ #error unimplemented for this target
+ #endif
+diff --git a/winsup/cygwin/include/cygwin/signal.h b/winsup/cygwin/include/cygwin/signal.h
+index de728bede..c93b47545 100644
+--- a/winsup/cygwin/include/cygwin/signal.h
++++ b/winsup/cygwin/include/cygwin/signal.h
+@@ -19,7 +19,7 @@ extern "C" {
+   Define a struct __mcontext, which should be identical in layout to the Win32
+   API type CONTEXT with the addition of oldmask and cr2 fields at the end.
+ */
+-#ifdef __x86_64__
++#if defined(__x86_64__) || defined(__aarch64__)
+ 
+ struct _uc_fpxreg {
+   __uint16_t significand[4];
+diff --git a/winsup/cygwin/include/machine/_endian.h b/winsup/cygwin/include/machine/_endian.h
+index dbd4429b8..2f77f90db 100644
+--- a/winsup/cygwin/include/machine/_endian.h
++++ b/winsup/cygwin/include/machine/_endian.h
+@@ -26,16 +26,24 @@ _ELIDABLE_INLINE __uint16_t __ntohs(__uint16_t);
+ _ELIDABLE_INLINE __uint32_t
+ __ntohl(__uint32_t _x)
+ {
++#if defined(__x86_64__)
+ 	__asm__("bswap %0" : "=r" (_x) : "0" (_x));
++#elif defined(__aarch64__)
++  // TODO
++#endif
+ 	return _x;
+ }
+ 
+ _ELIDABLE_INLINE __uint16_t
+ __ntohs(__uint16_t _x)
+ {
++#if defined(__x86_64__)
+ 	__asm__("xchgb %b0,%h0"		/* swap bytes		*/
+ 		: "=Q" (_x)
+ 		:  "0" (_x));
++#elif defined(__aarch64__)
++  // TODO
++#endif
+ 	return _x;
+ }
+ 
+diff --git a/winsup/cygwin/include/register.h b/winsup/cygwin/include/register.h
+new file mode 100644
+index 000000000..90beff992
+--- /dev/null
++++ b/winsup/cygwin/include/register.h
+@@ -0,0 +1,26 @@
++/* Define macros for CPU-agnostic register access.  The _CX_foo
++   macros are for access into CONTEXT, the _MC_foo ones for access into
++   mcontext. The idea is to access the registers in terms of their job,
++   not in terms of their name on the given target. */
++#if defined(__x86_64__)
++#define _CX_instPtr	Rip
++#define _CX_stackPtr	Rsp
++#define _CX_framePtr	Rbp
++/* For special register access inside mcontext. */
++#define _MC_retReg	rax
++#define _MC_instPtr	rip
++#define _MC_stackPtr	rsp
++#define _MC_uclinkReg	rbx	/* MUST be callee-saved reg */
++#elif defined(__aarch64__)
++#define _CX_instPtr	Pc
++#define _CX_stackPtr	Sp
++#define _CX_framePtr	Fp
++/* For special register access inside mcontext. */
++// TODO
++#define _MC_retReg	rax
++#define _MC_instPtr	rip
++#define _MC_stackPtr	rsp
++#define _MC_uclinkReg	rbx	/* MUST be callee-saved reg */
++#else
++#error unimplemented for this target
++#endif
+diff --git a/winsup/cygwin/local_includes/cpuid.h b/winsup/cygwin/local_includes/cpuid.h
+index 6dbb1bddf..238c88777 100644
+--- a/winsup/cygwin/local_includes/cpuid.h
++++ b/winsup/cygwin/local_includes/cpuid.h
+@@ -13,17 +13,23 @@ static inline void __attribute ((always_inline))
+ cpuid (uint32_t *a, uint32_t *b, uint32_t *c, uint32_t *d, uint32_t ain,
+        uint32_t cin = 0)
+ {
++#if defined(__x86_64__)
+   asm volatile ("cpuid"
+ 		: "=a" (*a), "=b" (*b), "=c" (*c), "=d" (*d)
+ 		: "a" (ain), "c" (cin));
++#elif defined(__aarch64__)
++  // TODO
++  *a = *b = *c = *d = 0;
++#endif
+ }
+ 
+-#ifdef __x86_64__
++#if defined(__x86_64__) || defined(__aarch64__)
+ static inline bool __attribute ((always_inline))
+ can_set_flag (uint32_t long flag)
+ {
+   uint32_t long r1, r2;
+ 
++#if defined(__x86_64__)
+   asm volatile ("pushfq\n"
+ 		"popq %0\n"
+ 		"movq %0, %1\n"
+@@ -37,6 +43,9 @@ can_set_flag (uint32_t long flag)
+ 		: "=&r" (r1), "=&r" (r2)
+ 		: "ir" (flag)
+   );
++#elif defined(__aarch64__)
++  // TODO
++#endif
+   return ((r1 ^ r2) & flag) != 0;
+ }
+ #else
+diff --git a/winsup/cygwin/local_includes/cygtls.h b/winsup/cygwin/local_includes/cygtls.h
+index f67e9136c..866c26cf2 100644
+--- a/winsup/cygwin/local_includes/cygtls.h
++++ b/winsup/cygwin/local_includes/cygtls.h
+@@ -295,7 +295,11 @@ public:
+        address of the _except block to restore the context correctly.
+        See comment preceeding myfault_altstack_handler in exception.cc. */
+     ret = (DWORD64) _ret;
++#if defined(__x86_64__)
+     __asm__ volatile ("movq %%rsp,%0": "=o" (frame));
++#elif defined(__aarch64__)
++    // TODO
++#endif
+   }
+   ~san () __attribute__ ((always_inline))
+   {
+diff --git a/winsup/cygwin/local_includes/fhandler.h b/winsup/cygwin/local_includes/fhandler.h
+index 978d3e514..adebb021f 100644
+--- a/winsup/cygwin/local_includes/fhandler.h
++++ b/winsup/cygwin/local_includes/fhandler.h
+@@ -1732,9 +1732,9 @@ class fhandler_disk_file: public fhandler_base
+   uint64_t fs_ioc_getflags ();
+   int fs_ioc_setflags (uint64_t);
+ 
+-  falloc_allocate (int, off_t, off_t);
+-  falloc_punch_hole (off_t, off_t);
+-  falloc_zero_range (int, off_t, off_t);
++  int falloc_allocate (int, off_t, off_t);
++  int falloc_punch_hole (off_t, off_t);
++  int falloc_zero_range (int, off_t, off_t);
+ 
+  public:
+   fhandler_disk_file ();
+@@ -1959,7 +1959,7 @@ class fhandler_termios: public fhandler_base
+  protected:
+   virtual void doecho (const void *, DWORD) {};
+   virtual int accept_input () {return 1;};
+-  int ioctl (int, void *);
++  int ioctl (unsigned int, void *);
+   tty_min *_tc;
+   tty *get_ttyp () {return (tty *) tc ();}
+   int eat_readahead (int n);
+diff --git a/winsup/cygwin/math/acosl.c b/winsup/cygwin/math/acosl.c
+index 553d06f75..3cf0f87cf 100644
+--- a/winsup/cygwin/math/acosl.c
++++ b/winsup/cygwin/math/acosl.c
+@@ -3,6 +3,11 @@
+  * This file is part of the mingw-w64 runtime package.
+  * No warranty is given; refer to the file DISCLAIMER.PD within this package.
+  */
++
++#if defined(__aarch64__)
++#include <math.h>
++#endif
++
+ long double acosl (long double x);
+ 
+ long double acosl (long double x)
+@@ -10,6 +15,7 @@ long double acosl (long double x)
+   long double res = 0.0L;
+ 
+   /* acosl = atanl (sqrtl(1 - x^2) / x) */
++#if defined(__x86_64__)
+   asm volatile (
+ 	"fld	%%st\n\t"
+ 	"fmul	%%st(0)\n\t"		/* x^2 */
+@@ -19,5 +25,9 @@ long double acosl (long double x)
+ 	"fxch	%%st(1)\n\t"
+ 	"fpatan"
+ 	: "=t" (res) : "0" (x) : "st(1)");
++#elif defined(__aarch64__)
++  // TODO
++  res = atanl (sqrtl(1 - x*x) / x);
++#endif
+   return res;
+ }
+diff --git a/winsup/cygwin/math/asinl.c b/winsup/cygwin/math/asinl.c
+index 35df3b5dd..f9199eaee 100644
+--- a/winsup/cygwin/math/asinl.c
++++ b/winsup/cygwin/math/asinl.c
+@@ -16,6 +16,7 @@ long double asinl (long double x)
+ {
+   long double res = 0.0L;
+ 
++#if defined(__x86_64__)
+   asm volatile (
+ 	"fld	%%st\n\t"
+ 	"fmul	%%st(0)\n\t"			/* x^2 */
+@@ -24,5 +25,9 @@ long double asinl (long double x)
+ 	"fsqrt\n\t"				/* sqrt (1 - x^2) */
+ 	"fpatan"
+ 	: "=t" (res) : "0" (x) : "st(1)");
++#elif defined(__aarch64__)
++    // TODO
++    res = 0.0;
++#endif
+   return res;
+ }
+diff --git a/winsup/cygwin/math/atan2l.c b/winsup/cygwin/math/atan2l.c
+index a4300cbf4..e47a8e77c 100644
+--- a/winsup/cygwin/math/atan2l.c
++++ b/winsup/cygwin/math/atan2l.c
+@@ -9,6 +9,11 @@ long double
+ atan2l (long double y, long double x)
+ {
+   long double res = 0.0L;
++#if defined(__x86_64__)
+   asm volatile ("fpatan" : "=t" (res) : "u" (y), "0" (x) : "st(1)");
++#elif defined(__aarch64__)
++    // TODO
++    res = 0.0;
++#endif
+   return res;
+ }
+diff --git a/winsup/cygwin/math/atanl.c b/winsup/cygwin/math/atanl.c
+index d289ef08c..3a6b65b18 100644
+--- a/winsup/cygwin/math/atanl.c
++++ b/winsup/cygwin/math/atanl.c
+@@ -9,10 +9,14 @@ long double
+ atanl (long double x)
+ {
+   long double res = 0.0L;
+-
++#if defined(__x86_64__)
+   asm volatile (
+        "fld1\n\t"
+        "fpatan"
+        : "=t" (res) : "0" (x));
++#elif defined(__aarch64__)
++    // TODO
++    res = 0.0;
++#endif
+   return res;
+ }
+diff --git a/winsup/cygwin/math/cosl_internal.S b/winsup/cygwin/math/cosl_internal.S
+index 3c8f60d14..edadee21b 100644
+--- a/winsup/cygwin/math/cosl_internal.S
++++ b/winsup/cygwin/math/cosl_internal.S
+@@ -34,7 +34,7 @@ __MINGW_USYMBOL(__cosl_internal):
+ 	movq	$0,8(%rcx)
+ 	fstpt (%rcx)
+ 	ret
+-#else
++#elif __i386__
+ 	fldt	4(%esp)
+ 	fcos
+ 	fnstsw	%ax
+@@ -51,5 +51,7 @@ __MINGW_USYMBOL(__cosl_internal):
+ 	fstp	%st(1)
+ 	fcos
+ 	ret
++#else
++  // TODO
+ #endif
+ 
+diff --git a/winsup/cygwin/math/cossin.c b/winsup/cygwin/math/cossin.c
+index 0095daa66..d4945e280 100644
+--- a/winsup/cygwin/math/cossin.c
++++ b/winsup/cygwin/math/cossin.c
+@@ -12,6 +12,7 @@ void sincos (double __x, double *p_sin, double *p_cos)
+ {
+   long double c, s;
+ 
++#if defined(__x86_64__)
+   __asm__ __volatile__ ("fsincos\n\t"
+     "fnstsw    %%ax\n\t"
+     "testl     $0x400, %%eax\n\t"
+@@ -26,6 +27,11 @@ void sincos (double __x, double *p_sin, double *p_cos)
+     "fstp      %%st(1)\n\t"
+     "fsincos\n\t"
+     "1:" : "=t" (c), "=u" (s) : "0" (__x));
++#elif defined(__aarch64__)
++  // TODO
++  c = 0.0;
++  s = 0.0;
++#endif
+   *p_sin = (double) s;
+   *p_cos = (double) c;
+ }
+@@ -34,6 +40,7 @@ void sincosf (float __x, float *p_sin, float *p_cos)
+ {
+   long double c, s;
+ 
++#if defined(__x86_64__)
+   __asm__ __volatile__ ("fsincos\n\t"
+     "fnstsw    %%ax\n\t"
+     "testl     $0x400, %%eax\n\t"
+@@ -48,6 +55,11 @@ void sincosf (float __x, float *p_sin, float *p_cos)
+     "fstp      %%st(1)\n\t"
+     "fsincos\n\t"
+     "1:" : "=t" (c), "=u" (s) : "0" (__x));
++#elif defined(__aarch64__)
++  // TODO
++  c = 0.0;
++  s = 0.0;
++#endif
+   *p_sin = (float) s;
+   *p_cos = (float) c;
+ }
+@@ -56,6 +68,7 @@ void sincosl (long double __x, long double *p_sin, long double *p_cos)
+ {
+   long double c, s;
+ 
++#if defined(__x86_64__)
+   __asm__ __volatile__ ("fsincos\n\t"
+     "fnstsw    %%ax\n\t"
+     "testl     $0x400, %%eax\n\t"
+@@ -70,6 +83,11 @@ void sincosl (long double __x, long double *p_sin, long double *p_cos)
+     "fstp      %%st(1)\n\t"
+     "fsincos\n\t"
+     "1:" : "=t" (c), "=u" (s) : "0" (__x));
++#elif defined(__aarch64__)
++  // TODO
++  c = 0.0;
++  s = 0.0;
++#endif
+   *p_sin = s;
+   *p_cos = c;
+ }
+diff --git a/winsup/cygwin/math/exp.def.h b/winsup/cygwin/math/exp.def.h
+index 3066b745d..9907ddd45 100644
+--- a/winsup/cygwin/math/exp.def.h
++++ b/winsup/cygwin/math/exp.def.h
+@@ -52,11 +52,12 @@ static long double
+ __expl_internal (long double x)
+ {
+   long double res = 0.0L;
++#if defined(__x86_64__) || defined(__i386__)
+   asm volatile (
+        "fldl2e\n\t"             /* 1  log2(e)         */
+        "fmul %%st(1),%%st\n\t"  /* 1  x log2(e)       */
+ 
+-#ifdef __x86_64__
++#if defined(__x86_64__)
+     "subq $8, %%rsp\n"
+     "fnstcw 4(%%rsp)\n"
+     "movzwl 4(%%rsp), %%eax\n"
+@@ -101,6 +102,10 @@ __expl_internal (long double x)
+        "fstp	%%st(1)\n\t"    /* 1  */
+        "fstp	%%st(1)\n\t"    /* 0  */
+        : "=t" (res) : "0" (x), "m" (c0), "m" (c1) : "ax", "dx");
++#elif defined(__aarch64__)
++  // TODO
++  res = 0.0 * c0 * c1;
++#endif
+   return res;
+ }
+ 
+diff --git a/winsup/cygwin/math/exp2l.S b/winsup/cygwin/math/exp2l.S
+index b08d8e40a..a404eecd4 100644
+--- a/winsup/cygwin/math/exp2l.S
++++ b/winsup/cygwin/math/exp2l.S
+@@ -53,7 +53,7 @@ __MINGW_USYMBOL(exp2l):
+ 	movq	$0,8(%rcx)
+ 	fstpt	(%rcx)
+ 	ret
+-#else
++#elif __i386__
+ 	fldt	4(%esp)
+ /* I added the following ugly construct because exp(+-Inf) resulted
+    in NaN.  The ugliness results from the bright minds at Intel.
+@@ -89,4 +89,6 @@ __MINGW_USYMBOL(exp2l):
+ 	fstp	%st
+ 	fldz				/* Set result to 0.  */
+ 2:	ret
++#else
++  // TODO
+ #endif
+diff --git a/winsup/cygwin/math/expm1.def.h b/winsup/cygwin/math/expm1.def.h
+index 028211f91..0ad04e110 100644
+--- a/winsup/cygwin/math/expm1.def.h
++++ b/winsup/cygwin/math/expm1.def.h
+@@ -65,7 +65,12 @@ __FLT_ABI(expm1) (__FLT_TYPE x)
+   if (__FLT_ABI (fabs) (x) < __FLT_LOGE2)
+     {
+       x /= __FLT_LOGE2;
++#if defined(_x86_64__)
+       __asm__ __volatile__ ("f2xm1" : "=t" (x) : "0" (x));
++#elif defined(__aarch64__)
++      // TODO 
++      x = 0.0;
++#endif
+       return x;
+     }
+   return __FLT_ABI (exp) (x) - __FLT_CST (1.0);
+diff --git a/winsup/cygwin/math/fabsl.c b/winsup/cygwin/math/fabsl.c
+index f3864ea13..931962711 100644
+--- a/winsup/cygwin/math/fabsl.c
++++ b/winsup/cygwin/math/fabsl.c
+@@ -12,7 +12,7 @@ fabsl (long double x)
+   long double res = 0.0L;
+   asm volatile ("fabs;" : "=t" (res) : "0" (x));
+   return res;
+-#elif defined(__arm__) || defined(_ARM_)
++#elif defined(__arm__) || defined(_ARM_) || defined(__aarch64__)
+   return __builtin_fabsl (x);
+ #endif /* defined(__x86_64__) || defined(_AMD64_) || defined(__i386__) || defined(_X86_) */
+ }
+diff --git a/winsup/cygwin/math/fastmath.h b/winsup/cygwin/math/fastmath.h
+index eb1846cb3..edd349a70 100644
+--- a/winsup/cygwin/math/fastmath.h
++++ b/winsup/cygwin/math/fastmath.h
+@@ -18,7 +18,7 @@
+ 
+ static __inline__ double __fast_sqrt (double x)
+ {
+-  double res;
++  double res;  
+   asm __volatile__ ("fsqrt" : "=t" (res) : "0" (x));
+   return res;
+ }
+@@ -26,7 +26,12 @@ static __inline__ double __fast_sqrt (double x)
+ static __inline__ long double __fast_sqrtl (long double x)
+ {
+   long double res;
++#if defined(__x86_64__)
+   asm __volatile__ ("fsqrt" : "=t" (res) : "0" (x));
++#elif defined(__aarch64__)
++  // TODO
++  res = 0.0;
++#endif
+   return res;
+ }
+ 
+@@ -41,22 +46,32 @@ static __inline__ float __fast_sqrtf (float x)
+ static __inline__ double __fast_log (double x)
+ {
+    double res;
++#if defined(__x86_64__)
+    asm __volatile__
+      ("fldln2\n\t"
+       "fxch\n\t"
+       "fyl2x"
+        : "=t" (res) : "0" (x) : "st(1)");
++#elif defined(__aarch64__)
++  // TODO
++  res = 0.0;
++#endif
+    return res;
+ }
+ 
+ static __inline__ long double __fast_logl (long double x)
+ {
+   long double res;
+-   asm __volatile__
+-     ("fldln2\n\t"
+-      "fxch\n\t"
+-      "fyl2x"
+-       : "=t" (res) : "0" (x) : "st(1)");
++#if defined(__x86_64__)
++  asm __volatile__
++    ("fldln2\n\t"
++     "fxch\n\t"
++     "fyl2x"
++      : "=t" (res) : "0" (x) : "st(1)");
++#elif defined(__aarch64__)
++  // TODO
++  res = 0.0;
++#endif
+    return res;
+ }
+ 
+@@ -93,12 +108,18 @@ static __inline__ long double __fast_log1pl (long double x)
+   /* fyl2xp1 accurate only for |x| <= 1.0 - 0.5 * sqrt (2.0) */
+   if (fabsl (x) >= 1.0L - 0.5L * 1.41421356237309504880L)
+     res = __fast_logl (1.0L + x);
+-  else
++  else {
++#if defined(__x86_64__)
+     asm __volatile__
+       ("fldln2\n\t"
+        "fxch\n\t"
+        "fyl2xp1"
+        : "=t" (res) : "0" (x) : "st(1)");
++#elif defined(__aarch64__)
++    // TODO
++    res = 0.0;
++#endif
++   }
+    return res;
+ }
+ 
+diff --git a/winsup/cygwin/math/fmodl.c b/winsup/cygwin/math/fmodl.c
+index 462b6fa79..21a3fa0f7 100644
+--- a/winsup/cygwin/math/fmodl.c
++++ b/winsup/cygwin/math/fmodl.c
+@@ -10,6 +10,7 @@ fmodl (long double x, long double y)
+ {
+   long double res = 0.0L;
+ 
++#if defined(__x86_64__)
+   asm volatile (
+        "1:\tfprem\n\t"
+        "fstsw   %%ax\n\t"
+@@ -17,5 +18,9 @@ fmodl (long double x, long double y)
+        "jp      1b\n\t"
+        "fstp    %%st(1)"
+        : "=t" (res) : "0" (x), "u" (y) : "ax", "st(1)");
++#elif defined(__aarch64__)
++  // TODO
++  res = 0.0;
++#endif
+   return res;
+ }
+diff --git a/winsup/cygwin/math/frexpl.S b/winsup/cygwin/math/frexpl.S
+index 12782c29e..dcc288b95 100644
+--- a/winsup/cygwin/math/frexpl.S
++++ b/winsup/cygwin/math/frexpl.S
+@@ -10,14 +10,14 @@
+  * It returns an integer power of two to expnt and the significand
+  * between 0.5 and 1 to y.  Thus  x = y * 2**expn.
+  */
+-#ifdef __x86_64__
++#if defined(__x86_64__)
+ 	.align 8
+-#else
++#elif defined(__i386__)
+ 	.align 2
+ #endif
+ .globl __MINGW_USYMBOL(frexpl)
+ __MINGW_USYMBOL(frexpl):
+-#ifdef __x86_64__
++#if defined(__x86_64__)
+ 	pushq %rbp
+ 	movq %rsp,%rbp
+ 	subq $48,%rsp
+@@ -72,7 +72,7 @@ L24:
+ 	fstpt	(%r9)
+ 	leave
+ 	ret
+-#else
++#elif defined(__i386__)
+ 	pushl %ebp
+ 	movl %esp,%ebp
+ 	subl $24,%esp
+@@ -127,4 +127,8 @@ L24:
+ 	popl %esi
+ 	leave
+ 	ret
++#elif defined(__aarch64__)
++	// TODO
++#else
++	.error "Not supported on your platform yet"
+ #endif
+diff --git a/winsup/cygwin/math/ilogbl.S b/winsup/cygwin/math/ilogbl.S
+index c75a7d0fd..cc8aaf02a 100644
+--- a/winsup/cygwin/math/ilogbl.S
++++ b/winsup/cygwin/math/ilogbl.S
+@@ -7,15 +7,15 @@
+ 
+ 	.file	"ilogbl.S"
+ 	.text
+-#ifdef __x86_64__
++#if defined(__x86_64__)
+ 	.align 8
+-#else
++#elif defined(__i386__)
+ 	.align 4
+ #endif
+ .globl __MINGW_USYMBOL(ilogbl)
+ 	.def	__MINGW_USYMBOL(ilogbl);	.scl	2;	.type	32;	.endef
+ __MINGW_USYMBOL(ilogbl):
+-#ifdef __x86_64__
++#if defined(__x86_64__)
+ 	fldt	(%rcx)
+ 	fxam			/* Is NaN or +-Inf?  */
+ 	fstsw   %ax
+@@ -44,7 +44,7 @@ __MINGW_USYMBOL(ilogbl):
+ 2:	fstp    %st
+ 	movl	$0x80000001, %eax	/* FP_ILOGB0  */
+ 	ret
+-#else
++#elif defined(__i386__)
+ 	fldt	4(%esp)
+ /* I added the following ugly construct because ilogb(+-Inf) is
+    required to return INT_MAX in ISO C99.
+@@ -76,4 +76,8 @@ __MINGW_USYMBOL(ilogbl):
+ 2:	fstp    %st
+ 	movl	$0x80000001, %eax	/* FP_ILOGB0  */
+ 	ret
++#elif defined(__aarch64__)
++	// TODO
++#else
++	.error "Not supported on your platform yet"
+ #endif
+diff --git a/winsup/cygwin/math/internal_logl.S b/winsup/cygwin/math/internal_logl.S
+index f8a075774..da98f4cf2 100644
+--- a/winsup/cygwin/math/internal_logl.S
++++ b/winsup/cygwin/math/internal_logl.S
+@@ -7,9 +7,9 @@
+ 
+ 	.file	"internal_logl.S"
+ 	.text
+-#ifdef __x86_64__
++#if defined(__x86_64__)
+ 	.align 8
+-#else
++#elif defined(__i386__)
+ 	.align 4
+ #endif
+ one:	.double 1.0
+@@ -21,7 +21,7 @@ limit:	.double 0.29
+ .globl __MINGW_USYMBOL(__logl_internal)
+ 	.def	__MINGW_USYMBOL(__logl_internal);	.scl	2;	.type	32;	.endef
+ __MINGW_USYMBOL(__logl_internal):
+-#ifdef __x86_64__
++#if defined(__x86_64__)
+ 	fldln2			// log(2)
+ 	fldt	(%rdx)		// x : log(2)
+ 	fld	%st		// x : x : log(2)
+@@ -45,7 +45,7 @@ __MINGW_USYMBOL(__logl_internal):
+ 	movq	$0,8(%rcx)
+ 	fstpt	(%rcx)
+ 	ret
+-#else
++#elif defined(__i386__)
+ 	fldln2			// log(2)
+ 	fldt	4(%esp)		// x : log(2)
+ 	fld	%st		// x : x : log(2)
+@@ -63,4 +63,8 @@ __MINGW_USYMBOL(__logl_internal):
+ 2:	fstp	%st(0)		// x : log(2)
+ 	fyl2x			// log(x)
+ 	ret
++#elif defined(__aarch64__)
++	// TODO
++#else
++	.error "Not supported on your platform yet"
+ #endif
+diff --git a/winsup/cygwin/math/ldexpl.c b/winsup/cygwin/math/ldexpl.c
+index 2438617c3..9d5255c7a 100644
+--- a/winsup/cygwin/math/ldexpl.c
++++ b/winsup/cygwin/math/ldexpl.c
+@@ -12,9 +12,14 @@ long double ldexpl(long double x, int expn)
+   if (!isfinite (x) || x == 0.0L)
+     return x;
+ 
++#if defined(__x86_64__) || defined(__i386__)
+   __asm__ __volatile__ ("fscale"
+ 	    : "=t" (res)
+ 	    : "0" (x), "u" ((long double) expn));
++#elif defined(__aarch64__)
++  // TODO
++  res = 0.0L;
++#endif 
+ 
+   if (!isfinite (res) || res == 0.0L)
+     errno = ERANGE;
+diff --git a/winsup/cygwin/math/log10l.S b/winsup/cygwin/math/log10l.S
+index 33d45a3a8..2ec1108cc 100644
+--- a/winsup/cygwin/math/log10l.S
++++ b/winsup/cygwin/math/log10l.S
+@@ -7,9 +7,9 @@
+ 
+ 	.file	"log10l.S"
+ 	.text
+-#ifdef __x86_64__
++#if defined(__x86_64__)
+ 	.align 8
+-#else
++#elif defined(__i386__)
+ 	.align 4
+ #endif
+ one:	.double 1.0
+@@ -19,15 +19,15 @@ one:	.double 1.0
+ limit:	.double 0.29
+ 
+ 	.text
+-#ifdef __x86_64__
++#if defined(__x86_64__)
+ 	.align 8
+-#else
++#elif defined(__i386__)
+ 	.align 4
+ #endif
+ .globl __MINGW_USYMBOL(log10l)
+ 	.def	__MINGW_USYMBOL(log10l);	.scl	2;	.type	32;	.endef
+ __MINGW_USYMBOL(log10l):
+-#ifdef __x86_64__
++#if defined(__x86_64__)
+ 	fldlg2			// log10(2)
+ 	fldt	(%rdx)		// x : log10(2)
+ 	fxam
+@@ -63,7 +63,7 @@ __MINGW_USYMBOL(log10l):
+ 	movq	$0,8(%rcx)
+ 	fstpt	(%rcx)
+ 	ret
+-#else
++#elif defined(__i386__)
+ 	fldlg2			// log10(2)
+ 	fldt	4(%esp)		// x : log10(2)
+ 	fxam
+@@ -90,4 +90,8 @@ __MINGW_USYMBOL(log10l):
+ 	fstp	%st(1)
+ 	fstp	%st(1)
+ 	ret
++#elif defined(__aarch64__)
++	// TODO
++#else
++	.error "Not supported on your platform yet"
+ #endif
+diff --git a/winsup/cygwin/math/log1pl.S b/winsup/cygwin/math/log1pl.S
+index a56bcf4ec..b6b443860 100644
+--- a/winsup/cygwin/math/log1pl.S
++++ b/winsup/cygwin/math/log1pl.S
+@@ -12,18 +12,20 @@
+ 	   0.29 is a safe value.
+ 	 */
+ 
++#if defined(__x86_64__) || defined(__i386__)
+ 	/* Only gcc understands the .tfloat type
+ 	   The series of .long below represents
+ 	   limit:	.tfloat 0.29
+ 	 */
+ 	.align 16
++#endif
+ limit:
+ 	.long 2920577761
+ 	.long 2491081031
+ 	.long 16381
+-#ifdef __x86_64__
++#if defined(__x86_64__)
+ 	.align 8
+-#else
++#elif defined(__i386__)
+ 	.align 4
+ #endif
+ 	/* Please note:	 we use a double value here.  Since 1.0 has
+@@ -38,7 +40,7 @@ one:	.double 1.0
+ .globl __MINGW_USYMBOL(log1pl)
+ 	.def	__MINGW_USYMBOL(log1pl);	.scl	2;	.type	32;	.endef
+ __MINGW_USYMBOL(log1pl):
+-#ifdef __x86_64__
++#if defined(__x86_64__)
+ 	fldln2
+ 	fldt	(%rdx)
+ 	fxam
+@@ -73,7 +75,7 @@ __MINGW_USYMBOL(log1pl):
+ 	movq	$0,8(%rcx)
+ 	fstpt	(%rcx)
+ 	ret
+-#else
++#elif defined(__i386__)
+ 	fldln2
+ 	fldt	4(%esp)
+ 	fxam
+@@ -99,4 +101,8 @@ __MINGW_USYMBOL(log1pl):
+ 	fstp	%st(1)
+ 	fstp	%st(1)
+ 	ret
++#elif defined(__aarch64__)
++	// TODO
++#else
++	.error "Not supported on your platform yet"
+ #endif
+diff --git a/winsup/cygwin/math/log2l.S b/winsup/cygwin/math/log2l.S
+index 771cd8ae4..204b1b70d 100644
+--- a/winsup/cygwin/math/log2l.S
++++ b/winsup/cygwin/math/log2l.S
+@@ -7,9 +7,9 @@
+ 
+ 	.file	"log2l.S"
+ 	.text
+-#ifdef __x86_64__
++#if defined(__x86_64__)
+ 	.align 8
+-#else
++#elif defined(__i386__)
+ 	.align 4
+ #endif
+ one:	.double 1.0
+@@ -21,7 +21,7 @@ limit:	.double 0.29
+ .globl __MINGW_USYMBOL(log2l)
+ 	.def	__MINGW_USYMBOL(log2l);	.scl	2;	.type	32;	.endef
+ __MINGW_USYMBOL(log2l):
+-#ifdef __x86_64__
++#if defined(__x86_64__)
+ 	fldl	one(%rip)
+ 	fldt	(%rdx)		// x : 1
+ 	fxam
+@@ -57,7 +57,7 @@ __MINGW_USYMBOL(log2l):
+ 	movq	$0,8(%rcx)
+ 	fstpt	(%rcx)
+ 	ret
+-#else
++#elif defined(__i386__)
+ 	fldl	one
+ 	fldt	4(%esp)		// x : 1
+ 	fxam
+@@ -84,4 +84,8 @@ __MINGW_USYMBOL(log2l):
+ 	fstp	%st(1)
+ 	fstp	%st(1)
+ 	ret
++#elif (__aarch64__)
++	// TODO
++#else
++	.error "Not supported on your platform yet"
+ #endif
+diff --git a/winsup/cygwin/math/logbl.c b/winsup/cygwin/math/logbl.c
+index 5e533c07c..cdce28d22 100644
+--- a/winsup/cygwin/math/logbl.c
++++ b/winsup/cygwin/math/logbl.c
+@@ -16,8 +16,12 @@ logbl (long double x)
+ {
+   long double res = 0.0L;
+ 
++#if defined(__x86_64__) || defined(__i386__)
+   asm volatile (
+        "fxtract\n\t"
+        "fstp	%%st" : "=t" (res) : "0" (x));
++#elif defined(__aarch64__)
++  res = 0.0;
++#endif
+   return res;
+ }
+diff --git a/winsup/cygwin/math/pow.def.h b/winsup/cygwin/math/pow.def.h
+index 2ea825720..2d9dee40a 100644
+--- a/winsup/cygwin/math/pow.def.h
++++ b/winsup/cygwin/math/pow.def.h
+@@ -81,7 +81,7 @@ internal_modf (__FLT_TYPE value, __FLT_TYPE *iptr)
+   __FLT_TYPE int_part = (__FLT_TYPE) 0.0;
+   /* truncate */
+   /* truncate */
+-#ifdef __x86_64__
++#if defined(__x86_64__)
+   asm volatile ("pushq %%rax\n\tsubq $8, %%rsp\n"
+     "fnstcw 4(%%rsp)\n"
+     "movzwl 4(%%rsp), %%eax\n"
+@@ -91,7 +91,7 @@ internal_modf (__FLT_TYPE value, __FLT_TYPE *iptr)
+     "frndint\n"
+     "fldcw 4(%%rsp)\n"
+     "addq $8, %%rsp\npopq %%rax" : "=t" (int_part) : "0" (value)); /* round */
+-#else
++#elif defined(__i386__)
+   asm volatile ("push %%eax\n\tsubl $8, %%esp\n"
+     "fnstcw 4(%%esp)\n"
+     "movzwl 4(%%esp), %%eax\n"
+@@ -101,6 +101,8 @@ internal_modf (__FLT_TYPE value, __FLT_TYPE *iptr)
+     "frndint\n"
+     "fldcw 4(%%esp)\n"
+     "addl $8, %%esp\n\tpop %%eax\n" : "=t" (int_part) : "0" (value)); /* round */
++#elif defined(__aarch64__)
++  // TODO
+ #endif
+   if (iptr)
+     *iptr = int_part;
+@@ -204,7 +206,12 @@ __FLT_ABI(pow) (__FLT_TYPE x, __FLT_TYPE y)
+ 	}
+       if (y == __FLT_CST(0.5))
+ 	{
++#if defined(__x86_64__) || defined(__i386__)
+ 	  asm volatile ("fsqrt" : "=t" (rslt) : "0" (x));
++#elif defined(__aarch64__)
++	  // TODO
++	  rslt = 0.0;
++#endif
+ 	  return rslt;
+ 	}
+     }
+diff --git a/winsup/cygwin/math/remainder.S b/winsup/cygwin/math/remainder.S
+index 5a713f904..5e115b8bf 100644
+--- a/winsup/cygwin/math/remainder.S
++++ b/winsup/cygwin/math/remainder.S
+@@ -7,15 +7,15 @@
+ 
+ 	.file	"remainder.S"
+ 	.text
+-#ifdef __x86_64__
++#if defined(__x86_64__)
+ 	.align 8
+-#else
++#elif defined(__i386__)
+ 	.align 4
+ #endif
+ .globl __MINGW_USYMBOL(remainder)
+ 	.def	__MINGW_USYMBOL(remainder);	.scl	2;	.type	32;	.endef
+ __MINGW_USYMBOL(remainder):
+-#ifdef __x86_64__
++#if defined(__x86_64__)
+ 	movsd	%xmm0,-16(%rsp)
+ 	movsd	%xmm1,-32(%rsp)
+ 	fldl	-32(%rsp)
+@@ -28,7 +28,7 @@ __MINGW_USYMBOL(remainder):
+ 	fstpl	-16(%rsp)
+ 	movsd	-16(%rsp),%xmm0
+ 	ret
+-#else
++#elif defined(__i386__)
+ 	fldl	12(%esp)
+ 	fldl	4(%esp)
+ 1:	fprem1
+@@ -37,4 +37,8 @@ __MINGW_USYMBOL(remainder):
+ 	jp	1b
+ 	fstp	%st(1)
+ 	ret
++#elif defined(__aarch64__)
++	// TODO
++#else
++	.error "Not supported on your platform yet"
+ #endif
+diff --git a/winsup/cygwin/math/remainderf.S b/winsup/cygwin/math/remainderf.S
+index c3a3a3dc5..a2b8fb45b 100644
+--- a/winsup/cygwin/math/remainderf.S
++++ b/winsup/cygwin/math/remainderf.S
+@@ -7,15 +7,15 @@
+ 
+ 	.file	"remainderf.S"
+ 	.text
+-#ifdef __x86_64__
++#if defined(__x86_64__)
+ 	.align 8
+-#else
++#elif defined(__i386__)
+ 	.align 4
+ #endif
+ .globl __MINGW_USYMBOL(remainder)
+ 	.def	__MINGW_USYMBOL(remainderf);	.scl	2;	.type	32;	.endef
+ __MINGW_USYMBOL(remainderf):
+-#ifdef __x86_64__
++#if defined(__x86_64__)
+ 	movss	%xmm1,-12(%rsp)
+ 	flds	-12(%rsp)
+ 	movss	%xmm0,-12(%rsp)
+@@ -28,7 +28,7 @@ __MINGW_USYMBOL(remainderf):
+ 	fstps	-12(%rsp)
+ 	movss	-12(%rsp),%xmm0
+ 	ret
+-#else
++#elif defined(__i386__)
+ 	flds	8(%esp)
+ 	flds	4(%esp)
+ 1:	fprem1
+@@ -37,4 +37,8 @@ __MINGW_USYMBOL(remainderf):
+ 	jp	1b
+ 	fstp	%st(1)
+ 	ret
++#elif defined(__aarch64__)
++	// TODO
++#else
++	.error "Not supported on your platform yet"
+ #endif
+diff --git a/winsup/cygwin/math/remainderl.S b/winsup/cygwin/math/remainderl.S
+index a69e38296..3ca354ff0 100644
+--- a/winsup/cygwin/math/remainderl.S
++++ b/winsup/cygwin/math/remainderl.S
+@@ -7,15 +7,15 @@
+ 
+ 	.file	"remainderl.S"
+ 	.text
+-#ifdef __x86_64__
++#if defined(__x86_64__)
+ 	.align 8
+-#else
++#elif defined(__i386__)
+ 	.align 4
+ #endif
+ .globl __MINGW_USYMBOL(remainderl)
+ 	.def	__MINGW_USYMBOL(remainderl);	.scl	2;	.type	32;	.endef
+ __MINGW_USYMBOL(remainderl):
+-#ifdef __x86_64__
++#if defined(__x86_64__)
+ 	fldt	(%r8)
+ 	fldt	(%rdx)
+ 1:	fprem1
+@@ -27,7 +27,7 @@ __MINGW_USYMBOL(remainderl):
+ 	movq	$0,8(%rcx)
+ 	fstpt	(%rcx)
+ 	ret
+-#else
++#elif defined(__i386__)
+ 	fldt	16(%esp)
+ 	fldt	4(%esp)
+ 1:	fprem1
+@@ -36,4 +36,8 @@ __MINGW_USYMBOL(remainderl):
+ 	jp	1b
+ 	fstp	%st(1)
+ 	ret
++#elif defined(__aarch64__)
++	// TODO
++#else
++	.error "Not supported on your platform yet"
+ #endif
+diff --git a/winsup/cygwin/math/remquol.S b/winsup/cygwin/math/remquol.S
+index e16df8ad2..2a067f5aa 100644
+--- a/winsup/cygwin/math/remquol.S
++++ b/winsup/cygwin/math/remquol.S
+@@ -7,14 +7,14 @@
+ 
+ 	.file	"remquol.S"
+         .text
+-#ifdef __x86_64__
++#if defined(__x86_64__)
+ 	.align 8
+-#else
++#elif defined(__i386__)
+ 	.align 4
+ #endif
+ .globl __MINGW_USYMBOL(remquol)
+ __MINGW_USYMBOL(remquol):
+-#ifdef __x86_64__
++#if defined(__x86_64__)
+ 	pushq	%rcx
+         fldt (%r8)
+         fldt (%rdx)
+@@ -45,7 +45,7 @@ __MINGW_USYMBOL(remquol):
+ 	movq	$0,8(%rcx)
+ 	fstpt	(%rcx)
+         ret
+-#else
++#elif defined(__i386__)
+         fldt 4 +12(%esp)
+         fldt 4(%esp)
+ 1:	fprem1
+@@ -72,4 +72,8 @@ __MINGW_USYMBOL(remquol):
+ 1:	movl %eax, (%ecx)
+ 
+         ret
++#elif defined(__aarch64__)
++	// TODO
++#else
++	.error "Not supported on your platform yet"
+ #endif
+diff --git a/winsup/cygwin/math/scalbl.S b/winsup/cygwin/math/scalbl.S
+index f9675ac4b..376cd921e 100644
+--- a/winsup/cygwin/math/scalbl.S
++++ b/winsup/cygwin/math/scalbl.S
+@@ -7,15 +7,15 @@
+ 
+ 	.file	"scalbl.S"
+ 	.text
+-#ifdef __x86_64__
++#if defined(__x86_64__)
+ 	.align 8
+-#else
++#elif defined(__i386__)
+ 	.align 4
+ #endif
+ .globl __MINGW_USYMBOL(scalbl)
+ 	.def	__MINGW_USYMBOL(scalbl);	.scl	2;	.type	32;	.endef
+ __MINGW_USYMBOL(scalbl):
+-#ifdef __x86_64__
++#if defined(__x86_64__)
+ 	subq  $24, %rsp
+ 	fldt	(%r8)
+ 	fldt	(%rdx)
+@@ -26,10 +26,14 @@ __MINGW_USYMBOL(scalbl):
+ 	fstpt	(%rcx)
+ 	addq $24, %rsp
+ 	ret
+-#else
++#elif defined(__i386__)
+ 	fildl	16(%esp)
+ 	fldt	4(%esp)
+ 	fscale
+ 	fstp	%st(1)
+ 	ret
++#elif defined(__aarch64__)
++	// TODO
++#else
++	.error "Not supported on your platform yet"
+ #endif
+diff --git a/winsup/cygwin/math/scalbnl.S b/winsup/cygwin/math/scalbnl.S
+index 5ff0a68f3..430fe7ea7 100644
+--- a/winsup/cygwin/math/scalbnl.S
++++ b/winsup/cygwin/math/scalbnl.S
+@@ -7,15 +7,15 @@
+ 
+ 	.file	"scalbnl.S"
+ 	.text
+-#ifdef __x86_64__
++#if defined(__x86_64__)
+ 	.align 8
+-#else
++#elif defined(__i386__)
+ 	.align 4
+ #endif
+ .globl __MINGW_USYMBOL(scalbnl)
+ 	.def	__MINGW_USYMBOL(scalbnl);	.scl	2;	.type	32;	.endef
+ __MINGW_USYMBOL(scalbnl):
+-#ifdef __x86_64__
++#if defined(__x86_64__)
+ 	subq  $24, %rsp
+ 	andl    $-1, %r8d
+ 	movq	%r8, (%rsp)
+@@ -28,14 +28,17 @@ __MINGW_USYMBOL(scalbnl):
+ 	fstpt	(%rcx)
+ 	addq $24, %rsp
+ 	ret
+-#else
++#elif defined(__i386__)
+ 	fildl	16(%esp)
+ 	fldt	4(%esp)
+ 	fscale
+ 	fstp	%st(1)
+ 	ret
++#elif defined(__aarch64__)
++	// TODO
++#else
++	.error "Not supported on your platform yet"
+ #endif
+ 
+ .globl __MINGW_USYMBOL(scalblnl)
+ 	.set	__MINGW_USYMBOL(scalblnl),__MINGW_USYMBOL(scalbnl)
+-
+diff --git a/winsup/cygwin/math/sinl_internal.S b/winsup/cygwin/math/sinl_internal.S
+index 6d766b098..30f528f0a 100644
+--- a/winsup/cygwin/math/sinl_internal.S
++++ b/winsup/cygwin/math/sinl_internal.S
+@@ -7,15 +7,15 @@
+ 
+ 	.file	"sinl_internal.S"
+ 	.text
+-#ifdef __x86_64__
++#if defined(__x86_64__)
+ 	.align 8
+-#else
++#elif defined(__i386__)
+ 	.align 4
+ #endif
+ .globl __MINGW_USYMBOL(__sinl_internal)
+ 	.def	__MINGW_USYMBOL(__sinl_internal);	.scl	2;	.type	32;	.endef
+ __MINGW_USYMBOL(__sinl_internal):
+-#ifdef __x86_64__
++#if defined(__x86_64__)
+ 	fldt	(%rdx)
+ 	fsin
+ 	fnstsw	%ax
+@@ -38,7 +38,7 @@ __MINGW_USYMBOL(__sinl_internal):
+ 	movq	$0,8(%rcx)
+ 	fstpt	(%rcx)
+ 	ret
+-#else
++#elif defined(__i386__)
+ 	fldt	4(%esp)
+ 	fsin
+ 	fnstsw	%ax
+@@ -55,4 +55,8 @@ __MINGW_USYMBOL(__sinl_internal):
+ 	fstp	%st(1)
+ 	fsin
+ 	ret
++#elif defined(__aarch64__)
++	// TODO
++#else
++	.error "Not supported on your platform yet"
+ #endif
+diff --git a/winsup/cygwin/math/sqrt.def.h b/winsup/cygwin/math/sqrt.def.h
+index 3d1a00908..ea0e43e92 100644
+--- a/winsup/cygwin/math/sqrt.def.h
++++ b/winsup/cygwin/math/sqrt.def.h
+@@ -89,6 +89,8 @@ __FLT_ABI (sqrt) (__FLT_TYPE x)
+   __fsqrt_internal(x);
+ #elif defined(_X86_) || defined(__i386__) || defined(_AMD64_) || defined(__x86_64__)
+   asm volatile ("fsqrt" : "=t" (res) : "0" (x));
++#elif defined(__aarch64__)
++  // TODO
+ #else
+ #error Not supported on your platform yet
+ #endif
+diff --git a/winsup/cygwin/math/tanl.S b/winsup/cygwin/math/tanl.S
+index f11b53920..4102d3bc1 100644
+--- a/winsup/cygwin/math/tanl.S
++++ b/winsup/cygwin/math/tanl.S
+@@ -7,15 +7,15 @@
+ 
+ 	.file	"tanl.S"
+ 	.text
+-#ifdef __x86_64__
++#if defined(__x86_64__)
+ 	.align 8
+-#else
++#elif defined(__i386__)
+ 	.align 4
+ #endif
+ .globl __MINGW_USYMBOL(tanl)
+ 	.def	__MINGW_USYMBOL(tanl);	.scl	2;	.type	32;	.endef
+ __MINGW_USYMBOL(tanl):
+-#ifdef __x86_64__
++#if defined(__x86_64__)
+ 	fldt	(%rdx)
+ 	fptan
+ 	fnstsw	%ax
+@@ -40,7 +40,7 @@ __MINGW_USYMBOL(tanl):
+ 	movq	$0,8(%rcx)
+ 	fstpt	(%rcx)
+ 	ret
+-#else
++#elif defined(__i386__)
+ 	fldt	4(%esp)
+ 	fptan
+ 	fnstsw	%ax
+@@ -59,4 +59,8 @@ __MINGW_USYMBOL(tanl):
+ 	fptan
+ 	fstp	%st(0)
+ 	ret
++#elif defined(__aarch64__)
++	// TODO
++#else
++	.error "Not supported on your platform yet"
+ #endif
+diff --git a/winsup/cygwin/math/truncl.c b/winsup/cygwin/math/truncl.c
+index 9380f9571..c64a20fb5 100644
+--- a/winsup/cygwin/math/truncl.c
++++ b/winsup/cygwin/math/truncl.c
+@@ -13,7 +13,7 @@
+ long double
+ truncl (long double _x)
+ {
+-#if defined(_ARM_) || defined(__arm__)
++#if defined(_ARM_) || defined(__arm__) || defined(__aarch64__)
+   return trunc(_x);
+ #else
+   long double retval = 0.0L;
+@@ -26,5 +26,5 @@ truncl (long double _x)
+   __asm__ __volatile__ ("frndint;" : "=t" (retval)  : "0" (_x)); /* round towards zero */
+   __asm__ __volatile__ ("fldcw %0;" : : "m" (saved_cw) ); /* restore saved control word */
+   return retval;
+-#endif /* defined(_ARM_) || defined(__arm__) */
++#endif /* defined(_ARM_) || defined(__arm__) || defined(__aarch64__) */
+ }
+diff --git a/winsup/cygwin/profil.c b/winsup/cygwin/profil.c
+index 30b37244a..9578ab1df 100644
+--- a/winsup/cygwin/profil.c
++++ b/winsup/cygwin/profil.c
+@@ -21,6 +21,7 @@
+ #include <errno.h>
+ #include <pthread.h>
+ #include "profil.h"
++#include "register.h"
+ 
+ #define SLEEPTIME (1000 / PROF_HZ)
+ 
+@@ -42,11 +43,7 @@ get_thrpc (HANDLE thr)
+   ctx.ContextFlags = CONTEXT_CONTROL | CONTEXT_INTEGER;
+   pc = (size_t) - 1;
+   if (GetThreadContext (thr, &ctx)) {
+-#ifdef __x86_64__
+-    pc = ctx.Rip;
+-#else
+-#error unimplemented for this target
+-#endif
++    pc = ctx._CX_instPtr;
+   }
+   ResumeThread (thr);
+   return pc;
+diff --git a/winsup/cygwin/scripts/gendef b/winsup/cygwin/scripts/gendef
+index 3b1f8b9da..734c4d5a3 100755
+--- a/winsup/cygwin/scripts/gendef
++++ b/winsup/cygwin/scripts/gendef
+@@ -21,6 +21,7 @@ if (!defined($cpu) || !defined($output_def)) {
+     die "$0: missing required option\n";
+ }
+ 
++my $is_aarch64 = $cpu eq 'aarch64';
+ my $is_x86_64 = $cpu eq 'x86_64';
+ # FIXME? Do other (non-32 bit) arches on Windows still use symbol prefixes?
+ my $sym_prefix = '';
+@@ -89,7 +90,7 @@ sub fefunc {
+     my $func = $sym_prefix . shift;
+     my $fe = $sym_prefix . shift;
+     my $sigfe_func;
+-    if ($is_x86_64) {
++    if ($is_x86_64 || $is_aarch64) {
+ 	$sigfe_func = ($fe =~ /^(.*)_${func}$/)[0];
+     }
+     my $extra;
+@@ -109,6 +110,24 @@ $fe:
+ 
+ EOF
+     }
++    # TODO
++    if ($is_aarch64) {
++	$res = <<EOF;
++	.extern $func
++	.global $fe
++	.seh_proc $fe
++$fe:
++	adrp x17, $func
++	str x17, [sp, #-16]!
++	.seh_pushreg x17
++	.seh_endprologue
++	adr x16, $sigfe_func
++	ldr x16, [x16]
++	br x16
++	.seh_endproc
++EOF
++    }
++
+     if (!$main::first++) {
+ 	if ($is_x86_64) {
+ 	  $res = <<EOF . longjmp () . $res;
+@@ -378,6 +391,79 @@ stabilize_sig_stack:
+ 	popq	%r12
+ 	ret
+ 	.seh_endproc
++EOF
++	}
++	# TODO
++	if ($is_aarch64) {
++	  $res = <<EOF . longjmp () . $res;
++	.include "tlsoffsets"
++	.text
++
++	.seh_proc _sigfe_maybe
++_sigfe_maybe:					# stack is aligned on entry!
++	.seh_endprologue
++0:	ret
++	.seh_endproc
++
++	.seh_proc _sigfe
++_sigfe:						# stack is aligned on entry!
++	.seh_endprologue
++	.seh_endproc
++
++	.global _sigbe
++	.seh_proc _sigbe
++_sigbe:						# return here after cygwin syscall
++						# stack is aligned on entry!
++	.seh_endprologue
++	.seh_endproc
++
++	.global	sigdelayed
++	.seh_proc sigdelayed
++sigdelayed:
++	.seh_endprologue
++
++	ret
++	.seh_endproc
++_sigdelayed_end:
++	.global _sigdelayed_end
++
++# _cygtls::pop
++	.global _ZN7_cygtls3popEv
++	.seh_proc _ZN7_cygtls3popEv
++_ZN7_cygtls3popEv:
++	.seh_endprologue
++	ret
++	.seh_endproc
++
++# _cygtls::lock
++	.global _ZN7_cygtls4lockEv
++	.seh_proc _ZN7_cygtls4lockEv
++_ZN7_cygtls4lockEv:
++	.seh_endprologue
++	ret
++	.seh_endproc
++
++# _cygtls::unlock
++	.global _ZN7_cygtls6unlockEv
++	.seh_proc _ZN7_cygtls6unlockEv
++_ZN7_cygtls6unlockEv:
++	.seh_endprologue
++	ret
++	.seh_endproc
++
++# _cygtls::locked
++	.global _ZN7_cygtls6lockedEv
++	.seh_proc _ZN7_cygtls6lockedEv
++_ZN7_cygtls6lockedEv:
++	.seh_endprologue
++	ret
++	.seh_endproc
++
++	.seh_proc stabilize_sig_stack
++stabilize_sig_stack:
++	.seh_endprologue
++	ret
++	.seh_endproc
+ EOF
+ 	}
+     }
+@@ -514,6 +600,37 @@ longjmp:
+ 	incl	%eax
+ 0:	ret
+ 	.seh_endproc
++EOF
++    }
++    if ($is_aarch64) {
++      	# TODO
++      	return <<EOF;
++
++	.globl	sigsetjmp
++	.seh_proc sigsetjmp
++sigsetjmp:
++	.seh_endprologue
++	.seh_endproc
++
++	.globl  setjmp
++	.seh_proc setjmp
++setjmp:
++	.seh_endprologue
++	ret
++	.seh_endproc
++
++	.globl	siglongjmp
++	.seh_proc siglongjmp
++siglongjmp:
++	.seh_endprologue
++	.seh_endproc
++
++	.globl  longjmp
++	.seh_proc longjmp
++longjmp:
++	.seh_endprologue
++	ret
++	.seh_endproc
+ EOF
+     }
+ }
+diff --git a/winsup/cygwin/scripts/gentls_offsets b/winsup/cygwin/scripts/gentls_offsets
+index 040b5de6b..07b4eda37 100755
+--- a/winsup/cygwin/scripts/gentls_offsets
++++ b/winsup/cygwin/scripts/gentls_offsets
+@@ -62,7 +62,7 @@ start_offset=$(gawk '\
+   /^__CYGTLS__/ {
+     varname = gensub (/__CYGTLS__(\w+):/, "\\1", "g");
+   }
+-  /\s*\.long\s+/ {
++  /\s*\.word\s+/ {
+     if (length (varname) > 0) {
+       if (varname == "start_offset") {
+ 	print $2;
+@@ -85,7 +85,7 @@ gawk -v start_offset="$start_offset" '\
+       varname = "";
+     }
+   }
+-  /\s*\.long\s+/ {
++  /\s*\.word\s+/ {
+     if (length (varname) > 0) {
+       if (varname == "start_offset") {
+ 	printf (".equ _cygtls.%s, -%u\n", varname, start_offset);
+diff --git a/winsup/cygwin/scripts/mkimport b/winsup/cygwin/scripts/mkimport
+index 9517c4e9e..633dd6af3 100755
+--- a/winsup/cygwin/scripts/mkimport
++++ b/winsup/cygwin/scripts/mkimport
+@@ -24,6 +24,7 @@ my %import = ();
+ my %symfile = ();
+ 
+ my $is_x86_64 = ($cpu eq 'x86_64' ? 1 : 0);
++my $is_aarch64 = ($cpu eq 'aarch64' ? 1 : 0);
+ # FIXME? Do other (non-32 bit) arches on Windows still use symbol prefixes?
+ my $sym_prefix = '';
+ 
+@@ -65,6 +66,14 @@ for my $f (keys %text) {
+ 	.global	$glob_sym
+ $glob_sym:
+ 	jmp	*$imp_sym(%rip)
++EOF
++	} elsif ($is_aarch64) {
++	    # TODO
++	    print $as_fd <<EOF;
++	.text
++	.extern	$imp_sym
++	.global	$glob_sym
++$glob_sym:
+ EOF
+ 	} else {
+ 	    print $as_fd <<EOF;
+diff --git a/winsup/cygwin/thread.cc b/winsup/cygwin/thread.cc
+index 0f8327831..a491e280f 100644
+--- a/winsup/cygwin/thread.cc
++++ b/winsup/cygwin/thread.cc
+@@ -32,6 +32,7 @@ details. */
+ #include "ntdll.h"
+ #include "cygwait.h"
+ #include "exception.h"
++#include "register.h"
+ 
+ /* For Linux compatibility, the length of a thread name is 16 characters. */
+ #define THRNAMELEN 16
+@@ -629,7 +630,7 @@ pthread::cancel ()
+       threadlist_t *tl_entry = cygheap->find_tls (cygtls);
+       if (!cygtls->inside_kernel (&context))
+ 	{
+-	  context.Rip = (ULONG_PTR) pthread::static_cancel_self;
++	  context._CX_instPtr = (ULONG_PTR) pthread::static_cancel_self;
+ 	  SetThreadContext (win32_obj_id, &context);
+ 	}
+       cygheap->unlock_tls (tl_entry);
+@@ -1946,7 +1947,11 @@ pthread_spinlock::lock ()
+       else if (spins < FAST_SPINS_LIMIT)
+         {
+           ++spins;
++#if defined(__x86_64__)
+           __asm__ volatile ("pause":::);
++#elif defined(__aarch64__)
++          // TODO
++#endif
+         }
+       else
+ 	{
+diff --git a/winsup/utils/profiler.cc b/winsup/utils/profiler.cc
+index b5ce16cf2..04c6b3ed3 100644
+--- a/winsup/utils/profiler.cc
++++ b/winsup/utils/profiler.cc
+@@ -33,6 +33,7 @@ typedef uint16_t u_int16_t; // Non-standard sized type needed by ancient gmon.h
+ #define NO_GLOBALS_H
+ #include "gmon.h"
+ #include "path.h"
++#include "register.h"
+ 
+ /* Undo this #define from winsup.h. */
+ #ifdef ExitThread
+@@ -193,11 +194,7 @@ sample (CONTEXT *context, HANDLE h)
+       return 0ULL;
+     }
+   else
+-#ifdef __x86_64__
+-    return context->Rip;
+-#else
+-#error unimplemented for this target
+-#endif
++    return context->_CX_instPtr;
+ }
+ 
+ void
+@@ -503,8 +500,10 @@ find_text_section (LPVOID base, HANDLE h)
+ 
+   read_child ((void *) &machine, sizeof (machine),
+               &inth->FileHeader.Machine, h);
+-#ifdef __x86_64__
++#if defined(__x86_64__)
+   if (machine != IMAGE_FILE_MACHINE_AMD64)
++#elif defined(__aarch64__)
++  if (machine != IMAGE_FILE_MACHINE_ARM64)
+ #else
+ #error unimplemented for this target
+ #endif
+diff --git a/winsup/utils/ssp.c b/winsup/utils/ssp.c
+index 96a90a1d9..9ab9d1e05 100644
+--- a/winsup/utils/ssp.c
++++ b/winsup/utils/ssp.c
+@@ -41,13 +41,21 @@ static struct option longopts[] =
+ 
+ static char opts[] = "+cdehlstvV";
+ 
+-#ifdef __x86_64__
++#if defined(__x86_64__)
+ #define KERNEL_ADDR 0x00007FF000000000
+ #define CONTEXT_SP Rsp
+ #define CONTEXT_IP Rip
+ typedef DWORD64 CONTEXT_REG;
+ #define CONTEXT_REG_FMT "%016llx"
+ #define ADDR_SSCANF_FMT "%lli"
++#elif defined(__aarch64__)
++// TODO
++#define KERNEL_ADDR 0x00007FF000000000
++#define CONTEXT_SP Sp
++#define CONTEXT_IP Pc
++typedef DWORD64 CONTEXT_REG;
++#define CONTEXT_REG_FMT "%016llx"
++#define ADDR_SSCANF_FMT "%lli"
+ #else
+ #error unimplemented for this target
+ #endif
+@@ -200,10 +208,16 @@ set_step_threads (int threadId, int trace)
+   if (rv != -1)
+     {
+       thread_step_flags[tix] = trace;
++#if defined(__i386__) || defined(__x86_64__)
+       if (trace)
+ 	context.EFlags |= 0x100; /* TRAP (single step) flag */
+       else
+ 	context.EFlags &= ~0x100; /* TRAP (single step) flag */
++#elif defined(__aarch64__)
++	// TODO
++#else
++#error unimplemented for this target
++#endif
+       SetThreadContext (thread, &context);
+     }
+ }
+@@ -215,7 +229,14 @@ set_steps ()
+   for (i=0; i<num_active_threads; i++)
+     {
+       GetThreadContext (active_threads[i], &context);
++#if defined(__i386__) || defined(__x86_64__)
+       s = context.EFlags & 0x0100;
++#elif defined(__aarch64__)
++      // TODO
++      s = 0;
++#else
++#error unimplemented for this target
++#endif
+       if (!s && thread_step_flags[i])
+ 	{
+ 	  set_step_threads (active_thread_ids[i], 1);
+@@ -252,11 +273,13 @@ dump_registers (HANDLE thread)
+ {
+   context.ContextFlags = CONTEXT_FULL;
+   GetThreadContext (thread, &context);
+-#ifdef __x86_64__
++#if defined(__x86_64__)
+   printf ("eax %016llx ebx %016llx ecx %016llx edx %016llx eip\n",
+ 	  context.Rax, context.Rbx, context.Rcx, context.Rdx);
+   printf ("esi %016llx edi %016llx ebp %016llx esp %016llx %016llx\n",
+ 	  context.Rsi, context.Rdi, context.Rbp, context.Rsp, context.Rip);
++#elif defined(__aarch64__)
++  // TODO
+ #else
+ #error unimplemented for this target
+ #endif
+@@ -542,19 +565,31 @@ run_program (char *cmdline)
+ 	    {
+ 	      if (pc == thread_return_address[tix])
+ 		{
++#if defined(__i386__) || defined(__x86_64__)
+ 		  if (context.EFlags & 0x100)
+ 		    {
+ 		      context.EFlags &= ~0x100; /* TRAP (single step) flag */
+ 		      SetThreadContext (hThread, &context);
+ 		    }
++#elif defined(__aarch64__)
++		  // TODO
++#else
++#error unimplemented for this target
++#endif
+ 		}
+ 	      else if (stepping_enabled)
+ 		{
++#if defined(__i386__) || defined(__x86_64__)
+ 		  if (!(context.EFlags & 0x100))
+ 		    {
+ 		      context.EFlags |= 0x100; /* TRAP (single step) flag */
+ 		      SetThreadContext (hThread, &context);
+ 		    }
++#elif defined(__aarch64__)
++		  // TODO
++#else
++#error unimplemented for this target
++#endif
+ 		}
+ 	    }
+ 	  break;
+@@ -935,7 +970,7 @@ main (int argc, char **argv)
+ 
+   if (dll_counts)
+     {
+-#ifdef __x86_64__
++#if defined(__x86_64__) || defined(__aarch64__)
+       /*       1234567 123% 1234567 123% 1234567812345678 xxxxxxxxxxx */
+       printf (" Main-Thread Other-Thread BaseAddr         DLL Name\n");
+ #else

@@ -41,8 +41,8 @@ index 9efdd4c..a6c204d 100644
 --- a/winsup/Makefile.am
 +++ b/winsup/Makefile.am
 @@ -14,10 +14,10 @@ cygdoc_DATA = \
-        CYGWIN_LICENSE \
-        COPYING
+ 	CYGWIN_LICENSE \
+ 	COPYING
  
 -SUBDIRS = cygwin cygserver utils testsuite
 +SUBDIRS = cygwin cygserver
