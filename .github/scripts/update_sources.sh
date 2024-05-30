@@ -3,7 +3,7 @@
 source `dirname ${BASH_SOURCE[0]}`/config.sh
 
 echo "::group::Update binutils, gcc and mingw sources"
-    [ ! -d "$SOURCE_PATH" ] && mkdir -p "$SOURCE_PATH"
+    mkdir -p "$SOURCE_PATH"
 
     cd "$SOURCE_PATH"
     git -C "$BINUTILS_VERSION" pull || git clone "$BINUTILS_REPO" -b "$BINUTILS_BRANCH" "$BINUTILS_VERSION" --single-branch --depth 1

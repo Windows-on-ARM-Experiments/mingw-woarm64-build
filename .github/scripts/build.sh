@@ -20,8 +20,8 @@ if [ "$RUN_BOOTSTRAP" = 1 ]; then
     .github/scripts/install-dependencies.sh
 fi
 
-if [ "$UPDATE_SOURCE" = 1 ]; then
-    .github/scripts/update_source.sh
+if [ "$UPDATE_SOURCES" = 1 ]; then
+    .github/scripts/update_sources.sh
 fi
 
 if [[ "$PLATFORM" =~ cygwin ]]; then

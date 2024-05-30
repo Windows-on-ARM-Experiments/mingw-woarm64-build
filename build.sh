@@ -15,7 +15,7 @@ export MINGW_REPO=${MINGW_REPO:-https://github.com/Windows-on-ARM-Experiments/mi
 export MINGW_BRANCH=${MINGW_BRANCH:-woarm64}
 
 export RUN_BOOTSTRAP=${RUN_BOOTSTRAP:-1}
-export UPDATE_SOURCE=${UPDATE_SOURCE:-1}
+export UPDATE_SOURCES=${UPDATE_SOURCES:-1}
 
 .github/scripts/build.sh
 
