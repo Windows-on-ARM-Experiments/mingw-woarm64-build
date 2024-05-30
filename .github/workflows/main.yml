@@ -24,6 +24,8 @@ env:
   GCC_BRANCH: ${{ inputs.gcc_branch || 'woarm64' }}
   MINGW_BRANCH: ${{ inputs.mingw_branch || 'woarm64' }}
 
+  TOOLCHAIN_PATH: ${{ github.workspace }}/cross
+
 jobs:
   build-toolchain:
     runs-on: ubuntu-latest
@@ -43,5 +45,5 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: main-aarch64-w64-mingw32-toolchain
-          path: ${{ env.INSTALL_PATH }}
+          path: ${{ env.TOOLCHAIN_PATH }}
           retention-days: 1
