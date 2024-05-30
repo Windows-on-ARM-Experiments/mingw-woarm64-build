@@ -30,9 +30,6 @@ jobs:
   build-toolchain:
     runs-on: ubuntu-latest
 
-    env:
-      INSTALL_PATH: ${{ github.workspace }}/cross
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
