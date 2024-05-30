@@ -34,7 +34,7 @@ on:
       openblas_branch:
         description: 'OpenBLAS branch to test'
         required: false
-        default: 'develop'
+        default: 'v0.3.26'
       openssl_branch:
         description: 'OpenSSL branch to test'
         required: false
