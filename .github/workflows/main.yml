@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+  pull_request:
   workflow_dispatch:
     inputs:
       binutils_branch:
@@ -24,7 +25,7 @@ env:
   MINGW_BRANCH: ${{ inputs.mingw_branch }}
 
 jobs:
-  run-script:
+  build-toolchain:
     runs-on: ubuntu-latest
 
     env:
