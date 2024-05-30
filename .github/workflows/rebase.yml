@@ -106,7 +106,7 @@ jobs:
 
   build:
     needs: [start-binutils-rebase, start-gcc-rebase, start-mingw-rebase]
-    uses: ./.github/workflows/advanced.yml
+    uses: ./.github/workflows/variants.yml
     with:
       binutils_branch: ${{ inputs.rebase_branch || 'rebase-upstream' }}
       gcc_branch: ${{ inputs.rebase_branch || 'rebase-upstream' }}
