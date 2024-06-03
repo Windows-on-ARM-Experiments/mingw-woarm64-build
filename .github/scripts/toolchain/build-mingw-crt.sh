@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source `dirname ${BASH_SOURCE[0]}`/../config-mingw.sh
+source `dirname ${BASH_SOURCE[0]}`/../config.sh
 
 MINGW_BUILD_PATH=$BUILD_PATH/mingw-crt
 
@@ -16,11 +16,46 @@ if [ "$RUN_CONFIG" = 1 ] || [ ! -f "$MINGW_BUILD_PATH/Makefile" ] ; then
                 --enable-debug"
         fi
 
-        case $PLATFORM in
+        case "$ARCH" in
+            x86_64)
+                TARGET_OPTIONS="$TARGET_OPTIONS \
+                    --disable-lib32 \
+                    --enable-lib64 \
+                    --disable-libarm32 \
+                    --disable-libarm64"
+            ;;
+            aarch64)
+                TARGET_OPTIONS="$TARGET_OPTIONS \
+                    --disable-lib32 \
+                    --disable-lib64 \
+                    --disable-libarm32 \
+                    --enable-libarm64"
+                CFLAGS="$CFLAGS \
+                    -mno-outline-atomics"
+            ;;
+        esac
+
+        case "$PLATFORM" in
+            *cygwin*)
+                TARGET_OPTIONS="$TARGET_OPTIONS \
+                    --enable-w32api"
+                ;;
             *mingw*)
                 TARGET_OPTIONS="$TARGET_OPTIONS \
-                    --with-sysroot=$TOOLCHAIN_PATH/$TARGET"
+                    --enable-wildcard \
+                    --disable-dependency-tracking"
                 ;;
+        esac
+
+        case "$CRT" in
+            ucrt)
+                TARGET_OPTIONS="$TARGET_OPTIONS \
+                    --with-default-msvcrt=ucrt"
+            ;;
+            msvcrt)
+                TARGET_OPTIONS="$TARGET_OPTIONS \
+                    --with-default-msvcrt=msvcrt"
+            ;;
         esac
 
         $SOURCE_PATH/$MINGW_VERSION/mingw-w64-crt/configure \
@@ -28,7 +63,8 @@ if [ "$RUN_CONFIG" = 1 ] || [ ! -f "$MINGW_BUILD_PATH/Makefile" ] ; then
             --build=$BUILD \
             --host=$TARGET \
             $HOST_OPTIONS \
-            $TARGET_OPTIONS
+            $TARGET_OPTIONS \
+            CFLAGS="$CFLAGS"
     echo "::endgroup::"
 fi
 
@@ -39,6 +75,25 @@ echo "::endgroup::"
 if [ "$RUN_INSTALL" = 1 ] ; then
     echo "::group::Install MinGW CRT"
         make install
+
+        case "$PLATFORM" in
+            *cygwin*)
+                pushd $TOOLCHAIN_PATH/$TARGET/lib
+                    ln -fs w32api/libkernel32.a .
+                    ln -fs w32api/libuser32.a .
+                    ln -fs w32api/libadvapi32.a .
+                    ln -fs w32api/libshell32.a .
+                    ln -fs w32api/libgdi32.a .
+                    ln -fs w32api/libcomdlg32.a .
+                    ln -fs w32api/libntdll.a .
+                    ln -fs w32api/libnetapi32.a .
+                    ln -fs w32api/libpsapi.a .
+                    ln -fs w32api/libuserenv.a .
+                    ln -fs w32api/libnetapi32.a .
+                    ln -fs w32api/libdbghelp.a .
+                popd
+                ;;
+        esac
     echo "::endgroup::"
 fi
 

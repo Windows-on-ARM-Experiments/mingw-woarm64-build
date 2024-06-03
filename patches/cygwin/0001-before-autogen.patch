@@ -1,0 +1,67 @@
+diff --git a/newlib/libc/include/stdlib.h b/newlib/libc/include/stdlib.h
+index fd89f5ba7..7579d9cab 100644
+--- a/newlib/libc/include/stdlib.h
++++ b/newlib/libc/include/stdlib.h
+@@ -66,7 +67,7 @@ int	__locale_mb_cur_max (void);
+ 
+ #define MB_CUR_MAX __locale_mb_cur_max()
+ 
+-void	abort (void) _ATTRIBUTE ((__noreturn__));
++void	abort () _ATTRIBUTE ((__noreturn__));
+ int	abs (int);
+ #if __BSD_VISIBLE
+ __uint32_t arc4random (void);
+diff --git a/winsup/configure.ac b/winsup/configure.ac
+index 9b9b59d..1e5ab31 100644
+--- a/winsup/configure.ac
++++ b/winsup/configure.ac
+@@ -28,8 +28,6 @@ realdirpath() {
+ winsup_srcdir="$(realdirpath $srcdir)"
+ target_builddir="$(realdirpath ..)"
+ 
+-AC_NO_EXECUTABLES
+-
+ AC_PROG_INSTALL
+ AC_PROG_MKDIR_P
+ AC_PROG_CC
+@@ -129,11 +127,6 @@ AC_CONFIG_FILES([
+     Makefile
+     cygwin/Makefile
+     cygserver/Makefile
+-    doc/Makefile
+-    utils/Makefile
+-    utils/mingw/Makefile
+-    testsuite/Makefile
+-    testsuite/mingw/Makefile
+ ])
+ 
+ AC_OUTPUT
+diff --git a/winsup/Makefile.am b/winsup/Makefile.am
+index 9efdd4c..a6c204d 100644
+--- a/winsup/Makefile.am
++++ b/winsup/Makefile.am
+@@ -14,10 +14,10 @@ cygdoc_DATA = \
+        CYGWIN_LICENSE \
+        COPYING
+ 
+-SUBDIRS = cygwin cygserver utils testsuite
++SUBDIRS = cygwin cygserver
+ 
+ if BUILD_DOC
+ SUBDIRS += doc
+ endif
+ 
+-cygserver utils testsuite: cygwin
++cygserver: cygwin
+diff --git a/winsup/cygserver/Makefile.am b/winsup/cygserver/Makefile.am
+index ec7a622..0249a62 100644
+--- a/winsup/cygserver/Makefile.am
++++ b/winsup/cygserver/Makefile.am
+@@ -12,7 +12,6 @@ cygserver_flags=$(cxxflags_common) -Wimplicit-fallthrough=5 -Werror -DSYSCONFDIR
+ AM_CXXFLAGS = $(CFLAGS)
+ 
+ noinst_LIBRARIES = libcygserver.a
+-sbin_PROGRAMS = cygserver
+ bin_SCRIPTS = cygserver-config
+ 
+ cygserver_SOURCES = \

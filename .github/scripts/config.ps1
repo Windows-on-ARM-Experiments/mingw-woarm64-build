@@ -7,8 +7,8 @@ if ( -not $env:LIBJPEG_TURBO_VERSION) { $env:LIBJPEG_TURBO_VERSION="libjpeg-turb
 if ( -not $env:ARCH ) { $env:ARCH = "aarch64" }
 if ( -not $env:PLATFORM ) { $env:PLATFORM = "w64-mingw32" }
 if ( -not $env:CRT ) { $env:CRT = "msvcrt" }
-if ( -not $env:TARGET ) { $env:TARGET = "$ARCH-$PLATFORM" }
-if ( -not $env:TOOLCHAIN_NAME ) { $env:TOOLCHAIN_NAME = "$ARCH-$PLATFORM-$CRT" }
+if ( -not $env:TARGET ) { $env:TARGET = "$env:ARCH-$env:PLATFORM" }
+if ( -not $env:TOOLCHAIN_NAME ) { $env:TOOLCHAIN_NAME = "$env:ARCH-$env:PLATFORM-$env:CRT" }
 
 if ( -not $env:SOURCE_PATH ) { $env:SOURCE_PATH= "$PWD\code" }
 if ( -not $env:BUILD_PATH ) { $env:BUILD_PATH = "$PWD\build-$env:TOOLCHAIN_NAME" }
