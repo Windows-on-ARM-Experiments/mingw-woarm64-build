@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - wo-stage1-compiler
   pull_request:
   workflow_dispatch:
     inputs:
@@ -117,7 +116,7 @@ jobs:
       fail-fast: false
       matrix:
         arch: [aarch64, x86_64]
-        platform: [w64-mingw32, pc-linux-gnu, pc-cygwin]
+        platform: [w64-mingw32, pc-linux-gnu]
         crt: [msvcrt, ucrt, libc]
         exclude:
           - platform: w64-mingw32
