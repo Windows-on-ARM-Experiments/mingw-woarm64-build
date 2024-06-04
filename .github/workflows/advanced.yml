@@ -66,7 +66,7 @@ env:
   BINUTILS_VERSION: binutils-master
 
   GCC_REPO: Windows-on-ARM-Experiments/gcc-woarm64
-  GCC_BRANCH: ${{ inputs.gcc_branch || 'aarch64-patch-series2-v4' }}
+  GCC_BRANCH: ${{ inputs.gcc_branch || 'aarch64-patch-series2-v5' }}
   GCC_VERSION: gcc-master
 
   MINGW_REPO: Windows-on-ARM-Experiments/mingw-woarm64
