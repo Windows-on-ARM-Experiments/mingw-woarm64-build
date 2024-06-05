@@ -62,12 +62,13 @@ TESTS_PACKAGE_NAME=${TESTS_PACKAGE_NAME:-$TOOLCHAIN_NAME-tests.tar.gz}
 FFMPEG_PATH=${FFMPEG_PATH:-~/ffmpeg}
 FFMPEG_TESTS_PATH=${FFMPEG_TESTS_PATH:-~/ffmpeg-tests}
 
-DEBUG=${DEBUG:-0}
-CCACHE=${CCACHE:-0}
-RUN_BOOTSTRAP=${RUN_BOOTSTRAP:-0}
-UPDATE_SOURCES=${UPDATE_SOURCES:-0}
-RUN_CONFIG=${RUN_CONFIG:-1}
-RUN_INSTALL=${RUN_INSTALL:-1}
+DEBUG=${DEBUG:-0} # Enable debug build.
+CCACHE=${CCACHE:-0} # Enable usage of ccache.
+RUN_BOOTSTRAP=${RUN_BOOTSTRAP:-0} # Bootstrap dependencies during the build.
+UPDATE_SOURCES=${UPDATE_SOURCES:-0} # Update source code repositories.
+RESET_SOURCES=${RESET_SOURCES:-0} # Reset source code repositories before update.
+RUN_CONFIG=${RUN_CONFIG:-1} # Run configuration step.
+RUN_INSTALL=${RUN_INSTALL:-1} # Run installation step.
 
 PATH=$PATH:$TOOLCHAIN_PATH/bin
 

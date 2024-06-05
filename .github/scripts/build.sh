@@ -21,7 +21,7 @@ if [ "$RUN_BOOTSTRAP" = 1 ]; then
 fi
 
 if [ "$UPDATE_SOURCES" = 1 ]; then
-    .github/scripts/update_sources.sh
+    .github/scripts/update-sources.sh
 fi
 
 if [[ "$PLATFORM" =~ cygwin ]]; then
