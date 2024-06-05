@@ -32,6 +32,7 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$CYGWIN_BUILD_PATH/Makefile" ]]; then
             --build=$HOST \
             --host=$HOST \
             --target=$TARGET \
+            --enable-languages=c \
             --enable-static \
             --disable-dumper \
             --with-sysroot=$TOOLCHAIN_PATH \
