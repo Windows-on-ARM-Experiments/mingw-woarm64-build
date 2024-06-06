@@ -87,13 +87,13 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$GCC_BUILD_PATH/Makefile" ]]; then
         case "$ARCH-$PLATFORM" in
             aarch64-*linux*)
                 TARGET_OPTIONS="$TARGET_OPTIONS \
-                    --disable-libsanitizer" \
+                    --disable-libsanitizer \
                     --enable-languages=c,c++,lto,fortran"
                 ;;
             aarch64-*mingw*)
                 # CHANGED: --enable-shared to --disable-shared
                 TARGET_OPTIONS="$TARGET_OPTIONS \
-                    --disable-shared" \
+                    --disable-shared \
                     --enable-languages=c"
                 ;;
             *)
