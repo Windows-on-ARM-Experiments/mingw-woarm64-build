@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - wo-stage1-compiler
+  pull_request:
   workflow_dispatch:
     inputs:
       binutils_branch:
@@ -16,13 +16,25 @@ on:
         required: false
         default: 'woarm64'
       mingw_branch:
-        description: 'Mingw branch to build'
+        description: 'MinGW branch to build'
         required: false
         default: 'woarm64'
+      cygwin_branch:
+        description: 'Cygwin branch to build'
+        required: false
+        default: 'main'
+      cygwin_packages_branch:
+        description: 'Cygwin packages branch to build'
+        required: false
+        default: 'main'
+      cocom_branch:
+        description: 'COCOM branch to build'
+        required: false
+        default: 'master'
       openblas_branch:
         description: 'OpenBLAS branch to test'
         required: false
-        default: 'develop'
+        default: 'v0.3.26'
       openssl_branch:
         description: 'OpenSSL branch to test'
         required: false
@@ -35,6 +47,12 @@ on:
         type: string
       mingw_branch:
         type: string
+      cygwin_branch:
+        type: string
+      cygwin_packages_branch:
+        type: string
+      cocom_branch:
+        type: string
     outputs:
       toolchain-package-name:
         value: ${{ jobs.build-toolchain.outputs.toolchain-package-name }}
@@ -43,19 +61,31 @@ on:
 
 env:
   BINUTILS_REPO: Windows-on-ARM-Experiments/binutils-woarm64
-  BINUTILS_BRANCH: ${{ inputs.binutils_branch || 'woarm64' }}
+  BINUTILS_BRANCH: ${{ inputs.binutils_branch || 'aarch64-patch-stage2-v1' }}
   BINUTILS_VERSION: binutils-master
 
   GCC_REPO: Windows-on-ARM-Experiments/gcc-woarm64
-  GCC_BRANCH: ${{ inputs.gcc_branch || 'aarch64-patch-series2-v2' }}
+  GCC_BRANCH: ${{ inputs.gcc_branch || 'aarch64-patch-series2-v5' }}
   GCC_VERSION: gcc-master
 
   MINGW_REPO: Windows-on-ARM-Experiments/mingw-woarm64
   MINGW_BRANCH: ${{ inputs.mingw_branch || 'aarch64-patch-stage2-v1' }}
   MINGW_VERSION: mingw-w64-master
 
+  CYGWIN_REPO: Windows-on-ARM-Experiments/newlib-cygwin
+  CYGWIN_BRANCH: ${{ inputs.cygwin_branch || 'main' }}
+  CYGWIN_VERSION: cygwin-master
+
+  CYGWIN_PACKAGES_REPO: Windows-on-ARM-Experiments/cygwin-packages
+  CYGWIN_PACKAGES_BRANCH: ${{ inputs.cygwin_packages_branch || 'main' }}
+  CYGWIN_PACKAGES_VERSION: cygwin-packages
+
+  COCOM_REPO: https://git.code.sf.net/p/cocom/git
+  COCOM_BRANCH: ${{ inputs.cocom_branch || 'master' }}
+  COCOM_VERSION: cocom-master
+
   OPENBLAS_REPO: OpenMathLib/OpenBLAS.git
-  OPENBLAS_BRANCH: ${{ inputs.openblas_branch || 'release-0.3.0' }}
+  OPENBLAS_BRANCH: ${{ inputs.openblas_branch || 'v0.3.26' }}
   OPENBLAS_VERSION: openblas-develop
 
   ZLIB_REPO: madler/zlib
@@ -90,17 +120,24 @@ jobs:
     runs-on: ubuntu-latest
 
     strategy:
+      fail-fast: false
       matrix:
         arch: [aarch64, x86_64]
-        platform: [w64-mingw32, pc-linux-gnu]
+        platform: [w64-mingw32, pc-linux-gnu, pc-cygwin]
         crt: [msvcrt, ucrt, libc]
         exclude:
+          - platform: w64-mingw32
+            crt: libc
           - platform: pc-linux-gnu
             crt: msvcrt
           - platform: pc-linux-gnu
             crt: ucrt
-          - platform: w64-mingw32
+          - platform: pc-cygwin
+            crt: ucrt
+          - platform: pc-cygwin
             crt: libc
+          - platform: pc-cygwin
+            arch: aarch64
 
     env:
       ARCH: ${{ matrix.arch }}
@@ -118,7 +155,38 @@ jobs:
           path: ${{ github.workspace }}
           fetch-depth: 0
 
+      - name: Get workflow SHA
+        id: workflow-sha
+        run: |
+          .github/scripts/get-files-sha.sh ${{ github.workspace }} .github/workflows/advanced.yml
+
+      - name: Get binutils SHA
+        id: binutils-sha
+        run: |
+          .github/scripts/get-repository-sha.sh ${{ env.BINUTILS_REPO }} ${{ env.BINUTILS_BRANCH }}
+
+      - name: Get GCC SHA
+        id: gcc-sha
+        run: |
+          .github/scripts/get-repository-sha.sh ${{ env.GCC_REPO }} ${{ env.GCC_BRANCH }}
+
+      - name: Get MinGW SHA
+        id: mingw-sha
+        run: |
+          .github/scripts/get-repository-sha.sh ${{ env.MINGW_REPO }} ${{ env.MINGW_BRANCH }}
+
+      - name: Get binutils scripts SHA
+        id: binutils-scripts-sha
+        run: |
+          .github/scripts/get-files-sha.sh ${{ github.workspace }} .github/scripts/binutils
+  
+      - name: Get toolchain scripts SHA
+        id: toolchain-scripts-sha
+        run: |
+          .github/scripts/get-files-sha.sh ${{ github.workspace }} .github/scripts/toolchain
+
       - name: Checkout binutils
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
         uses: actions/checkout@v4
         with:
           repository: ${{ env.BINUTILS_REPO }}
@@ -126,6 +194,7 @@ jobs:
           path: ${{ env.SOURCE_PATH }}/${{ env.BINUTILS_VERSION }}
 
       - name: Checkout GCC
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
         uses: actions/checkout@v4
         with:
           repository: ${{ env.GCC_REPO }}
@@ -133,56 +202,125 @@ jobs:
           path: ${{ env.SOURCE_PATH }}/${{ env.GCC_VERSION }}
 
       - name: Checkout MinGW
-        if: ${{ matrix.platform != 'pc-linux-gnu' }}
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform != 'pc-linux-gnu' }}
         uses: actions/checkout@v4
         with:
           repository: ${{ env.MINGW_REPO }}
           ref: ${{ env.MINGW_BRANCH }}
           path: ${{ env.SOURCE_PATH }}/${{ env.MINGW_VERSION }}
 
+      - name: Checkout Cygwin
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform == 'pc-cygwin' }}
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.CYGWIN_REPO }}
+          ref: ${{ env.CYGWIN_BRANCH }}
+          path: ${{ env.SOURCE_PATH }}/${{ env.CYGWIN_VERSION }}
+
+      - name: Checkout Cygwin packages
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform == 'pc-cygwin' }}
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.CYGWIN_PACKAGES_REPO }}
+          ref: ${{ env.CYGWIN_PACKAGES_BRANCH }}
+          submodules: 'recursive'
+          path: ${{ env.SOURCE_PATH }}/${{ env.CYGWIN_PACKAGES_VERSION }}
+
+      - name: Checkout COCOM
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform == 'pc-cygwin' }}
+        run: |
+          cd ${{ env.SOURCE_PATH }}
+          git clone ${{ env.COCOM_REPO }} -b ${{ env.COCOM_BRANCH }} ${{ env.COCOM_VERSION }}
+
       - name: Install dependencies
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
         run: |
           .github/scripts/install-dependencies.sh
 
+      - name: Patch binutils stage1
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform == 'pc-cygwin' }}
+        run: |
+          .github/scripts/binutils/patch-cygwin.sh 1
+
+      - name: Patch toolchain stage1
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform == 'pc-cygwin' }}
+        run: |
+          .github/scripts/toolchain/patch-cygwin.sh 1
+
       - name: Install libraries
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
         run: |
           .github/scripts/install-libraries.sh
 
       - name: Build binutils
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
         run: |
           .github/scripts/binutils/build.sh
 
       - name: Install cross headers and libraries
-        if: ${{ matrix.platform == 'pc-linux-gnu' }}
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform == 'pc-linux-gnu' }}
         run: |
           .github/scripts/toolchain/install-cross-headers-libs.sh
 
       - name: Build MinGW headers
-        if: ${{ matrix.platform != 'pc-linux-gnu' }}
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform != 'pc-linux-gnu' }}
         run: |
           .github/scripts/toolchain/build-mingw-headers.sh
 
-      - name: Build GCC
+      - name: Install Cygwin headers
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform == 'pc-cygwin' }}
         run: |
-          .github/scripts/toolchain/build-gcc.sh
+          .github/scripts/toolchain/install-cygwin-headers.sh
+
+      - name: Build GCC stage1
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform != 'pc-linux-gnu' }}
+        run: |
+          .github/scripts/toolchain/build-gcc-stage1.sh
 
       - name: Build MinGW CRT
-        if: ${{ matrix.platform != 'pc-linux-gnu' }}
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform != 'pc-linux-gnu' }}
         run: |
           .github/scripts/toolchain/build-mingw-crt.sh
 
-      - name: Build libgcc
+      - name: Build MinGW winpthreads
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform == 'w64-mingw32' }}
         run: |
-          .github/scripts/toolchain/build-libgcc.sh
+          .github/scripts/toolchain/build-mingw-winpthreads.sh
+  
+      - name: Build COCOM
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform == 'pc-cygwin' }}
+        run: |
+          .github/scripts/toolchain/build-cocom.sh
+
+      - name: Build Cygwin stage1
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform == 'pc-cygwin' }}
+        run: |
+          .github/scripts/toolchain/build-cygwin.sh 1
+
+      - name: Patch toolchain stage2
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform == 'pc-cygwin' }}
+        run: |
+          .github/scripts/toolchain/patch-cygwin.sh 2
+
+      - name: Install libraries
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
+        run: |
+          .github/scripts/install-libraries.sh
+
+      - name: Build GCC stage2
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
+        run: |
+          .github/scripts/toolchain/build-gcc.sh
 
       - name: Build MinGW
-        if: ${{ matrix.platform != 'pc-linux-gnu' }}
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform != 'pc-linux-gnu' }}
         run: |
           .github/scripts/toolchain/build-mingw.sh
 
-      - name: Build GCC libs
+      - name: Build Cygwin stage2
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform == 'pc-cygwin' }}
         run: |
-          .github/scripts/toolchain/build-gcc-libs.sh
+          .github/scripts/toolchain/build-cygwin.sh 2
 
     outputs:
       toolchain-package-name: ${{ env.PACK_TOOLCHAIN == 'true' && env.TOOLCHAIN_PACKAGE_NAME || '' }}
