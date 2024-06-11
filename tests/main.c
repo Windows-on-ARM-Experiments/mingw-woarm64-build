@@ -5,6 +5,7 @@
 TEST(Aarch64MinGW, BigDataTest);
 TEST(Aarch64MinGW, CHKSTKTest);
 TEST(Aarch64MinGW, DllTest);
+TEST(Aarch64MinGW, LargeStructRelocationTest);
 TEST(Aarch64MinGW, MathTest);
 TEST(Aarch64MinGW, NestedFunction);
 TEST(Aarch64MinGW, OmpTest);
@@ -43,6 +44,7 @@ int main(int argc, char **argv) {
         DECLARE_TEST(Aarch64MinGW, BigDataTest),
         DECLARE_TEST(Aarch64MinGW, CHKSTKTest),
         DECLARE_TEST(Aarch64MinGW, DllTest),
+        DECLARE_TEST(Aarch64MinGW, LargeStructRelocationTest),
         DECLARE_TEST(Aarch64MinGW, MathTest),
         DECLARE_TEST(Aarch64MinGW, NestedFunction),
         DECLARE_TEST(Aarch64MinGW, OmpTest),
