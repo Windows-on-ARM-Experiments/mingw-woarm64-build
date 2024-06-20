@@ -36,6 +36,8 @@ add_executable(
   pdata-test.c
   sjlj-test.c
   sscanf-double.c
+  static-function-test.c
+  static-function.c
   struct-test.c
   varargs-test.c
 )
