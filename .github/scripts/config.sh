@@ -23,8 +23,8 @@ if [[ "$PLATFORM" =~ (mingw|cygwin) ]]; then
 else
     CRT=${CRT:-libc}
 fi
-BUILD=x86_64-pc-linux-gnu
-HOST=x86_64-pc-linux-gnu
+BUILD=aarch64-pc-linux-gnu
+HOST=aarch64-pc-linux-gnu
 TARGET=$ARCH-$PLATFORM
 TOOLCHAIN_NAME=${TOOLCHAIN_NAME:-$ARCH-$PLATFORM-$CRT}
 
@@ -63,7 +63,7 @@ FFMPEG_PATH=${FFMPEG_PATH:-~/ffmpeg}
 FFMPEG_TESTS_PATH=${FFMPEG_TESTS_PATH:-~/ffmpeg-tests}
 
 DEBUG=${DEBUG:-0} # Enable debug build.
-CCACHE=${CCACHE:-0} # Enable usage of ccache.
+CCACHE=${CCACHE:-1} # Enable usage of ccache.
 RUN_BOOTSTRAP=${RUN_BOOTSTRAP:-0} # Bootstrap dependencies during the build.
 UPDATE_SOURCES=${UPDATE_SOURCES:-0} # Update source code repositories.
 RESET_SOURCES=${RESET_SOURCES:-0} # Reset source code repositories before update.
