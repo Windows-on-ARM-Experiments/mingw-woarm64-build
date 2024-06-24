@@ -1,10 +1,10 @@
-set SIM "true &&"
+set SIM "echo "
 
 load_generic_config "sim"
 
 set_board_info target_install {x86_64-w64-mingw32, aarch64-w64-mingw32}
-set_board_info gcc,timeout 5000
-set_board_info sim,timeout 5000
+set_board_info gcc,timeout 1000
+set_board_info sim,timeout 1000
 
 load_base_board_description "basic-sim";
 

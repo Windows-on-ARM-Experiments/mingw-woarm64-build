@@ -2,6 +2,10 @@
 
 source `dirname ${BASH_SOURCE[0]}`/config.sh
 
+if [[ "$RUN_BOOTSTRAP" = 1 ]]; then
+    .github/scripts/install-dependencies.sh
+fi
+
 if [[ "$CCACHE" = 1 ]]; then
   mkdir -p $TOOLCHAIN_PATH/lib/ccache
   pushd $TOOLCHAIN_PATH/lib/ccache
@@ -14,10 +18,6 @@ if [[ "$CCACHE" = 1 ]]; then
   popd
 
   ccache -z
-fi
-
-if [[ "$RUN_BOOTSTRAP" = 1 ]]; then
-    .github/scripts/install-dependencies.sh
 fi
 
 if [[ "$UPDATE_SOURCES" = 1 ]]; then

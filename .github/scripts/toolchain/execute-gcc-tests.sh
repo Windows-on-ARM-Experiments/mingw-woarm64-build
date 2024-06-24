@@ -4,6 +4,7 @@ source `dirname ${BASH_SOURCE[0]}`/../config.sh
 
 TAG=$1
 GCC_BUILD_PATH=$BUILD_PATH/gcc
+TEST_BOARD="wsl-sim"
 TEST_RESULTS_PATH=$ARTIFACT_PATH/gcc-tests-$TAG
 
 echo "::group::Execute GCC tests"
@@ -13,9 +14,8 @@ echo "::group::Execute GCC tests"
 
     cd $GCC_BUILD_PATH
     make $BUILD_MAKE_OPTIONS -k check \
-        RUNTESTFLAGS="--target_board wsl-sim" \
+        RUNTESTFLAGS="--target_board $TEST_BOARD" \
         DEJAGNU="$DEJAGNU_FILE" \
-        CHECK_TEST_FRAMEWORK=1 \
         || echo "Error"
 
     mkdir -p $TEST_RESULTS_PATH
