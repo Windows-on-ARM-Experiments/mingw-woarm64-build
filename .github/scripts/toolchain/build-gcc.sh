@@ -106,6 +106,8 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$GCC_BUILD_PATH/Makefile" ]]; then
             --enable-languages=c,c++,lto,fortran \
             --disable-bootstrap \
             --disable-multilib \
+            --with-sysroot=$TOOLCHAIN_PATH \
+            --with-native-system-header-dir=/mingw/include \
             --with-gnu-as \
             --with-gnu-ld \
             $HOST_OPTIONS \

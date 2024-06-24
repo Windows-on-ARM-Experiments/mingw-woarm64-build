@@ -72,6 +72,8 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$GCC_BUILD_PATH/Makefile" ]]; then
         --disable-libquadmath \
         --disable-libssp \
         --disable-nls \
+        --with-sysroot=$TOOLCHAIN_PATH \
+        --with-native-system-header-dir=/mingw/include \
         --with-gnu-as \
         --with-gnu-ld \
         --without-headers \

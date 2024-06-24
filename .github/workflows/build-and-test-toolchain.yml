@@ -1,6 +1,7 @@
 name: Build toolchain
 
 on:
+  pull_request:
   workflow_dispatch:
     inputs:
       binutils_branch:
@@ -60,11 +61,13 @@ on:
         type: string
 
 env:
+  DISTRO: 'Ubuntu'
+
   BINUTILS_BRANCH: ${{ inputs.binutils_branch || 'woarm64' }}
   GCC_BRANCH: ${{ inputs.gcc_branch || 'woarm64' }}
   MINGW_BRANCH: ${{ inputs.mingw_branch || 'woarm64' }}
 
-  ARCH: ${{ inputs.arch || 'x86_64' }}
+  ARCH: ${{ inputs.arch || 'aarch64' }}
   PLATFORM: ${{ inputs.platform || 'w64-mingw32' }}
   CRT: ${{ inputs.crt || 'msvcrt' }}
   
@@ -79,7 +82,7 @@ env:
 jobs:
   build-and-test-toolchain:
     name: Build and test toolchain
-    runs-on: windows-latest
+    runs-on: [Windows, ARM64, Blackhex]
 
     env:
       WSLENV: BINUTILS_BRANCH:GCC_BRANCH:MINGW_BRANCH:ARCH:PLATFORM:CRT:TAG:MODULE:FILTER:CCACHE:RUN_BOOTSTRAP:UPDATE_SOURCES:GITHUB_OUTPUT/p
@@ -95,17 +98,18 @@ jobs:
         run: |
           Write-Output "timestamp=$((Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ"))" >> "$env:GITHUB_OUTPUT"
 
-      - name: Setup WSL
-        uses: Windows-on-ARM-Experiments/setup-wsl@master
-        with:
-          distribution: Ubuntu-22.04
-          additional-packages:
-            git
-
-      - name: Checkout repository
+      - name: Install ${{ env.DISTRO}}
+        shell: cmd
         run: |
-          cd ~
-          git clone --depth=1 ${{ github.server_url }}/${{ github.repository }}.git -b ${{ github.head_ref || github.ref_name || 'main' }} work
+          wsl --install
+  
+      - name: Checkout repository
+        uses: Ubuntu/WSL/.github/actions/wsl-bash@main
+        with:
+          distro: ${{ env.DISTRO }}
+          exec: |
+            cd ~
+            git clone --depth=1 ${{ github.server_url }}/${{ github.repository }}.git -b ${{ github.head_ref || github.ref_name || 'main' }} work
 
       - name: Get WSL paths
         id: get-wsl-paths

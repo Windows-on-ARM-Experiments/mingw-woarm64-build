@@ -1,0 +1,11 @@
+set SIM "qemu-aarch64"
+
+load_generic_config "sim"
+
+set_board_info target_install {aarch64-w64-mingw32}
+set_board_info gcc,timeout 5000
+set_board_info sim,timeout 5000
+
+load_base_board_description "basic-sim";
+
+setup_sim ""
