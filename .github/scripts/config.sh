@@ -40,8 +40,8 @@ else
 fi
 
 PROCESSOR=$(uname --processor)
-BUILD=${BUILD:-$PROCESSOR-pc-linux-gnu}
-HOST=${HOST:-$PROCESSOR-pc-linux-gnu}
+BUILD=${BUILD:-$PROCESSOR-linux-gnu}
+HOST=${HOST:-$PROCESSOR-linux-gnu}
 TARGET=$ARCH-$PLATFORM
 TOOLCHAIN_NAME=${TOOLCHAIN_NAME:-$ARCH-$PLATFORM-$CRT}
 
@@ -105,6 +105,7 @@ else
 fi
 
 DEBUG=${DEBUG:-0} # Enable debug build.
+TEST=${TEST:-0} # Enable build for testing.
 CCACHE=${CCACHE:-0} # Enable usage of ccache.
 RUN_BOOTSTRAP=${RUN_BOOTSTRAP:-0} # Bootstrap dependencies during the build.
 UPDATE_SOURCES=${UPDATE_SOURCES:-0} # Update source code repositories.

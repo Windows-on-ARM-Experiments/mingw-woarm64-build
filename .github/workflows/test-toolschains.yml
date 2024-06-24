@@ -1,0 +1,73 @@
+name: Comparative test of toolchain branches accross multiple targets
+
+on:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      binutils_branch_baseline:
+        description: 'Baseline Binutils branch'
+        required: false
+        default: 'woarm64'
+      binutils_branch_changes:
+        description: 'Changes Binutils branch'
+        required: false
+        default: 'woarm64'
+      gcc_branch_baseline:
+        description: 'Baseline GCC branch'
+        required: false
+        default: 'woarm64'
+      gcc_branch_changes:
+        description: 'Changes GCC branch'
+        required: false
+        default: 'fix-va-list'
+      mingw_branch_baseline:
+        description: 'Baseline MinGW branch'
+        required: false
+        default: 'woarm64'
+      mingw_branch_changes:
+        description: 'Changes MinGW branch'
+        required: false
+        default: 'woarm64'
+  workflow_call:
+    inputs:
+      binutils_branch_baseline:
+        type: string
+      binutils_branch_changes:
+        type: string
+      gcc_branch_baseline:
+        type: string
+      gcc_branch_changes:
+        type: string
+      mingw_branch_baseline:
+        type: string
+      mingw_branch_changes:
+        type: string
+
+jobs:
+
+  build-and-test-toolchains:
+    name: Build and test toolchains
+
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [aarch64, x86_64]
+        platform: [w64-mingw32, linux-gnu]
+        crt: [ucrt, libc]
+        exclude:
+          - platform: w64-mingw32
+            crt: libc
+          - platform: linux-gnu
+            crt: ucrt
+
+    uses: ./.github/workflows/test-toolchain.yml
+    with:
+      binutils_branch_baseline: ${{ inputs.binutils_branch_baseline || 'woarm64' }}
+      binutils_branch_changes: ${{ inputs.binutils_branch_changes || 'woarm64' }}
+      gcc_branch_baseline: ${{ inputs.gcc_branch_baseline || 'woarm64' }}
+      gcc_branch_changes: ${{ inputs.gcc_branch_changes || 'fix-va-list' }}
+      mingw_branch_baseline: ${{ inputs.mingw_branch_baseline || 'woarm64' }}
+      mingw_branch_changes: ${{ inputs.mingw_branch_changes || 'woarm64' }}
+      arch: ${{ matrix.arch }}
+      platform: ${{ matrix.platform }}
+      crt: ${{ matrix.crt }}

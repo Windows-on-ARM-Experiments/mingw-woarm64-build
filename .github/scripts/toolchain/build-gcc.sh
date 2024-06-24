@@ -9,7 +9,7 @@ cd $GCC_BUILD_PATH
 
 if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$GCC_BUILD_PATH/Makefile" ]]; then
     echo "::group::Configure GCC"
-        rm -rf $GCC_BUILD_PATH/*
+        $ROOT_PATH/.github/scripts/toolchain/delete-gcc-build.sh
 
         if [[ "$DEBUG" = 1 ]]; then
             HOST_OPTIONS="$HOST_OPTIONS \
@@ -127,7 +127,7 @@ if [[ "$RUN_INSTALL" = 1 ]]; then
     echo "::group::Install GCC"
         make install
         if [[ "$DELETE_BUILD" = 1 ]]; then
-            rm -rf $GCC_BUILD_PATH
+            $ROOT_PATH/.github/scripts/toolchain/delete-gcc-build.sh
         fi
     echo "::endgroup::"
 fi

@@ -18,7 +18,7 @@ on:
       arch:
         description: 'Architecture to build for'
         required: false
-        default: 'x86_64'
+        default: 'aarch64'
       platform:
         description: 'Platform to build for'
         required: false
@@ -59,110 +59,258 @@ on:
       gcc_test_filter:
         type: string
 
+run-name: Build and test ${{ inputs.arch }}-${{ inputs.platform }}-${{ inputs.crt }}-${{ inputs.tag }} toolchain
+
 env:
   BINUTILS_BRANCH: ${{ inputs.binutils_branch || 'woarm64' }}
   GCC_BRANCH: ${{ inputs.gcc_branch || 'woarm64' }}
   MINGW_BRANCH: ${{ inputs.mingw_branch || 'woarm64' }}
 
-  ARCH: ${{ inputs.arch || 'x86_64' }}
+  ARCH: ${{ inputs.arch || 'aarch64' }}
   PLATFORM: ${{ inputs.platform || 'w64-mingw32' }}
+  TARGET: ${{ inputs.arch }}-${{ inputs.platform }}
   CRT: ${{ inputs.crt || 'msvcrt' }}
-  
   TAG: ${{ inputs.tag || 'test' }}
+  VARIANT: ${{ inputs.arch }}-${{ inputs.platform }}-${{ inputs.crt }}-${{ inputs.tag }}
   MODULE: ${{ inputs.gcc_module || '' }}
   FILTER: ${{ inputs.gcc_test_filter || '' }}
 
+  ROOT_PATH: /tmp/work
+  TOOLCHAIN_ARTIFACT_NAME: toolchain-${{ inputs.arch }}-${{ inputs.platform }}-${{ inputs.crt }}-${{ inputs.tag }}
+  TOOLCHAIN_PACKAGE_NAME: toolchain-${{ inputs.arch }}-${{ inputs.platform }}-${{ inputs.crt }}-${{ inputs.tag }}.tar.gz
+
+  TEST: 1
   CCACHE: 1
+  DELETE_BUILD: 1
   RUN_BOOTSTRAP: 1
   UPDATE_SOURCES: 1
+  RESET_SOURCES: 1
+
+  WSLENV: BINUTILS_BRANCH:GCC_BRANCH:MINGW_BRANCH:ARCH:PLATFORM:CRT:TAG:MODULE:FILTER:ROOT_PATH:TOOLCHAIN_ARTIFACT_NAME:TOOLCHAIN_PACKAGE_NAME:TEST:CCACHE:DELETE_BUILD:RUN_BOOTSTRAP:UPDATE_SOURCES:RESET_SOURCES:GITHUB_OUTPUT/p:GITHUB_STEP_SUMMARY/p
+
+  DEFAULT_WINDOWS_RUNNER: ${{ ((inputs.arch == 'x86_64') && (inputs.platform != 'linux-gnu')) && 1 || 0 }}
+  DEFAULT_UBUNTU_RUNNER: ${{ (inputs.platform == 'linux-gnu') && 1 || 0 }}
+  SELF_HOSTED_RUNNER: ${{ ((inputs.arch != 'x86_64') && (inputs.platform != 'linux-gnu')) && 1 || 0 }}
+  WSL_RUNNER: ${{ (inputs.platform == 'w64-mingw32') && 1 || 0 }}
+  WSL_DISTRIBUTION: Ubuntu-22.04
+  WSL_USER: root
 
 jobs:
-  build-and-test-toolchain:
-    name: Build and test toolchain
-    runs-on: windows-latest
+  build-toolchain:
+    name: Build ${{ inputs.arch }}-${{ inputs.platform }}-${{ inputs.crt }}-${{ inputs.tag }} toolchain
+    runs-on: ubuntu-22.04
 
-    env:
-      WSLENV: BINUTILS_BRANCH:GCC_BRANCH:MINGW_BRANCH:ARCH:PLATFORM:CRT:TAG:MODULE:FILTER:CCACHE:RUN_BOOTSTRAP:UPDATE_SOURCES:GITHUB_OUTPUT/p:GITHUB_STEP_SUMMARY/p
-
-    defaults:
-      run:
-        shell: wsl-bash {0}
+    outputs:
+      timestamp: ${{ steps.get-cache-keys.outputs.timestamp }}
 
     steps:
-      - name: Get cache key
-        id: get-cache-key
-        shell: powershell
+      - name: Debug
         run: |
-          Write-Output "timestamp=$((Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ"))" >> "$env:GITHUB_OUTPUT"
-
-      - name: Setup WSL
-        uses: Windows-on-ARM-Experiments/setup-wsl@master
-        with:
-          distribution: Ubuntu-22.04
-          additional-packages:
-            git
+          env
 
       - name: Checkout repository
         run: |
-          git clone --depth=1 ${{ github.server_url }}/${{ github.repository }}.git -b ${{ github.head_ref || github.ref_name || 'main' }} ~/work
+          git clone --depth=1 ${{ github.server_url }}/${{ github.repository }}.git -b ${{ github.head_ref || github.ref_name || 'main' }} ${{ env.ROOT_PATH }}
 
-      - name: Get WSL paths
-        id: get-wsl-paths
+      - name: Get cache keys
+        id: get-cache-keys
         run: |
-          source ~/work/.github/scripts/config.sh
-          mkdir -p $BUILD_PATH
-          mkdir -p $CCACHE_DIR_PATH
-          mkdir -p $ARTIFACT_PATH
-          echo "build-path-win=`wslpath -w $BUILD_PATH`" >> $GITHUB_OUTPUT
-          echo "ccache-dir-path-win=`wslpath -w $CCACHE_DIR_PATH`" >> $GITHUB_OUTPUT
-          echo "artifact-path-win=`wslpath -w $ARTIFACT_PATH`" >> $GITHUB_OUTPUT
-          echo "artifact-path-wsl=$ARTIFACT_PATH" >> $GITHUB_OUTPUT
+          ${{ env.ROOT_PATH }}/.github/scripts/get-cache-keys.sh
+
+      - name: Get paths
+        id: get-paths
+        run: |
+          ${{ env.ROOT_PATH }}/.github/scripts/get-paths.sh
 
       - name: Restore Ccache
         uses: actions/cache/restore@v4
         with:
-          path: ${{ steps.get-wsl-paths.outputs.ccache-dir-path-win }}
-          key: build-and-test-gcc-ccache-${{ steps.get-cache-key.outputs.timestamp }}
-          restore-keys: build-and-test-gcc-ccache-
+          path: ${{ steps.get-paths.outputs.ccache-dir-path-host }}
+          key: build-and-test-${{ env.TARGET }}-gcc-ccache-${{ steps.get-cache-keys.outputs.ccache-key }}
+          restore-keys: build-and-test-${{ env.TARGET }}-gcc-ccache-
 
       - name: Build toolchain
         run: |
-          ~/work/.github/scripts/build.sh
+          ${{ env.ROOT_PATH }}/.github/scripts/build.sh
+
+      - name: Pack GCC build folder
+        run: |
+          ${{ env.ROOT_PATH }}/.github/scripts/toolchain/pack-gcc-build.sh
+
+      - name: Delete GCC build folder
+        run: |
+          ${{ env.ROOT_PATH }}/.github/scripts/toolchain/delete-gcc-build.sh
+
+      - name: Save GCC build folder
+        uses: actions/cache/save@v4
+        with:
+          key: gcc-build-${{ env.VARIANT }}-${{ steps.get-cache-keys.outputs.timestamp }}
+          path: ${{ steps.get-paths.outputs.artifact-path-host }}/gcc-build.tar.gz
+          enableCrossOsArchive: true
+
+      - name: Pack toolchain
+        run: |
+          ${{ env.ROOT_PATH }}/.github/scripts/toolchain/pack.sh
+
+      - name: Save toolchain
+        uses: actions/cache/save@v4
+        with:
+          key: ${{ env.TOOLCHAIN_ARTIFACT_NAME }}-${{ steps.get-cache-keys.outputs.timestamp }}
+          path: ${{ steps.get-paths.outputs.artifact-path-host }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
+          enableCrossOsArchive: true
 
       - name: Save Ccache
         if: always()
         uses: actions/cache/save@v4
         with:
-          path: ${{ steps.get-wsl-paths.outputs.ccache-dir-path-win }}
-          key: build-and-test-gcc-ccache-${{ steps.get-cache-key.outputs.timestamp }}
+          key: build-and-test-${{ env.TARGET }}-gcc-ccache-${{ steps.get-cache-keys.outputs.ccache-key }}
+          path: ${{ steps.get-paths.outputs.ccache-dir-path-host }}
+
+  test-toolchain:
+    name: Test ${{ inputs.arch }}-${{ inputs.platform }}-${{ inputs.crt }}-${{ inputs.tag }} toolchain
+    needs: [
+      build-toolchain
+    ]
+    timeout-minutes: 240
+    runs-on: >-
+      ${{
+        (inputs.arch == 'x86_64')
+          && ((inputs.platform == 'linux-gnu')
+            && 'ubuntu-22.04'
+            || 'windows-latest')
+          || ((inputs.platform == 'linux-gnu')
+            && 'ubuntu-22.04-arm'
+            || fromJson('["Windows", "ARM64", "WSL"]'))
+      }}
+
+    defaults:
+      run:
+        shell: ${{ (env.WSL_RUNNER == 1) && 'wsl-bash {0}' || ((env.DEFAULT_UBUNTU_RUNNER == 1) && 'bash {0}' || 'wsl -d Ubuntu `wslpath -a {0}`') }}
+
+    steps:
+      - name: Checkout repository
+        if: env.WSL_RUNNER == 1
+        uses: actions/checkout@v4
+        with:
+          path: ${{ github.workspace }}
+
+      - name: Install zstd
+        if: env.WSL_RUNNER == 1
+        shell: powershell
+        run: |
+          .github/scripts/install-zstd.ps1
+
+      - name: Install WSL (Vampire/setup-wsl)
+        if: (env.WSL_RUNNER == 1) && (env.DEFAULT_WINDOWS_RUNNER == 1)
+        uses: Windows-on-ARM-Experiments/setup-wsl@master
+        with:
+          distribution: ${{ env.WSL_DISTRIBUTION }}
+          wsl-shell-user: ${{ env.WSL_USER }}
+          additional-packages:
+            git
+
+      - name: Install WSL (Vampire/setup-wsl)
+        if: (env.WSL_RUNNER == 1) && (env.SELF_HOSTED_RUNNER == 1)
+        uses: Windows-on-ARM-Experiments/setup-wsl@master
+        with:
+          distribution: Ubuntu
+          set-as-default: false
+          wsl-version: 1
+          wsl-shell-user: ${{ env.WSL_USER }}
+          additional-packages:
+            git
+
+      - name: Install winget
+        if: false
+        uses: Cyberboss/install-winget@v1
+
+      - name: Install WSL (Ubuntu/WSL/.github/actions/wsl-install)
+        if: false
+        uses: Ubuntu/WSL/.github/actions/wsl-install@main
+        with:
+          distro: ${{ env.WSL_DISTRIBUTION }}
+
+      - name: Install WSL (wsl --install)
+        if: false
+        shell: powershell
+        run: |
+          wsl --set-default-version 1
+          wsl --install --no-launch --distribution ${{ env.WSL_DISTRIBUTION }}
+          wsl --list --verbose
+
+      - name: Debug
+        run: |
+          env
+
+      - name: Clean up previous build
+        if: env.SELF_HOSTED_RUNNER == 1
+        run: |
+          rm -rf ${{ env.ROOT_PATH }}
+
+      - name: Checkout repository
+        run: |
+          git clone --depth=1 ${{ github.server_url }}/${{ github.repository }}.git -b ${{ github.head_ref || github.ref_name || 'main' }} ${{ env.ROOT_PATH }}
+
+      - name: Get paths
+        id: get-paths
+        run: |
+          ${{ env.ROOT_PATH }}/.github/scripts/get-paths.sh
+
+      - name: Download toolchain
+        uses: actions/cache/restore@v4
+        with:
+          key: ${{ env.TOOLCHAIN_ARTIFACT_NAME }}-${{ needs.build-toolchain.outputs.timestamp }}
+          restore-keys: ${{ env.TOOLCHAIN_ARTIFACT_NAME }}-${{ needs.build-toolchain.outputs.timestamp }}
+          path: ${{ steps.get-paths.outputs.artifact-path-host }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
+          enableCrossOsArchive: true
+          fail-on-cache-miss: true
+
+      - name: Unpack toolchain
+        run: |
+          ${{ env.ROOT_PATH }}/.github/scripts/toolchain/unpack.sh
+
+      - name: Download GCC build folder
+        uses: actions/cache/restore@v4
+        with:
+          key: gcc-build-${{ env.VARIANT }}-${{ needs.build-toolchain.outputs.timestamp }}
+          restore-keys: gcc-build-${{ env.VARIANT }}-${{ needs.build-toolchain.outputs.timestamp }}
+          path: ${{ steps.get-paths.outputs.artifact-path-host }}/gcc-build.tar.gz
+          enableCrossOsArchive: true
+          fail-on-cache-miss: true
+
+      - name: Unpack GCC build folder
+        run: |
+          mkdir -p ${{ steps.get-paths.outputs.build-path-env }}/gcc
+          tar --overwrite -xzf ${{ steps.get-paths.outputs.artifact-path-env }}/gcc-build.tar.gz -C ${{ steps.get-paths.outputs.build-path-env }}/gcc
+
+      - name: Install dependencies
+        run: |
+          ${{ env.ROOT_PATH }}/.github/scripts/install-dependencies.sh
+
+      - name: Download sources
+        run: |
+          ${{ env.ROOT_PATH }}/.github/scripts/update-sources.sh
+
+      - name: Install libraries
+        run: |
+          ${{ env.ROOT_PATH }}/.github/scripts/install-libraries.sh
 
       - name: Execute GCC tests
         run: |
-          ~/work/.github/scripts/toolchain/execute-gcc-tests.sh "gcc-tests-${{ env.TAG }}" \
-            "${{ env.MODULE }}" "${{ env.FILTER }}"
+          ${{ env.ROOT_PATH }}/.github/scripts/toolchain/execute-gcc-tests.sh \
+            "${{ steps.get-paths.outputs.artifact-path-env }}/gcc-tests-${{ env.VARIANT }}" \
+            "${{ env.MODULE }}" \
+            "${{ env.FILTER }}"
+          cat "${{ steps.get-paths.outputs.artifact-path-env }}/gcc-tests-${{ env.VARIANT }}/summary.md" >> $GITHUB_STEP_SUMMARY
+          cat "${{ steps.get-paths.outputs.artifact-path-env }}/gcc-tests-${{ env.VARIANT }}/most-frequent-groups.md" >> $GITHUB_STEP_SUMMARY
 
-      - name: Create summary
+      - name: Debug
         run: |
-          ~/work/.github/scripts/toolchain/create-gcc-summary.sh " \
-            ${{ steps.get-wsl-paths.outputs.artifact-path-wsl }}/gcc-tests-${{ env.TAG }}" >> \
-            ${{ steps.get-wsl-paths.outputs.artifact-path-wsl }}/gcc-tests-${{ env.TAG }}/summary.md
-          cat ${{ steps.get-wsl-paths.outputs.artifact-path-wsl }}/gcc-tests-${{ env.TAG }}/summary.md >> $GITHUB_STEP_SUMMARY
-
-      - name: Group test failures
-        run: |
-          ~/work/.github/scripts/toolchain/group-gcc-test-failures.sh "gcc-tests-${{ env.TAG }}" >> $GITHUB_STEP_SUMMARY
-
-      - name: Upload build folder
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: build
-          retention-days: 1
-          path: ${{ steps.get-wsl-paths.outputs.build-path-win }}
+          ls -al "${{ steps.get-paths.outputs.artifact-path-env }}/gcc-tests-${{ env.VARIANT }}/"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: gcc-tests-${{ env.TAG }}
-          path: ${{ steps.get-wsl-paths.outputs.artifact-path-win }}\gcc-tests-${{ env.TAG }}
+          name: gcc-gests-${{ env.VARIANT }}
+          path: ${{ steps.get-paths.outputs.artifact-path-host }}/gcc-tests-${{ env.VARIANT }}
           retention-days: 30

@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-  pull_request:
   workflow_dispatch:
     inputs:
       binutils_branch:
@@ -39,16 +38,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Get cache key
-        id: get-cache-key
+      - name: Get cache keys
+        id: get-cache-keys
         run: |
-          echo "timestamp=$(date -u --iso-8601=seconds)" >> "$GITHUB_OUTPUT"
+          .github/scripts/get-cache-keys.sh
 
       - name: Restore Ccache
         uses: actions/cache/restore@v4
         with:
           path: ${{ env.CCACHE_DIR_PATH }}
-          key: main-gcc-ccache-${{ steps.get-cache-key.outputs.timestamp }}
+          key: main-gcc-ccache-${{ steps.get-cache-keys.outputs.ccache-key }}
           restore-keys: main-gcc-ccache-
 
       - name: Run Build
@@ -64,7 +63,7 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: ${{ env.CCACHE_DIR_PATH }}
-          key: main-gcc-ccache-${{ steps.get-cache-key.outputs.timestamp }}
+          key: main-gcc-ccache-${{ steps.get-cache-keys.outputs.ccache-key }}
 
       - name: Upload build folder
         if: failure()

@@ -49,13 +49,20 @@ if [[ "$PLATFORM" =~ cygwin ]]; then
     $ROOT_PATH/.github/scripts/toolchain/build-cygwin.sh 1
 fi
 
-$ROOT_PATH/.github/scripts/toolchain/build-gcc.sh
-
-if [[ "$PLATFORM" =~ (mingw|cygwin) ]]; then
-    $ROOT_PATH/.github/scripts/toolchain/build-mingw.sh
+if [[ "$TEST" = 1 ]]; then
+    DELETE_BUILD=0 \
+    $ROOT_PATH/.github/scripts/toolchain/build-gcc.sh
+else
+    $ROOT_PATH/.github/scripts/toolchain/build-gcc.sh
 fi
-if [[ "$PLATFORM" =~ cygwin ]]; then
-    $ROOT_PATH/.github/scripts/toolchain/build-cygwin.sh 2
+
+if [[ "$TEST" = 0 ]]; then
+    if [[ "$PLATFORM" =~ (mingw|cygwin) ]]; then
+        $ROOT_PATH/.github/scripts/toolchain/build-mingw.sh
+    fi
+    if [[ "$PLATFORM" =~ cygwin ]]; then
+        $ROOT_PATH/.github/scripts/toolchain/build-cygwin.sh 2
+    fi
 fi
 
 if [[ "$CCACHE" = 1 ]]; then

@@ -24,6 +24,7 @@ print_summary() {
     fi
 
     echo "### $TITLE"
+    echo ""
     echo "| Metric                | Count                 |"
     echo "|-----------------------|-----------------------|"
     echo "| Expected passes       | $EXPECTED_PASSES      |"
