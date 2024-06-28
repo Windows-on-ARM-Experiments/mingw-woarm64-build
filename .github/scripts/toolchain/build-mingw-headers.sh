@@ -41,7 +41,7 @@ if [ "$RUN_CONFIG" = 1 ] || [ ! -f "$MINGW_HEADERS_BUILD_PATH/Makefile" ] ; then
         esac
 
         $SOURCE_PATH/$MINGW_VERSION/mingw-w64-headers/configure \
-            --prefix=$TOOLCHAIN_PATH/$TARGET \
+            --prefix=$TOOLCHAIN_PATH/mingw \
             --build=$BUILD \
             --host=$TARGET \
             $HOST_OPTIONS \
@@ -56,9 +56,6 @@ echo "::endgroup::"
 if [ "$RUN_INSTALL" = 1 ] ; then
     echo "::group::Install MinGW headers"
         make install
-
-        # Symlink for gcc
-        ln -sf $TOOLCHAIN_PATH/$TARGET $TOOLCHAIN_PATH/mingw
     echo "::endgroup::"
 fi
 

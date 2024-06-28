@@ -59,7 +59,7 @@ if [ "$RUN_CONFIG" = 1 ] || [ ! -f "$MINGW_BUILD_PATH/Makefile" ] ; then
         esac
 
         $SOURCE_PATH/$MINGW_VERSION/configure \
-            --prefix=$TOOLCHAIN_PATH/$TARGET \
+            --prefix=$TOOLCHAIN_PATH \
             --build=$BUILD \
             --host=$TARGET \
             $HOST_OPTIONS \

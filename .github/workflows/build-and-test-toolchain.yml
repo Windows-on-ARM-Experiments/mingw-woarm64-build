@@ -1,6 +1,7 @@
 name: Build toolchain
 
 on:
+  pull_request:
   workflow_dispatch:
     inputs:
       binutils_branch:
@@ -60,7 +61,7 @@ env:
   MINGW_BRANCH: ${{ inputs.mingw_branch || 'woarm64' }}
   MINGW_VERSION: mingw-w64
 
-  ARCH: ${{ inputs.arch || 'x86_64' }}
+  ARCH: ${{ inputs.arch || 'aarch64' }}
   PLATFORM: ${{ inputs.platform || 'w64-mingw32' }}
   CRT: ${{ inputs.crt || 'msvcrt' }}
 
