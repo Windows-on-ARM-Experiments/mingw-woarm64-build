@@ -35,6 +35,7 @@ BUILD_MAKE_OPTIONS=${BUILD_MAKE_OPTIONS:-V=1 -j$(nproc)}
 TOOLCHAIN_PATH=${TOOLCHAIN_PATH:-~/cross-$TOOLCHAIN_NAME}
 TOOLCHAIN_FILE=${TOOLCHAIN_FILE:-$ROOT_PATH/.github/cmake/$TARGET.cmake}
 TOOLCHAIN_PACKAGE_NAME=${TOOLCHAIN_PACKAGE_NAME:-$TOOLCHAIN_NAME-toolchain.tar.gz}
+RUNTIME_PACKAGE_NAME=${RUNTIME_PACKAGE_NAME:-$TOOLCHAIN_NAME-runtime.tar.gz}
 DEJAGNU_FILE=${DEJAGNU_FILE:-$ROOT_PATH/.github/scripts/toolchain/site.exp}
 
 ZLIB_PATH=${ZLIB_PATH:-~/zlib}
@@ -57,6 +58,12 @@ FFMPEG_TESTS_PATH=${FFMPEG_TESTS_PATH:-~/ffmpeg-tests}
 CCACHE_LIB_DIR=/usr/lib/ccache
 TOOLCHAIN_CCACHE_LIB_DIR=$TOOLCHAIN_PATH/lib/ccache
 
+if [[ -f $SOURCE_PATH/gcc/gcc/BASE-VER ]]; then
+    GCC_VERSION=$(cat $SOURCE_PATH/gcc/gcc/BASE-VER)
+else
+    GCC_VERSION="15.0.0"
+fi
+
 DEBUG=${DEBUG:-0} # Enable debug build.
 CCACHE=${CCACHE:-0} # Enable usage of ccache.
 RUN_BOOTSTRAP=${RUN_BOOTSTRAP:-0} # Bootstrap dependencies during the build.
@@ -67,7 +74,7 @@ RUN_CONFIG=${RUN_CONFIG:-1} # Run configuration step.
 RUN_INSTALL=${RUN_INSTALL:-1} # Run installation step.
 DELETE_BUILD=${DELETE_BUILD:-0} # Delete build folders after successful builds.
 
-PATH="$PATH:$TOOLCHAIN_PATH/bin"
+PATH="$PATH:$TOOLCHAIN_PATH/bin:$ARTIFACT_PATH/bin"
 if [[ "$CCACHE" = 1 ]]; then
     PATH=$CCACHE_LIB_DIR:$TOOLCHAIN_CCACHE_LIB_DIR:$PATH
     export CCACHE_DIR=$CCACHE_DIR_PATH

@@ -30,8 +30,6 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$MINGW_BUILD_PATH/Makefile" ]]; then
                     --disable-lib64 \
                     --disable-libarm32 \
                     --enable-libarm64"
-                CFLAGS="$CFLAGS \
-                    -mno-outline-atomics"
             ;;
         esac
 
@@ -62,6 +60,8 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$MINGW_BUILD_PATH/Makefile" ]]; then
             --prefix=$TOOLCHAIN_PATH/$TARGET \
             --build=$BUILD \
             --host=$TARGET \
+            --enable-static \
+            --enable-shared \
             $HOST_OPTIONS \
             $TARGET_OPTIONS \
             CFLAGS="$CFLAGS"
