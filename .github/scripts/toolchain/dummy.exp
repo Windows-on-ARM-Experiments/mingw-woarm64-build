@@ -1,0 +1,71 @@
+set timeout 5000
+
+proc dummy_load { board prog args } {
+  global timeout
+
+  warning "Load: board: $board, prog: $prog, args: $args"
+
+  set ret [local_exec "$prog $args" "" "" "$timeout]
+  set status [lindex $ret 0]
+  set output [lindex $ret 1]
+  if { $status == 0 } {
+    set result "pass"
+  } else {
+    set result "fail"
+  }
+  return [list $result $output]
+}
+
+proc dummy_spawn { board prog args } {
+  global timeout
+
+  warning "Spawn: board: $board, prog: $prog, args: $args"
+
+  return [local_exec "$prog $args" "" "" "$timeout]
+}
+
+proc dummy_download { board srcfile dstfile } {
+  global timeout
+
+  warning "Download: board: $board, srcfile: $srcfile, dstfile: $dstfile"
+
+  if { "$srcfile" != "$dstfile" } {
+    set ret [local_exec "cp -rf $srcfile $dstfile" "" "" $timeout]
+  }
+  return $dstfile
+}
+
+proc dummy_upload { board srcfile dstfile} {
+  global timeout
+
+  warning "Upload: board: $board, srcfile: $srcfile, dstfile: $dstfile"
+
+  if { "$srcfile" != "$dstfile" } {
+    set ret [local_exec "cp -rf $srcfile $dstfile" "" "" $timeout]
+  }
+  return $dstfile
+}
+
+proc dummy_exec { board prog args inp outp } {
+  global timeout
+
+  warning "Exec: board: $board, prog: $prog, args: $args, inp: $inp, outp: $outp"
+
+  set ret [local_exec "$prog $args" $inp $outp $timeout]
+  set status [lindex $ret 0]
+  set output [lindex $ret 1]
+  if { $status == 0 } {
+    set result "pass"
+  } else {
+    set result "fail"
+  }
+  return [list $result $output]
+}
+
+proc dummy_open { board } {
+  warning "Open: board: $board"
+
+  return 0
+}
+
+set_board_info protocol "dummy"

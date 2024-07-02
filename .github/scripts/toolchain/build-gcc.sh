@@ -59,6 +59,11 @@ if [ "$RUN_CONFIG" = 1 ] || [ ! -f "$GCC_BUILD_PATH/Makefile" ] ; then
                     --without-libintl-prefix"
                 ;;
             *mingw*)
+                # REMOVED: --with-gmp=$TOOLCHAIN_PATH
+                # REMOVED: --with-mpfr=$TOOLCHAIN_PATH
+                # REMOVED: --with-mpc=$TOOLCHAIN_PATH
+                # REMOVED: --with-isl=$TOOLCHAIN_PATH
+                # CHANGED: --enable-lto to --disable-lto
                 TARGET_OPTIONS="$TARGET_OPTIONS \
                     --libexecdir=$TOOLCHAIN_PATH/lib \
                     --enable-threads=win32 \
@@ -68,7 +73,6 @@ if [ "$RUN_CONFIG" = 1 ] || [ ! -f "$GCC_BUILD_PATH/Makefile" ] ; then
                     --enable-libstdcxx-time \
                     --enable-cloog-backend=isl \
                     --enable-version-specific-runtime-libs \
-                    --enable-lto \
                     --enable-libgomp \
                     --enable-checking=release \
                     --disable-libstdcxx-pch \
@@ -89,13 +93,9 @@ if [ "$RUN_CONFIG" = 1 ] || [ ! -f "$GCC_BUILD_PATH/Makefile" ] ; then
                 TARGET_OPTIONS="$TARGET_OPTIONS \
                     --disable-libsanitizer"
                 ;;
-            aarch64-*mingw*)
-                # CHANGED: --enable-shared to --disable-shared
-                TARGET_OPTIONS="$TARGET_OPTIONS \
-                    --disable-shared"
-                ;;
         esac
 
+        # REMOVED --enable-languages=lto
         $SOURCE_PATH/$GCC_VERSION/configure \
             --prefix=$TOOLCHAIN_PATH \
             --build=$BUILD \
@@ -103,7 +103,7 @@ if [ "$RUN_CONFIG" = 1 ] || [ ! -f "$GCC_BUILD_PATH/Makefile" ] ; then
             --target=$TARGET \
             --enable-static \
             --enable-shared \
-            --enable-languages=c,c++,lto,fortran \
+            --enable-languages=c,c++,fortran \
             --disable-bootstrap \
             --disable-multilib \
             --with-gnu-as \
@@ -114,12 +114,12 @@ if [ "$RUN_CONFIG" = 1 ] || [ ! -f "$GCC_BUILD_PATH/Makefile" ] ; then
 fi
 
 echo "::group::Build GCC"
-    make $BUILD_MAKE_OPTIONS
+    $BUILD_MAKE $BUILD_MAKE_OPTIONS
 echo "::endgroup::"
 
 if [ "$RUN_INSTALL" = 1 ] ; then
     echo "::group::Install GCC"
-        make install
+        $INSTALL_MAKE $INSTALL_MAKE_OPTIONS install
     echo "::endgroup::"
 fi
 

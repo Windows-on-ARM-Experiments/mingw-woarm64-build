@@ -20,12 +20,12 @@ if [ "$RUN_CONFIG" = 1 ] || [ ! -f "$OPENSSL_BUILD_PATH/Makefile" ] ; then
 fi
 
 echo "::group::Build OpenSSL"
-    make $BUILD_MAKE_OPTIONS
+    $BUILD_MAKE $BUILD_MAKE_OPTIONS
 echo "::endgroup::"
 
 if [ "$RUN_INSTALL" = 1 ] ; then
     echo "::group::Install OpenSSL"
-        make install
+        $INSTALL_MAKE $INSTALL_MAKE_OPTIONS install
     echo "::endgroup::"
 fi
 

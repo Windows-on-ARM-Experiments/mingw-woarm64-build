@@ -1,0 +1,126 @@
+name: Build and test GCC
+
+on:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      binutils_branch:
+        description: 'Binutils branch to build'
+        required: false
+        default: 'woarm64'
+      gcc_branch:
+        description: 'GCC branch to build'
+        required: false
+        default: 'woarm64'
+      mingw_branch:
+        description: 'Mingw branch to build'
+        required: false
+        default: 'woarm64'
+
+env:
+  BINUTILS_REPO: Windows-on-ARM-Experiments/binutils-woarm64
+  BINUTILS_BRANCH: ${{ inputs.binutils_branch }}
+  BINUTILS_VERSION: binutils
+
+  GCC_REPO: Windows-on-ARM-Experiments/gcc-woarm64
+  GCC_BRANCH: ${{ inputs.gcc_branch }}
+  GCC_VERSION: gcc
+
+  MINGW_REPO: Windows-on-ARM-Experiments/mingw-woarm64
+  MINGW_BRANCH: ${{ inputs.mingw_branch }}
+  MINGW_VERSION: mingw-w64-master
+
+jobs:
+  build-and-test:
+    runs-on: windows-latest
+
+    defaults:
+        run:
+          shell: msys2 {0}
+
+    env:
+      BUILD: x86_64-w64-mingw32
+      ARCH: x86_64
+      PLATFORM: w64-mingw32
+      CRT: msvcrt
+
+    steps:
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          install: >
+            git patch autoconf autoconf-archive autogen automake
+            mingw-w64-cross-gcc mingw-w64-cross-zlib make ccache
+            flex bison
+            dejagnu
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Checkout binutils
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.BINUTILS_REPO }}
+          ref: ${{ env.BINUTILS_BRANCH }}
+          path: ${{ github.workspace }}/code/${{ env.BINUTILS_VERSION }}
+
+      - name: Checkout GCC
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.GCC_REPO }}
+          ref: ${{ env.GCC_BRANCH }}
+          path: ${{ github.workspace }}/code/${{ env.GCC_VERSION }}
+
+      - name: Checkout MinGW
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.MINGW_REPO }}
+          ref: ${{ env.MINGW_BRANCH }}
+          path: ${{ github.workspace }}/code/${{ env.MINGW_VERSION }}
+
+      - name: Enable Ccache
+        id: enable-ccache
+        run: |
+          .github/scripts/enable-ccache.sh
+
+      - name: Restore Ccache
+        uses:  actions/cache/restore@v4
+        with:
+          path: ${{ github.workspace }}/ccache
+          key: test-gcc-ccache-${{ steps.enable-ccache.outputs.timestamp }}
+          restore-keys: test-gcc-ccache-
+
+      - name: Build toolchain
+        run: |
+          .github/scripts/build.sh
+
+      - name: Execute GCC tests
+        run: |
+          .github/scripts/toolchain/execute-gcc-tests.sh results
+
+      - name: Save Ccache
+        if: always()
+        uses:  actions/cache/save@v4
+        with:
+          path: ${{ github.workspace }}/ccache
+          key: test-gcc-ccache-${{ steps.enable-ccache.outputs.timestamp }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gcc-tests-results
+          path: ${{ github.workspace }}/artifact/gcc-tests-results
+          retention-days: 30
+
+      - name: Compress build folder
+        if: failure()
+        run: |
+          tar -czf build.tar.gz build-*/*
+
+      - name: Upload build folder
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build
+          retention-days: 1
+          path: build.tar.gz

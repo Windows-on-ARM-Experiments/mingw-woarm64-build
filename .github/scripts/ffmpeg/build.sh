@@ -30,12 +30,12 @@ if [ "$RUN_CONFIG" = 1 ] || [ ! -f "$FFMPEG_BUILD_PATH/Makefile" ] ; then
 fi
 
 echo "::group::Build FFmpeg"
-    make $BUILD_MAKE_OPTIONS
+    $BUILD_MAKE $BUILD_MAKE_OPTIONS
 echo "::endgroup::"
 
 echo "::group::Build FFmpeg tests"
-    make fate-rsync SAMPLES=samples
-    make fate | tee fate.log.orig
+    $BUILD_MAKE fate-rsync SAMPLES=samples
+    $BUILD_MAKE fate | tee fate.log.orig
     sed -E "/^warning: |^HOSTCC\t|^HOSTLD\t|^AS\t|^CC\t|^LD\t|TEST    source|fate-source/d" fate.log.orig > fate.log
     sed -i "s@$FFMPEG_SOURCE_PATH@\$FFMPEG_SOURCE_PATH@g" fate.log
 echo "::endgroup::"
