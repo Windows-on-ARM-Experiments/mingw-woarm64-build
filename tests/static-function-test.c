@@ -11,7 +11,7 @@ int static_function_test()
     int (*test_static)(int* val) = get_test_static();
     int i = 10;
 
-    if (test_static(&i) != 10)
+    if (test_static(&i) != 11)
         return 0;
 
     return 1;

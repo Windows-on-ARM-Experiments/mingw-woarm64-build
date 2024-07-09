@@ -5,7 +5,7 @@
 
 static int test_static(int* val)
 {
-    return *val;
+    return *val + 1;
 }
 
 
