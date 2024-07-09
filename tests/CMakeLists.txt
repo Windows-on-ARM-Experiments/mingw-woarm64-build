@@ -26,6 +26,7 @@ add_executable(
   bigdata-test.c
   chkstk-test.c
   dll-test.c
+  large-struct-test.c
   gtest_like_c.c
   main.c
   math-test.c
@@ -35,6 +36,8 @@ add_executable(
   pdata-test.c
   sjlj-test.c
   sscanf-double.c
+  static-function-test.c
+  static-function.c
   struct-test.c
   varargs-test.c
 )

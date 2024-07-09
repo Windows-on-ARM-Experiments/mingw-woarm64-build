@@ -34,7 +34,7 @@ on:
       openblas_branch:
         description: 'OpenBLAS branch to test'
         required: false
-        default: 'v0.3.26'
+        default: 'develop'
       openssl_branch:
         description: 'OpenSSL branch to test'
         required: false
@@ -85,7 +85,7 @@ env:
   COCOM_VERSION: cocom-master
 
   OPENBLAS_REPO: OpenMathLib/OpenBLAS.git
-  OPENBLAS_BRANCH: ${{ inputs.openblas_branch || 'v0.3.26' }}
+  OPENBLAS_BRANCH: ${{ inputs.openblas_branch || 'develop' }}
   OPENBLAS_VERSION: openblas-develop
 
   ZLIB_REPO: madler/zlib
