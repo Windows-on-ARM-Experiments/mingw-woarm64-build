@@ -42,7 +42,6 @@ if [ "$RUN_CONFIG" = 1 ] || [ ! -f "$MINGW_BUILD_PATH/Makefile" ] ; then
                 ;;
             *mingw*)
                 TARGET_OPTIONS="$TARGET_OPTIONS \
-                    --enable-lto \
                     --enable-wildcard \
                     --disable-dependency-tracking"
                 ;;

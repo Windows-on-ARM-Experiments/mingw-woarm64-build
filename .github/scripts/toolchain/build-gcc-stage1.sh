@@ -75,7 +75,6 @@ if [ "$RUN_CONFIG" = 1 ] || [ ! -f "$GCC_BUILD_PATH/Makefile" ] ; then
         --with-gnu-as \
         --with-gnu-ld \
         --without-headers \
-        --enable-lto \
         $HOST_OPTIONS \
         $TARGET_OPTIONS
     echo "::endgroup::"
