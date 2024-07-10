@@ -103,7 +103,7 @@ if [ "$RUN_CONFIG" = 1 ] || [ ! -f "$GCC_BUILD_PATH/Makefile" ] ; then
             --target=$TARGET \
             --enable-static \
             --enable-shared \
-            --enable-languages=c,c++,lto,fortran \
+            --enable-languages=c,c++,fortran \
             --disable-bootstrap \
             --disable-multilib \
             --with-gnu-as \

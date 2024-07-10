@@ -32,12 +32,12 @@ if [ "$RUN_CONFIG" = 1 ] || [ ! -f "$GCC_BUILD_PATH/Makefile" ] ; then
         case "$PLATFORM" in
             *linux*)
                 TARGET_OPTIONS="$TARGET_OPTIONS \
-                    --enable-languages=c,lto \
+                    --enable-languages=c \
                     --enable-threads=posix"
                 ;;
             *cygwin*)
                 TARGET_OPTIONS="$TARGET_OPTIONS \
-                    --enable-languages=c,c++,lto \
+                    --enable-languages=c,c++ \
                     --disable-__cxa_atexit \
                     --enable-threads=posix \
                     --with-dwarf2 \
@@ -75,6 +75,7 @@ if [ "$RUN_CONFIG" = 1 ] || [ ! -f "$GCC_BUILD_PATH/Makefile" ] ; then
         --with-gnu-as \
         --with-gnu-ld \
         --without-headers \
+        --enable-lto \
         $HOST_OPTIONS \
         $TARGET_OPTIONS
     echo "::endgroup::"
