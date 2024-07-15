@@ -121,6 +121,13 @@ if [ "$RUN_INSTALL" = 1 ] ; then
     echo "::group::Install GCC"
         make install
     echo "::endgroup::"
+    
+   lto_plugin_path=$(find $TOOLCHAIN_PATH/lib/gcc/$TARGET -type f -name liblto_plugin.so | head -n 1)
+    if [ -n $lto_plugin_path ]; then
+        echo "::group::Install LTO plug-in"
+            ln -sf $lto_plugin_path $TOOLCHAIN_PATH/lib/bfd-plugins/liblto_plugin.so
+        echo "::endgroup::"
+    fi
 fi
 
 echo 'Success!'
