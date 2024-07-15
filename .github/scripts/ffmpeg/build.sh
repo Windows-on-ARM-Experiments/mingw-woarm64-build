@@ -21,6 +21,7 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$FFMPEG_BUILD_PATH/Makefile" ]]; then
         $FFMPEG_SOURCE_PATH/configure \
             --prefix=$FFMPEG_PATH \
             --target-path="." \
+            --enable-lto \
             --target-samples="./samples" \
             --arch=aarch64 \
             --target-os=mingw32 \
