@@ -19,6 +19,7 @@ FFMPEG_VERSION=${FFMPEG_VERSION:-ffmpeg-master}
 ARCH=${ARCH:-aarch64}
 PLATFORM=${PLATFORM:-w64-mingw32}
 if [[ "$PLATFORM" =~ (mingw|cygwin) ]]; then
+    MINGW_LTO=${MINGW_LTO:-1}
     CRT=${CRT:-msvcrt}
 else
     CRT=${CRT:-libc}

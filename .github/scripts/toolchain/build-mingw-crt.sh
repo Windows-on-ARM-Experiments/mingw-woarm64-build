@@ -39,12 +39,17 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$MINGW_BUILD_PATH/Makefile" ]]; then
             *cygwin*)
                 TARGET_OPTIONS="$TARGET_OPTIONS \
                     --enable-w32api"
-                ;;
+            ;;
             *mingw*)
                 TARGET_OPTIONS="$TARGET_OPTIONS \
                     --enable-wildcard \
                     --disable-dependency-tracking"
-                ;;
+
+                if [ "$MINGW_LTO" = 1 ] ; then
+                    CFLAGS="$CFLAGS \
+                        -flto"
+                fi
+            ;;
         esac
 
         case "$CRT" in
