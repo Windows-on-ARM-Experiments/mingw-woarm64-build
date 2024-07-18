@@ -19,7 +19,6 @@ FFMPEG_VERSION=${FFMPEG_VERSION:-ffmpeg-master}
 ARCH=${ARCH:-aarch64}
 PLATFORM=${PLATFORM:-w64-mingw32}
 if [[ "$PLATFORM" =~ (mingw|cygwin) ]]; then
-    MINGW_LTO=${MINGW_LTO:-1}
     CRT=${CRT:-msvcrt}
 else
     CRT=${CRT:-libc}
@@ -35,6 +34,10 @@ if [[ ("$PLATFORM" =~ (mingw|cygwin) && ! ("$CRT" =~ (msvcrt|ucrt))) ||
     ("$PLATFORM" =~ linux && "$CRT" != "libc") ]]; then
     echo "Unsupported target $PLATFORM with CRT $CRT!"
     exit 1
+fi
+
+if [[ "$TARGET" = aarch64-w64-mingw32 ]]; then
+    MINGW_LTO=${MINGW_LTO:-1}
 fi
 
 SOURCE_PATH=${SOURCE_PATH:-$PWD/code}
