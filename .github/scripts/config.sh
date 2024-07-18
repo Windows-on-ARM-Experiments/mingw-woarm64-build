@@ -36,7 +36,7 @@ if [[ ("$PLATFORM" =~ (mingw|cygwin) && ! ("$CRT" =~ (msvcrt|ucrt))) ||
     exit 1
 fi
 
-if [[ "$TARGET" = aarch64-w64-mingw32 ]]; then
+if [[ "$TOOLCHAIN_NAME" = aarch64-w64-mingw32-msvcrt ]]; then
     MINGW_LTO=${MINGW_LTO:-1}
 fi
 
