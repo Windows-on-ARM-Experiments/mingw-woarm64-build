@@ -18,7 +18,8 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$MINGW_BUILD_PATH/Makefile" ]]; then
 
         if [ "$MINGW_LTO" = 1 ] ; then
             CFLAGS="$CFLAGS \
-                -flto"
+                -flto \
+                -fno-builtin"
         fi
 
         case "$ARCH" in

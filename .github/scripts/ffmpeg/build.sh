@@ -17,7 +17,7 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$FFMPEG_BUILD_PATH/Makefile" ]]; then
                 --enable-debug=3"
         fi
 
-        CFLAGS="-Wno-incompatible-pointer-types -fno-builtin-sin -fno-builtin-cos" \
+        CFLAGS="-Wno-incompatible-pointer-types -fno-builtin-sin -fno-builtin-cos -fno-builtin" \
         $FFMPEG_SOURCE_PATH/configure \
             --prefix=$FFMPEG_PATH \
             --target-path="." \
