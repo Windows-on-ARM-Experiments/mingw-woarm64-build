@@ -42,6 +42,8 @@ add_executable(
   static-function.c
   struct-test.c
   varargs-test.c
+  weak-references-test.c
+  weak-references.c
 )
 
 target_link_libraries(
