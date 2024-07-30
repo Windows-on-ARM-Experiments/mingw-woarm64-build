@@ -18,6 +18,7 @@ TEST(Aarch64MinGW, StructTest);
 TEST(Aarch64MinGW, TestVaList);
 TEST(Aarch64MinGW, TestSPrintf);
 TEST(Aarch64MinGW, TestVaArgPack);
+TEST(Aarch64MinGW, WeakReferencesTest);
 
 int main(int argc, char **argv) {
 
@@ -57,7 +58,8 @@ int main(int argc, char **argv) {
         DECLARE_TEST(Aarch64MinGW, StructTest),
         DECLARE_TEST(Aarch64MinGW, TestVaList),
         DECLARE_TEST(Aarch64MinGW, TestSPrintf),
-        DECLARE_TEST(Aarch64MinGW, TestVaArgPack)
+        DECLARE_TEST(Aarch64MinGW, TestVaArgPack),
+        DECLARE_TEST(Aarch64MinGW, WeakReferencesTest)
     };
 
     return gtest_like_c_run_tests(tests, sizeof(tests) / sizeof(tests[0]), gtest_filter);
