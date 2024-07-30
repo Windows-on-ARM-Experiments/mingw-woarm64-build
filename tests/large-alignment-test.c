@@ -9,9 +9,7 @@ float __attribute__((aligned (32))) large_aligned_array[3];
 int large_alignment()
 {
   large_aligned_array[0] = 1;
-  large_aligned_array[0] = 1;
-  printf("%d\n", sizeof(large_aligned_array));
-  return 0;
+  return 1;
 }
 
 TEST(Aarch64MinGW, LargeAlignmentTest)
