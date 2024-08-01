@@ -29,7 +29,7 @@ if [[ "$PLATFORM" =~ cygwin ]]; then
     .github/scripts/toolchain/patch-cygwin.sh 1
 fi
 
-if [[ "$RUN_BOOTSTRAP" = 1 ]]; then
+if [[ "$RUN_BOOTSTRAP" = 1 || "$RESET_SOURCES" = 1 ]]; then
     .github/scripts/install-libraries.sh
 fi
 
@@ -63,7 +63,7 @@ if [[ "$PLATFORM" =~ cygwin ]]; then
     .github/scripts/toolchain/patch-cygwin.sh 2
 fi
 
-if [[ "$RUN_BOOTSTRAP" = 1 ]]; then
+if [[ "$RUN_BOOTSTRAP" = 1 || "$RESET_SOURCES" = 1 ]]; then
     .github/scripts/install-libraries.sh
 fi
 
