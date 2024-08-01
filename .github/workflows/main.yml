@@ -32,14 +32,14 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         
       - name: Run Build
         run: |
           ./build.sh
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: main-aarch64-w64-mingw32-toolchain
           path: ${{ env.TOOLCHAIN_PATH }}
