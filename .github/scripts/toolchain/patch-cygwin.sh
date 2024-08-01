@@ -32,13 +32,13 @@ echo "::group::Patch Cygwin"
     git clean -fdx
 
     PATCH_DIR=$PATCHES_PATH/cygwin
-    if [ "$STAGE" = "1" ]; then
+    if [[ "$STAGE" = "1" ]]; then
         patch -p1 -i $PATCH_DIR/0001-before-autogen.patch
     fi
 
     (cd winsup && ./autogen.sh)
 
-    if [ "$STAGE" = "1" ]; then
+    if [[ "$STAGE" = "1" ]]; then
         patch -p1 -i $PATCH_DIR/0002-after-autogen.patch
     fi
 

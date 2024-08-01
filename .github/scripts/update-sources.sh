@@ -6,13 +6,13 @@ function update_repository() {
     DIRECTORY=$1
     REPOSITORY=$2
     BRANCH=$3
-    if ! [ -d $DIRECTORY ]; then
+    if [[ ! -d $DIRECTORY ]]; then
         git clone $REPOSITORY -b $BRANCH --single-branch --depth 1 $DIRECTORY
         git submodule init
         git submodule update
     else
         pushd $DIRECTORY
-            if [ "$RESET_SOURCES" = 1 ]; then
+            if [[ "$RESET_SOURCES" = 1 ]]; then
                 git reset --hard
                 git clean -fdx
                 git switch $BRANCH

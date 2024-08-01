@@ -7,11 +7,11 @@ BINUTILS_BUILD_PATH=$BUILD_PATH/binutils
 mkdir -p $BINUTILS_BUILD_PATH
 cd $BINUTILS_BUILD_PATH
 
-if [ "$RUN_CONFIG" = 1 ] || [ ! -f "$BINUTILS_BUILD_PATH/Makefile" ] ; then
+if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$BINUTILS_BUILD_PATH/Makefile" ]]; then
     echo "::group::Configure binutils"
         rm -rf $BINUTILS_BUILD_PATH/*
 
-        if [ "$DEBUG" = 1 ] ; then
+        if [[ "$DEBUG" = 1 ]]; then
             HOST_OPTIONS="$HOST_OPTIONS \
                 --enable-debug"
         fi
@@ -56,7 +56,7 @@ echo "::group::Build binutils"
     make $BUILD_MAKE_OPTIONS
 echo "::endgroup::"
 
-if [ "$RUN_INSTALL" = 1 ] ; then
+if [[ "$RUN_INSTALL" = 1 ]]; then
     echo "::group::Install binutils"
         make install
     echo "::endgroup::"

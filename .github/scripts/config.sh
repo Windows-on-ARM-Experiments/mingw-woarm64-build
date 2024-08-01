@@ -28,7 +28,7 @@ HOST=x86_64-pc-linux-gnu
 TARGET=$ARCH-$PLATFORM
 TOOLCHAIN_NAME=${TOOLCHAIN_NAME:-$ARCH-$PLATFORM-$CRT}
 
-if [[ ("$PLATFORM" =~ (mingw|cygwin) && !("$CRT" =~ (msvcrt|ucrt))) ||
+if [[ ("$PLATFORM" =~ (mingw|cygwin) && ! ("$CRT" =~ (msvcrt|ucrt))) ||
     ("$PLATFORM" =~ linux && "$CRT" != "libc") ]]; then
     echo "Unsupported target $PLATFORM with CRT $CRT!"
     exit 1
@@ -72,6 +72,6 @@ RUN_INSTALL=${RUN_INSTALL:-1} # Run installation step.
 
 PATH=$PATH:$TOOLCHAIN_PATH/bin
 
-if [ "$CCACHE" = 1 ]; then
+if [[ "$CCACHE" = 1 ]]; then
     PATH=/usr/lib/ccache:$TOOLCHAIN_PATH/lib/ccache:$PATH
 fi

@@ -7,11 +7,11 @@ MINGW_BUILD_PATH=$BUILD_PATH/mingw
 mkdir -p $MINGW_BUILD_PATH
 cd $MINGW_BUILD_PATH
 
-if [ "$RUN_CONFIG" = 1 ] || [ ! -f "$MINGW_BUILD_PATH/Makefile" ] ; then
+if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$MINGW_BUILD_PATH/Makefile" ]]; then
     echo "::group::Configure MinGW libraries"
         rm -rf $MINGW_BUILD_PATH/*
 
-        if [ "$DEBUG" = 1 ] ; then
+        if [[ "$DEBUG" = 1 ]]; then
             HOST_OPTIONS="$HOST_OPTIONS \
                 --enable-debug"
         fi
@@ -72,7 +72,7 @@ echo "::group::Build MinGW"
     make $BUILD_MAKE_OPTIONS
 echo "::endgroup::"
 
-if [ "$RUN_INSTALL" = 1 ] ; then
+if [[ "$RUN_INSTALL" = 1 ]]; then
     echo "::group::Install MinGW"
         make install
     echo "::endgroup::"

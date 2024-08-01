@@ -2,7 +2,7 @@
 
 source `dirname ${BASH_SOURCE[0]}`/config.sh
 
-if [ "$CCACHE" = 1 ] ; then
+if [[ "$CCACHE" = 1 ]]; then
   mkdir -p $TOOLCHAIN_PATH/lib/ccache
   pushd $TOOLCHAIN_PATH/lib/ccache
     if ! [ -f $TARGET-gcc ]; then
@@ -16,11 +16,11 @@ if [ "$CCACHE" = 1 ] ; then
   ccache -z
 fi
 
-if [ "$RUN_BOOTSTRAP" = 1 ]; then
+if [[ "$RUN_BOOTSTRAP" = 1 ]]; then
     .github/scripts/install-dependencies.sh
 fi
 
-if [ "$UPDATE_SOURCES" = 1 ]; then
+if [[ "$UPDATE_SOURCES" = 1 ]]; then
     .github/scripts/update-sources.sh
 fi
 
@@ -29,7 +29,7 @@ if [[ "$PLATFORM" =~ cygwin ]]; then
     .github/scripts/toolchain/patch-cygwin.sh 1
 fi
 
-if [ "$RUN_BOOTSTRAP" = 1 ]; then
+if [[ "$RUN_BOOTSTRAP" = 1 ]]; then
     .github/scripts/install-libraries.sh
 fi
 
@@ -45,7 +45,7 @@ if [[ "$PLATFORM" =~ cygwin ]]; then
     .github/scripts/toolchain/install-cygwin-headers.sh
 fi
 
-if [ "$BUILD" != "$TARGET" ]; then
+if [[ "$BUILD" != "$TARGET" ]]; then
     .github/scripts/toolchain/build-gcc-stage1.sh
 fi
 
@@ -63,7 +63,7 @@ if [[ "$PLATFORM" =~ cygwin ]]; then
     .github/scripts/toolchain/patch-cygwin.sh 2
 fi
 
-if [ "$RUN_BOOTSTRAP" = 1 ]; then
+if [[ "$RUN_BOOTSTRAP" = 1 ]]; then
     .github/scripts/install-libraries.sh
 fi
 
@@ -76,8 +76,8 @@ if [[ "$PLATFORM" =~ cygwin ]]; then
     .github/scripts/toolchain/build-cygwin.sh 2
 fi
 
-if [ "$CCACHE" = 1 ] ; then
-  ccache -s
+if [[ "$CCACHE" = 1 ]]; then
+    ccache -s
 fi
 
 echo 'Success!'

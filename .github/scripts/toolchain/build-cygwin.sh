@@ -9,7 +9,7 @@ CYGWIN_BUILD_PATH=$BUILD_PATH/cygwin
 mkdir -p $CYGWIN_BUILD_PATH
 cd $CYGWIN_BUILD_PATH
 
-if [ "$RUN_CONFIG" = 1 ] || [ ! -f "$CYGWIN_BUILD_PATH/Makefile" ] ; then
+if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$CYGWIN_BUILD_PATH/Makefile" ]]; then
     echo "::group::Configure Cygwin"
         rm -rf $CYGWIN_BUILD_PATH/*
 
@@ -45,7 +45,7 @@ echo "::group::Build Cygwin"
     make $BUILD_MAKE_OPTIONS
 echo "::endgroup::"
 
-if [ "$RUN_INSTALL" = 1 ] ; then
+if [[ "$RUN_INSTALL" = 1 ]]; then
     echo "::group::Install Cygwin"
         make install
     echo "::endgroup::"
