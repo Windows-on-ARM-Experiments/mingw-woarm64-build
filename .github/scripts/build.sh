@@ -2,22 +2,12 @@
 
 source `dirname ${BASH_SOURCE[0]}`/config.sh
 
-if [[ "$CCACHE" = 1 ]]; then
-  mkdir -p $TOOLCHAIN_PATH/lib/ccache
-  pushd $TOOLCHAIN_PATH/lib/ccache
-    if ! [ -f $TARGET-gcc ]; then
-      ln -s /usr/bin/ccache $TARGET-gcc
-    fi
-    if ! [ -f $TARGET-g++ ]; then
-      ln -s /usr/bin/ccache $TARGET-g++
-    fi
-  popd
-
-  ccache -z
-fi
-
 if [[ "$RUN_BOOTSTRAP" = 1 ]]; then
     .github/scripts/install-dependencies.sh
+fi
+
+if [[ "$CCACHE" = 1 ]]; then
+    .github/scripts/enable-ccache.sh
 fi
 
 if [[ "$UPDATE_SOURCES" = 1 ]]; then
@@ -31,6 +21,10 @@ fi
 
 if [[ "$RUN_BOOTSTRAP" = 1 || "$RESET_SOURCES" = 1 ]]; then
     .github/scripts/install-libraries.sh
+fi
+
+if [[ "$CCACHE" = 1 ]]; then
+    ccache -sv
 fi
 
 .github/scripts/binutils/build.sh
@@ -77,7 +71,7 @@ if [[ "$PLATFORM" =~ cygwin ]]; then
 fi
 
 if [[ "$CCACHE" = 1 ]]; then
-    ccache -s
+    ccache -sv
 fi
 
 echo 'Success!'

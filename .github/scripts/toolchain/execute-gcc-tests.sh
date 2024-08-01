@@ -1,5 +1,7 @@
 #!/bin/bash
 
+CCACHE=0 # Disable ccache for testing.
+
 source `dirname ${BASH_SOURCE[0]}`/../config.sh
 
 TAG=$1
