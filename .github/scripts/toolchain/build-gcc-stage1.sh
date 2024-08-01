@@ -7,11 +7,11 @@ GCC_BUILD_PATH=$BUILD_PATH/gcc-stage1
 mkdir -p $GCC_BUILD_PATH
 cd $GCC_BUILD_PATH
 
-if [ "$RUN_CONFIG" = 1 ] || [ ! -f "$GCC_BUILD_PATH/Makefile" ] ; then
+if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$GCC_BUILD_PATH/Makefile" ]]; then
     echo "::group::Configure GCC stage1"
         rm -rf $GCC_BUILD_PATH/*
 
-        if [ "$DEBUG" = 1 ] ; then
+        if [[ "$DEBUG" = 1 ]]; then
             HOST_OPTIONS="$HOST_OPTIONS \
                 --enable-debug"
         fi
@@ -84,7 +84,7 @@ echo "::group::Build GCC stage1"
     make $BUILD_MAKE_OPTIONS
 echo "::endgroup::"
 
-if [ "$RUN_INSTALL" = 1 ] ; then
+if [[ "$RUN_INSTALL" = 1 ]]; then
     echo "::group::Install GCC stage1"
         make install
     echo "::endgroup::"

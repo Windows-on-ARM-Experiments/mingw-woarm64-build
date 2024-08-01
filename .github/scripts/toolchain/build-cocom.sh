@@ -8,7 +8,7 @@ COCOM_BUILD_PATH=$BUILD_PATH/cocom
 mkdir -p $COCOM_BUILD_PATH
 cd $COCOM_BUILD_PATH
 
-if [ "$RUN_CONFIG" = 1 ] || [ ! -f "$COCOM_BUILD_PATH/Makefile" ] ; then
+if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$COCOM_BUILD_PATH/Makefile" ]]; then
     echo "::group::Configure COCOM"
         rm -rf $COCOM_BUILD_PATH/*
 
@@ -23,7 +23,7 @@ echo "::group::Build COCOM"
     make $BUILD_MAKE_OPTIONS
 echo "::endgroup::"
 
-if [ "$RUN_INSTALL" = 1 ] ; then
+if [[ "$RUN_INSTALL" = 1 ]]; then
     echo "::group::Install COCOM"
         make install
     echo "::endgroup::"
