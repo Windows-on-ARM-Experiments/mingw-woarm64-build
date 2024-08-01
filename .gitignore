@@ -11,3 +11,4 @@ tests/*.o
 tests/*.dump
 tests/*.log
 tests/*.a
+*.code-workspace
