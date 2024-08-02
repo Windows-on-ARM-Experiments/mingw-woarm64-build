@@ -28,6 +28,7 @@ add_executable(
   bigdata-test.c
   chkstk-test.c
   dll-test.c
+  large-alignment-test.c
   large-struct-test.c
   gtest_like_c.c
   main.c
