@@ -87,7 +87,7 @@ jobs:
 
       - name: Checkout repository
         run: |
-          git clone --depth=1 https://github.com/Windows-on-ARM-Experiments/mingw-woarm64-build.git -b ${{ github.head_ref || 'main' }} .
+          git clone --depth=1 https://github.com/Windows-on-ARM-Experiments/mingw-woarm64-build.git -b ${{ github.head_ref || github.ref_name || 'main' }} .
 
       - name: Setup WSL environment
         run: |
