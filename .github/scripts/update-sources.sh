@@ -8,14 +8,17 @@ function update_repository() {
     BRANCH=$3
     if [[ ! -d $DIRECTORY ]]; then
         git clone $REPOSITORY -b $BRANCH --single-branch --depth 1 $DIRECTORY
-        git submodule init
-        git submodule update
+        pushd $DIRECTORY
+            git config pull.rebase true
+            git submodule init
+            git submodule update
+        popd
     else
         pushd $DIRECTORY
             if [[ "$RESET_SOURCES" = 1 ]]; then
-                git reset --hard
-                git clean -fdx
+                git reset --hard HEAD
                 git switch $BRANCH
+                git clean -fdx
             fi
             git pull
             git submodule update
