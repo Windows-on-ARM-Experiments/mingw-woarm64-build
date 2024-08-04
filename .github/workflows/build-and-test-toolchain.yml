@@ -1,6 +1,7 @@
 name: Build and test main toolchain
 
 on:
+  pull_request:
   workflow_dispatch:
     inputs:
       binutils_branch:
@@ -72,6 +73,7 @@ env:
   MODULE: ${{ inputs.gcc_module || '' }}
   FILTER: ${{ inputs.gcc_test_filter || '' }}
 
+  TEST: 1
   CCACHE: 1
   RUN_BOOTSTRAP: 1
   UPDATE_SOURCES: 1
@@ -82,7 +84,7 @@ jobs:
     runs-on: windows-latest
 
     env:
-      WSLENV: BINUTILS_BRANCH:GCC_BRANCH:MINGW_BRANCH:ARCH:PLATFORM:CRT:TAG:MODULE:FILTER:CCACHE:RUN_BOOTSTRAP:UPDATE_SOURCES:GITHUB_OUTPUT/p:GITHUB_STEP_SUMMARY/p
+      WSLENV: BINUTILS_BRANCH:GCC_BRANCH:MINGW_BRANCH:ARCH:PLATFORM:CRT:TAG:MODULE:FILTER:TEST:CCACHE:RUN_BOOTSTRAP:UPDATE_SOURCES:GITHUB_OUTPUT/p:GITHUB_STEP_SUMMARY/p
 
     defaults:
       run:
