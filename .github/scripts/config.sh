@@ -67,6 +67,7 @@ CCACHE_LIB_DIR=/usr/lib/ccache
 TOOLCHAIN_CCACHE_LIB_DIR=$TOOLCHAIN_PATH/lib/ccache
 
 DEBUG=${DEBUG:-0} # Enable debug build.
+TEST=${TEST:-0} # Enable build for testing.
 CCACHE=${CCACHE:-0} # Enable usage of ccache.
 RUN_BOOTSTRAP=${RUN_BOOTSTRAP:-0} # Bootstrap dependencies during the build.
 UPDATE_SOURCES=${UPDATE_SOURCES:-0} # Update source code repositories.

@@ -9,9 +9,11 @@ echo "::group::Install libraries"
     ./contrib/download_prerequisites
 
     # Symbolic links for binutils dependencies
-    cd $SOURCE_PATH/$BINUTILS_VERSION
-    ln -sf $SOURCE_PATH/$GCC_VERSION/gmp gmp
-    ln -sf $SOURCE_PATH/$GCC_VERSION/mpfr mpfr
+    if [[ "$TEST" = 0 ]]; then
+        cd $SOURCE_PATH/$BINUTILS_VERSION
+        ln -sf $SOURCE_PATH/$GCC_VERSION/gmp gmp
+        ln -sf $SOURCE_PATH/$GCC_VERSION/mpfr mpfr
+    fi
 
 echo "::endgroup::"
 
