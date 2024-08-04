@@ -85,7 +85,9 @@ echo "::group::Update source code repositories"
     mkdir -p "$SOURCE_PATH"
 
     cd "$SOURCE_PATH"
-    update_repository binutils $BINUTILS_REPO $BINUTILS_BRANCH $BINUTILS_BASE_BRANCH
+    if [[ "$TEST" = 0 ]]; then
+        update_repository binutils $BINUTILS_REPO $BINUTILS_BRANCH $BINUTILS_BASE_BRANCH
+    fi
     update_repository gcc $GCC_REPO $GCC_BRANCH $GCC_BASE_BRANCH
     update_repository mingw $MINGW_REPO $MINGW_BRANCH $MINGW_BASE_BRANCH
     if [[ "$PLATFORM" =~ cygwin ]]; then 
