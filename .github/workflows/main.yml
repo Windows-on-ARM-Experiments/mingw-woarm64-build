@@ -24,7 +24,11 @@ env:
   GCC_BRANCH: ${{ inputs.gcc_branch || 'woarm64' }}
   MINGW_BRANCH: ${{ inputs.mingw_branch || 'woarm64' }}
 
+  BUILD_PATH: ${{ github.workspace }}/build
+  CCACHE_DIR_PATH: ${{ github.workspace }}/ccache
   TOOLCHAIN_PATH: ${{ github.workspace }}/cross
+
+  CCACHE: 1
 
 jobs:
   build-toolchain:
@@ -33,10 +37,37 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        
+
+      - name: Get cache key
+        id: get-cache-key
+        run: |
+          echo "timestamp=$(date -u --iso-8601=seconds)" >> "$GITHUB_OUTPUT"
+
+      - name: Restore Ccache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ env.CCACHE_DIR_PATH }}
+          key: main-gcc-ccache-${{ steps.get-cache-key.outputs.timestamp }}
+          restore-keys: main-gcc-ccache-
+
       - name: Run Build
         run: |
           ./build.sh
+
+      - name: Save Ccache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ env.CCACHE_DIR_PATH }}
+          key: main-gcc-ccache-${{ steps.get-cache-key.outputs.timestamp }}
+
+      - name: Upload build folder
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build
+          retention-days: 1
+          path: ${{ env.BUILD_PATH }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
