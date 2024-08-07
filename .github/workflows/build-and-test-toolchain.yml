@@ -118,6 +118,18 @@ jobs:
           cd ~/work
           .github/scripts/toolchain/execute-gcc-tests.sh "${{ env.TAG }}" "${{ env.MODULE }}" "${{ env.FILTER }}"
 
+      - name: Create summary
+        run: |
+          cd ~/work
+          source .github/scripts/config.sh
+          .github/scripts/toolchain/create-gcc-summary.sh "${{ env.TAG }}" >> \
+            $ARTIFACT_PATH/gcc-tests-${{ env.TAG }}/summary.txt
+
+      - name: Present summary
+        shell: powershell
+        run: |
+          cat ${{ steps.get-wsl-paths.outputs.artifact-path }}\gcc-tests-${{ env.TAG }}\summary.txt >> $env:GITHUB_STEP_SUMMARY
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
