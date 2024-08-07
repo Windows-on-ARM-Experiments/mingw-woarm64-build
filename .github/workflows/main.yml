@@ -29,6 +29,7 @@ env:
   TOOLCHAIN_PATH: ${{ github.workspace }}/cross
 
   CCACHE: 1
+  DELETE_BUILD: 1
 
 jobs:
   build-toolchain:

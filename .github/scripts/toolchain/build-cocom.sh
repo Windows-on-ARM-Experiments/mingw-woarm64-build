@@ -26,6 +26,9 @@ echo "::endgroup::"
 if [[ "$RUN_INSTALL" = 1 ]]; then
     echo "::group::Install COCOM"
         make install
+        if [[ "$DELETE_BUILD" = 1 ]]; then
+            rm -rf $COCOM_BUILD_PATH 
+        fi
     echo "::endgroup::"
 fi
 

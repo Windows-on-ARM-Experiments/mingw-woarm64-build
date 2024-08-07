@@ -59,6 +59,10 @@ if [[ "$RUN_INSTALL" = 1 ]]; then
 
         # Symlink for gcc
         ln -sf $TOOLCHAIN_PATH/$TARGET $TOOLCHAIN_PATH/mingw
+
+        if [[ "$DELETE_BUILD" = 1 ]]; then
+            rm -rf $MINGW_HEADERS_BUILD_PATH
+        fi
     echo "::endgroup::"
 fi
 

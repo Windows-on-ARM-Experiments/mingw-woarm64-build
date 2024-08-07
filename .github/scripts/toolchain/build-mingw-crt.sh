@@ -94,6 +94,10 @@ if [[ "$RUN_INSTALL" = 1 ]]; then
                 popd
                 ;;
         esac
+
+        if [[ "$DELETE_BUILD" = 1 ]]; then
+            rm -rf $MINGW_BUILD_PATH
+        fi
     echo "::endgroup::"
 fi
 

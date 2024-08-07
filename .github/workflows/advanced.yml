@@ -115,6 +115,8 @@ env:
   SOURCE_PATH: ${{ github.workspace }}/code
   ARTIFACT_PATH: ${{ github.workspace }}/artifact
 
+  DELETE_BUILD: 1
+
 jobs:
   build-toolchain:
     runs-on: ubuntu-latest
