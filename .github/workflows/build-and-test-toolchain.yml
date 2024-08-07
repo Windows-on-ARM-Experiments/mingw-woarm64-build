@@ -72,6 +72,7 @@ env:
   MODULE: ${{ inputs.gcc_module || '' }}
   FILTER: ${{ inputs.gcc_test_filter || '' }}
 
+  CCACHE: 1
   RUN_BOOTSTRAP: 1
   UPDATE_SOURCES: 1
 
@@ -81,13 +82,19 @@ jobs:
     runs-on: windows-latest
 
     env:
-      WSLENV: BINUTILS_BRANCH:GCC_BRANCH:MINGW_BRANCH:ARCH:PLATFORM:CRT:TAG:MODULE:FILTER:RUN_BOOTSTRAP:UPDATE_SOURCES:GITHUB_OUTPUT/p
+      WSLENV: BINUTILS_BRANCH:GCC_BRANCH:MINGW_BRANCH:ARCH:PLATFORM:CRT:TAG:MODULE:FILTER:CCACHE:RUN_BOOTSTRAP:UPDATE_SOURCES:GITHUB_OUTPUT/p
 
     defaults:
       run:
         shell: wsl-bash {0}
 
     steps:
+      - name: Get cache key
+        id: get-cache-key
+        shell: powershell
+        run: |
+          Write-Output "timestamp=$((Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ"))" >> "$env:GITHUB_OUTPUT"
+
       - name: Setup WSL
         uses: Windows-on-ARM-Experiments/setup-wsl@master
         with:
@@ -105,13 +112,31 @@ jobs:
         run: |
           cd ~/work
           source .github/scripts/config.sh
+          mkdir -p $BUILD_PATH
+          mkdir -p $CCACHE_DIR_PATH
           mkdir -p $ARTIFACT_PATH
+          echo "build-path=`wslpath -w $BUILD_PATH`" >> $GITHUB_OUTPUT
+          echo "ccache-dir-path=`wslpath -w $CCACHE_DIR_PATH`" >> $GITHUB_OUTPUT
           echo "artifact-path=`wslpath -w $ARTIFACT_PATH`" >> $GITHUB_OUTPUT
+
+      - name: Restore Ccache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ steps.get-wsl-paths.outputs.ccache-dir-path }}
+          key: build-and-test-gcc-ccache-${{ steps.get-cache-key.outputs.timestamp }}
+          restore-keys: build-and-test-gcc-ccache-
 
       - name: Build toolchain
         run: |
           cd ~/work
           .github/scripts/build.sh
+
+      - name: Save Ccache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ steps.get-wsl-paths.outputs.ccache-dir-path }}
+          key: build-and-test-gcc-ccache-${{ steps.get-cache-key.outputs.timestamp }}
 
       - name: Execute GCC tests
         run: |
@@ -129,6 +154,14 @@ jobs:
         shell: powershell
         run: |
           cat ${{ steps.get-wsl-paths.outputs.artifact-path }}\gcc-tests-${{ env.TAG }}\summary.txt >> $env:GITHUB_STEP_SUMMARY
+
+      - name: Upload build folder
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build
+          retention-days: 1
+          path: ${{ steps.get-wsl-paths.outputs.build-path }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

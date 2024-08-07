@@ -1,5 +1,6 @@
 .vscode/
 build-*/
+ccache/
 code/
 downloads/
 artifact/
