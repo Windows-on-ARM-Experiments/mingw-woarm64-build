@@ -48,6 +48,9 @@ echo "::endgroup::"
 if [[ "$RUN_INSTALL" = 1 ]]; then
     echo "::group::Install Cygwin"
         make install
+        if [[ "$DELETE_BUILD" = 1 ]]; then
+            rm -rf $CYGWIN_BUILD_PATH
+        fi
     echo "::endgroup::"
 fi
 

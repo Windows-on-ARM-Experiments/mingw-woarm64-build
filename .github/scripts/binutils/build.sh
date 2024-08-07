@@ -59,6 +59,9 @@ echo "::endgroup::"
 if [[ "$RUN_INSTALL" = 1 ]]; then
     echo "::group::Install binutils"
         make install
+        if [[ "$DELETE_BUILD" = 1 ]]; then
+            rm -rf $BINUTILS_BUILD_PATH
+        fi
     echo "::endgroup::"
 fi
 

@@ -74,6 +74,7 @@ RESET_SOURCES=${RESET_SOURCES:-0} # Reset source code repositories before update
 APPLY_PATCHES=${APPLY_PATCHES:-1} # Patch source repositories for targets requiring it.
 RUN_CONFIG=${RUN_CONFIG:-1} # Run configuration step.
 RUN_INSTALL=${RUN_INSTALL:-1} # Run installation step.
+DELETE_BUILD=${DELETE_BUILD:-0} # Delete build folders after successful builds.
 
 PATH="$PATH:$TOOLCHAIN_PATH/bin"
 if [[ "$CCACHE" = 1 ]]; then

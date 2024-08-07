@@ -42,6 +42,9 @@ echo "::endgroup::"
 if [[ "$RUN_INSTALL" = 1 ]]; then
     echo "::group::Install MinGW winpthreads"
         make install
+        if [[ "$DELETE_BUILD" = 1 ]]; then
+            rm -rf $MINGW_BUILD_PATH
+        fi
     echo "::endgroup::"
 fi
 
