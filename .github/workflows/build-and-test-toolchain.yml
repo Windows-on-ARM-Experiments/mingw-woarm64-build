@@ -30,6 +30,14 @@ on:
       tag:
         description: 'Tag to use for the artifact'
         required: true
+      gcc_module:
+        description: 'GCC module to test'
+        required: false
+        default: ''
+      gcc_test_filter:
+        description: 'GCC test filter'
+        required: false
+        default: ''
   workflow_call:
     inputs:
       binutils_branch:
@@ -46,6 +54,10 @@ on:
         type: string
       tag:
         type: string
+      gcc_module:
+        type: string
+      gcc_test_filter:
+        type: string
 
 env:
   BINUTILS_BRANCH: ${{ inputs.binutils_branch || 'woarm64' }}
@@ -55,6 +67,10 @@ env:
   ARCH: ${{ inputs.arch || 'x86_64' }}
   PLATFORM: ${{ inputs.platform || 'w64-mingw32' }}
   CRT: ${{ inputs.crt || 'msvcrt' }}
+  
+  TAG: ${{ inputs.tag || 'test' }}
+  MODULE: ${{ inputs.gcc_module || '' }}
+  FILTER: ${{ inputs.gcc_test_filter || '' }}
 
   RUN_BOOTSTRAP: 1
   UPDATE_SOURCES: 1
@@ -65,7 +81,7 @@ jobs:
     runs-on: windows-latest
 
     env:
-      WSLENV: BINUTILS_BRANCH:GCC_BRANCH:MINGW_BRANCH:ARCH:PLATFORM:CRT:RUN_BOOTSTRAP:UPDATE_SOURCES:GITHUB_OUTPUT/p
+      WSLENV: BINUTILS_BRANCH:GCC_BRANCH:MINGW_BRANCH:ARCH:PLATFORM:CRT:TAG:MODULE:FILTER:RUN_BOOTSTRAP:UPDATE_SOURCES:GITHUB_OUTPUT/p
 
     defaults:
       run:
@@ -100,11 +116,11 @@ jobs:
       - name: Execute GCC tests
         run: |
           cd ~/work
-          .github/scripts/toolchain/execute-gcc-tests.sh ${{ inputs.tag }}
+          .github/scripts/toolchain/execute-gcc-tests.sh "${{ env.TAG }}" "${{ env.MODULE }}" "${{ env.FILTER }}"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: gcc-tests-${{ inputs.tag }}
-          path: ${{ steps.get-wsl-paths.outputs.artifact-path }}\gcc-tests-${{ inputs.tag }}
+          name: gcc-tests-${{ env.TAG }}
+          path: ${{ steps.get-wsl-paths.outputs.artifact-path }}\gcc-tests-${{ env.TAG }}
           retention-days: 30
