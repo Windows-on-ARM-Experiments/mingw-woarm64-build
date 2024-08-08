@@ -28,7 +28,7 @@ if [[ "$RUN_BOOTSTRAP" = 1 || "$RESET_SOURCES" = 1 ]]; then
 fi
 
 if [[ "$CCACHE" = 1 ]]; then
-    ccache -sv
+    $CCACHE_STATISTICS
 fi
 
 .github/scripts/binutils/build.sh
@@ -81,7 +81,7 @@ if [[ "$PLATFORM" =~ cygwin ]]; then
 fi
 
 if [[ "$CCACHE" = 1 ]]; then
-    ccache -sv
+    $CCACHE_STATISTICS
 fi
 
 echo 'Success!'
