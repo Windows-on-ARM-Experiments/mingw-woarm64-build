@@ -2,7 +2,13 @@
 
 source `dirname ${BASH_SOURCE[0]}`/../config.sh
 
-MINGW_BUILD_PATH=$BUILD_PATH/mingw
+if [[ "$LTO" = 1 ]]; then
+    MINGW_BUILD_PATH=$BUILD_PATH/mingw-lto
+    INSTALL_PATH=$TOOLCHAIN_PATH/$TARGET-lto
+else
+    MINGW_BUILD_PATH=$BUILD_PATH/mingw
+    INSTALL_PATH=$TOOLCHAIN_PATH/$TARGET
+fi
 
 mkdir -p $MINGW_BUILD_PATH
 cd $MINGW_BUILD_PATH
@@ -16,7 +22,7 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$MINGW_BUILD_PATH/Makefile" ]]; then
                 --enable-debug"
         fi
 
-        if [ "$MINGW_LTO" = 1 ] ; then
+        if [[ "$LTO" = 1 ]]; then
             CFLAGS="$CFLAGS \
                 -flto \
                 -fno-builtin"
