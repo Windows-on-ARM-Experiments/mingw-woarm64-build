@@ -113,8 +113,11 @@ env:
   TOOLCHAIN_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-toolchain.tar.gz
 
   SOURCE_PATH: ${{ github.workspace }}/code
+  BUILD_PATH: ${{ github.workspace }}/build
+  CCACHE_DIR_PATH: ${{ github.workspace }}/ccache
   ARTIFACT_PATH: ${{ github.workspace }}/artifact
 
+  CCACHE: 1
   DELETE_BUILD: 1
 
 jobs:
@@ -261,6 +264,20 @@ jobs:
         run: |
           .github/scripts/install-libraries.sh
 
+      - name: Get cache key
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
+        id: get-cache-key
+        run: |
+          echo "timestamp=$(date -u --iso-8601=seconds)" >> "$GITHUB_OUTPUT"
+
+      - name: Restore Ccache
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ env.CCACHE_DIR_PATH }}
+          key: advanced-gcc-ccache-${{ steps.get-cache-key.outputs.timestamp }}
+          restore-keys: advanced-gcc-ccache-
+
       - name: Build binutils
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
         run: |
@@ -331,6 +348,13 @@ jobs:
         run: |
           .github/scripts/toolchain/build-cygwin.sh 2
 
+      - name: Save Ccache
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && always() }}
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ env.CCACHE_DIR_PATH }}
+          key: advanced-gcc-ccache-${{ steps.get-cache-key.outputs.timestamp }}
+
       - name: Pack toolchain
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && env.PACK_TOOLCHAIN == 'true' }}
         run: |
@@ -340,7 +364,15 @@ jobs:
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && env.PACK_TOOLCHAIN != 'true' }}
         run: |
           .github/scripts/toolchain/pack-mock.sh
-          
+
+      - name: Upload build folder
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: build
+          retention-days: 1
+          path: ${{ env.BUILD_PATH }}
+
       - name: Upload artifact
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' || env.PACK_TOOLCHAIN == 'true' }}
         uses: actions/upload-artifact@v4
