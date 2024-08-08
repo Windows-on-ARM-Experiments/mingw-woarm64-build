@@ -17,6 +17,14 @@ echo "::group::Add $TARGET toolchain to ccache"
     which $BUILD-gcc || true
     which $HOST-gcc || true
     which $TARGET-gcc || true
+
+    if ccache -svv 2>&1 | grep -qv "invalid option"; then
+        CCACHE_STATISTICS="-svv"
+    elif ccache -sv 2>&1 | grep -qv "invalid option"; then
+        CCACHE_STATISTICS="-sv"
+    else
+        CCACHE_STATISTICS="-s"
+    fi
 echo "::endgroup::"
 
 # Zero statistics.

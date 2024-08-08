@@ -80,11 +80,4 @@ PATH="$PATH:$TOOLCHAIN_PATH/bin"
 if [[ "$CCACHE" = 1 ]]; then
     PATH=$CCACHE_LIB_DIR:$TOOLCHAIN_CCACHE_LIB_DIR:$PATH
     export CCACHE_DIR=$CCACHE_DIR_PATH
-    set +o pipefail
-    if ccache -sv 2>&1 | grep -q "invalid option"; then
-        CCACHE_STATISTICS="ccache -s"
-    else
-        CCACHE_STATISTICS="ccache -sv"
-    fi
-    set -o pipefail
 fi
