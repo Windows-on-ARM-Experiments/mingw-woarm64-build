@@ -1,4 +1,4 @@
-name: Build toolchain
+name: Build and test toolchain
 
 on:
   workflow_dispatch:
@@ -78,7 +78,7 @@ env:
 
 jobs:
   build-and-test-toolchain:
-    name: Build and test toolchain
+    name: Build and test ${{ inputs.tag || 'test' }} toolchain
     runs-on: windows-latest
 
     env:
