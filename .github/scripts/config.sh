@@ -23,8 +23,10 @@ if [[ "$PLATFORM" =~ (mingw|cygwin) ]]; then
 else
     CRT=${CRT:-libc}
 fi
-BUILD=x86_64-pc-linux-gnu
-HOST=x86_64-pc-linux-gnu
+
+PROCESSOR=$(uname --processor)
+BUILD=${BUILD:-$PROCESSOR-pc-linux-gnu}
+HOST=${HOST:-$PROCESSOR-pc-linux-gnu}
 TARGET=$ARCH-$PLATFORM
 TOOLCHAIN_NAME=${TOOLCHAIN_NAME:-$ARCH-$PLATFORM-$CRT}
 
