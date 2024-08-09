@@ -46,6 +46,7 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$GCC_BUILD_PATH/Makefile" ]]; then
             *mingw*)
                 TARGET_OPTIONS="$TARGET_OPTIONS \
                     --enable-languages=c \
+                    --enable-lto \
                     --disable-isl-version-check \
                     --disable-rpath \
                     --disable-win32-registry \
@@ -64,7 +65,6 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$GCC_BUILD_PATH/Makefile" ]]; then
         --disable-shared \
         --disable-bootstrap \
         --disable-multilib \
-        --disable-plugins \
         --disable-gcov \
         --disable-libatomic \
         --disable-libgomp \
@@ -91,6 +91,13 @@ if [[ "$RUN_INSTALL" = 1 ]]; then
             rm -rf $GCC_BUILD_PATH
         fi
     echo "::endgroup::"
+
+   lto_plugin_path=$(find $TOOLCHAIN_PATH/libexec/gcc/$TARGET -type f -name liblto_plugin.so | head -n 1)
+    if [ -n $lto_plugin_path ]; then
+        echo "::group::Install LTO plug-in"
+            ln -sf $lto_plugin_path $TOOLCHAIN_PATH/lib/bfd-plugins/liblto_plugin.so
+        echo "::endgroup::"
+    fi
 fi
 
 echo 'Success!'

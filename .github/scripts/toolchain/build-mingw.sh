@@ -16,6 +16,12 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$MINGW_BUILD_PATH/Makefile" ]]; then
                 --enable-debug"
         fi
 
+        if [ "$MINGW_LTO" = 1 ] ; then
+            CFLAGS="$CFLAGS \
+                -flto \
+                -fno-builtin"
+        fi
+
         case "$ARCH" in
             x86_64)
                 TARGET_OPTIONS="$TARGET_OPTIONS \
@@ -39,12 +45,12 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$MINGW_BUILD_PATH/Makefile" ]]; then
             *cygwin*)
                 TARGET_OPTIONS="$TARGET_OPTIONS \
                     --enable-w32api"
-                ;;
+            ;;
             *mingw*)
                 TARGET_OPTIONS="$TARGET_OPTIONS \
                     --enable-wildcard \
                     --disable-dependency-tracking"
-                ;;
+            ;;
         esac
 
         case "$CRT" in

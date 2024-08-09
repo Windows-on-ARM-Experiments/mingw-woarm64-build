@@ -36,6 +36,10 @@ if [[ ("$PLATFORM" =~ (mingw|cygwin) && ! ("$CRT" =~ (msvcrt|ucrt))) ||
     exit 1
 fi
 
+if [[ "$TOOLCHAIN_NAME" = aarch64-w64-mingw32-msvcrt ]]; then
+    MINGW_LTO=${MINGW_LTO:-1}
+fi
+
 SOURCE_PATH=${SOURCE_PATH:-$PWD/code}
 DOWNLOADS_PATH=${DOWNLOADS_PATH:-$PWD/downloads}
 PATCHES_PATH=${PATCHES_PATH:-$PWD/patches}
