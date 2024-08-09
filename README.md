@@ -1,33 +1,63 @@
-# Windows-on-arm64 GNU toolchain cross compiler.
+# Windows on Arm64 GNU Toolchain Cross-Compiler
 
-[![Build toolchain](https://github.com/Windows-on-ARM-Experiments/mingw-woarm64-build/actions/workflows/main.yml/badge.svg)](https://github.com/Windows-on-ARM-Experiments/mingw-woarm64-build/actions/workflows/main.yml)
+[![Build main toolchain](https://github.com/Windows-on-ARM-Experiments/mingw-woarm64-build/actions/workflows/main.yml/badge.svg)](https://github.com/Windows-on-ARM-Experiments/mingw-woarm64-build/actions/workflows/main.yml) [![Build toolchain variants](https://github.com/Windows-on-ARM-Experiments/mingw-woarm64-build/actions/workflows/advanced.yml/badge.svg)](https://github.com/Windows-on-ARM-Experiments/mingw-woarm64-build/actions/workflows/advanced.yml) [![Daily rebase](https://github.com/Windows-on-ARM-Experiments/mingw-woarm64-build/actions/workflows/rebase.yml/badge.svg)](https://github.com/Windows-on-ARM-Experiments/mingw-woarm64-build/actions/workflows/rebase.yml)
 
-This repository contains a script to build a GNU toolchain cross compiler for Windows-on-arm64. It is a **work in progress**. This allows binaries that can execute on Windows-on-arm64 to be built on Linux. I have only tested this script on Ubuntu/WSL.
+This repository contains scripts for building a `x86_64-pc-linux-gnu` host, `aarch64-w64-mingw32` target GNU toolchain cross-compiler for Windows on Arm64. It is a **work in progress** in the stage of upstreaming the necessary changes to the corresponding repositories. This toolchain contains binaries that can be executed on Windows on Arm64 to be built on Linux. The scripts are being actively tested on the default Ubuntu 22.04 GitHub Actions runners and Ubuntu 22.04 in WSL.
 
-# Known issues:
-This toolchain is not yet ready for real-world use. Problems and missing parts are listed in the [issues](https://github.com/Windows-on-ARM-Experiments/mingw-woarm64-build/issues).
+# Known Issues
 
-# Install build dependencies:
+This toolchain is not yet ready for real-world use. Problems and missing parts are listed in the [issues](https://github.com/Windows-on-ARM-Experiments/mingw-woarm64-build/issues). Please, report all issues, even if the issue is, e.g., GCC-specific, here.
 
-sudo apt-get install build-essential binutils-for-build texinfo bison flex zlib1g-dev libgmp-dev dejagnu libmpc-dev
+# Installing Build Dependencies
 
-# Build the cross-compiler
+The [main build script](https://github.com/Windows-on-ARM-Experiments/mingw-woarm64-build/blob/main/build.sh) installs its dependencies automatically when `RUN_BOOTSTRAP=1` environment variable is defined which is the default. To see what will be installed refer to [`.github/scripts/install-dependencies.sh`](https://github.com/Windows-on-ARM-Experiments/mingw-woarm64-build/blob/main/.github/scripts/install-dependencies.sh).
 
-Running build.sh will build the cross compiler. It installs it into ~/cross. The build script does multiple things.
- - Downloads dependencies
- - Clones several dependencies 
-    - modified binutils from https://github.com/Windows-on-ARM-Experiments/binutils-woarm64.git
-    - modified gcc from https://github.com/Windows-on-ARM-Experiments/gcc-woarm64
-    - modified mingw from https://github.com/Windows-on-ARM-Experiments/mingw-woarm64
- - Builds and installs: binutils, mingw, gcc and libgcc.
+# Building the Cross-Compiler
 
-# Using the cross compiler
+Running [`./build.sh`](https://github.com/Windows-on-ARM-Experiments/mingw-woarm64-build/blob/main/build.sh) on Ubuntu 22.04 in the root repository folder will build the cross-compiler and install it into `~/cross-aarch64-w64-mingw32-msvcrt` folder by default.
 
-To build a simple C file, something like this works:
+```bash
+./build.sh
 ```
-~/cross/bin/aarch64-w64-mingw32-gcc hello.c
+
+To skip dependencies bootstrapping process and fetching source code repositories for consecutive builds you can use environment variables:
+
+```bash
+RUN_BOOTSTRAP=0 UPDATE_SOURCES=0 ./build.sh
 ```
-I was able to cross compile zlib and install as follows:
+
+The build script is doing multiple things:
+
+- Installs the dependency Ubuntu packages.
+- Clones several dependency source code repositories:
+  - modified binutils from [Windows-on-ARM-Experiments/binutils-woarm64](https://github.com/Windows-on-ARM-Experiments/binutils-woarm64),
+  - modified GCC from [Windows-on-ARM-Experiments/gcc-woarm64](https://github.com/Windows-on-ARM-Experiments/gcc-woarm64),
+  - modified MinGW from [Windows-on-ARM-Experiments/mingw-woarm64](https://github.com/Windows-on-ARM-Experiments/mingw-woarm64).
+- Bootstraps the binutils and GCC sources with `gmp`, `mpfr`, `isl`, etc. dependencies.
+- Builds and installs binutils, stage 1 GCC, MinGW runtimes, GCC with libgcc, and then the entire MinGW.
+
+# Using the Cross-Compiler
+
+After building the toochain, to build a simple C source code file run:
+
+```bash
+~/cross-aarch64-w64-mingw32-msvcrt/bin/aarch64-w64-mingw32-gcc hello.c -o hello.exe
 ```
-make -f win32/Makefile.gcc DESTDIR=~/cross CC=~/cross/bin/aarch64-w64-mingw32-gcc AR=~/cross/bin/aarch64-w64-mingw32-ar RANLIB=~/cross/bin/aarch64-w64-mingw32-ranlib RC=~/cross/bin/aarch64-w64-mingw32-windres STRIP=~/cross/bin/aarch64-w64-mingw32-strip BINARY_PATH=$PREFIXDIR/bin INCLUDE_PATH=$PREFIXDIR/include LIBRARY_PATH=$PREFIXDIR/lib SHARED_MODE=1 PREFIX=aarch64-w64-mingw32- clean install
-```
+
+# Testing the Toolchain
+
+We are [testing](https://github.com/Windows-on-ARM-Experiments/mingw-woarm64-build/actions/workflows/build-and-test-toolchain.yml) the toolchain binaries with GCC test suite and against [four example projects builds](https://github.com/Windows-on-ARM-Experiments/mingw-woarm64-build/actions/workflows/advanced.yml) ([OpenSSL](https://openssl-library.org/), [FFmpeg](https://ffmpeg.org/), [OpenBLAS](https://github.com/OpenMathLib/OpenBLAS), [libjpeg-turbo](https://github.com/libjpeg-turbo/libjpeg-turbo)) and their testing suites.
+
+As of 2024/08/09 we are reaching the following level of quality with the GCC testing:
+
+| Metric                | Count  |
+|-----------------------|--------|
+| Expected passes       | 573324 |
+| Unexpected failures   | 224452 |
+| Unexpected successes  | 172    |
+| Expected failures     | 4528   |
+| Unresolved testcases  | 7363   |
+| Unsupported tests     | 10774  |
+| DejaGnu errors        | 0      |
+| Total                 | 820613 |
+| Reliability rate      | 71%    |
