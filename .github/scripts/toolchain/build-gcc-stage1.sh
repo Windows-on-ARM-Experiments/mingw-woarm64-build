@@ -45,6 +45,7 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$GCC_BUILD_PATH/Makefile" ]]; then
                 ;;
             *mingw*)
                 TARGET_OPTIONS="$TARGET_OPTIONS \
+                    --libexecdir=$TOOLCHAIN_PATH/lib \
                     --enable-languages=c \
                     --disable-isl-version-check \
                     --disable-rpath \
