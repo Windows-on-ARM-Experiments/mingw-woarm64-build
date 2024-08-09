@@ -13,6 +13,13 @@ HOST_BOARD=${5:-}
 GCC_BUILD_PATH=$BUILD_PATH/gcc
 TEST_RESULTS_PATH=$ARTIFACT_PATH/gcc-tests-$TAG
 
+# Add target binutils to path.
+if [[ -n "$MSYSTEM" && "$TEST" = 1 ]]; then
+    PATH="/opt/$TARGET/bin:$PATH"
+else
+    PATH="$TOOLCHAIN_PATH/bin:$PATH"
+fi
+
 echo "::group::Execute GCC tests"
     for FILE in `find $GCC_BUILD_PATH -path '*testsuite*.log' -or -path '*testsuite*.sum'`; do
         rm $FILE
