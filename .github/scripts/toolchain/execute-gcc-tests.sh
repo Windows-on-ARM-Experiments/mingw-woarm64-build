@@ -13,6 +13,8 @@ HOST_BOARD=${5:-}
 GCC_BUILD_PATH=$BUILD_PATH/gcc
 TEST_RESULTS_PATH=$ARTIFACT_PATH/gcc-tests-$TAG
 
+PATH="$TOOLCHAIN_PATH/bin:$PATH"
+
 echo "::group::Execute GCC tests"
     for FILE in `find $GCC_BUILD_PATH -path '*testsuite*.log' -or -path '*testsuite*.sum'`; do
         rm $FILE
