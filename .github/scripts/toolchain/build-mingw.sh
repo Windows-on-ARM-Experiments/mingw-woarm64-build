@@ -4,7 +4,7 @@ source `dirname ${BASH_SOURCE[0]}`/../config.sh
 
 if [[ "$LTO" = 1 ]]; then
     MINGW_BUILD_PATH=$BUILD_PATH/mingw-lto
-    INSTALL_PATH=$TOOLCHAIN_PATH/$TARGET-lto
+    INSTALL_PATH=$TOOLCHAIN_PATH/$TARGET/lto
 else
     MINGW_BUILD_PATH=$BUILD_PATH/mingw
     INSTALL_PATH=$TOOLCHAIN_PATH/$TARGET
@@ -71,7 +71,7 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$MINGW_BUILD_PATH/Makefile" ]]; then
         esac
 
         $SOURCE_PATH/$MINGW_VERSION/configure \
-            --prefix=$TOOLCHAIN_PATH/$TARGET \
+            --prefix=$INSTALL_PATH \
             --build=$BUILD \
             --host=$TARGET \
             $HOST_OPTIONS \

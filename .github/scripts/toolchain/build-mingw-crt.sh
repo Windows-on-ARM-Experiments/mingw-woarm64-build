@@ -4,7 +4,7 @@ source `dirname ${BASH_SOURCE[0]}`/../config.sh
 
 if [[ "$LTO" = 1 ]]; then
     MINGW_BUILD_PATH=$BUILD_PATH/mingw-crt-lto
-    INSTALL_PATH=$TOOLCHAIN_PATH/$TARGET-lto
+    INSTALL_PATH=$TOOLCHAIN_PATH/$TARGET/lto
 else
     MINGW_BUILD_PATH=$BUILD_PATH/mingw-crt
     INSTALL_PATH=$TOOLCHAIN_PATH/$TARGET
