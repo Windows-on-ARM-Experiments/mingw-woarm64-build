@@ -1,9 +1,5 @@
 Set-PSDebug -Trace 2 # echo on
 
-if ( -not $env:OPENBLAS_VERSION ) { $env:OPENBLAS_VERSION = "openblas-develop" }
-if ( -not $env:OPENSSL_VERSION ) { $env:OPENSSL_VERSION = "openssl-master" }
-if ( -not $env:LIBJPEG_TURBO_VERSION) { $env:LIBJPEG_TURBO_VERSION="libjpeg-turbo-main" }
-
 if ( -not $env:ARCH ) { $env:ARCH = "aarch64" }
 if ( -not $env:PLATFORM ) { $env:PLATFORM = "w64-mingw32" }
 if ( -not $env:CRT ) { $env:CRT = "msvcrt" }

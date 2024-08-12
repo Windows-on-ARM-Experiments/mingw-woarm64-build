@@ -5,7 +5,7 @@ Write-Output '::group::Test OpenSSL'
        '-test_ssl_new' # something about handshake failure
     )
 
-    $env:SRCTOP = "$env:SOURCE_PATH\$env:OPENSSL_VERSION"
+    $env:SRCTOP = "$env:SOURCE_PATH\openssl"
     $env:BLDTOP = "$env:OPENSSL_TESTS_PATH"
     $env:LC_ALL = "C"
 

@@ -96,7 +96,7 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$GCC_BUILD_PATH/Makefile" ]]; then
                 ;;
         esac
 
-        $SOURCE_PATH/$GCC_VERSION/configure \
+        $SOURCE_PATH/gcc/configure \
             --prefix=$TOOLCHAIN_PATH \
             --build=$BUILD \
             --host=$HOST \

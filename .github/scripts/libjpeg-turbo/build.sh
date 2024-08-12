@@ -4,7 +4,7 @@ source `dirname ${BASH_SOURCE[0]}`/../config.sh
 
 LIBJPEG_TURBO_BUILD_PATH=$BUILD_PATH/libjpeg-turbo
 
-cd $SOURCE_PATH/$LIBJPEG_TURBO_VERSION
+cd $SOURCE_PATH/libjpeg-turbo
 
 if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f $LIBJPEG_TURBO_BUILD_PATH/CMakeCache.txt ]]; then
     echo "::group::Configure libjpeg-turbo"

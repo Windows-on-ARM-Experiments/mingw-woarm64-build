@@ -63,7 +63,6 @@ on:
 env:
   GCC_REPO: Windows-on-ARM-Experiments/gcc-woarm64
   GCC_BRANCH: ${{ inputs.gcc_branch_changes || 'woarm64' }}
-  GCC_VERSION: gcc-master
 
   SOURCE_PATH: ${{ github.workspace }}/code
   ARTIFACT_PATH: ${{ github.workspace }}/artifact
@@ -110,7 +109,7 @@ jobs:
           repository: ${{ env.GCC_REPO }}
           ref: ${{ env.GCC_BRANCH }}
           sparse-checkout: 'contrib'
-          path: ${{ env.SOURCE_PATH }}/${{ env.GCC_VERSION }}
+          path: ${{ env.SOURCE_PATH }}/gcc
 
       - name: Download baseline artifact
         uses: actions/download-artifact@v4

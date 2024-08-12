@@ -13,7 +13,7 @@ mkdir -p $RESULTS_PATH
 echo "::group::Compare GCC tests results"
     for TEST_FILE in $TEST_PATH/*.sum; do
         BASELINE_FIILE=$BASELINE_PATH/`basename $TEST_FILE`
-        $SOURCE_PATH/$GCC_VERSION/contrib/compare_tests $BASELINE_FIILE $TEST_FILE > \
+        $SOURCE_PATH/gcc/contrib/compare_tests $BASELINE_FIILE $TEST_FILE > \
           $RESULTS_PATH/`basename $TEST_FILE .sum`.diff && true
     done
 echo "::endgroup::"

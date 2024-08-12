@@ -10,7 +10,7 @@ cd $OPENSSL_BUILD_PATH
 if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$OPENSSL_BUILD_PATH/Makefile" ]]; then
     echo "::group::Configure OpenSSL"
         rm -rf $OPENSSL_BUILD_PATH/*
-        $SOURCE_PATH/$OPENSSL_VERSION/Configure \
+        $SOURCE_PATH/openssl/Configure \
             --prefix=$OPENSSL_PATH \
             --cross-compile-prefix=$TOOLCHAIN_PATH/bin/$TARGET- \
             --with-zlib-include=$ZLIB_PATH/include \
