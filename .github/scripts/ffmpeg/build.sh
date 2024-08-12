@@ -17,7 +17,19 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$FFMPEG_BUILD_PATH/Makefile" ]]; then
                 --enable-debug=3"
         fi
 
-        CFLAGS="-Wno-incompatible-pointer-types -fno-builtin-sin -fno-builtin-cos" \
+        CFLAGS="-Wno-incompatible-pointer-types -fno-builtin-sin -fno-builtin-cos"
+
+        if [[ "$LTO" = 1 ]]; then
+            CFLAGS=" \
+                $CFLAGS \
+                -fno-builtin"
+            HOST_OPTIONS=" \
+                $HOST_OPTIONS \
+                --enable-lto"
+
+        fi
+
+        CFLAGS=$CFLAGS \
         $FFMPEG_SOURCE_PATH/configure \
             --prefix=$FFMPEG_PATH \
             --target-path="." \

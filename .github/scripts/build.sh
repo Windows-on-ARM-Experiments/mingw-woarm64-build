@@ -49,6 +49,9 @@ fi
 
 if [[ "$PLATFORM" =~ (mingw|cygwin) ]]; then
     .github/scripts/toolchain/build-mingw-crt.sh
+    if [[ "$MINGW_LTO" = 1 ]]; then
+        LTO=1 .github/scripts/toolchain/build-mingw-crt.sh
+    fi
 fi
 if [[ "$PLATFORM" =~ mingw ]]; then
     .github/scripts/toolchain/build-mingw-winpthreads.sh
@@ -75,6 +78,9 @@ fi
 
 if [[ "$PLATFORM" =~ (mingw|cygwin) ]]; then
     .github/scripts/toolchain/build-mingw.sh
+    if [[ "$MINGW_LTO" = 1 ]]; then
+        LTO=1 .github/scripts/toolchain/build-mingw.sh
+    fi
 fi
 if [[ "$PLATFORM" =~ cygwin ]]; then
     .github/scripts/toolchain/build-cygwin.sh 2

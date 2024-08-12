@@ -2,7 +2,13 @@
 
 source `dirname ${BASH_SOURCE[0]}`/../config.sh
 
-MINGW_BUILD_PATH=$BUILD_PATH/mingw-crt
+if [[ "$LTO" = 1 ]]; then
+    MINGW_BUILD_PATH=$BUILD_PATH/mingw-crt-lto
+    INSTALL_PATH=$TOOLCHAIN_PATH/$TARGET/lto
+else
+    MINGW_BUILD_PATH=$BUILD_PATH/mingw-crt
+    INSTALL_PATH=$TOOLCHAIN_PATH/$TARGET
+fi
 
 mkdir -p $MINGW_BUILD_PATH
 cd $MINGW_BUILD_PATH
@@ -14,6 +20,12 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$MINGW_BUILD_PATH/Makefile" ]]; then
         if [[ "$DEBUG" = 1 ]]; then
             HOST_OPTIONS="$HOST_OPTIONS \
                 --enable-debug"
+        fi
+
+        if [ "$LTO" = 1 ] ; then
+            CFLAGS="$CFLAGS \
+                -flto \
+                -fno-builtin"
         fi
 
         case "$ARCH" in
@@ -39,12 +51,12 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$MINGW_BUILD_PATH/Makefile" ]]; then
             *cygwin*)
                 TARGET_OPTIONS="$TARGET_OPTIONS \
                     --enable-w32api"
-                ;;
+            ;;
             *mingw*)
                 TARGET_OPTIONS="$TARGET_OPTIONS \
                     --enable-wildcard \
                     --disable-dependency-tracking"
-                ;;
+            ;;
         esac
 
         case "$CRT" in
@@ -59,7 +71,7 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$MINGW_BUILD_PATH/Makefile" ]]; then
         esac
 
         $SOURCE_PATH/$MINGW_VERSION/mingw-w64-crt/configure \
-            --prefix=$TOOLCHAIN_PATH/$TARGET \
+            --prefix=$INSTALL_PATH \
             --build=$BUILD \
             --host=$TARGET \
             $HOST_OPTIONS \
