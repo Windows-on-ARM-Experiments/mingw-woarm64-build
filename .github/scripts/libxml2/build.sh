@@ -4,7 +4,7 @@ source `dirname ${BASH_SOURCE[0]}`/../config.sh
 
 LIBXML2_BUILD_PATH=$BUILD_PATH/libxml2
 
-cd $SOURCE_PATH/$LIBXML2_VERSION
+cd $SOURCE_PATH/libxml2
 
 if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f $LIBXML2_BUILD_PATH/CMakeCache.txt ]]; then
     echo "::group::Configure libxml2"

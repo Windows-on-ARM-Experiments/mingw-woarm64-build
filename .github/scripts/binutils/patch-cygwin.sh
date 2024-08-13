@@ -10,7 +10,7 @@ if [[ "$STAGE" = 2 && "$PLATFORM" =~ cygwin ]]; then
 fi
 
 echo "::group::Patch Cygwin binutils"
-    cd $SOURCE_PATH/$BINUTILS_VERSION
+    cd $SOURCE_PATH/binutils
 
     if [[ "$RESET_SOURCES" = 1 ]]; then
         git reset --hard HEAD

@@ -10,7 +10,7 @@ if [[ "$STAGE" = 2 && "$PLATFORM" =~ cygwin ]]; then
 fi
 
 echo "::group::Patch Cygwin GCC"
-    cd $SOURCE_PATH/$GCC_VERSION
+    cd $SOURCE_PATH/gcc
 
     if [[ "$RESET_SOURCES" = 1 ]]; then
         git reset --hard HEAD
@@ -33,7 +33,7 @@ echo "::group::Patch Cygwin GCC"
 echo "::endgroup::"
 
 echo "::group::Patch Cygwin"
-    cd $SOURCE_PATH/$CYGWIN_VERSION
+    cd $SOURCE_PATH/cygwin
 
     if [[ "$RESET_SOURCES" = 1 ]]; then
         git reset --hard HEAD

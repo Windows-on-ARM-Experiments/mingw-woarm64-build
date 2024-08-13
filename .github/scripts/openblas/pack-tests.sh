@@ -2,7 +2,7 @@
 
 source `dirname ${BASH_SOURCE[0]}`/../config.sh
 
-OPENBLAS_BUILD_PATH=$SOURCE_PATH/$OPENBLAS_VERSION
+OPENBLAS_BUILD_PATH=$SOURCE_PATH/openblas
 
 echo "::group::Pack OpenBLAS tests"
     mkdir -p $ARTIFACT_PATH

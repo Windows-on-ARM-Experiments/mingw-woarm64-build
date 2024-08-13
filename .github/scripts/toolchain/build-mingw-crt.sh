@@ -58,7 +58,7 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$MINGW_BUILD_PATH/Makefile" ]]; then
             ;;
         esac
 
-        $SOURCE_PATH/$MINGW_VERSION/mingw-w64-crt/configure \
+        $SOURCE_PATH/mingw/mingw-w64-crt/configure \
             --prefix=$TOOLCHAIN_PATH/$TARGET \
             --build=$BUILD \
             --host=$TARGET \

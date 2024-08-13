@@ -42,7 +42,7 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$BINUTILS_BUILD_PATH/Makefile" ]]; then
                 ;;
         esac
 
-        $SOURCE_PATH/$BINUTILS_VERSION/configure \
+        $SOURCE_PATH/binutils/configure \
             --prefix=$TOOLCHAIN_PATH \
             --build=$BUILD \
             --host=$HOST \

@@ -4,7 +4,7 @@ source `dirname ${BASH_SOURCE[0]}`/../config.sh
 
 ZLIB_BUILD_PATH=$BUILD_PATH/zlib
 
-cd $SOURCE_PATH/$ZLIB_VERSION
+cd $SOURCE_PATH/zlib
 
 if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f $ZLIB_BUILD_PATH/CMakeCache.txt ]]; then
     echo "::group::Configure zblib"
