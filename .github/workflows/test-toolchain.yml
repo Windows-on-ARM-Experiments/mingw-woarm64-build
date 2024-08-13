@@ -1,68 +1,60 @@
-name: Test toolchain
+name: Test toolchain against baseline
 
 on:
   workflow_dispatch:
     inputs:
-      binutils_branch_baseline:
-        description: 'Baseline Binutils branch'
+      binutils_branches:
+        description: 'Binutils branches (baseline, changes)'
         required: false
-        default: 'upstream'
-      binutils_branch_changes:
-        description: 'Changes Binutils branch'
+        default: '["upstream", "woarm64"]'
+      gcc_branches:
+        description: 'GCC branches (baseline, changes)'
         required: false
-        default: 'upstream'
-      gcc_branch_baseline:
-        description: 'Baseline GCC branch'
+        default: '["upstream", "woarm64"]'
+      mingw_branches:
+        description: 'Baseline MinGW branch  (baseline, changes)'
         required: false
-        default: 'upstream'
-      gcc_branch_changes:
-        description: 'Changes GCC branch'
+        default: '["upstream", "woarm64"]'
+      archs:
+        description: 'Architectures to build for (baseline, changes)'
         required: false
-        default: 'upstream'
-      mingw_branch_baseline:
-        description: 'Baseline MinGW branch'
+        default: '["x86_64", "x86_64"]'
+      platforms:
+        description: 'Platforms to build for (baseline, changes)'
         required: false
-        default: 'upstream'
-      mingw_branch_changes:
-        description: 'Changes MinGW branch'
+        default: '["w64-mingw32", "w64-mingw32"]'
+      crts:
+        description: 'C runtimes to build for (baseline, changes)'
         required: false
-        default: 'upstream'
-      arch:
-        description: 'Architecture to build for'
+        default: '["msvcrt", "msvcrt"]'
+      gcc_module:
+        description: 'GCC module to test'
         required: false
-        default: 'x86_64'
-      platform:
-        description: 'Platform to build for'
+        default: ''
+      gcc_test_filter:
+        description: 'GCC test filter'
         required: false
-        default: 'w64-mingw32'
-      crt:
-        description: 'C runtime to build for'
-        required: false
-        default: 'msvcrt'
+        default: ''
   workflow_call:
     inputs:
-      binutils_branch_baseline:
+      binutils_branches:
         type: string
-      binutils_branch_changes:
+      gcc_branches:
         type: string
-      gcc_branch_baseline:
+      mingw_branches:
         type: string
-      gcc_branch_changes:
+      archs:
         type: string
-      mingw_branch_baseline:
+      platforms:
         type: string
-      mingw_branch_changes:
+      gcc_module:
         type: string
-      arch:
-        type: string
-      platform:
-        type: string
-      crt:
+      gcc_test_filter:
         type: string
 
 env:
   GCC_REPO: Windows-on-ARM-Experiments/gcc-woarm64
-  GCC_BRANCH: ${{ inputs.gcc_branch_changes || 'woarm64' }}
+  GCC_BRANCH: ${{ fromJson(inputs.gcc_branches)[1] || 'woarm64' }}
   GCC_VERSION: gcc-master
 
   SOURCE_PATH: ${{ github.workspace }}/code
@@ -73,25 +65,29 @@ jobs:
     name: Build and test baseline
     uses: ./.github/workflows/build-and-test-toolchain.yml
     with:
-      binutils_branch: ${{ inputs.binutils_branch_baseline }}
-      gcc_branch: ${{ inputs.gcc_branch_baseline || 'aarch64-patch-stage1-v11-upstream' }}
-      mingw_branch: ${{ inputs.mingw_branch_baseline }}
-      arch: ${{ inputs.arch }}
-      platform: ${{ inputs.platform }}
-      crt: ${{ inputs.crt }}
+      binutils_branch: ${{ fromJson(inputs.binutils_branches)[0] || 'upstream' }}
+      gcc_branch: ${{ fromJson(inputs.gcc_branches)[0] || 'upstream' }}
+      mingw_branch: ${{ fromJson(inputs.mingw_branches)[0] || 'upstream' }}
+      arch: ${{ fromJson(inputs.archs)[0] || 'x86_64' }}
+      platform: ${{ fromJson(inputs.platforms)[0] || 'w64-mingw32' }}
+      crt: ${{ fromJson(inputs.crts)[0] || 'msvcrt' }}
       tag: baseline
+      gcc_module: ${{ inputs.gcc_module || '' }}
+      gcc_test_filter: ${{ inputs.gcc_test_filter || '' }}
 
   build-and-test-changes:
     name: Build and test changes
     uses: ./.github/workflows/build-and-test-toolchain.yml
     with:
-      binutils_branch: ${{ inputs.binutils_branch_changes }}
-      gcc_branch: ${{ inputs.gcc_branch_changes || 'aarch64-patch-stage1-v11' }}
-      mingw_branch: ${{ inputs.mingw_branch_changes }}
-      arch: ${{ inputs.arch }}
-      platform: ${{ inputs.platform }}
-      crt: ${{ inputs.crt }}
+      binutils_branch: ${{ fromJson(inputs.binutils_branches)[1] || 'woarm64' }}
+      gcc_branch: ${{ fromJson(inputs.gcc_branches)[1] || 'woarm64' }}
+      mingw_branch: ${{ fromJson(inputs.mingw_branches)[1] || 'woarm64' }}
+      arch: ${{ fromJson(inputs.archs)[1] || 'x86_64' }}
+      platform: ${{ fromJson(inputs.platforms)[1] || 'w64-mingw32' }}
+      crt: ${{ fromJson(inputs.crts)[1] || 'msvcrt' }}
       tag: changes
+      gcc_module: ${{ inputs.gcc_module || '' }}
+      gcc_test_filter: ${{ inputs.gcc_test_filter || '' }}
 
   compare-test-results:
     name: Compare test results
@@ -127,6 +123,16 @@ jobs:
       - name: Compare results
         run: |
           .github/scripts/toolchain/compare-gcc-results.sh baseline changes
+
+      - name: Create summary
+        run: |
+          source .github/scripts/config.sh
+          RESULTS_PATH=$ARTIFACT_PATH/gcc-tests-results
+          for FILE in $RESULTS_PATH/*.diff; do
+            echo "$FILE:\n" >> $GITHUB_STEP_SUMMARY
+            cat $FILE >> $GITHUB_STEP_SUMMARY
+            echo "\n\n" >> $GITHUB_STEP_SUMMARY
+          done
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
