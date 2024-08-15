@@ -6,44 +6,65 @@ on:
 
 jobs:
 
-  build-patch-series2-1:
+  build-patch-series3-1:
     uses: ./.github/workflows/build-only.yml
     with:
       binutils_branch: 'upstream'
-      gcc_branch: '38f557b8898c980cd0e019e02dcc1167eb4362af'
+      gcc_branch: 'fa1bc9b083bcb3a974aab25ce7f91346c1ac0996'
       mingw_branch: 'aarch64-patch-stage2-v1'
 
-  build-patch-series2-2:
+  build-patch-series3-2:
     uses: ./.github/workflows/build-only.yml
     with:
       binutils_branch: 'upstream'
-      gcc_branch: '97403fd6696358991d6a204d33646e85dbcb5a1c'
+      gcc_branch: '060640d6c4a3f8b25b9f2b51788e854ee3d56ad8'
       mingw_branch: 'aarch64-patch-stage2-v1'
 
-  build-patch-series2-3:
+  build-patch-series3-3:
     uses: ./.github/workflows/build-only.yml
     with:
       binutils_branch: 'upstream'
-      gcc_branch: 'e0628dea3f79846134bbd11eebc8487652c21643'
+      gcc_branch: 'aa4c1f2cf7d3b2631e7c831ab7bd0188baf3733e'
       mingw_branch: 'aarch64-patch-stage2-v1'
 
-  build-patch-series2-4:
+  build-patch-series3-4:
     uses: ./.github/workflows/build-only.yml
     with:
       binutils_branch: 'upstream'
-      gcc_branch: '02e18f4ab3794c8a35ec4b1836805e8749f9768a'
+      gcc_branch: '72b4c2c93ca459b91241a799f57326f315a18e12'
       mingw_branch: 'aarch64-patch-stage2-v1'
 
-  build-patch-series2-5:
+  build-patch-series3-5:
     uses: ./.github/workflows/build-only.yml
     with:
       binutils_branch: 'upstream'
-      gcc_branch: '372a7e5c6896744a6bded67a41a3a635fd7b1a2f'
+      gcc_branch: '87b352a8d6f747ef88f29c0e2ec513939541a62b'
       mingw_branch: 'aarch64-patch-stage2-v1'
 
-  build-patch-series2-6:
+  build-patch-series3-6:
     uses: ./.github/workflows/build-only.yml
     with:
       binutils_branch: 'upstream'
-      gcc_branch: '18135563e5ed92fe80c6567c8873a2e2ab94eaf5'
+      gcc_branch: 'fef63c38ac34dc0b1e3a91474f7469349b9d6d82'
+      mingw_branch: 'aarch64-patch-stage2-v1'
+
+  build-patch-series3-7:
+    uses: ./.github/workflows/build-only.yml
+    with:
+      binutils_branch: 'upstream'
+      gcc_branch: '3f48f1bc20cf4d4ee6018fa4f175a0222303ffeb'
+      mingw_branch: 'aarch64-patch-stage2-v1'
+
+  build-patch-series3-8:
+    uses: ./.github/workflows/build-only.yml
+    with:
+      binutils_branch: 'upstream'
+      gcc_branch: '9afc8dda2c241e49fd6e900471128fb4c4440ad7'
+      mingw_branch: 'aarch64-patch-stage2-v1'
+
+  build-patch-series3-9:
+    uses: ./.github/workflows/build-only.yml
+    with:
+      binutils_branch: 'upstream'
+      gcc_branch: '8509de4ac3f2c724516277aa95ba248610d61745'
       mingw_branch: 'aarch64-patch-stage2-v1'
