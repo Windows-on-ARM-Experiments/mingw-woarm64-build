@@ -27,10 +27,10 @@ echo "::group::Execute GCC tests"
         MAKE_TARGET="check-$MODULE"
     fi
     if [[ -n "$TARGET_BOARD" ]]; then
-        TARGET_BOARD="--target-board $TARGET_BOARD"
+        TARGET_BOARD="--target_board=$TARGET_BOARD"
     fi
     if [[ -n "$HOST_BOARD" ]]; then
-        HOST_BOARD="--host-board $HOST_BOARD"
+        HOST_BOARD="--host_board=$HOST_BOARD"
     fi
     make $BUILD_MAKE_OPTIONS -k $MAKE_TARGET \
         RUNTESTFLAGS="$FILTER $HOST_BOARD $TARGET_BOARD" \
