@@ -102,6 +102,11 @@ jobs:
           additional-packages:
             git
 
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
       - name: Checkout repository
         run: |
           cd ~
@@ -154,6 +159,10 @@ jobs:
         shell: powershell
         run: |
           cat ${{ steps.get-wsl-paths.outputs.artifact-path }}\gcc-tests-${{ env.TAG }}\summary.txt >> $env:GITHUB_STEP_SUMMARY
+
+      - name: Group failing tests by filepath of their source files
+        run: |
+          python .github/scripts/toolchain/group-gcc-results-by-source.py $ARTIFACT_PATH/gcc-tests-${{ env.TAG }} >> $ARTIFACT_PATH/gcc-tests-${{ env.TAG }}/grouped-failing-by-source.txt
 
       - name: Upload build folder
         if: failure()
