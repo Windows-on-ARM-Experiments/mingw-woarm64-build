@@ -100,10 +100,10 @@ def print_path_structure(log_messages: LOG_MESSAGES_TYPE) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Aggregate test results from log files")
-    parser.add_argument('DIR', type=str, help="Directory containing log files")
+    parser.add_argument('--dir', required=True, type=str, help="Directory containing log files")
     args = parser.parse_args()
 
-    log_messages = read_logs(args.DIR)
+    log_messages = read_logs(args.dir)
     # We don't care about tests that are passing, remove them
     for log_type in PASS_LOG_TYPES:
         log_messages.pop(log_type)
