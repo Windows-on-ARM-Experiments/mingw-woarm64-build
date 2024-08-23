@@ -5,15 +5,16 @@ import dataclasses
 import argparse
 
 
-# PASS = expected passes
-# FAIL = unexpected failures
-# XPASS = unexpected successes
-# XFAIL = expected failures
-# UNRESOLVED = unresolved testcases
-# UNSUPPORTED = unsupported tests
-PASS_LOG_TYPES = ["PASS", "XFAIL", "UNSUPPORTED"]
+# Tests which ends with one of these results are considered as failure:
+#   FAIL = unexpected failures
+#   XPASS = unexpected successes
+#   UNRESOLVED = unresolved testcases
+# Beside those, tests can also result in the following pass results:
+#   PASS = expected passes
+#   XFAIL = expected failures
+#   UNSUPPORTED = unsupported tests
 FAIL_LOG_TYPES = ["FAIL", "XPASS", "UNRESOLVED"]
-LOG_TYPES = PASS_LOG_TYPES + FAIL_LOG_TYPES
+PASS_LOG_TYPES = ["PASS", "XFAIL", "UNSUPPORTED"]
 
 LOG_MESSAGES_TYPE = dict[str, list[list[str]]]
 
@@ -34,17 +35,19 @@ def read_logs(log_dir: str) -> LOG_MESSAGES_TYPE:
                     continue
 
                 log_paragraph.append(line)
-                for log_type in LOG_TYPES:
-                    if line.startswith(log_type):
-                        log_messages[log_type].append(log_paragraph)
-                        log_paragraph = []
-                        break
 
-    print(f"Finished reading all log files.")
+                log_type_candidate = line.split(":")[0]
+                if log_type_candidate in FAIL_LOG_TYPES:
+                    # Store log messages from tests that failed
+                    log_messages[log_type_candidate].append(log_paragraph)
+                    log_paragraph = []
+                elif log_type_candidate in PASS_LOG_TYPES:
+                    # Ignore log messages from tests that passed
+                    log_paragraph = []
+
+    print("Finished reading all log files.")
     print()
-    
-    total_test_count = sum(len(messages) for messages in log_messages.values())
-    print(f"Found logs from {total_test_count} tests. Number of tests per result type:")
+    print("Number of found tests for each result type:")
     for log_type, messages in log_messages.items():
         print(f"  {log_type: <12} {len(messages)}")
     print()
@@ -56,7 +59,7 @@ def print_path_structure(log_messages: LOG_MESSAGES_TYPE) -> None:
     def parse_filepath(message: list[str]) -> list[str]:
         # We parse here the last line of each log message, example:
         # FAIL: g++.dg/contracts/contracts-pre10.C   20 blank line(s) in output"""
-        assert any(message[-1].startswith(log_type) for log_type in LOG_TYPES)
+        assert any(message[-1].startswith(log_type) for log_type in FAIL_LOG_TYPES)
         filepath = message[-1].split(" ")[1]
         # The path might or but don't have to start with tool name split by dot
         if "." in filepath and "/" not in filepath.split(".", 1)[0]:
@@ -104,10 +107,6 @@ def main() -> None:
     args = parser.parse_args()
 
     log_messages = read_logs(args.dir)
-    # We don't care about tests that are passing, remove them
-    for log_type in PASS_LOG_TYPES:
-        log_messages.pop(log_type)
-
     print_path_structure(log_messages)
 
 
