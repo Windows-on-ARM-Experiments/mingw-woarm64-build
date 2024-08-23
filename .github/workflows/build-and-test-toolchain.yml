@@ -102,11 +102,6 @@ jobs:
           additional-packages:
             git
 
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.12'
-
       - name: Checkout repository
         run: |
           cd ~
@@ -164,7 +159,7 @@ jobs:
         run: |
           cd ~/work
           source .github/scripts/config.sh
-          python .github/scripts/toolchain/group-gcc-test-failures.py --dir $ARTIFACT_PATH/gcc-tests-${{ env.TAG }} >> \
+          python3 .github/scripts/toolchain/group-gcc-test-failures.py --dir $ARTIFACT_PATH/gcc-tests-${{ env.TAG }} >> \
             $ARTIFACT_PATH/gcc-tests-${{ env.TAG }}/grouped-test-failures.txt
 
       - name: Upload build folder
