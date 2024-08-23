@@ -162,7 +162,10 @@ jobs:
 
       - name: Group failing tests by filepath of their source files
         run: |
-          python .github/scripts/toolchain/group-gcc-results-by-source.py $ARTIFACT_PATH/gcc-tests-${{ env.TAG }} >> $ARTIFACT_PATH/gcc-tests-${{ env.TAG }}/grouped-failing-by-source.txt
+          cd ~/work
+          source .github/scripts/config.sh
+          python .github/scripts/toolchain/group-gcc-results-by-source.py $ARTIFACT_PATH/gcc-tests-${{ env.TAG }} >> \
+            $ARTIFACT_PATH/gcc-tests-${{ env.TAG }}/grouped-failing-by-source.txt
 
       - name: Upload build folder
         if: failure()
