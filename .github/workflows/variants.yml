@@ -1,0 +1,95 @@
+name: Build toolchain variants
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      binutils_branch:
+        description: 'Binutils branch to build'
+        required: false
+        default: 'woarm64'
+      gcc_branch:
+        description: 'GCC branch to build'
+        required: false
+        default: 'woarm64'
+      mingw_branch:
+        description: 'MinGW branch to build'
+        required: false
+        default: 'woarm64'
+      cygwin_branch:
+        description: 'Cygwin branch to build'
+        required: false
+        default: 'main'
+      cygwin_packages_branch:
+        description: 'Cygwin packages branch to build'
+        required: false
+        default: 'main'
+      cocom_branch:
+        description: 'COCOM branch to build'
+        required: false
+        default: 'master'
+      openblas_branch:
+        description: 'OpenBLAS branch to test'
+        required: false
+        default: 'v0.3.26'
+      openssl_branch:
+        description: 'OpenSSL branch to test'
+        required: false
+        default: 'fix-tests'
+  workflow_call:
+    inputs:
+      binutils_branch:
+        type: string
+      gcc_branch:
+        type: string
+      mingw_branch:
+        type: string
+      cygwin_branch:
+        type: string
+      cygwin_packages_branch:
+        type: string
+      cocom_branch:
+        type: string
+      openblas_branch:
+        type: string
+      openssl_branch:
+        type: string
+
+jobs:
+  build-toolchain-variants:
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [aarch64, x86_64]
+        platform: [w64-mingw32, pc-linux-gnu, pc-cygwin]
+        crt: [msvcrt, ucrt, libc]
+        exclude:
+          - platform: w64-mingw32
+            crt: libc
+          - platform: pc-linux-gnu
+            crt: msvcrt
+          - platform: pc-linux-gnu
+            crt: ucrt
+          - platform: pc-cygwin
+            crt: ucrt
+          - platform: pc-cygwin
+            crt: libc
+          - platform: pc-cygwin
+            arch: aarch64
+
+    uses: ./.github/workflows/advanced.yml
+    with:
+      arch: ${{ matrix.arch }}
+      platform: ${{ matrix.platform }}
+      crt: ${{ matrix.crt }}
+      binutils_branch: ${{ inputs.binutils_branch || 'woarm64' }}
+      gcc_branch: ${{ inputs.gcc_branch || 'woarm64' }}
+      mingw_branch: ${{ inputs.mingw_branch || 'woarm64' }}
+      cygwin_branch: ${{ inputs.cygwin_branch || 'main' }}
+      cygwin_packages_branch: ${{ inputs.cygwin_packages_branch || 'main' }}
+      cocom_branch: ${{ inputs.cocom_branch || 'master' }}
+      openblas_branch: ${{ inputs.openblas_branch || 'v0.3.26' }}
+      openssl_branch: ${{ inputs.openssl_branch || 'fix-tests' }}
