@@ -20,6 +20,14 @@ LOG_MESSAGES_TYPE = dict[str, list[list[str]]]
 
 
 def read_logs(log_dir: str) -> LOG_MESSAGES_TYPE:
+    """Parses log files into individual log messages
+
+    Warning: This function correctly parses lines with test result tokens (like FAIL:) into
+    individual messages but other log lines might be assigned to the wrong message. It is enough for
+    the current purpose of this script as it uses only line with tokens but it might need to be
+    improved for other use cases. For more details, see
+    https://github.com/Windows-on-ARM-Experiments/mingw-woarm64-build/pull/184
+    """
     log_messages = collections.defaultdict(list)
     for log_file in glob.glob(os.path.join(log_dir, "*.log")):
         print(f"Reading {log_file} ...")
