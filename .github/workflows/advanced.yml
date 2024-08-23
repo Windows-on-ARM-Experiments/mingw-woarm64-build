@@ -1,46 +1,14 @@
-name: Build toolchain variants
+name: Build toolchain variant
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-  workflow_dispatch:
-    inputs:
-      binutils_branch:
-        description: 'Binutils branch to build'
-        required: false
-        default: 'woarm64'
-      gcc_branch:
-        description: 'GCC branch to build'
-        required: false
-        default: 'woarm64'
-      mingw_branch:
-        description: 'MinGW branch to build'
-        required: false
-        default: 'woarm64'
-      cygwin_branch:
-        description: 'Cygwin branch to build'
-        required: false
-        default: 'main'
-      cygwin_packages_branch:
-        description: 'Cygwin packages branch to build'
-        required: false
-        default: 'main'
-      cocom_branch:
-        description: 'COCOM branch to build'
-        required: false
-        default: 'master'
-      openblas_branch:
-        description: 'OpenBLAS branch to test'
-        required: false
-        default: 'develop'
-      openssl_branch:
-        description: 'OpenSSL branch to test'
-        required: false
-        default: 'fix-tests'
   workflow_call:
     inputs:
+      arch:
+        type: string
+      platform:
+        type: string
+      crt:
+        type: string
       binutils_branch:
         type: string
       gcc_branch:
@@ -53,52 +21,66 @@ on:
         type: string
       cocom_branch:
         type: string
-    outputs:
-      toolchain-package-name:
-        value: ${{ jobs.build-toolchain.outputs.toolchain-package-name }}
-      toolchain-cache-key:
-        value: ${{ jobs.build-toolchain.outputs.toolchain-cache-key }}
+      openblas_branch:
+        type: string
+      openssl_branch:
+        type: string
 
 env:
+  ARCH: ${{ inputs.arch }}
+  PLATFORM: ${{ inputs.platform }}
+  CRT: ${{ inputs.crt }}
+
   BINUTILS_REPO: Windows-on-ARM-Experiments/binutils-woarm64
-  BINUTILS_BRANCH: ${{ inputs.binutils_branch || 'woarm64' }}
+  BINUTILS_BRANCH: ${{ inputs.binutils_branch }}
 
   GCC_REPO: Windows-on-ARM-Experiments/gcc-woarm64
-  GCC_BRANCH: ${{ inputs.gcc_branch || 'woarm64' }}
+  GCC_BRANCH: ${{ inputs.gcc_branch }}
 
   MINGW_REPO: Windows-on-ARM-Experiments/mingw-woarm64
-  MINGW_BRANCH: ${{ inputs.mingw_branch || 'woarm64' }}
+  MINGW_BRANCH: ${{ inputs.mingw_branch }}
 
   CYGWIN_REPO: Windows-on-ARM-Experiments/newlib-cygwin
-  CYGWIN_BRANCH: ${{ inputs.cygwin_branch || 'main' }}
+  CYGWIN_BRANCH: ${{ inputs.cygwin_branch }}
 
   CYGWIN_PACKAGES_REPO: Windows-on-ARM-Experiments/cygwin-packages
-  CYGWIN_PACKAGES_BRANCH: ${{ inputs.cygwin_packages_branch || 'main' }}
+  CYGWIN_PACKAGES_BRANCH: ${{ inputs.cygwin_packages_branch }}
 
   COCOM_REPO: https://git.code.sf.net/p/cocom/git
-  COCOM_BRANCH: ${{ inputs.cocom_branch || 'master' }}
+  COCOM_BRANCH: ${{ inputs.cocom_branch }}
 
   OPENBLAS_REPO: OpenMathLib/OpenBLAS.git
-  OPENBLAS_BRANCH: ${{ inputs.openblas_branch || 'develop' }}
+  OPENBLAS_BRANCH: ${{ inputs.openblas_branch }}
+  OPENBLAS_TESTS_PATH: ${{ github.workspace }}/openblas-tests
 
   ZLIB_REPO: madler/zlib
   ZLIB_BRANCH: 'develop'
+  ZLIB_PATH: ${{ github.workspace }}/zlib
 
   LIBXML2_REPO: GNOME/libxml2
   LIBXML2_BRANCH: 'master'
+  LIBXML2_PATH: ${{ github.workspace }}/libxml2
 
   OPENSSL_REPO: Windows-on-ARM-Experiments/openssl
-  OPENSSL_BRANCH: ${{ inputs.openssl_branch || 'fix-tests' }}
+  OPENSSL_BRANCH: ${{ inputs.openssl_branch }}
+  OPENSSL_PATH: ${{ github.workspace }}/openssl
+  OPENSSL_TESTS_PATH: ${{ github.workspace }}/openssl-tests
 
   LIBJPEG_TURBO_REPO: libjpeg-turbo/libjpeg-turbo
   LIBJPEG_TURBO_BRANCH: 3.0.2
+  LIBJPEG_TURBO_PATH: ${{ github.workspace }}/libjpeg-turbo
+  LIBJPEG_TURBO_TESTS_PATH: ${{ github.workspace }}/libjpeg-turbo-tests
 
   FFMPEG_REPO: FFmpeg/FFmpeg
   FFMPEG_BRANCH: release/6.1
+  FFMPEG_PATH: ${{ github.workspace }}/ffmpeg
+  FFMPEG_TESTS_PATH: ${{ github.workspace }}/ffmpeg-tests
 
   TOOLCHAIN_PATH: ${{ github.workspace }}/cross
-  TOOLCHAIN_NAME: aarch64-w64-mingw32-msvcrt
-  TOOLCHAIN_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-toolchain.tar.gz
+  TOOLCHAIN_NAME: ${{ inputs.arch }}-${{ inputs.platform }}-${{ inputs.crt }}
+  TOOLCHAIN_PACKAGE_NAME: ${{ inputs.arch }}-${{ inputs.platform }}-${{ inputs.crt }}-toolchain.tar.gz
+
+  TESTS_PACKAGE_NAME: ${{ inputs.arch }}-${{ inputs.crt }}-tests.tar.gz
 
   SOURCE_PATH: ${{ github.workspace }}/code
   BUILD_PATH: ${{ github.workspace }}/build
@@ -108,38 +90,11 @@ env:
   CCACHE: 1
   DELETE_BUILD: 1
 
+  TEST_TOOLCHAIN: ${{ inputs.arch == 'aarch64' && inputs.platform == 'w64-mingw32' && inputs.crt == 'msvcrt' }}
+
 jobs:
   build-toolchain:
     runs-on: ubuntu-latest
-
-    strategy:
-      fail-fast: false
-      matrix:
-        arch: [aarch64, x86_64]
-        platform: [w64-mingw32, pc-linux-gnu, pc-cygwin]
-        crt: [msvcrt, ucrt, libc]
-        exclude:
-          - platform: w64-mingw32
-            crt: libc
-          - platform: pc-linux-gnu
-            crt: msvcrt
-          - platform: pc-linux-gnu
-            crt: ucrt
-          - platform: pc-cygwin
-            crt: ucrt
-          - platform: pc-cygwin
-            crt: libc
-          - platform: pc-cygwin
-            arch: aarch64
-
-    env:
-      ARCH: ${{ matrix.arch }}
-      PLATFORM: ${{ matrix.platform }}
-      CRT: ${{ matrix.crt }}
-      PACK_TOOLCHAIN: ${{ matrix.arch == 'aarch64' && matrix.platform == 'w64-mingw32' && matrix.crt == 'msvcrt' }}
-      TOOLCHAIN_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}
-      TOOLCHAIN_PACKAGE_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}-toolchain.tar.gz
-      TESTS_PACKAGE_NAME: ${{ matrix.arch }}-${{ matrix.crt }}-tests.tar.gz
 
     steps:
       - name: Checkout repository
@@ -202,7 +157,7 @@ jobs:
           path: ${{ env.SOURCE_PATH }}/gcc
 
       - name: Checkout MinGW
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform != 'pc-linux-gnu' }}
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && inputs.platform != 'pc-linux-gnu' }}
         uses: actions/checkout@v4
         with:
           repository: ${{ env.MINGW_REPO }}
@@ -210,7 +165,7 @@ jobs:
           path: ${{ env.SOURCE_PATH }}/mingw
 
       - name: Checkout Cygwin
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform == 'pc-cygwin' }}
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && inputs.platform == 'pc-cygwin' }}
         uses: actions/checkout@v4
         with:
           repository: ${{ env.CYGWIN_REPO }}
@@ -218,7 +173,7 @@ jobs:
           path: ${{ env.SOURCE_PATH }}/cygwin
 
       - name: Checkout Cygwin packages
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform == 'pc-cygwin' }}
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && inputs.platform == 'pc-cygwin' }}
         uses: actions/checkout@v4
         with:
           repository: ${{ env.CYGWIN_PACKAGES_REPO }}
@@ -227,7 +182,7 @@ jobs:
           path: ${{ env.SOURCE_PATH }}/cygwin-packages
 
       - name: Checkout COCOM
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform == 'pc-cygwin' }}
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && inputs.platform == 'pc-cygwin' }}
         run: |
           cd ${{ env.SOURCE_PATH }}
           git clone ${{ env.COCOM_REPO }} -b ${{ env.COCOM_BRANCH }} cocom
@@ -238,12 +193,12 @@ jobs:
           .github/scripts/install-dependencies.sh
 
       - name: Patch binutils stage1
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform == 'pc-cygwin' }}
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && inputs.platform == 'pc-cygwin' }}
         run: |
           .github/scripts/binutils/patch-cygwin.sh 1
 
       - name: Patch toolchain stage1
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform == 'pc-cygwin' }}
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && inputs.platform == 'pc-cygwin' }}
         run: |
           .github/scripts/toolchain/patch-cygwin.sh 1
 
@@ -272,47 +227,47 @@ jobs:
           .github/scripts/binutils/build.sh
 
       - name: Install cross headers and libraries
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform == 'pc-linux-gnu' }}
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && inputs.platform == 'pc-linux-gnu' }}
         run: |
           .github/scripts/toolchain/install-cross-headers-libs.sh
 
       - name: Build MinGW headers
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform != 'pc-linux-gnu' }}
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && inputs.platform != 'pc-linux-gnu' }}
         run: |
           .github/scripts/toolchain/build-mingw-headers.sh
 
       - name: Install Cygwin headers
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform == 'pc-cygwin' }}
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && inputs.platform == 'pc-cygwin' }}
         run: |
           .github/scripts/toolchain/install-cygwin-headers.sh
 
       - name: Build GCC stage1
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform != 'pc-linux-gnu' }}
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && inputs.platform != 'pc-linux-gnu' }}
         run: |
           .github/scripts/toolchain/build-gcc-stage1.sh
 
       - name: Build MinGW CRT
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform != 'pc-linux-gnu' }}
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && inputs.platform != 'pc-linux-gnu' }}
         run: |
           .github/scripts/toolchain/build-mingw-crt.sh
 
       - name: Build MinGW winpthreads
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform == 'w64-mingw32' }}
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && inputs.platform == 'w64-mingw32' }}
         run: |
           .github/scripts/toolchain/build-mingw-winpthreads.sh
   
       - name: Build COCOM
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform == 'pc-cygwin' }}
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && inputs.platform == 'pc-cygwin' }}
         run: |
           .github/scripts/toolchain/build-cocom.sh
 
       - name: Build Cygwin stage1
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform == 'pc-cygwin' }}
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && inputs.platform == 'pc-cygwin' }}
         run: |
           .github/scripts/toolchain/build-cygwin.sh 1
 
       - name: Patch toolchain stage2
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform == 'pc-cygwin' }}
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && inputs.platform == 'pc-cygwin' }}
         run: |
           .github/scripts/toolchain/patch-cygwin.sh 2
 
@@ -327,12 +282,12 @@ jobs:
           .github/scripts/toolchain/build-gcc.sh
 
       - name: Build MinGW
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform != 'pc-linux-gnu' }}
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && inputs.platform != 'pc-linux-gnu' }}
         run: |
           .github/scripts/toolchain/build-mingw.sh
 
       - name: Build Cygwin stage2
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform == 'pc-cygwin' }}
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && inputs.platform == 'pc-cygwin' }}
         run: |
           .github/scripts/toolchain/build-cygwin.sh 2
 
@@ -344,12 +299,12 @@ jobs:
           key: advanced-gcc-ccache-${{ steps.get-cache-key.outputs.timestamp }}
 
       - name: Pack toolchain
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && env.PACK_TOOLCHAIN == 'true' }}
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && env.TEST_TOOLCHAIN == 'true' }}
         run: |
           .github/scripts/toolchain/pack.sh
 
       - name: Pack toolchain mock
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && env.PACK_TOOLCHAIN != 'true' }}
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && env.TEST_TOOLCHAIN != 'true' }}
         run: |
           .github/scripts/toolchain/pack-mock.sh
 
@@ -362,7 +317,7 @@ jobs:
           path: ${{ env.BUILD_PATH }}
 
       - name: Upload artifact
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' || env.PACK_TOOLCHAIN == 'true' }}
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' || env.TEST_TOOLCHAIN == 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.TOOLCHAIN_PACKAGE_NAME }}
@@ -370,15 +325,13 @@ jobs:
           retention-days: 3
 
     outputs:
-      toolchain-package-name: ${{ env.PACK_TOOLCHAIN == 'true' && env.TOOLCHAIN_PACKAGE_NAME || '' }}
-      toolchain-cache-key: ${{ env.PACK_TOOLCHAIN == 'true' && format('{0}-{1}-{2}-{3}-{4}-{5}-{6}', env.TOOLCHAIN_NAME, steps.workflow-sha.outputs.sha, steps.binutils-sha.outputs.sha, steps.gcc-sha.outputs.sha, steps.mingw-sha.outputs.sha, steps.binutils-scripts-sha.outputs.sha, steps.toolchain-scripts-sha.outputs.sha) || '' }}
+      toolchain-cache-key: ${{ env.TEST_TOOLCHAIN == 'true' && format('{0}-{1}-{2}-{3}-{4}-{5}-{6}', env.TOOLCHAIN_NAME, steps.workflow-sha.outputs.sha, steps.binutils-sha.outputs.sha, steps.gcc-sha.outputs.sha, steps.mingw-sha.outputs.sha, steps.binutils-scripts-sha.outputs.sha, steps.toolchain-scripts-sha.outputs.sha) || '' }}
+      test-toolchain: ${{ env.TEST_TOOLCHAIN == 'true' }}
 
-  build-aarch64-tests:
+  build-tests:
     needs: [build-toolchain]
+    if: ${{ needs.build-toolchain.outputs.test-toolchain == 'true' }}
     runs-on: ubuntu-latest
-
-    env:
-      TESTS_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-tests.tar.gz
 
     steps:
       - name: Checkout repository
@@ -397,7 +350,7 @@ jobs:
         run: |
           .github/scripts/toolchain/unpack.sh
   
-      - name: Build aarch64-tests
+      - name: Build ${{ env.TOOLCHAIN_NAME }} tests
         run: |
           .github/scripts/tests/build.sh
 
@@ -405,19 +358,17 @@ jobs:
         run: |
           tar czf ${{ env.TESTS_PACKAGE_NAME }} -C tests/build/bin/ .
 
-      - name: Upload build-aarch64-mingw-tests
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.TESTS_PACKAGE_NAME }}
           path: ${{ env.TESTS_PACKAGE_NAME }}
           retention-days: 3
 
-  execute-aarch64-tests:
-    needs: [build-aarch64-tests]
+  execute-tests:
+    needs: [build-toolchain, build-tests]
+    if: ${{ needs.build-toolchain.outputs.test-toolchain == 'true' }}
     runs-on: [Windows, GCC, ARM64]
-
-    env:
-      TESTS_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-tests.tar.gz
 
     steps:
       - name: Checkout repository
@@ -431,7 +382,7 @@ jobs:
           name: ${{ env.TESTS_PACKAGE_NAME }}
           path: ${{ env.ARTIFACT_PATH }}
 
-      - name: Unpack tests
+      - name: Unpack ${{ env.TOOLCHAIN_NAME }} tests
         run: |
           tar xzf ${{ env.ARTIFACT_PATH }}\${{ env.TESTS_PACKAGE_NAME }} -C ${{ env.ARTIFACT_PATH }}
 
@@ -441,6 +392,7 @@ jobs:
 
   build-openblas:
     needs: [build-toolchain]
+    if: ${{ needs.build-toolchain.outputs.test-toolchain == 'true' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -483,11 +435,9 @@ jobs:
           retention-days: 3
         
   execute-openblas-tests:
-    needs: [build-openblas]
+    needs: [build-toolchain, build-openblas]
+    if: ${{ needs.build-toolchain.outputs.test-toolchain == 'true' }}
     runs-on: [Windows, GCC, ARM64]
-
-    env:
-      OPENBLAS_TESTS_PATH: ${{ github.workspace }}/openblas-tests
 
     steps:
       - name: Checkout repository
@@ -512,10 +462,8 @@ jobs:
   
   build-zlib:
     needs: [build-toolchain]
+    if: ${{ needs.build-toolchain.outputs.test-toolchain == 'true' }}
     runs-on: ubuntu-latest 
-
-    env:
-      ZLIB_PATH: ${{ github.workspace }}/zlib
 
     steps:
       - name: Checkout repository
@@ -558,10 +506,8 @@ jobs:
 
   build-libxml2:
     needs: [build-toolchain, build-zlib]
+    if: ${{ needs.build-toolchain.outputs.test-toolchain == 'true' }}
     runs-on: ubuntu-latest
-
-    env:
-      ZLIB_PATH: ${{ github.workspace }}/zlib
 
     steps:
       - name: Checkout repository
@@ -614,11 +560,8 @@ jobs:
 
   build-openssl:
     needs: [build-toolchain, build-zlib]
+    if: ${{ needs.build-toolchain.outputs.test-toolchain == 'true' }}
     runs-on: ubuntu-latest
-
-    env:
-      ZLIB_PATH: ${{ github.workspace }}/zlib
-      OPENSSL_PATH: ${{ github.workspace }}/openssl
 
     steps:
       - name: Checkout repository
@@ -685,12 +628,9 @@ jobs:
           retention-days: 3
 
   execute-openssl-tests:
-    needs: [build-openssl]
+    needs: [build-toolchain, build-openssl]
+    if: ${{ needs.build-toolchain.outputs.test-toolchain == 'true' }}
     runs-on: [Windows, GCC, ARM64]
-
-    env:
-      ZLIB_PATH: ${{ github.workspace }}/zlib
-      OPENSSL_TESTS_PATH: ${{ github.workspace }}/openssl-tests
 
     steps:
       - name: Checkout repository
@@ -731,10 +671,8 @@ jobs:
 
   build-libjpeg-turbo:
     needs: [build-toolchain]
+    if: ${{ needs.build-toolchain.outputs.test-toolchain == 'true' }}
     runs-on: ubuntu-latest
-
-    env:
-      LIBJPEG_TURBO_PATH: ${{ github.workspace }}/libjpeg-turbo
 
     steps:
       - name: Checkout repository
@@ -791,11 +729,9 @@ jobs:
           retention-days: 3
 
   execute-libpeg-turbo-tests:
-    needs: [build-libjpeg-turbo]
+    needs: [build-toolchain, build-libjpeg-turbo]
+    if: ${{ needs.build-toolchain.outputs.test-toolchain == 'true' }}
     runs-on: [Windows, GCC, ARM64]
-
-    env:
-      LIBJPEG_TURBO_TESTS_PATH: ${{ github.workspace }}/libjpeg-turbo-tests
 
     steps:
       - name: Checkout repository
@@ -819,10 +755,8 @@ jobs:
 
   build-ffmpeg:
     needs: [build-toolchain]
+    if: ${{ needs.build-toolchain.outputs.test-toolchain == 'true' }}
     runs-on: ubuntu-latest
-
-    env:
-      FFMPEG_PATH: ${{ github.workspace }}/ffmpeg
 
     steps:
       - name: Checkout repository
@@ -869,11 +803,9 @@ jobs:
           retention-days: 3
 
   execute-ffmpeg-tests:
-    needs: [build-ffmpeg]
+    needs: [build-toolchain, build-ffmpeg]
+    if: ${{ needs.build-toolchain.outputs.test-toolchain == 'true' }}
     runs-on: [Windows, GCC, ARM64]
-
-    env:
-      FFMPEG_TESTS_PATH: ${{ github.workspace }}/ffmpeg-tests
 
     steps:
       - name: Checkout repository
