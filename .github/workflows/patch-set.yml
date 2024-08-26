@@ -17,54 +17,54 @@ jobs:
     uses: ./.github/workflows/build-only.yml
     with:
       binutils_branch: 'aarch64-patch-series3-v1'
-      gcc_branch: 'b9c2162b5e16e66a82623e044585204e1802beac'
+      gcc_branch: '5b6cb4738c5511203c359952c1a4a3aacb588502'
       mingw_branch: 'woarm64'
 
   build-patch-series3-3:
     uses: ./.github/workflows/build-only.yml
     with:
       binutils_branch: 'aarch64-patch-series3-v1'
-      gcc_branch: '1b63635310d8ec0de60abb92148f296e6ed331e7'
+      gcc_branch: '66e14ac702dc6d696f54d2c66b82ca92a51f7032'
       mingw_branch: 'woarm64'
 
   build-patch-series3-4:
     uses: ./.github/workflows/build-only.yml
     with:
       binutils_branch: 'aarch64-patch-series3-v1'
-      gcc_branch: 'cc6c81aa4e701c2335c83f65783c93fd8fa5096f'
+      gcc_branch: '4d76c321668ad7f6af42a03520b347841030a38d'
       mingw_branch: 'woarm64'
 
   build-patch-series3-5:
     uses: ./.github/workflows/build-only.yml
     with:
       binutils_branch: 'aarch64-patch-series3-v1'
-      gcc_branch: 'e8cf260732d314582c2042621bf11b79c671f835'
+      gcc_branch: '2a2754012aafd698cca4fc55b7e5840217c393dd'
       mingw_branch: 'woarm64'
 
   build-patch-series3-6:
     uses: ./.github/workflows/build-only.yml
     with:
       binutils_branch: 'aarch64-patch-series3-v1'
-      gcc_branch: '272423114981bffe3e555320056702c68706987f'
+      gcc_branch: 'ee811afe6c7919bc149282d1e05c6890403e24f7'
       mingw_branch: 'woarm64'
 
   build-patch-series3-7:
     uses: ./.github/workflows/build-only.yml
     with:
       binutils_branch: 'aarch64-patch-series3-v1'
-      gcc_branch: '355f51d756bae98acc2651d38ffc3cb7cf3c0c1a'
+      gcc_branch: '8dc423915287bc1ff8f2ff5026ea585b08c5ba03'
       mingw_branch: 'woarm64'
 
   build-patch-series3-8:
     uses: ./.github/workflows/build-only.yml
     with:
       binutils_branch: 'aarch64-patch-series3-v1'
-      gcc_branch: 'cf81355bdd994ad09a7ceca5d58150bb810fc6e8'
+      gcc_branch: 'a6e0fed187a277d3293f0af59c652f06faf42be9'
       mingw_branch: 'woarm64'
 
   build-patch-series3-9:
     uses: ./.github/workflows/build-only.yml
     with:
       binutils_branch: 'aarch64-patch-series3-v1'
-      gcc_branch: '83ab258a4d0a71e0936af2594d8f3072513a9af9'
+      gcc_branch: '72b8976b791ce2cb71786f6f82524f96480920e8'
       mingw_branch: 'woarm64'
