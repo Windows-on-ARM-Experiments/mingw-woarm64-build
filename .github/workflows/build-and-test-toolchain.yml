@@ -82,7 +82,7 @@ jobs:
     runs-on: windows-latest
 
     env:
-      WSLENV: BINUTILS_BRANCH:GCC_BRANCH:MINGW_BRANCH:ARCH:PLATFORM:CRT:TAG:MODULE:FILTER:CCACHE:RUN_BOOTSTRAP:UPDATE_SOURCES:GITHUB_OUTPUT/p
+      WSLENV: BINUTILS_BRANCH:GCC_BRANCH:MINGW_BRANCH:ARCH:PLATFORM:CRT:TAG:MODULE:FILTER:CCACHE:RUN_BOOTSTRAP:UPDATE_SOURCES:GITHUB_OUTPUT/p:GITHUB_STEP_SUMMARY/p
 
     defaults:
       run:
@@ -158,10 +158,7 @@ jobs:
       - name: Group test failures
         run: |
           cd ~/work
-          source .github/scripts/config.sh
-          python3 .github/scripts/toolchain/group-gcc-test-failures.py \
-            --dir $ARTIFACT_PATH/gcc-tests-${{ env.TAG }} --summary_output $env:GITHUB_STEP_SUMMARY >> \
-            $ARTIFACT_PATH/gcc-tests-${{ env.TAG }}/grouped-test-failures.txt
+          .github/scripts/toolchain/group-gcc-test-failures.sh "${{ env.TAG }}" $GITHUB_STEP_SUMMARY
 
       - name: Upload build folder
         if: failure()
