@@ -159,7 +159,8 @@ jobs:
         run: |
           cd ~/work
           source .github/scripts/config.sh
-          python3 .github/scripts/toolchain/group-gcc-test-failures.py --dir $ARTIFACT_PATH/gcc-tests-${{ env.TAG }} >> \
+          python3 .github/scripts/toolchain/group-gcc-test-failures.py \
+            --dir $ARTIFACT_PATH/gcc-tests-${{ env.TAG }} --summary_output $env:GITHUB_STEP_SUMMARY >> \
             $ARTIFACT_PATH/gcc-tests-${{ env.TAG }}/grouped-test-failures.txt
 
       - name: Upload build folder

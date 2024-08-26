@@ -84,7 +84,7 @@ def print_path_structure(log_messages: LOG_MESSAGES_TYPE, summary_output: str) -
     def print_path_segment_stats(
         entry: PathSegmentStats,
         print_limit: int = 0,
-        note_skipped: bool = True,
+        print_markdown_list: bool = False,
         indent: int = 0
     ) -> None:
         """Prints hierarchical path segments with their occurrence counts
@@ -94,12 +94,15 @@ def print_path_structure(log_messages: LOG_MESSAGES_TYPE, summary_output: str) -
         sorted_path_stats = sorted(entry.children.items(), key=lambda x: x[1].count, reverse=True)
         for key, value in sorted_path_stats:
             if value.count < print_limit:
-                if note_skipped:
+                if not print_markdown_list:
                     print(" " * (indent) + "...")
                 return
             
-            print(" " * indent + f"{key}: {value.count}")
-            print_path_segment_stats(value, print_limit, note_skipped, indent + 2)
+            if print_markdown_list:
+                print(" " * indent + f"- {key}: {value.count}")
+            else:
+                print(" " * indent + f"{key}: {value.count}")
+            print_path_segment_stats(value, print_limit, print_markdown_list, indent + 2)
 
     def update_top_counts(entry: PathSegmentStats, sorted_top_counts: list[int]) -> None:
         """Updates recursively the sorted_top_counts list with the top counts from the entry"""
@@ -126,8 +129,8 @@ def print_path_structure(log_messages: LOG_MESSAGES_TYPE, summary_output: str) -
     update_top_counts(root_seg_stats, top_counts)
     with open(summary_output, "a") as summary_output_file:
         with contextlib.redirect_stdout(summary_output_file):
-            print(f"Top {TOP_SEGMENTS} path segments:")
-            print_path_segment_stats(root_seg_stats, print_limit=min(top_counts), note_skipped=False)
+            print(f"## Top {TOP_SEGMENTS} path segments:")
+            print_path_segment_stats(root_seg_stats, print_limit=min(top_counts), print_markdown_list=True)
 
     print_path_segment_stats(root_seg_stats, print_limit=100)
 
