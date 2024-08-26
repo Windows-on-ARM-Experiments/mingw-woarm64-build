@@ -5,7 +5,7 @@ import dataclasses
 import argparse
 
 
-# Tests which ends with one of these results are considered as failure:
+# Tests which finished with one of these results are considered as failure:
 #   FAIL = unexpected failures
 #   XPASS = unexpected successes
 #   UNRESOLVED = unresolved testcases
@@ -66,10 +66,10 @@ def read_logs(log_dir: str) -> LOG_MESSAGES_TYPE:
 def print_path_structure(log_messages: LOG_MESSAGES_TYPE) -> None:
     def parse_filepath(message: list[str]) -> list[str]:
         # We parse here the last line of each log message, example:
-        # FAIL: g++.dg/contracts/contracts-pre10.C   20 blank line(s) in output"""
+        # FAIL: g++.dg/contracts/contracts-pre10.C   20 blank line(s) in output
         assert any(message[-1].startswith(log_type) for log_type in FAIL_LOG_TYPES)
         filepath = message[-1].split(" ")[1]
-        # The path might or but don't have to start with tool name split by dot
+        # The path might but don't have to start with tool name split by dot
         if "." in filepath and "/" not in filepath.split(".", 1)[0]:
             tool_name, filepath = filepath.split(".", 1)
             return [tool_name] + filepath.split("/")
