@@ -80,7 +80,12 @@ def print_path_structure(log_messages: LOG_MESSAGES_TYPE) -> None:
         count: int = 0
         children: dict[str, "PathSegmentStats"] = dataclasses.field(default_factory=dict)
 
-    def print_path_segment_stats(entry: PathSegmentStats, indent: int = 0, print_limit: int = 100) -> None:
+    def print_path_segment_stats(
+        entry: PathSegmentStats,
+        print_limit: int = 0,
+        note_skipped: bool = True,
+        indent: int = 0
+    ) -> None:
         """Prints hierarchical path segments with their occurrence counts
         
         print_limit: Print only path segments with occurrence count >= print_limit
@@ -88,11 +93,20 @@ def print_path_structure(log_messages: LOG_MESSAGES_TYPE) -> None:
         sorted_path_stats = sorted(entry.children.items(), key=lambda x: x[1].count, reverse=True)
         for key, value in sorted_path_stats:
             if value.count < print_limit:
-                print(" " * (indent + 2) + "...")
+                if note_skipped:
+                    print(" " * (indent) + "...")
                 return
             
             print(" " * indent + f"{key}: {value.count}")
-            print_path_segment_stats(value, indent + 2)
+            print_path_segment_stats(value, print_limit, note_skipped, indent + 2)
+
+    def update_top_counts(entry: PathSegmentStats, sorted_top_counts: list[int]) -> None:
+        """Updates recursively the sorted_top_counts list with the top counts from the entry"""
+        for segment_stats in entry.children.values():
+            if segment_stats.count > sorted_top_counts[0]:
+                sorted_top_counts[0] = segment_stats.count
+                sorted_top_counts.sort()
+                update_top_counts(segment_stats, sorted_top_counts)
 
     root_seg_stats = PathSegmentStats()
     for messages in log_messages.values():
@@ -106,7 +120,13 @@ def print_path_structure(log_messages: LOG_MESSAGES_TYPE) -> None:
                 curr_seg_stats = curr_seg_stats.children[segment]
                 curr_seg_stats.count += 1
 
-    print_path_segment_stats(root_seg_stats)
+    TOP_SEGMENTS = 10
+    print(f"Top {TOP_SEGMENTS} path segments:")
+    top_counts = [0] * TOP_SEGMENTS
+    update_top_counts(root_seg_stats, top_counts)
+    print_path_segment_stats(root_seg_stats, print_limit=min(top_counts), note_skipped=False)
+    print()
+    print_path_segment_stats(root_seg_stats, print_limit=100)
 
 
 def main() -> None:
