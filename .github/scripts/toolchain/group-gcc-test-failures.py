@@ -3,7 +3,6 @@ import glob
 import collections
 import dataclasses
 import argparse
-import contextlib
 
 
 # Tests which finished with one of these results are considered as failure:
@@ -64,7 +63,7 @@ def read_logs(log_dir: str) -> LOG_MESSAGES_TYPE:
     return log_messages
 
 
-def print_path_structure(log_messages: LOG_MESSAGES_TYPE, summary_output: str) -> None:
+def print_path_structure(log_messages: LOG_MESSAGES_TYPE) -> None:
     def parse_filepath(message: list[str]) -> list[str]:
         # We parse here the last line of each log message, example:
         # FAIL: g++.dg/contracts/contracts-pre10.C   20 blank line(s) in output
@@ -84,7 +83,6 @@ def print_path_structure(log_messages: LOG_MESSAGES_TYPE, summary_output: str) -
     def print_path_segment_stats(
         entry: PathSegmentStats,
         print_limit: int = 0,
-        print_markdown_list: bool = False,
         indent: int = 0
     ) -> None:
         """Prints hierarchical path segments with their occurrence counts
@@ -94,23 +92,11 @@ def print_path_structure(log_messages: LOG_MESSAGES_TYPE, summary_output: str) -
         sorted_path_stats = sorted(entry.children.items(), key=lambda x: x[1].count, reverse=True)
         for key, value in sorted_path_stats:
             if value.count < print_limit:
-                if not print_markdown_list:
-                    print(" " * (indent) + "...")
+                print(" " * (indent) + "...")
                 return
             
-            if print_markdown_list:
-                print(" " * indent + f"- {key}: {value.count}")
-            else:
-                print(" " * indent + f"{key}: {value.count}")
-            print_path_segment_stats(value, print_limit, print_markdown_list, indent + 2)
-
-    def update_top_counts(entry: PathSegmentStats, sorted_top_counts: list[int]) -> None:
-        """Updates recursively the sorted_top_counts list with the top counts from the entry"""
-        for segment_stats in entry.children.values():
-            if segment_stats.count > sorted_top_counts[0]:
-                sorted_top_counts[0] = segment_stats.count
-                sorted_top_counts.sort()
-                update_top_counts(segment_stats, sorted_top_counts)
+            print(" " * indent + f"{key}: {value.count}")
+            print_path_segment_stats(value, print_limit, indent + 2)
 
     root_seg_stats = PathSegmentStats()
     for messages in log_messages.values():
@@ -124,25 +110,17 @@ def print_path_structure(log_messages: LOG_MESSAGES_TYPE, summary_output: str) -
                 curr_seg_stats = curr_seg_stats.children[segment]
                 curr_seg_stats.count += 1
 
-    TOP_SEGMENTS = 10
-    top_counts = [0] * TOP_SEGMENTS
-    update_top_counts(root_seg_stats, top_counts)
-    with open(summary_output, "a") as summary_output_file:
-        with contextlib.redirect_stdout(summary_output_file):
-            print(f"## Top {TOP_SEGMENTS} path segments:")
-            print_path_segment_stats(root_seg_stats, print_limit=min(top_counts), print_markdown_list=True)
-
+    print(f"Directory structure of failed tests with failure count:")
     print_path_segment_stats(root_seg_stats, print_limit=100)
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Aggregate test results from log files")
     parser.add_argument("--dir", required=True, type=str, help="Directory containing log files")
-    parser.add_argument("--summary_output", required=True, type=str, help="Path to the summary output file")
     args = parser.parse_args()
 
     log_messages = read_logs(args.dir)
-    print_path_structure(log_messages, args.summary_output)
+    print_path_structure(log_messages)
 
 
 if __name__ == "__main__":

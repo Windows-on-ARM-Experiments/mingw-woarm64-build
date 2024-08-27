@@ -3,9 +3,10 @@
 source `dirname ${BASH_SOURCE[0]}`/../config.sh
 
 TAG=$1
-GITHUB_STEP_SUMMARY=$2
 
 python3 `dirname ${BASH_SOURCE[0]}`/group-gcc-test-failures.py \
-    --dir $ARTIFACT_PATH/gcc-tests-$TAG \
-    --summary_output $GITHUB_STEP_SUMMARY >> \
+    --dir $ARTIFACT_PATH/gcc-tests-$TAG >> \
     $ARTIFACT_PATH/gcc-tests-$TAG/grouped-test-failures.txt
+
+cat $ARTIFACT_PATH/gcc-tests-$TAG/grouped-test-failures.txt |
+`dirname ${BASH_SOURCE[0]}`/extract-most-frequent-failures.sh >> $GITHUB_STEP_SUMMARY

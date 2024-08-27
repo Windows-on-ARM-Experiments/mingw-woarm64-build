@@ -158,7 +158,7 @@ jobs:
       - name: Group test failures
         run: |
           cd ~/work
-          .github/scripts/toolchain/group-gcc-test-failures.sh "${{ env.TAG }}" $GITHUB_STEP_SUMMARY
+          .github/scripts/toolchain/group-gcc-test-failures.sh "${{ env.TAG }}"
 
       - name: Upload build folder
         if: failure()
