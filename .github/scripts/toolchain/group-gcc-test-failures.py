@@ -29,6 +29,7 @@ def read_logs(log_dir: str) -> LOG_MESSAGES_TYPE:
     https://github.com/Windows-on-ARM-Experiments/mingw-woarm64-build/pull/184
     """
     log_messages = collections.defaultdict(list)
+    print("```")
     for log_file in glob.glob(os.path.join(log_dir, "*.log")):
         print(f"Reading {log_file} ...")
         reading_init_lines = True
@@ -58,6 +59,7 @@ def read_logs(log_dir: str) -> LOG_MESSAGES_TYPE:
     print("Number of found tests for each result type:")
     for log_type, messages in log_messages.items():
         print(f"  {log_type: <12} {len(messages)}")
+    print("```")
     print()
 
     return log_messages
@@ -92,11 +94,18 @@ def print_path_structure(log_messages: LOG_MESSAGES_TYPE) -> None:
         sorted_path_stats = sorted(entry.children.items(), key=lambda x: x[1].count, reverse=True)
         for key, value in sorted_path_stats:
             if value.count < print_limit:
-                print(" " * (indent) + "...")
+                print(" " * (indent) + "- ...")
                 return
-            
-            print(" " * indent + f"{key}: {value.count}")
-            print_path_segment_stats(value, print_limit, indent + 2)
+
+            if len(value.children) > 0:
+                print(" " * indent + f"- <details> <summary>{key}: {value.count}</summary>")
+                print()
+                print_path_segment_stats(value, print_limit, indent + 2)
+                print()
+                print(" " * indent + "  </details>")
+                print()
+            else:
+                print(" " * indent + f"- {key}: {value.count}")
 
     root_seg_stats = PathSegmentStats()
     for messages in log_messages.values():
@@ -110,7 +119,7 @@ def print_path_structure(log_messages: LOG_MESSAGES_TYPE) -> None:
                 curr_seg_stats = curr_seg_stats.children[segment]
                 curr_seg_stats.count += 1
 
-    print(f"Directory structure of failed tests with failure count:")
+    print(f"## Directory structure of failed tests with failure count:")
     print_path_segment_stats(root_seg_stats, print_limit=100)
 
 
