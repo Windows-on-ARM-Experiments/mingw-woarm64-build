@@ -84,23 +84,15 @@ def print_path_structure(log_messages: LOG_MESSAGES_TYPE) -> None:
 
     def print_path_segment_stats(
         entry: PathSegmentStats,
-        print_limit: int = 0,
         indent: int = 0
     ) -> None:
-        """Prints hierarchical path segments with their occurrence counts
-        
-        print_limit: Print only path segments with occurrence count >= print_limit
-        """
+        """Prints hierarchical path segments with their occurrence counts"""
         sorted_path_stats = sorted(entry.children.items(), key=lambda x: x[1].count, reverse=True)
         for key, value in sorted_path_stats:
-            if value.count < print_limit:
-                print(" " * (indent) + "- ...")
-                return
-
             if len(value.children) > 0:
                 print(" " * indent + f"- <details> <summary>{key}: {value.count}</summary>")
                 print()
-                print_path_segment_stats(value, print_limit, indent + 2)
+                print_path_segment_stats(value, indent + 2)
                 print()
                 print(" " * indent + "  </details>")
                 print()
@@ -120,7 +112,7 @@ def print_path_structure(log_messages: LOG_MESSAGES_TYPE) -> None:
                 curr_seg_stats.count += 1
 
     print(f"## Directory structure of failed tests with failure count:")
-    print_path_segment_stats(root_seg_stats, print_limit=100)
+    print_path_segment_stats(root_seg_stats)
 
 
 def main() -> None:
