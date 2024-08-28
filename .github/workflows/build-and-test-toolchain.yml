@@ -1,6 +1,7 @@
 name: Build toolchain
 
 on:
+  pull_request:
   workflow_dispatch:
     inputs:
       binutils_branch:
@@ -60,6 +61,8 @@ on:
         type: string
 
 env:
+  DISTRO: 'Ubuntu-22.04'
+
   BINUTILS_BRANCH: ${{ inputs.binutils_branch || 'woarm64' }}
   GCC_BRANCH: ${{ inputs.gcc_branch || 'woarm64' }}
   MINGW_BRANCH: ${{ inputs.mingw_branch || 'woarm64' }}
@@ -86,38 +89,49 @@ jobs:
 
     defaults:
       run:
-        shell: wsl-bash {0}
+        shell: powershell
 
     steps:
       - name: Get cache key
         id: get-cache-key
-        shell: powershell
         run: |
           Write-Output "timestamp=$((Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ"))" >> "$env:GITHUB_OUTPUT"
 
-      - name: Setup WSL
-        uses: Windows-on-ARM-Experiments/setup-wsl@master
-        with:
-          distribution: Ubuntu-22.04
-          additional-packages:
-            git
+      - name: Install winget
+        if: false
+        uses: Cyberboss/install-winget@v1
+
+      - name: Install WSL
+        if: false
+        uses: Ubuntu/WSL/.github/actions/wsl-install@main
+
+      - name: Update WSL
+        run: |
+          wsl.exe --set-default-version 2
+          #wsl.exe --update
+
+      - name: Install ${{ env.DISTRO }}
+        run: |
+          wsl.exe --install --distribution ${{ env.DISTRO }}
 
       - name: Checkout repository
         run: |
-          cd ~
-          git clone --depth=1 ${{ github.server_url }}/${{ github.repository }}.git -b ${{ github.head_ref || github.ref_name || 'main' }} work
+          wsl.exe -d ${{ env.DISTRO }} --cd '~' -- bash "git clone --depth=1 ${{ github.server_url }}/${{ github.repository }}.git -b ${{ github.head_ref || github.ref_name || 'main' }} work"
 
       - name: Get WSL paths
         id: get-wsl-paths
-        run: |
-          cd ~/work
-          source .github/scripts/config.sh
-          mkdir -p $BUILD_PATH
-          mkdir -p $CCACHE_DIR_PATH
-          mkdir -p $ARTIFACT_PATH
-          echo "build-path=`wslpath -w $BUILD_PATH`" >> $GITHUB_OUTPUT
-          echo "ccache-dir-path=`wslpath -w $CCACHE_DIR_PATH`" >> $GITHUB_OUTPUT
-          echo "artifact-path=`wslpath -w $ARTIFACT_PATH`" >> $GITHUB_OUTPUT
+        uses: Ubuntu/WSL/.github/actions/wsl-bash@main
+        with:
+          distro: ${{ env.DISTRO }}
+          exec: |
+            cd ~/work
+            source .github/scripts/config.sh
+            mkdir -p $BUILD_PATH
+            mkdir -p $CCACHE_DIR_PATH
+            mkdir -p $ARTIFACT_PATH
+            echo "build-path=`wslpath -w $BUILD_PATH`" >> $GITHUB_OUTPUT
+            echo "ccache-dir-path=`wslpath -w $CCACHE_DIR_PATH`" >> $GITHUB_OUTPUT
+            echo "artifact-path=`wslpath -w $ARTIFACT_PATH`" >> $GITHUB_OUTPUT
 
       - name: Restore Ccache
         uses: actions/cache/restore@v4
@@ -127,9 +141,12 @@ jobs:
           restore-keys: build-and-test-gcc-ccache-
 
       - name: Build toolchain
-        run: |
-          cd ~/work
-          .github/scripts/build.sh
+        uses: Ubuntu/WSL/.github/actions/wsl-bash@main
+        with:
+          distro: ${{ env.DISTRO }}
+          exec: |
+            cd ~/work
+            .github/scripts/build.sh
 
       - name: Save Ccache
         if: always()
@@ -139,19 +156,24 @@ jobs:
           key: build-and-test-gcc-ccache-${{ steps.get-cache-key.outputs.timestamp }}
 
       - name: Execute GCC tests
-        run: |
-          cd ~/work
-          .github/scripts/toolchain/execute-gcc-tests.sh "${{ env.TAG }}" "${{ env.MODULE }}" "${{ env.FILTER }}"
+        uses: Ubuntu/WSL/.github/actions/wsl-bash@main
+        with:
+          distro: ${{ env.DISTRO }}
+          exec: |
+            cd ~/work
+            .github/scripts/toolchain/execute-gcc-tests.sh "${{ env.TAG }}" "${{ env.MODULE }}" "${{ env.FILTER }}"
 
       - name: Create summary
-        run: |
-          cd ~/work
-          source .github/scripts/config.sh
-          .github/scripts/toolchain/create-gcc-summary.sh "${{ env.TAG }}" >> \
-            $ARTIFACT_PATH/gcc-tests-${{ env.TAG }}/summary.txt
+        uses: Ubuntu/WSL/.github/actions/wsl-bash@main
+        with:
+          distro: ${{ env.DISTRO }}
+          exec: |
+            cd ~/work
+            source .github/scripts/config.sh
+            .github/scripts/toolchain/create-gcc-summary.sh "${{ env.TAG }}" >> \
+              $ARTIFACT_PATH/gcc-tests-${{ env.TAG }}/summary.txt
 
       - name: Present summary
-        shell: powershell
         run: |
           cat ${{ steps.get-wsl-paths.outputs.artifact-path }}\gcc-tests-${{ env.TAG }}\summary.txt >> $env:GITHUB_STEP_SUMMARY
 
