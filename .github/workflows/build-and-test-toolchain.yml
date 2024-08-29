@@ -82,7 +82,7 @@ jobs:
     runs-on: windows-latest
 
     env:
-      WSLENV: BINUTILS_BRANCH:GCC_BRANCH:MINGW_BRANCH:ARCH:PLATFORM:CRT:TAG:MODULE:FILTER:CCACHE:RUN_BOOTSTRAP:UPDATE_SOURCES:GITHUB_OUTPUT/p
+      WSLENV: BINUTILS_BRANCH:GCC_BRANCH:MINGW_BRANCH:ARCH:PLATFORM:CRT:TAG:MODULE:FILTER:CCACHE:RUN_BOOTSTRAP:UPDATE_SOURCES:GITHUB_OUTPUT/p:GITHUB_STEP_SUMMARY/p
 
     defaults:
       run:
@@ -154,6 +154,11 @@ jobs:
         shell: powershell
         run: |
           cat ${{ steps.get-wsl-paths.outputs.artifact-path }}\gcc-tests-${{ env.TAG }}\summary.txt >> $env:GITHUB_STEP_SUMMARY
+
+      - name: Group test failures
+        run: |
+          cd ~/work
+          .github/scripts/toolchain/group-gcc-test-failures.sh "${{ env.TAG }}" $GITHUB_STEP_SUMMARY
 
       - name: Upload build folder
         if: failure()
