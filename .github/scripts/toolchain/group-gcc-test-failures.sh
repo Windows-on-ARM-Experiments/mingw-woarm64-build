@@ -12,4 +12,4 @@ python3 $BASH_SOURCE_DIR/group-gcc-test-failures.py \
     $ARTIFACT_PATH/gcc-tests-$TAG/grouped-test-failures.md
 
 cat $ARTIFACT_PATH/gcc-tests-$TAG/grouped-test-failures.md |
-    $BASH_SOURCE_DIR/extract-most-frequent-failures.sh >> $SUMMARY_OUTPUT
+    $BASH_SOURCE_DIR/extract-most-frequent-failures.sh 10 >> $SUMMARY_OUTPUT

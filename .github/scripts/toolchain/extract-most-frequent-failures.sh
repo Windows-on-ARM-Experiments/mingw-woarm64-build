@@ -1,6 +1,8 @@
 #!/bin/bash
 
-echo "## 10 directories with most test failures:"
+LIMIT=$1
+
+echo "## $LIMIT directories with most test failures:"
 
 sed -e '1,/^## Directory structure of failed tests with failure count:/d' |
     sed "s/<[^>]*>//g" |
@@ -8,7 +10,7 @@ sed -e '1,/^## Directory structure of failed tests with failure count:/d' |
     grep -v "^[[:space:]]*$" |
     awk -F ': ' '{print $2, NR, $0}' |
     sort -nr |
-    head -n 10 |
+    head -n $LIMIT |
     cut -f2- -d' ' |
     # sort by line number, so that nested directories are correctly grouped
     sort -n |
