@@ -4,14 +4,14 @@ CCACHE=0 # Disable ccache for testing.
 
 source `dirname ${BASH_SOURCE[0]}`/../config.sh
 
-TAG=$1
+DIR=$1
 MODULE=$2
 FILTER=$3
 TARGET_BOARD=${4:-wsl-sim}
 HOST_BOARD=${5:-}
 
 GCC_BUILD_PATH=$BUILD_PATH/gcc
-TEST_RESULTS_PATH=$ARTIFACT_PATH/gcc-tests-$TAG
+TEST_RESULTS_PATH=$ARTIFACT_PATH/$DIR
 
 PATH="$TOOLCHAIN_PATH/bin:$PATH"
 

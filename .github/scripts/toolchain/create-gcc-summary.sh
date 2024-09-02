@@ -2,7 +2,7 @@
 
 source `dirname ${BASH_SOURCE[0]}`/../config.sh
 
-TAG=$1
+DIR=$1
 
 print_summary() {
     local TITLE=$1
@@ -47,7 +47,7 @@ TOTAL_UNSUPPORTED_TESTS=0
 TOTAL_DEJAGNU_ERRORS=0
 
 set +x # echo off
-for SUM_FILE in "$ARTIFACT_PATH/gcc-tests-$TAG/"*.sum; do
+for FILE in `find $DIR -path '*.sum'`; do
     EXPECTED_PASSES=0
     UNEXPECTED_FAILURES=0
     UNEXPECTED_SUCCESSES=0
@@ -80,9 +80,9 @@ for SUM_FILE in "$ARTIFACT_PATH/gcc-tests-$TAG/"*.sum; do
                 DEJAGNU_ERRORS=$(($DEJAGNU_ERRORS + $(echo "$LINE" | awk '{print $5}')))
                 ;;
         esac
-    done <"$SUM_FILE"
+    done < "$FILE"
 
-    print_summary "Summary for \`$(basename $SUM_FILE)\`" $EXPECTED_PASSES $UNEXPECTED_FAILURES \
+    print_summary "Summary for \`$(basename $FILE)\`" $EXPECTED_PASSES $UNEXPECTED_FAILURES \
         $UNEXPECTED_SUCCESSES $EXPECTED_FAILURES $UNRESOLVED_TESTCASES $UNSUPPORTED_TESTS \
         $DEJAGNU_ERRORS
 

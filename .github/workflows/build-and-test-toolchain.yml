@@ -113,14 +113,15 @@ jobs:
           mkdir -p $BUILD_PATH
           mkdir -p $CCACHE_DIR_PATH
           mkdir -p $ARTIFACT_PATH
-          echo "build-path=`wslpath -w $BUILD_PATH`" >> $GITHUB_OUTPUT
-          echo "ccache-dir-path=`wslpath -w $CCACHE_DIR_PATH`" >> $GITHUB_OUTPUT
-          echo "artifact-path=`wslpath -w $ARTIFACT_PATH`" >> $GITHUB_OUTPUT
+          echo "build-path-win=`wslpath -w $BUILD_PATH`" >> $GITHUB_OUTPUT
+          echo "ccache-dir-path-win=`wslpath -w $CCACHE_DIR_PATH`" >> $GITHUB_OUTPUT
+          echo "artifact-path-win=`wslpath -w $ARTIFACT_PATH`" >> $GITHUB_OUTPUT
+          echo "artifact-path-wsl=$ARTIFACT_PATH" >> $GITHUB_OUTPUT
 
       - name: Restore Ccache
         uses: actions/cache/restore@v4
         with:
-          path: ${{ steps.get-wsl-paths.outputs.ccache-dir-path }}
+          path: ${{ steps.get-wsl-paths.outputs.ccache-dir-path-win }}
           key: build-and-test-gcc-ccache-${{ steps.get-cache-key.outputs.timestamp }}
           restore-keys: build-and-test-gcc-ccache-
 
@@ -132,27 +133,24 @@ jobs:
         if: always()
         uses: actions/cache/save@v4
         with:
-          path: ${{ steps.get-wsl-paths.outputs.ccache-dir-path }}
+          path: ${{ steps.get-wsl-paths.outputs.ccache-dir-path-win }}
           key: build-and-test-gcc-ccache-${{ steps.get-cache-key.outputs.timestamp }}
 
       - name: Execute GCC tests
         run: |
-          ~/work/.github/scripts/toolchain/execute-gcc-tests.sh "${{ env.TAG }}" "${{ env.MODULE }}" "${{ env.FILTER }}"
+          ~/work/.github/scripts/toolchain/execute-gcc-tests.sh "gcc-tests-${{ env.TAG }}" \
+            "${{ env.MODULE }}" "${{ env.FILTER }}"
 
       - name: Create summary
         run: |
-          source ~/work/.github/scripts/config.sh
-          ~/work/.github/scripts/toolchain/create-gcc-summary.sh "${{ env.TAG }}" >> \
-            $ARTIFACT_PATH/gcc-tests-${{ env.TAG }}/summary.txt
-
-      - name: Present summary
-        shell: powershell
-        run: |
-          cat ${{ steps.get-wsl-paths.outputs.artifact-path }}\gcc-tests-${{ env.TAG }}\summary.txt >> $env:GITHUB_STEP_SUMMARY
+          ~/work/.github/scripts/toolchain/create-gcc-summary.sh " \
+            ${{ steps.get-wsl-paths.outputs.artifact-path-wsl }}/gcc-tests-${{ env.TAG }}" >> \
+            ${{ steps.get-wsl-paths.outputs.artifact-path-wsl }}/gcc-tests-${{ env.TAG }}/summary.md
+          cat ${{ steps.get-wsl-paths.outputs.artifact-path-wsl }}/gcc-tests-${{ env.TAG }}/summary.md >> $GITHUB_STEP_SUMMARY
 
       - name: Group test failures
         run: |
-          ~/work/.github/scripts/toolchain/group-gcc-test-failures.sh "${{ env.TAG }}" $GITHUB_STEP_SUMMARY
+          ~/work/.github/scripts/toolchain/group-gcc-test-failures.sh "gcc-tests-${{ env.TAG }}" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload build folder
         if: failure()
@@ -160,11 +158,11 @@ jobs:
         with:
           name: build
           retention-days: 1
-          path: ${{ steps.get-wsl-paths.outputs.build-path }}
+          path: ${{ steps.get-wsl-paths.outputs.build-path-win }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: gcc-tests-${{ env.TAG }}
-          path: ${{ steps.get-wsl-paths.outputs.artifact-path }}\gcc-tests-${{ env.TAG }}
+          path: ${{ steps.get-wsl-paths.outputs.artifact-path-win }}\gcc-tests-${{ env.TAG }}
           retention-days: 30
