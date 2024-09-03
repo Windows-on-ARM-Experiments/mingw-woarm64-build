@@ -1,4 +1,4 @@
-name: Build toolchain
+name: Build and test main toolchain
 
 on:
   workflow_dispatch:
