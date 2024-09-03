@@ -104,14 +104,12 @@ jobs:
 
       - name: Checkout repository
         run: |
-          cd ~
-          git clone --depth=1 ${{ github.server_url }}/${{ github.repository }}.git -b ${{ github.head_ref || github.ref_name || 'main' }} work
+          git clone --depth=1 ${{ github.server_url }}/${{ github.repository }}.git -b ${{ github.head_ref || github.ref_name || 'main' }} ~/work
 
       - name: Get WSL paths
         id: get-wsl-paths
         run: |
-          cd ~/work
-          source .github/scripts/config.sh
+          source ~/work/.github/scripts/config.sh
           mkdir -p $BUILD_PATH
           mkdir -p $CCACHE_DIR_PATH
           mkdir -p $ARTIFACT_PATH
@@ -128,8 +126,7 @@ jobs:
 
       - name: Build toolchain
         run: |
-          cd ~/work
-          .github/scripts/build.sh
+          ~/work/.github/scripts/build.sh
 
       - name: Save Ccache
         if: always()
@@ -140,14 +137,12 @@ jobs:
 
       - name: Execute GCC tests
         run: |
-          cd ~/work
-          .github/scripts/toolchain/execute-gcc-tests.sh "${{ env.TAG }}" "${{ env.MODULE }}" "${{ env.FILTER }}"
+          ~/work/.github/scripts/toolchain/execute-gcc-tests.sh "${{ env.TAG }}" "${{ env.MODULE }}" "${{ env.FILTER }}"
 
       - name: Create summary
         run: |
-          cd ~/work
-          source .github/scripts/config.sh
-          .github/scripts/toolchain/create-gcc-summary.sh "${{ env.TAG }}" >> \
+          source ~/work/.github/scripts/config.sh
+          ~/work/.github/scripts/toolchain/create-gcc-summary.sh "${{ env.TAG }}" >> \
             $ARTIFACT_PATH/gcc-tests-${{ env.TAG }}/summary.txt
 
       - name: Present summary
@@ -157,8 +152,7 @@ jobs:
 
       - name: Group test failures
         run: |
-          cd ~/work
-          .github/scripts/toolchain/group-gcc-test-failures.sh "${{ env.TAG }}" $GITHUB_STEP_SUMMARY
+          ~/work/.github/scripts/toolchain/group-gcc-test-failures.sh "${{ env.TAG }}" $GITHUB_STEP_SUMMARY
 
       - name: Upload build folder
         if: failure()
