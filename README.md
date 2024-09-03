@@ -89,16 +89,17 @@ the toolchain binaries with the GCC test suite and against [four example project
 [OpenBLAS](https://github.com/OpenMathLib/OpenBLAS), [libjpeg-turbo](https://github.com/libjpeg-turbo/libjpeg-turbo))
 and their testing suites.
 
-As of 2024/08/09 we are reaching the following level of quality with the GCC testing:
+As of 2024/08/09 we are reaching the following level of quality with the GCC testing targeting
+armv8-a without optional extensions such as SVE:
 
 | Metric               | Count  |
 | -------------------- | ------ |
 | Expected passes      | 573324 |
-| Unexpected failures  | 224452 |
+| Unexpected failures  | 12118  |
 | Unexpected successes | 172    |
 | Expected failures    | 4528   |
 | Unresolved testcases | 7363   |
 | Unsupported tests    | 10774  |
 | DejaGnu errors       | 0      |
-| Total                | 820613 |
-| Reliability rate     | 71%    |
+| Total                | 608279 |
+| Reliability rate     | 96%    |

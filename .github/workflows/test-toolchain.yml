@@ -1,4 +1,4 @@
-name: Test toolchain
+name: Comparative test of toolchain branches
 
 on:
   workflow_dispatch:

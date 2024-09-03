@@ -6,7 +6,7 @@ SOURCE_PATH=`cygpath $SOURCE_PATH`
 FFMPEG_SOURCE_PATH=$SOURCE_PATH/ffmpeg
 
 # Path to the file with test names which should be skipped.
-SKIP_TESTS_PATH=$(realpath `dirname ${BASH_SOURCE[0]}`/skip-tests.txt)
+SKIP_TESTS_PATH=$ROOT_PATH/.github/scripts/ffmpeg/skip-tests.txt
 SKIP_TESTS=$(<$SKIP_TESTS_PATH)
 
 # Regex pattern to filter tests.
