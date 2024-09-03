@@ -64,7 +64,7 @@ env:
   BINUTILS_BRANCH: ${{ inputs.binutils_branch || 'aarch64-patch-series3-v1' }}
 
   GCC_REPO: Windows-on-ARM-Experiments/gcc-woarm64
-  GCC_BRANCH: ${{ inputs.gcc_branch || 'aarch64-patch-series3-v2' }}
+  GCC_BRANCH: ${{ inputs.gcc_branch || 'aarch64-patch-series3-v3' }}
 
   MINGW_REPO: Windows-on-ARM-Experiments/mingw-woarm64
   MINGW_BRANCH: ${{ inputs.mingw_branch || 'woarm64' }}
