@@ -18,8 +18,7 @@ echo "::group::Patch Cygwin binutils"
     fi
 
     PATCH_DIR=$SOURCE_PATH/cygwin-packages/binutils
-    patch -p2 -i $PATCH_DIR/binutils-2.42-cygwin-config-rpath.patch
-    patch -p2 -i $PATCH_DIR/binutils-2.42-cygwin-pep-dll-double-definition.patch
+    patch -p2 -i $PATCH_DIR/binutils-2.43-cygwin-config-rpath.patch
 echo "::endgroup::"
 
 echo 'Success!'

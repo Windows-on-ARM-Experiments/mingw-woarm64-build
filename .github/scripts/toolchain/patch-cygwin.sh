@@ -50,8 +50,6 @@ echo "::group::Patch Cygwin"
     if [[ "$STAGE" = "1" ]]; then
         patch -p1 -i $PATCH_DIR/0002-after-autogen.patch
     fi
-
-    patch -p1 -i $PATCHES_PATH/cygwin/0003-master.patch
 echo "::endgroup::"
 
 echo 'Success!'
