@@ -299,12 +299,12 @@ jobs:
           key: advanced-gcc-ccache-${{ steps.get-cache-key.outputs.timestamp }}
 
       - name: Pack toolchain
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && env.TEST_TOOLCHAIN == 'true' }}
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && inputs.arch == 'aarch64' && inputs.platform == 'w64-mingw32' && inputs.crt == 'msvcrt' }}
         run: |
           .github/scripts/toolchain/pack.sh
 
       - name: Pack toolchain mock
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && env.TEST_TOOLCHAIN != 'true' }}
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && inputs.arch == 'aarch64' && inputs.platform == 'w64-mingw32' && inputs.crt == 'msvcrt' }}
         run: |
           .github/scripts/toolchain/pack-mock.sh
 
@@ -317,7 +317,7 @@ jobs:
           path: ${{ env.BUILD_PATH }}
 
       - name: Upload artifact
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' || env.TEST_TOOLCHAIN == 'true' }}
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' || (inputs.arch == 'aarch64' && inputs.platform == 'w64-mingw32' && inputs.crt == 'msvcrt') }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.TOOLCHAIN_PACKAGE_NAME }}
@@ -330,7 +330,7 @@ jobs:
 
   build-tests:
     needs: [build-toolchain]
-    if: ${{ needs.build-toolchain.outputs.test-toolchain == 'true' }}
+    if: ${{ inputs.arch == 'aarch64' && inputs.platform == 'w64-mingw32' && inputs.crt == 'msvcrt' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -367,7 +367,7 @@ jobs:
 
   execute-tests:
     needs: [build-toolchain, build-tests]
-    if: ${{ needs.build-toolchain.outputs.test-toolchain == 'true' }}
+    if: ${{ inputs.arch == 'aarch64' && inputs.platform == 'w64-mingw32' && inputs.crt == 'msvcrt' }}
     runs-on: [Windows, GCC, ARM64]
 
     steps:
@@ -392,7 +392,7 @@ jobs:
 
   build-openblas:
     needs: [build-toolchain]
-    if: ${{ needs.build-toolchain.outputs.test-toolchain == 'true' }}
+    if: ${{ inputs.arch == 'aarch64' && inputs.platform == 'w64-mingw32' && inputs.crt == 'msvcrt' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -436,7 +436,7 @@ jobs:
         
   execute-openblas-tests:
     needs: [build-toolchain, build-openblas]
-    if: ${{ needs.build-toolchain.outputs.test-toolchain == 'true' }}
+    if: ${{ inputs.arch == 'aarch64' && inputs.platform == 'w64-mingw32' && inputs.crt == 'msvcrt' }}
     runs-on: [Windows, GCC, ARM64]
 
     steps:
@@ -462,7 +462,7 @@ jobs:
   
   build-zlib:
     needs: [build-toolchain]
-    if: ${{ needs.build-toolchain.outputs.test-toolchain == 'true' }}
+    if: ${{ inputs.arch == 'aarch64' && inputs.platform == 'w64-mingw32' && inputs.crt == 'msvcrt' }}
     runs-on: ubuntu-latest 
 
     steps:
@@ -506,7 +506,7 @@ jobs:
 
   build-libxml2:
     needs: [build-toolchain, build-zlib]
-    if: ${{ needs.build-toolchain.outputs.test-toolchain == 'true' }}
+    if: ${{ inputs.arch == 'aarch64' && inputs.platform == 'w64-mingw32' && inputs.crt == 'msvcrt' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -560,7 +560,7 @@ jobs:
 
   build-openssl:
     needs: [build-toolchain, build-zlib]
-    if: ${{ needs.build-toolchain.outputs.test-toolchain == 'true' }}
+    if: ${{ inputs.arch == 'aarch64' && inputs.platform == 'w64-mingw32' && inputs.crt == 'msvcrt' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -629,7 +629,7 @@ jobs:
 
   execute-openssl-tests:
     needs: [build-toolchain, build-openssl]
-    if: ${{ needs.build-toolchain.outputs.test-toolchain == 'true' }}
+    if: ${{ inputs.arch == 'aarch64' && inputs.platform == 'w64-mingw32' && inputs.crt == 'msvcrt' }}
     runs-on: [Windows, GCC, ARM64]
 
     steps:
@@ -671,7 +671,7 @@ jobs:
 
   build-libjpeg-turbo:
     needs: [build-toolchain]
-    if: ${{ needs.build-toolchain.outputs.test-toolchain == 'true' }}
+    if: ${{ inputs.arch == 'aarch64' && inputs.platform == 'w64-mingw32' && inputs.crt == 'msvcrt' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -730,7 +730,7 @@ jobs:
 
   execute-libpeg-turbo-tests:
     needs: [build-toolchain, build-libjpeg-turbo]
-    if: ${{ needs.build-toolchain.outputs.test-toolchain == 'true' }}
+    if: ${{ inputs.arch == 'aarch64' && inputs.platform == 'w64-mingw32' && inputs.crt == 'msvcrt' }}
     runs-on: [Windows, GCC, ARM64]
 
     steps:
@@ -755,7 +755,7 @@ jobs:
 
   build-ffmpeg:
     needs: [build-toolchain]
-    if: ${{ needs.build-toolchain.outputs.test-toolchain == 'true' }}
+    if: ${{ inputs.arch == 'aarch64' && inputs.platform == 'w64-mingw32' && inputs.crt == 'msvcrt' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -804,7 +804,7 @@ jobs:
 
   execute-ffmpeg-tests:
     needs: [build-toolchain, build-ffmpeg]
-    if: ${{ needs.build-toolchain.outputs.test-toolchain == 'true' }}
+    if: ${{ inputs.arch == 'aarch64' && inputs.platform == 'w64-mingw32' && inputs.crt == 'msvcrt' }}
     runs-on: [Windows, GCC, ARM64]
 
     steps:
