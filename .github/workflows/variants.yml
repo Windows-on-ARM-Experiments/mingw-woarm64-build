@@ -59,37 +59,108 @@ on:
         type: string
 
 jobs:
-  build-toolchain-variants:
-    strategy:
-      fail-fast: false
-      matrix:
-        arch: [aarch64, x86_64]
-        platform: [w64-mingw32, pc-linux-gnu, pc-cygwin]
-        crt: [msvcrt, ucrt, libc]
-        exclude:
-          - platform: w64-mingw32
-            crt: libc
-          - platform: pc-linux-gnu
-            crt: msvcrt
-          - platform: pc-linux-gnu
-            crt: ucrt
-          - platform: pc-cygwin
-            crt: ucrt
-          - platform: pc-cygwin
-            crt: libc
-          - platform: pc-cygwin
-            arch: aarch64
-
+  build-aarch64-w64-mingw32-msvcrt:
     uses: ./.github/workflows/advanced.yml
     with:
-      arch: ${{ matrix.arch }}
-      platform: ${{ matrix.platform }}
-      crt: ${{ matrix.crt }}
+      arch: aarch64
+      platform: w64-mingw32
+      crt: msvcrt
       binutils_branch: ${{ inputs.binutils_branch || 'woarm64' }}
       gcc_branch: ${{ inputs.gcc_branch || 'woarm64' }}
       mingw_branch: ${{ inputs.mingw_branch || 'woarm64' }}
       cygwin_branch: ${{ inputs.cygwin_branch || 'main' }}
       cygwin_packages_branch: ${{ inputs.cygwin_packages_branch || 'main' }}
       cocom_branch: ${{ inputs.cocom_branch || 'master' }}
-      openblas_branch: ${{ inputs.openblas_branch || 'v0.3.26' }}
+      openblas_branch: ${{ inputs.openblas_branch || 'develop' }}
       openssl_branch: ${{ inputs.openssl_branch || 'fix-tests' }}
+
+  build-aarch64-w64-mingw32-ucrt:
+    uses: ./.github/workflows/advanced.yml
+    with:
+      arch: aarch64
+      platform: w64-mingw32
+      crt: ucrt
+      binutils_branch: ${{ inputs.binutils_branch || 'woarm64' }}
+      gcc_branch: ${{ inputs.gcc_branch || 'woarm64' }}
+      mingw_branch: ${{ inputs.mingw_branch || 'woarm64' }}
+      cygwin_branch: ${{ inputs.cygwin_branch || 'main' }}
+      cygwin_packages_branch: ${{ inputs.cygwin_packages_branch || 'main' }}
+      cocom_branch: ${{ inputs.cocom_branch || 'master' }}
+      openblas_branch: ${{ inputs.openblas_branch || 'develop' }}
+      openssl_branch: ${{ inputs.openssl_branch || 'fix-tests' }}
+
+  build-aarch64-pc-linux-gnu-libc:
+    uses: ./.github/workflows/advanced.yml
+    with:
+      arch: aarch64
+      platform: pc-linux-gnu
+      crt: libc
+      binutils_branch: ${{ inputs.binutils_branch || 'woarm64' }}
+      gcc_branch: ${{ inputs.gcc_branch || 'woarm64' }}
+      mingw_branch: ${{ inputs.mingw_branch || 'woarm64' }}
+      cygwin_branch: ${{ inputs.cygwin_branch || 'main' }}
+      cygwin_packages_branch: ${{ inputs.cygwin_packages_branch || 'main' }}
+      cocom_branch: ${{ inputs.cocom_branch || 'master' }}
+      openblas_branch: ${{ inputs.openblas_branch || 'develop' }}
+      openssl_branch: ${{ inputs.openssl_branch || 'fix-tests' }}
+
+  build-x86_64-w64-mingw32-msvcrt:
+    uses: ./.github/workflows/advanced.yml
+    with:
+      arch: x86_64
+      platform: w64-mingw32
+      crt: msvcrt
+      binutils_branch: ${{ inputs.binutils_branch || 'woarm64' }}
+      gcc_branch: ${{ inputs.gcc_branch || 'woarm64' }}
+      mingw_branch: ${{ inputs.mingw_branch || 'woarm64' }}
+      cygwin_branch: ${{ inputs.cygwin_branch || 'main' }}
+      cygwin_packages_branch: ${{ inputs.cygwin_packages_branch || 'main' }}
+      cocom_branch: ${{ inputs.cocom_branch || 'master' }}
+      openblas_branch: ${{ inputs.openblas_branch || 'develop' }}
+      openssl_branch: ${{ inputs.openssl_branch || 'fix-tests' }}
+
+  build-x86_64-w64-mingw32-ucrt:
+    uses: ./.github/workflows/advanced.yml
+    with:
+      arch: x86_64
+      platform: w64-mingw32
+      crt: ucrt
+      binutils_branch: ${{ inputs.binutils_branch || 'woarm64' }}
+      gcc_branch: ${{ inputs.gcc_branch || 'woarm64' }}
+      mingw_branch: ${{ inputs.mingw_branch || 'woarm64' }}
+      cygwin_branch: ${{ inputs.cygwin_branch || 'main' }}
+      cygwin_packages_branch: ${{ inputs.cygwin_packages_branch || 'main' }}
+      cocom_branch: ${{ inputs.cocom_branch || 'master' }}
+      openblas_branch: ${{ inputs.openblas_branch || 'develop' }}
+      openssl_branch: ${{ inputs.openssl_branch || 'fix-tests' }}
+  
+  build-x86_64-pc-linux-gnu-libc:
+    uses: ./.github/workflows/advanced.yml
+    with:
+      arch: x86_64
+      platform: pc-linux-gnu
+      crt: libc
+      binutils_branch: ${{ inputs.binutils_branch || 'woarm64' }}
+      gcc_branch: ${{ inputs.gcc_branch || 'woarm64' }}
+      mingw_branch: ${{ inputs.mingw_branch || 'woarm64' }}
+      cygwin_branch: ${{ inputs.cygwin_branch || 'main' }}
+      cygwin_packages_branch: ${{ inputs.cygwin_packages_branch || 'main' }}
+      cocom_branch: ${{ inputs.cocom_branch || 'master' }}
+      openblas_branch: ${{ inputs.openblas_branch || 'develop' }}
+      openssl_branch: ${{ inputs.openssl_branch || 'fix-tests' }}
+
+  build-x86_64-pc-cygwin-libc:
+    uses: ./.github/workflows/advanced.yml
+    with:
+      arch: x86_64
+      platform: pc-cygwin
+      crt: msvcrt
+      binutils_branch: ${{ inputs.binutils_branch || 'woarm64' }}
+      gcc_branch: ${{ inputs.gcc_branch || 'woarm64' }}
+      mingw_branch: ${{ inputs.mingw_branch || 'woarm64' }}
+      cygwin_branch: ${{ inputs.cygwin_branch || 'main' }}
+      cygwin_packages_branch: ${{ inputs.cygwin_packages_branch || 'main' }}
+      cocom_branch: ${{ inputs.cocom_branch || 'master' }}
+      openblas_branch: ${{ inputs.openblas_branch || 'develop' }}
+      openssl_branch: ${{ inputs.openssl_branch || 'fix-tests' }}
+
