@@ -13,6 +13,12 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$CYGWIN_BUILD_PATH/Makefile" ]]; then
     echo "::group::Configure Cygwin"
         rm -rf $CYGWIN_BUILD_PATH/*
 
+        if [ "$DEBUG" = 1 ] ; then
+            HOST_OPTIONS="$HOST_OPTIONS \
+                --enable-debug \
+                --disable-lto"
+        fi
+
         case "$STAGE" in
             1)
                 TARGET_OPTIONS="$TARGET_OPTIONS \
@@ -37,6 +43,7 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$CYGWIN_BUILD_PATH/Makefile" ]]; then
             --with-sysroot=$TOOLCHAIN_PATH \
             --with-build-sysroot=$TOOLCHAIN_PATH \
             --with-cross-bootstrap \
+            $HOST_OPTIONS \
             $TARGET_OPTIONS
     echo "::endgroup::"
 fi
