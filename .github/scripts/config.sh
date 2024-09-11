@@ -4,6 +4,13 @@ set -e # exit on error
 set -x # echo on
 set -o pipefail # fail of any command in pipeline is an error
 
+BINUTILS_BRANCH=${BINUTILS_BRANCH:-woarm64}
+GCC_BRANCH=${GCC_BRANCH:-woarm64}
+MINGW_BRANCH=${MINGW_BRANCH:-woarm64}
+CYGWIN_BRANCH=${CYGWIN_BRANCH:-main}
+CYGWIN_PACKAGES_BRANCH=${CYGWIN_PACKAGES_BRANCH:-main}
+COCOM_BRANCH=${COCOM_BRANCH:-master}
+
 ARCH=${ARCH:-aarch64}
 PLATFORM=${PLATFORM:-w64-mingw32}
 if [[ "$PLATFORM" =~ (mingw|cygwin) ]]; then
