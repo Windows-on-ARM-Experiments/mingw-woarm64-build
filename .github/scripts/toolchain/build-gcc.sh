@@ -96,6 +96,7 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$GCC_BUILD_PATH/Makefile" ]]; then
                 ;;
         esac
 
+        # ADDED: --enable-tls
         $SOURCE_PATH/gcc/configure \
             --prefix=$TOOLCHAIN_PATH \
             --build=$BUILD \
@@ -104,6 +105,7 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$GCC_BUILD_PATH/Makefile" ]]; then
             --enable-static \
             --enable-shared \
             --enable-languages=c,c++,lto,fortran \
+            --enable-tls \
             --disable-bootstrap \
             --disable-multilib \
             --with-gnu-as \
