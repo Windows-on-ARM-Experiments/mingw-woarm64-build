@@ -30,7 +30,9 @@ echo "::group::Update source code repositories"
     mkdir -p "$SOURCE_PATH"
 
     cd "$SOURCE_PATH"
-    update_repository binutils https://github.com/Windows-on-ARM-Experiments/binutils-woarm64.git woarm64
+    if [[ "$TEST" = 0 ]]; then
+        update_repository binutils https://github.com/Windows-on-ARM-Experiments/binutils-woarm64.git woarm64
+    fi
     update_repository gcc https://github.com/Windows-on-ARM-Experiments/gcc-woarm64.git woarm64
     update_repository mingw https://github.com/Windows-on-ARM-Experiments/mingw-woarm64.git woarm64
     if [[ "$PLATFORM" =~ cygwin ]]; then 

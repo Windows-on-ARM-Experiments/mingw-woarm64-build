@@ -31,7 +31,9 @@ if [[ "$CCACHE" = 1 ]]; then
     ccache $CCACHE_STATISTICS
 fi
 
-$ROOT_PATH/.github/scripts/binutils/build.sh
+if [[ "$TEST" = 0 ]]; then
+    $ROOT_PATH/.github/scripts/binutils/build.sh
+fi
 
 if [[ "$PLATFORM" =~ linux ]]; then
     $ROOT_PATH/.github/scripts/toolchain/install-cross-headers-libs.sh
@@ -43,7 +45,7 @@ if [[ "$PLATFORM" =~ cygwin ]]; then
     $ROOT_PATH/.github/scripts/toolchain/install-cygwin-headers.sh
 fi
 
-if [[ "$BUILD" != "$TARGET" ]]; then
+if [[ "$BUILD" != "$TARGET" && "$TEST" = 0 ]]; then
     $ROOT_PATH/.github/scripts/toolchain/build-gcc-stage1.sh
 fi
 
@@ -73,11 +75,13 @@ fi
 
 $ROOT_PATH/.github/scripts/toolchain/build-gcc.sh
 
-if [[ "$PLATFORM" =~ (mingw|cygwin) ]]; then
-    $ROOT_PATH/.github/scripts/toolchain/build-mingw.sh
-fi
-if [[ "$PLATFORM" =~ cygwin ]]; then
-    $ROOT_PATH/.github/scripts/toolchain/build-cygwin.sh 2
+if [[ "$TEST" = 0 ]]; then
+    if [[ "$PLATFORM" =~ (mingw|cygwin) ]]; then
+        $ROOT_PATH/.github/scripts/toolchain/build-mingw.sh
+    fi
+    if [[ "$PLATFORM" =~ cygwin ]]; then
+        $ROOT_PATH/.github/scripts/toolchain/build-cygwin.sh 2
+    fi
 fi
 
 if [[ "$CCACHE" = 1 ]]; then
