@@ -89,11 +89,6 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$GCC_BUILD_PATH/Makefile" ]]; then
                 TARGET_OPTIONS="$TARGET_OPTIONS \
                     --disable-libsanitizer"
                 ;;
-            aarch64-*mingw*)
-                # CHANGED: --enable-shared to --disable-shared
-                TARGET_OPTIONS="$TARGET_OPTIONS \
-                    --disable-shared"
-                ;;
         esac
 
         $SOURCE_PATH/gcc/configure \

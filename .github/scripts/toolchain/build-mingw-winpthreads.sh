@@ -16,19 +16,12 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$MINGW_BUILD_PATH/Makefile" ]]; then
                 --enable-debug"
         fi
 
-        case "$ARCH" in
-            aarch64)
-                CFLAGS="$CFLAGS \
-                    -mno-outline-atomics"
-            ;;
-        esac
-
         $SOURCE_PATH/mingw/mingw-w64-libraries/winpthreads/configure \
             --prefix=$TOOLCHAIN_PATH/$TARGET \
             --build=$BUILD \
             --host=$TARGET \
             --enable-static \
-            --enable-shared \
+            --disable-shared \
             $HOST_OPTIONS \
             $TARGET_OPTIONS \
             CFLAGS="$CFLAGS"
