@@ -26,19 +26,26 @@ else
     cd $BOOST_BUILD_DIR/libs/process
     git checkout develop
     cd -
+    
+    # time git clone --recursive https://github.com/boostorg/boost.git $BOOST_BUILD_DIR
+    # cd $BOOST_BUILD_DIR
+    # git checkout develop
+    # git submodule update --init --recursive
+    # cd -
 fi
 
 cd $BOOST_BUILD_DIR
 
-echo "using gcc :  : /home/vejby/cross-aarch64-w64-mingw32-msvcrt/bin/aarch64-w64-mingw32-g++ ;" > "user-config.jam"
+echo "using gcc : 15 : /home/vejby/cross-aarch64-w64-mingw32-msvcrt/bin/aarch64-w64-mingw32-g++ : : <target-os>windows <address-model>64 <architecture>arm ;" > "user-config.jam"
 
 echo "Running Boost bootstrap.."
-time ./bootstrap.sh > boost-bootstrap.log
+./bootstrap.sh > boost-bootstrap.log
 
 echo "Running Boost b2 build..."
-# --without-context --without-cobalt --without-coroutine --without-fiber
+# --without-context --without-coroutine --without-fiber
 #    context contains assembler and it doesn't have specified target for MinGW Win ARM64
-#    cobalt, coroutine and fiber depends on context
+#    coroutine and fiber depends on context and they invoke its build, so we have to skip them
+#    (also Cobalt depends on it but build seems to work just fine with it)
 #    TODO: Investigate if I just didn't specify args uncorrectly as I had problems with that even
 #       for x64 MinGW compilator
 # --without-charconv --without-json
@@ -47,7 +54,10 @@ echo "Running Boost b2 build..."
 #    a library that defines a set of compiler architecture, operating system, library, and other
 #    version numbers it can gather from predefined macros
 #    -> needs to have specified target for MinGW Win ARM 64 as well
-time ./b2 --user-config=./user-config.jam --prefix=./build --debug-configuration target-os=windows address-model=64 variant=debug debug-symbols=on install --without-context --without-cobalt --without-coroutine --without-fiber --without-charconv --without-json --without-predef --without-program_options > boost-build.log
+
+# MinGW defaults to an older version of Windows header files, Process library of Boost needs newer
+# one, we default to the newest: define=_WIN32_WINNT=0x0A00
+./b2 --user-config=./user-config.jam --prefix=./build --debug-configuration target-os=windows address-model=64 variant=debug architecture=arm binary-format=pe abi=aapcs toolset=gcc-15 define=_WIN32_WINNT=0x0A00 link=static install > boost-build.log
 
 echo "Running Boost test.."
 cd status
@@ -68,4 +78,4 @@ cd status
 
 # Can run quick/minimal or full test suite. When running full test suite, we can specify modules to
 # be excluded from testing like --exclude-tests=context,cobalt,coroutine,fiber,charconv,json,predef
-time ../b2 quick --user-config=../user-config.jam -a --debug-configuration -d+2 target-os=windows address-model=64 variant=debug debug-symbols=on --exclude-tests=program_options > ../boost-test.log
+../b2 quick --user-config=../user-config.jam -d2 --debug-configuration --hash target-os=windows address-model=64 variant=debug architecture=arm binary-format=pe abi=aapcs toolset=gcc-15 define=_WIN32_WINNT=0x0A00 cxxflags=-Wno-error=attributes link=static > ../boost-test.log
