@@ -56,8 +56,12 @@ on:
     outputs:
       toolchain-package-name:
         value: ${{ jobs.build-toolchain.outputs.toolchain-package-name }}
+      runtime-package-name:
+        value: ${{ jobs.build-toolchain.outputs.runtime-package-name }}
       toolchain-cache-key:
         value: ${{ jobs.build-toolchain.outputs.toolchain-cache-key }}
+      runtime-cache-key:
+        value: ${{ jobs.build-toolchain.outputs.runtime-cache-key }}
 
 env:
   BINUTILS_REPO: Windows-on-ARM-Experiments/binutils-woarm64
@@ -105,6 +109,7 @@ env:
   BUILD_PATH: ${{ github.workspace }}/build
   CCACHE_DIR_PATH: ${{ github.workspace }}/ccache
   ARTIFACT_PATH: ${{ github.workspace }}/artifact
+  RELATIVE_ARTIFACT_PATH: ./artifact
 
   CCACHE: 1
   DELETE_BUILD: 1
@@ -150,42 +155,28 @@ jobs:
           path: ${{ github.workspace }}
           fetch-depth: 0
 
-      - name: Get workflow SHA
-        id: workflow-sha
+      - name: Get cache keys
+        id: cache-keys
         run: |
-          .github/scripts/get-files-sha.sh ${{ github.workspace }} .github/workflows/advanced.yml
-
-      - name: Get binutils SHA
-        id: binutils-sha
-        run: |
-          .github/scripts/get-repository-sha.sh ${{ env.BINUTILS_REPO }} ${{ env.BINUTILS_BRANCH }}
-
-      - name: Get GCC SHA
-        id: gcc-sha
-        run: |
-          .github/scripts/get-repository-sha.sh ${{ env.GCC_REPO }} ${{ env.GCC_BRANCH }}
-
-      - name: Get MinGW SHA
-        id: mingw-sha
-        run: |
-          .github/scripts/get-repository-sha.sh ${{ env.MINGW_REPO }} ${{ env.MINGW_BRANCH }}
-
-      - name: Get binutils scripts SHA
-        id: binutils-scripts-sha
-        run: |
-          .github/scripts/get-files-sha.sh ${{ github.workspace }} .github/scripts/binutils
-  
-      - name: Get toolchain scripts SHA
-        id: toolchain-scripts-sha
-        run: |
-          .github/scripts/get-files-sha.sh ${{ github.workspace }} .github/scripts/toolchain
+          .github/scripts/get-cache-keys.sh
 
       - name: Cache toolchain
         id: cache-toolchain
+        if: ${{ env.PACK_TOOLCHAIN == 'true' }}
         uses: actions/cache@v4
         with:
           path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
-          key: ${{ env.TOOLCHAIN_NAME }}-${{ steps.workflow-sha.outputs.sha }}-${{ steps.binutils-sha.outputs.sha }}-${{ steps.gcc-sha.outputs.sha }}-${{ steps.mingw-sha.outputs.sha }}-${{ steps.binutils-scripts-sha.outputs.sha }}-${{ steps.toolchain-scripts-sha.outputs.sha }}
+          key: ${{ steps.cache-keys.outputs.toolchain-cache-key }}
+          enableCrossOsArchive: true
+
+      - name: Cache runtime
+        id: cache-runtime
+        if: ${{ env.PACK_TOOLCHAIN == 'true' }}
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.RELATIVE_ARTIFACT_PATH }}/${{ env.RUNTIME_PACKAGE_NAME }}
+          key: ${{ steps.cache-keys.outputs.runtime-cache-key }}
+          enableCrossOsArchive: true
 
       - name: Checkout binutils
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
@@ -254,19 +245,13 @@ jobs:
         run: |
           .github/scripts/install-libraries.sh
 
-      - name: Get cache key
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
-        id: get-cache-key
-        run: |
-          echo "timestamp=$(date -u --iso-8601=seconds)" >> "$GITHUB_OUTPUT"
-
       - name: Restore Ccache
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
         uses: actions/cache/restore@v4
         with:
           path: ${{ env.CCACHE_DIR_PATH }}
-          key: advanced-gcc-ccache-${{ steps.get-cache-key.outputs.timestamp }}
-          restore-keys: advanced-gcc-ccache-
+          key: ${{ steps.cache-keys.outputs.ccache-key }}
+          restore-keys: ${{ steps.cache-keys.outputs.ccache-restore-keys }}
 
       - name: Build binutils
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
@@ -343,7 +328,7 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: ${{ env.CCACHE_DIR_PATH }}
-          key: advanced-gcc-ccache-${{ steps.get-cache-key.outputs.timestamp }}
+          key: ccache-${{ steps.cache-keys.outputs.ccache-key }}
 
       - name: Pack toolchain
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && env.PACK_TOOLCHAIN == 'true' }}
@@ -355,16 +340,6 @@ jobs:
         run: |
           .github/scripts/toolchain/pack-runtime.sh
 
-      - name: Pack toolchain mock
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && env.PACK_TOOLCHAIN != 'true' }}
-        run: |
-          .github/scripts/toolchain/pack-mock.sh
-
-      - name: Pack runtime mock
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && env.PACK_TOOLCHAIN != 'true' }}
-        run: |
-          .github/scripts/toolchain/pack-runtime-mock.sh
-
       - name: Upload build folder
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && failure() }}
         uses: actions/upload-artifact@v4
@@ -374,7 +349,7 @@ jobs:
           path: ${{ env.BUILD_PATH }}
 
       - name: Upload toolchain artifact
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' || env.PACK_TOOLCHAIN == 'true' }}
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && env.PACK_TOOLCHAIN == 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.TOOLCHAIN_PACKAGE_NAME }}
@@ -382,7 +357,7 @@ jobs:
           retention-days: 3
 
       - name: Upload runtime artifact
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' || env.PACK_TOOLCHAIN == 'true' }}
+        if: ${{ steps.cache-runtime.outputs.cache-hit != 'true' && env.PACK_TOOLCHAIN == 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.RUNTIME_PACKAGE_NAME }}
@@ -391,7 +366,9 @@ jobs:
 
     outputs:
       toolchain-package-name: ${{ env.PACK_TOOLCHAIN == 'true' && env.TOOLCHAIN_PACKAGE_NAME || '' }}
-      toolchain-cache-key: ${{ env.PACK_TOOLCHAIN == 'true' && format('{0}-{1}-{2}-{3}-{4}-{5}-{6}', env.TOOLCHAIN_NAME, steps.workflow-sha.outputs.sha, steps.binutils-sha.outputs.sha, steps.gcc-sha.outputs.sha, steps.mingw-sha.outputs.sha, steps.binutils-scripts-sha.outputs.sha, steps.toolchain-scripts-sha.outputs.sha) || '' }}
+      runtime-package-name: ${{ env.PACK_TOOLCHAIN == 'true' && env.RUNTIME_PACKAGE_NAME || '' }}
+      toolchain-cache-key: ${{ env.PACK_TOOLCHAIN == 'true' && steps.cache-keys.outputs.toolchain-cache-key || '' }}
+      runtime-cache-key: ${{ env.PACK_TOOLCHAIN == 'true' && steps.cache-keys.outputs.runtime-cache-key || '' }}
 
   build-aarch64-tests:
     needs: [build-toolchain]
@@ -406,11 +383,12 @@ jobs:
         with:
           path: ${{ github.workspace }}
 
-      - name: Download toolchain
+      - name: Download ${{ env.TOOLCHAIN_NAME }} toolchain
         uses: actions/cache/restore@v4
         with:
           path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
           key: ${{ needs.build-toolchain.outputs.toolchain-cache-key }}
+          enableCrossOsArchive: true
           fail-on-cache-miss: true
 
       - name: Unpack toolchain
@@ -433,7 +411,10 @@ jobs:
           retention-days: 3
 
   execute-aarch64-tests:
-    needs: [build-aarch64-tests]
+    needs: [
+      build-toolchain,
+      build-aarch64-tests
+    ]
     runs-on: [Windows, GCC, ARM64]
 
     env:
@@ -445,11 +426,18 @@ jobs:
         with:
           path: ${{ github.workspace }}
 
+      - name: Install zstd
+        run: |
+          .github/scripts/install-zstd.ps1
+
       - name: Download ${{ env.TOOLCHAIN_NAME }} runtime
-        uses: actions/download-artifact@v4
+        uses: actions/cache/restore@v4
         with:
-          name: ${{ env.RUNTIME_PACKAGE_NAME }}
-          path: ${{ env.ARTIFACT_PATH }}
+          path: ${{ env.RELATIVE_ARTIFACT_PATH }}/${{ env.RUNTIME_PACKAGE_NAME }}
+          key: ${{ needs.build-toolchain.outputs.runtime-cache-key }}
+          restore-keys: ${{ needs.build-toolchain.outputs.runtime-cache-key }}
+          enableCrossOsArchive: true
+          fail-on-cache-miss: true
 
       - name: Download ${{ env.TOOLCHAIN_NAME }} tests
         uses: actions/download-artifact@v4
@@ -486,11 +474,12 @@ jobs:
           ref: ${{ env.OPENBLAS_BRANCH }}
           path: ${{ env.SOURCE_PATH }}/openblas
 
-      - name: Download toolchain
+      - name: Download ${{ env.TOOLCHAIN_NAME }} toolchain
         uses: actions/cache/restore@v4
         with:
           path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
           key: ${{ needs.build-toolchain.outputs.toolchain-cache-key }}
+          enableCrossOsArchive: true
           fail-on-cache-miss: true
 
       - name: Unpack toolchain
@@ -513,7 +502,10 @@ jobs:
           retention-days: 3
         
   execute-openblas-tests:
-    needs: [build-openblas]
+    needs: [
+      build-toolchain,
+      build-openblas
+    ]
     runs-on: [Windows, GCC, ARM64]
 
     env:
@@ -525,11 +517,18 @@ jobs:
         with:
           path: ${{ github.workspace }}
 
+      - name: Install zstd
+        run: |
+          .github/scripts/install-zstd.ps1
+
       - name: Download ${{ env.TOOLCHAIN_NAME }} runtime
-        uses: actions/download-artifact@v4
+        uses: actions/cache/restore@v4
         with:
-          name: ${{ env.RUNTIME_PACKAGE_NAME }}
-          path: ${{ env.ARTIFACT_PATH }}
+          path: ${{ env.RELATIVE_ARTIFACT_PATH }}/${{ env.RUNTIME_PACKAGE_NAME }}
+          key: ${{ needs.build-toolchain.outputs.runtime-cache-key }}
+          restore-keys: ${{ needs.build-toolchain.outputs.runtime-cache-key }}
+          enableCrossOsArchive: true
+          fail-on-cache-miss: true
 
       - name: Download OpenBLAS tests
         uses: actions/download-artifact@v4
@@ -570,11 +569,12 @@ jobs:
           ref: ${{ env.ZLIB_BRANCH }}
           path: ${{ env.SOURCE_PATH }}/zlib
 
-      - name: Download toolchain
+      - name: Download ${{ env.TOOLCHAIN_NAME }} toolchain
         uses: actions/cache/restore@v4
         with:
           path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
           key: ${{ needs.build-toolchain.outputs.toolchain-cache-key }}
+          enableCrossOsArchive: true
           fail-on-cache-miss: true
 
       - name: Unpack toolchain
@@ -616,11 +616,12 @@ jobs:
           ref: ${{ env.LIBXML2_BRANCH }}
           path: ${{ env.SOURCE_PATH }}/libxml2
 
-      - name: Download toolchain
+      - name: Download ${{ env.TOOLCHAIN_NAME }} toolchain
         uses: actions/cache/restore@v4
         with:
           path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
           key: ${{ needs.build-toolchain.outputs.toolchain-cache-key }}
+          enableCrossOsArchive: true
           fail-on-cache-miss: true
 
       - name: Unpack toolchain
@@ -677,11 +678,12 @@ jobs:
         run: |
           .github/scripts/openssl/install-dependencies.sh
 
-      - name: Download toolchain
+      - name: Download ${{ env.TOOLCHAIN_NAME }} toolchain
         uses: actions/cache/restore@v4
         with:
           path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
           key: ${{ needs.build-toolchain.outputs.toolchain-cache-key }}
+          enableCrossOsArchive: true
           fail-on-cache-miss: true
 
       - name: Unpack toolchain
@@ -725,7 +727,10 @@ jobs:
           retention-days: 3
 
   execute-openssl-tests:
-    needs: [build-openssl]
+    needs: [
+      build-toolchain,
+      build-openssl
+    ]
     runs-on: [Windows, GCC, ARM64]
 
     env:
@@ -745,11 +750,18 @@ jobs:
           ref: ${{ env.OPENSSL_BRANCH }}
           path: ${{ env.SOURCE_PATH }}/openssl
 
+      - name: Install zstd
+        run: |
+          .github/scripts/install-zstd.ps1
+
       - name: Download ${{ env.TOOLCHAIN_NAME }} runtime
-        uses: actions/download-artifact@v4
+        uses: actions/cache/restore@v4
         with:
-          name: ${{ env.RUNTIME_PACKAGE_NAME }}
-          path: ${{ env.ARTIFACT_PATH }}
+          path: ${{ env.RELATIVE_ARTIFACT_PATH }}/${{ env.RUNTIME_PACKAGE_NAME }}
+          key: ${{ needs.build-toolchain.outputs.runtime-cache-key }}
+          restore-keys: ${{ needs.build-toolchain.outputs.runtime-cache-key }}
+          enableCrossOsArchive: true
+          fail-on-cache-miss: true
 
       - name: Download OpenSSL tests
         uses: actions/download-artifact@v4
@@ -803,11 +815,12 @@ jobs:
         run: |
           .github/scripts/libjpeg-turbo/patch.sh
 
-      - name: Download toolchain
+      - name: Download ${{ env.TOOLCHAIN_NAME }} toolchain
         uses: actions/cache/restore@v4
         with:
           path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
           key: ${{ needs.build-toolchain.outputs.toolchain-cache-key }}
+          enableCrossOsArchive: true
           fail-on-cache-miss: true
 
       - name: Unpack toolchain
@@ -841,7 +854,10 @@ jobs:
           retention-days: 3
 
   execute-libpeg-turbo-tests:
-    needs: [build-libjpeg-turbo]
+    needs: [
+      build-toolchain,
+      build-libjpeg-turbo
+    ]
     runs-on: [Windows, GCC, ARM64]
 
     env:
@@ -853,11 +869,18 @@ jobs:
         with:
           path: ${{ github.workspace }}
 
+      - name: Install zstd
+        run: |
+          .github/scripts/install-zstd.ps1
+
       - name: Download ${{ env.TOOLCHAIN_NAME }} runtime
-        uses: actions/download-artifact@v4
+        uses: actions/cache/restore@v4
         with:
-          name: ${{ env.RUNTIME_PACKAGE_NAME }}
-          path: ${{ env.ARTIFACT_PATH }}
+          path: ${{ env.RELATIVE_ARTIFACT_PATH }}/${{ env.RUNTIME_PACKAGE_NAME }}
+          key: ${{ needs.build-toolchain.outputs.runtime-cache-key }}
+          restore-keys: ${{ needs.build-toolchain.outputs.runtime-cache-key }}
+          enableCrossOsArchive: true
+          fail-on-cache-miss: true
 
       - name: Download libjpeg-turbo tests
         uses: actions/download-artifact@v4
@@ -898,11 +921,12 @@ jobs:
           path: ${{ env.SOURCE_PATH }}/ffmpeg
           fetch-depth: 0
 
-      - name: Download toolchain
+      - name: Download ${{ env.TOOLCHAIN_NAME }} toolchain
         uses: actions/cache/restore@v4
         with:
           path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
           key: ${{ needs.build-toolchain.outputs.toolchain-cache-key }}
+          enableCrossOsArchive: true
           fail-on-cache-miss: true
 
       - name: Unpack toolchain
@@ -929,7 +953,10 @@ jobs:
           retention-days: 3
 
   execute-ffmpeg-tests:
-    needs: [build-ffmpeg]
+    needs: [
+      build-toolchain,
+      build-ffmpeg
+    ]
     runs-on: [Windows, GCC, ARM64]
 
     env:
@@ -949,16 +976,23 @@ jobs:
           path: ${{ env.SOURCE_PATH }}/ffmpeg
           fetch-depth: 0
 
+      - name: Install zstd
+        run: |
+          .github/scripts/install-zstd.ps1
+
       - name: Patch FFmpeg
         shell: bash
         run: |
           .github/scripts/ffmpeg/patch.sh
 
       - name: Download ${{ env.TOOLCHAIN_NAME }} runtime
-        uses: actions/download-artifact@v4
+        uses: actions/cache/restore@v4
         with:
-          name: ${{ env.RUNTIME_PACKAGE_NAME }}
-          path: ${{ env.ARTIFACT_PATH }}
+          path: ${{ env.RELATIVE_ARTIFACT_PATH }}/${{ env.RUNTIME_PACKAGE_NAME }}
+          key: ${{ needs.build-toolchain.outputs.runtime-cache-key }}
+          restore-keys: ${{ needs.build-toolchain.outputs.runtime-cache-key }}
+          enableCrossOsArchive: true
+          fail-on-cache-miss: true
 
       - name: Download FFmpeg tests
         uses: actions/download-artifact@v4
