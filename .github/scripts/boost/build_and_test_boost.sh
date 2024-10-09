@@ -36,8 +36,22 @@ fi
 
 cd $BOOST_BUILD_DIR
 
-echo "using gcc : 15 : /home/vejby/cross-aarch64-w64-mingw32-msvcrt/bin/aarch64-w64-mingw32-g++ : : <target-os>windows <address-model>64 <architecture>arm ;" > "user-config.jam"
+# WSL linux x64 to win x64: x86_64-pc-linux-gnu -> x86_64-w64-mingw32
+# echo "using gcc : 10 : x86_64-w64-mingw32-g++ : : <target-os>windows <address-model>64 <architecture>x86 ;" > "user-config.jam"
 
+# WSL linux arm64 -> win arm64: aarch64-pc-linux-gnu -> aarch64-w64-mingw32
+# echo "using gcc : 15 : /home/vejby/cross-aarch64-w64-mingw32-msvcrt/bin/aarch64-w64-mingw32-g++ : : <target-os>windows <address-model>64 <architecture>arm ;" > "user-config.jam"
+
+# MSYS x64 -> win x64: x86_64-pc-msys -> x86_64-w64-mingw32
+# TODO: echo "using gcc : 15 : /opt/bin/x86_64-w64-mingw32-g++ : : <target-os>windows <address-model>64 <architecture>x86 ;" > "user-config.jam"
+
+# MSYS x64 -> arm64: x86_64-pc-msys -> aarch64-w64-mingw32
+echo "using gcc : 15 : /opt/bin/aarch64-w64-mingw32-g++ : : <target-os>windows <address-model>64 <architecture>arm ;" > "user-config.jam"
+
+# MSYS arm64 -> win arm64: TODO: aarch64-pc-msys/aarch64-w64-mingw32 -> aarch64-w64-mingw32
+# TODO: echo "using gcc : 15 : /opt/bin/aarch64-w64-mingw32-g++ : : <target-os>windows <address-model>64 <architecture>arm ;" > "user-config.jam"
+
+# Some gcc is needed for running this as well. I'm using MinGW from package manager (e.g. pacman -S gcc)
 echo "Running Boost bootstrap.."
 ./bootstrap.sh > boost-bootstrap.log
 
