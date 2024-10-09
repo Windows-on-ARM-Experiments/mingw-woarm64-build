@@ -88,7 +88,11 @@ cd status
 # This doesn't work as test .exe files are actually run on Windows which doesn't understand
 # LD_LIBRARY_PATH.
 #
-# TODO: Solve missing libraries by copying them, appending LD_LIBRARY_PATH to Windows PATH or ...
+# We solve missing libraries from group 1 by copying them and missing libraries from group 2 by
+# building tests with static linking.
+# MSYS x64 -> arm64: x86_64-pc-msys -> aarch64-w64-mingw32
+cp /opt/lib/gcc/aarch64-w64-mingw32/15.0.0/libgcc_s_seh-1.dll .
+cp /opt/lib/gcc/aarch64-w64-mingw32/15.0.0/libstdc++-6.dll .
 
 # Can run quick/minimal or full test suite. When running full test suite, we can specify modules to
 # be excluded from testing like --exclude-tests=context,cobalt,coroutine,fiber,charconv,json,predef
