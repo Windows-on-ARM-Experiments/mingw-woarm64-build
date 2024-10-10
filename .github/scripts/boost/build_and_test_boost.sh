@@ -74,7 +74,7 @@ echo "Running Boost b2 build..."
 # abi=aapcs architecture=arm
 time ./b2 --user-config=./user-config.jam --prefix=./build --debug-configuration target-os=windows address-model=64 variant=debug architecture=x86 binary-format=pe abi=ms toolset=gcc-13 define=_WIN32_WINNT=0x0A00 link=static install > boost-build.log
 
-echo "Running Boost test.."
+echo "Running Boost quick test.."
 cd status
 
 # Built test executables can depend on various DLLs. These can be categorized into two groups:
@@ -103,3 +103,6 @@ cp /mingw64/bin/libstdc++-6.dll .
 # Can run quick/minimal or full test suite. When running full test suite, we can specify modules to
 # be excluded from testing like --exclude-tests=context,cobalt,coroutine,fiber,charconv,json,predef
 time ../b2 quick --user-config=../user-config.jam -d2 --debug-configuration --hash target-os=windows address-model=64 variant=debug architecture=x86 binary-format=pe abi=ms toolset=gcc-13 define=_WIN32_WINNT=0x0A00 cxxflags=-Wno-error=attributes link=static > ../boost-test-quick.log
+
+echo "Running Boost minimal test.."
+time ../b2 minimal -a --user-config=../user-config.jam -d2 --debug-configuration --hash target-os=windows address-model=64 variant=debug architecture=x86 binary-format=pe abi=ms toolset=gcc-13 define=_WIN32_WINNT=0x0A00 cxxflags=-Wno-error=attributes link=static > ../boost-test-minimal.log
