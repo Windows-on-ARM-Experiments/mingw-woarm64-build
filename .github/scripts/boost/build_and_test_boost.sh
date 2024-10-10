@@ -42,18 +42,18 @@ cd $BOOST_BUILD_DIR
 # WSL linux arm64 -> win arm64: aarch64-pc-linux-gnu -> aarch64-w64-mingw32
 # echo "using gcc : 15 : /home/vejby/cross-aarch64-w64-mingw32-msvcrt/bin/aarch64-w64-mingw32-g++ : : <target-os>windows <address-model>64 <architecture>arm ;" > "user-config.jam"
 
-# MSYS x64 -> win x64: x86_64-pc-msys -> x86_64-w64-mingw32
-# TODO: echo "using gcc : 15 : /opt/bin/x86_64-w64-mingw32-g++ : : <target-os>windows <address-model>64 <architecture>x86 ;" > "user-config.jam"
+# MSYS x64 -> win x64: x86_64-pc-msys -> x86_64-pc-msys
+echo "using gcc : 13 : /usr/bin/x86_64-pc-msys-g++ : : <target-os>windows <address-model>64 <architecture>x86 ;" > "user-config.jam"
 
-# MSYS x64 -> arm64: x86_64-pc-msys -> aarch64-w64-mingw32
-echo "using gcc : 15 : /opt/bin/aarch64-w64-mingw32-g++ : : <target-os>windows <address-model>64 <architecture>arm ;" > "user-config.jam"
+# MSYS x64 -> win arm64: x86_64-pc-msys -> aarch64-w64-mingw32
+# echo "using gcc : 15 : /opt/bin/aarch64-w64-mingw32-g++ : : <target-os>windows <address-model>64 <architecture>arm ;" > "user-config.jam"
 
 # MSYS arm64 -> win arm64: TODO: aarch64-pc-msys/aarch64-w64-mingw32 -> aarch64-w64-mingw32
 # TODO: echo "using gcc : 15 : /opt/bin/aarch64-w64-mingw32-g++ : : <target-os>windows <address-model>64 <architecture>arm ;" > "user-config.jam"
 
 # Some gcc is needed for running this as well. I'm using MinGW from package manager (e.g. pacman -S gcc)
 echo "Running Boost bootstrap.."
-./bootstrap.sh > boost-bootstrap.log
+time ./bootstrap.sh > boost-bootstrap.log
 
 echo "Running Boost b2 build..."
 # --without-context --without-coroutine --without-fiber
@@ -71,7 +71,8 @@ echo "Running Boost b2 build..."
 
 # MinGW defaults to an older version of Windows header files, Process library of Boost needs newer
 # one, we default to the newest: define=_WIN32_WINNT=0x0A00
-./b2 --user-config=./user-config.jam --prefix=./build --debug-configuration target-os=windows address-model=64 variant=debug architecture=arm binary-format=pe abi=aapcs toolset=gcc-15 define=_WIN32_WINNT=0x0A00 link=static install > boost-build.log
+# abi=aapcs architecture=arm
+time ./b2 --user-config=./user-config.jam --prefix=./build --debug-configuration target-os=windows address-model=64 variant=debug architecture=x86 binary-format=pe abi=ms toolset=gcc-13 define=_WIN32_WINNT=0x0A00 link=static install > boost-build.log
 
 echo "Running Boost test.."
 cd status
@@ -90,10 +91,15 @@ cd status
 #
 # We solve missing libraries from group 1 by copying them and missing libraries from group 2 by
 # building tests with static linking.
+
+# MSYS x64 -> win x64: x86_64-w64-mingw32 -> x86_64-w64-mingw32
+cp /mingw64/bin/libgcc_s_seh-1.dll .
+cp /mingw64/bin/libstdc++-6.dll .
+
 # MSYS x64 -> arm64: x86_64-pc-msys -> aarch64-w64-mingw32
-cp /opt/lib/gcc/aarch64-w64-mingw32/15.0.0/libgcc_s_seh-1.dll .
-cp /opt/lib/gcc/aarch64-w64-mingw32/15.0.0/libstdc++-6.dll .
+# cp /opt/lib/gcc/aarch64-w64-mingw32/15.0.0/libgcc_s_seh-1.dll .
+# cp /opt/lib/gcc/aarch64-w64-mingw32/15.0.0/libstdc++-6.dll .
 
 # Can run quick/minimal or full test suite. When running full test suite, we can specify modules to
 # be excluded from testing like --exclude-tests=context,cobalt,coroutine,fiber,charconv,json,predef
-../b2 quick --user-config=../user-config.jam -d2 --debug-configuration --hash target-os=windows address-model=64 variant=debug architecture=arm binary-format=pe abi=aapcs toolset=gcc-15 define=_WIN32_WINNT=0x0A00 cxxflags=-Wno-error=attributes link=static > ../boost-test.log
+time ../b2 quick --user-config=../user-config.jam -d2 --debug-configuration --hash target-os=windows address-model=64 variant=debug architecture=x86 binary-format=pe abi=ms toolset=gcc-13 define=_WIN32_WINNT=0x0A00 cxxflags=-Wno-error=attributes link=static > ../boost-test-quick.log
