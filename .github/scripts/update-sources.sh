@@ -17,6 +17,10 @@ function update_repository() {
         pushd $DIRECTORY
             if [[ "$RESET_SOURCES" = 1 ]]; then
                 git reset --hard HEAD
+                if ! git show-ref --verify --quiet refs/remotes/origin/$BRANCH; then
+                    git remote set-branches --add origin $BRANCH
+                    git fetch origin --prune
+                fi
                 git switch $BRANCH
                 git clean -fdx
             fi
