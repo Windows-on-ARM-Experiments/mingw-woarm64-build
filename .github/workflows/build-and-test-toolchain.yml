@@ -1,6 +1,7 @@
 name: Build and test main toolchain
 
 on:
+  pull_request:
   workflow_dispatch:
     inputs:
       binutils_branch:
@@ -61,7 +62,7 @@ on:
 
 env:
   BINUTILS_BRANCH: ${{ inputs.binutils_branch || 'woarm64' }}
-  GCC_BRANCH: ${{ inputs.gcc_branch || 'woarm64' }}
+  GCC_BRANCH: ${{ inputs.gcc_branch || 'fix-d' }}
   MINGW_BRANCH: ${{ inputs.mingw_branch || 'woarm64' }}
 
   ARCH: ${{ inputs.arch || 'x86_64' }}
