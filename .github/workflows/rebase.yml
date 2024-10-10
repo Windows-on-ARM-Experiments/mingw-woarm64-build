@@ -28,6 +28,8 @@ env:
   GCC_UPSTREAM_URL: git://gcc.gnu.org/git/gcc.git
   MINGW_REPO: Windows-on-ARM-Experiments/mingw-woarm64
   MINGW_UPSTREAM_URL: https://git.code.sf.net/p/mingw-w64/mingw-w64
+  CYGWIN_REPO: Windows-on-ARM-Experiments/newlib-cygwin
+  CYGWIN_UPSTREAM_URL: https://cygwin.com/git/newlib-cygwin.git
 
   SOURCE_PATH: ${{ github.workspace }}/code
   ORIGIN_BRANCH: ${{ inputs.origin_branch || 'woarm64' }}
@@ -104,8 +106,36 @@ jobs:
         run: |
           ${{ github.workspace }}/.github/scripts/rebase-start.sh ${{ env.MINGW_UPSTREAM_URL }} ${{ env.UPSTREAM_BRANCH }} ${{ env.REBASE_BRANCH }}
 
+  start-cygwin-rebase:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: ${{ github.workspace }}
+
+      - name: Checkout Cygwin
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GNU_PUSH_PAT }}
+          repository: ${{ env.CYGWIN_REPO }}
+          ref: ${{ env.ORIGIN_BRANCH }}
+          fetch-depth: 0
+          path: ${{ env.SOURCE_PATH }}/cygwin
+
+      - name: Start Cygwin rebase
+        working-directory: ${{ env.SOURCE_PATH }}/cygwin
+        run: |
+          ${{ github.workspace }}/.github/scripts/rebase-start.sh ${{ env.CYGWIN_UPSTREAM_URL }} ${{ env.UPSTREAM_BRANCH }} ${{ env.REBASE_BRANCH }}
+
   build:
-    needs: [start-binutils-rebase, start-gcc-rebase, start-mingw-rebase]
+    needs: [
+      start-binutils-rebase,
+      start-gcc-rebase,
+      start-mingw-rebase,
+      start-cygwin-rebase
+    ]
     uses: ./.github/workflows/advanced.yml
     with:
       binutils_branch: ${{ inputs.rebase_branch || 'rebase-upstream' }}
@@ -178,6 +208,29 @@ jobs:
 
       - name: Finish MinGW rebase
         working-directory: ${{ env.SOURCE_PATH }}/mingw
+        run: |
+          ${{ github.workspace }}/.github/scripts/rebase-finish.sh ${{ env.REBASE_BRANCH }} ${{ env.ORIGIN_BRANCH }}
+
+  finish-cygwin-rebase:
+    needs: [build]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: ${{ github.workspace }}
+
+      - name: Checkout Cygwin
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GNU_PUSH_PAT }}
+          repository: ${{ env.CYGWIN_REPO }}
+          ref: ${{ env.ORIGIN_BRANCH }}
+          path: ${{ env.SOURCE_PATH }}/cygwin
+
+      - name: Finish Cygwin rebase
+        working-directory: ${{ env.SOURCE_PATH }}/cygwin
         run: |
           ${{ github.workspace }}/.github/scripts/rebase-finish.sh ${{ env.REBASE_BRANCH }} ${{ env.ORIGIN_BRANCH }}
 
