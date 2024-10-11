@@ -24,7 +24,7 @@ which is the default. To see what will be installed refer to
 
 # Building the Cross-Compiler
 
-To build the cross-compiler and install it into a `~/cross-aarch64-w64-mingw32-msvcrt` folder,
+To build the cross-compiler and install it into a `~/cross-aarch64-w64-mingw32-ucrt` folder,
 follow these steps:
 
 1. Clone the repository:
@@ -69,7 +69,7 @@ The build script does multiple things:
 
 After building the toolchain, to build a simple C source code file run:
 ```bash
-export PATH="~/cross-aarch64-w64-mingw32-msvcrt/bin:$PATH"
+export PATH="~/cross-aarch64-w64-mingw32-ucrt/bin:$PATH"
 aarch64-w64-mingw32-gcc hello.c -o hello.exe
 ```
 
