@@ -34,11 +34,17 @@ COCOM_BASE_BRANCH=master
 
 ARCH=${ARCH:-aarch64}
 PLATFORM=${PLATFORM:-w64-mingw32}
-if [[ "$PLATFORM" =~ (mingw|cygwin) ]]; then
-    CRT=${CRT:-ucrt}
-else
-    CRT=${CRT:-libc}
-fi
+case "$PLATFORM" in 
+    *mingw*)
+        CRT=${CRT:-ucrt}
+        ;;
+    *cygwin*)
+        CRT=${CRT:-msvcrt}
+        ;;
+    *)
+        CRT=${CRT:-libc}
+        ;;
+esac
 
 PROCESSOR=$(uname --processor)
 BUILD=${BUILD:-$PROCESSOR-pc-linux-gnu}

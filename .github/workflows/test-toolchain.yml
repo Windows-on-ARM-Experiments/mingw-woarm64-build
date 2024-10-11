@@ -38,7 +38,7 @@ on:
       crt:
         description: 'C runtime to build for'
         required: false
-        default: 'msvcrt'
+        default: 'ucrt'
   workflow_call:
     inputs:
       binutils_branch_baseline:
