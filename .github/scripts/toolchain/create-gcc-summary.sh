@@ -20,7 +20,7 @@ print_summary() {
     if [[ "$TOTAL" = 0 ]]; then
         RELIABILITY_RATE="undefined"
     else
-        RELIABILITY_RATE="$(($TOTAL_EXPECTED * 100 / $TOTAL))%"
+        RELIABILITY_RATE="$(( (($TOTAL_EXPECTED * 1000) + ($TOTAL * 5)) / ($TOTAL * 10) ))%"
     fi
 
     echo "### $TITLE"
