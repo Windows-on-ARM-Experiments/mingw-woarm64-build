@@ -97,9 +97,9 @@ env:
   FFMPEG_BRANCH: release/6.1
 
   TOOLCHAIN_PATH: ${{ github.workspace }}/cross
-  TOOLCHAIN_NAME: aarch64-w64-mingw32-msvcrt
-  TOOLCHAIN_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-toolchain.tar.gz
-  RUNTIME_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-runtime.tar.gz
+  TOOLCHAIN_NAME: aarch64-w64-mingw32-ucrt
+  TOOLCHAIN_PACKAGE_NAME: aarch64-w64-mingw32-ucrt-toolchain.tar.gz
+  RUNTIME_PACKAGE_NAME: aarch64-w64-mingw32-ucrt-runtime.tar.gz
 
   SOURCE_PATH: ${{ github.workspace }}/code
   BUILD_PATH: ${{ github.workspace }}/build
@@ -137,7 +137,7 @@ jobs:
       ARCH: ${{ matrix.arch }}
       PLATFORM: ${{ matrix.platform }}
       CRT: ${{ matrix.crt }}
-      PACK_TOOLCHAIN: ${{ matrix.arch == 'aarch64' && matrix.platform == 'w64-mingw32' && matrix.crt == 'msvcrt' }}
+      PACK_TOOLCHAIN: ${{ matrix.arch == 'aarch64' && matrix.platform == 'w64-mingw32' && matrix.crt == 'ucrt' }}
       TOOLCHAIN_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}
       TOOLCHAIN_PACKAGE_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}-toolchain.tar.gz
       RUNTIME_PACKAGE_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}-runtime.tar.gz
@@ -398,7 +398,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      TESTS_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-tests.tar.gz
+      TESTS_PACKAGE_NAME: aarch64-w64-mingw32-ucrt-tests.tar.gz
 
     steps:
       - name: Checkout repository
@@ -437,7 +437,7 @@ jobs:
     runs-on: [Windows, GCC, ARM64]
 
     env:
-      TESTS_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-tests.tar.gz
+      TESTS_PACKAGE_NAME: aarch64-w64-mingw32-ucrt-tests.tar.gz
 
     steps:
       - name: Checkout repository

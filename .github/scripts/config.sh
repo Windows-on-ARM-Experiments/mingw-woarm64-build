@@ -14,7 +14,7 @@ COCOM_BRANCH=${COCOM_BRANCH:-master}
 ARCH=${ARCH:-aarch64}
 PLATFORM=${PLATFORM:-w64-mingw32}
 if [[ "$PLATFORM" =~ (mingw|cygwin) ]]; then
-    CRT=${CRT:-msvcrt}
+    CRT=${CRT:-ucrt}
 else
     CRT=${CRT:-libc}
 fi
