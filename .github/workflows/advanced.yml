@@ -100,10 +100,17 @@ env:
   FFMPEG_REPO: FFmpeg/FFmpeg
   FFMPEG_BRANCH: release/6.1
 
+  ARCH: aarch64
+  PLATFORM: w64-mingw32
+  CRT: msvcrt
   TOOLCHAIN_PATH: ${{ github.workspace }}/cross
   TOOLCHAIN_NAME: aarch64-w64-mingw32-msvcrt
+  TOOLCHAIN_ARTIFACT_NAME: aarch64-w64-mingw32-msvcrt-toolchain
   TOOLCHAIN_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-toolchain.tar.gz
+  RUNTIME_ARTIFACT_NAME: aarch64-w64-mingw32-msvcrt-toolchain
   RUNTIME_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-runtime.tar.gz
+  TESTS_ARTIFACT_NAME: aarch64-w64-mingw32-msvcrt-tests
+  TESTS_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-tests.tar.gz
 
   SOURCE_PATH: ${{ github.workspace }}/code
   BUILD_PATH: ${{ github.workspace }}/build
@@ -144,9 +151,13 @@ jobs:
       CRT: ${{ matrix.crt }}
       PACK_TOOLCHAIN: ${{ matrix.arch == 'aarch64' && matrix.platform == 'w64-mingw32' && matrix.crt == 'msvcrt' }}
       TOOLCHAIN_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}
+      TOOLCHAIN_ARTIFACT_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}-toolchain
       TOOLCHAIN_PACKAGE_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}-toolchain.tar.gz
+      RUNTIME_ARTIFACT_NAME:  ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}-runtime
       RUNTIME_PACKAGE_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}-runtime.tar.gz
-      TESTS_PACKAGE_NAME: ${{ matrix.arch }}-${{ matrix.crt }}-tests.tar.gz
+      TESTS_ARTIFACT_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}-tests
+      TESTS_PACKAGE_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}-tests.tar.gz
+      BUILD_ARTIFACT_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}-build
 
     steps:
       - name: Checkout repository
@@ -344,7 +355,7 @@ jobs:
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && failure() }}
         uses: actions/upload-artifact@v4
         with:
-          name: build
+          name: ${{ env.BUILD_ARTIFACT_NAME }}
           retention-days: 1
           path: ${{ env.BUILD_PATH }}
 
@@ -352,7 +363,7 @@ jobs:
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && env.PACK_TOOLCHAIN == 'true' }}
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.TOOLCHAIN_PACKAGE_NAME }}
+          name: ${{ env.TOOLCHAIN_ARTIFACT_NAME }}
           path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
           retention-days: 3
 
@@ -360,7 +371,7 @@ jobs:
         if: ${{ steps.cache-runtime.outputs.cache-hit != 'true' && env.PACK_TOOLCHAIN == 'true' }}
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.RUNTIME_PACKAGE_NAME }}
+          name: ${{ env.RUNTIME_ARTIFACT_NAME }}
           path: ${{ env.ARTIFACT_PATH }}/${{ env.RUNTIME_PACKAGE_NAME }}
           retention-days: 3
 
@@ -406,7 +417,7 @@ jobs:
       - name: Upload build-aarch64-mingw-tests
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.TESTS_PACKAGE_NAME }}
+          name: ${{ env.TESTS_ARTIFACT_NAME }}
           path: ${{ env.ARTIFACT_PATH }}/${{ env.TESTS_PACKAGE_NAME }}
           retention-days: 3
 
@@ -442,7 +453,7 @@ jobs:
       - name: Download ${{ env.TOOLCHAIN_NAME }} tests
         uses: actions/download-artifact@v4
         with:
-          name: ${{ env.TESTS_PACKAGE_NAME }}
+          name: ${{ env.TESTS_ARTIFACT_NAME }}
           path: ${{ env.ARTIFACT_PATH }}
 
       - name: Unpack ${{ env.TOOLCHAIN_NAME }} runtime
