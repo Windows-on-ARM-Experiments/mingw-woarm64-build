@@ -12,8 +12,8 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$MINGW_BUILD_PATH/Makefile" ]]; then
         rm -rf $MINGW_BUILD_PATH/*
 
         if [[ "$DEBUG" = 1 ]]; then
-            HOST_OPTIONS="$HOST_OPTIONS \
-                --enable-debug"
+            CFLAGS="$CFLAGS -O0 -ggdb"
+            CXXFLAGS="$CXXFLAGS -O0 -ggdb"
         fi
 
         case "$ARCH" in
