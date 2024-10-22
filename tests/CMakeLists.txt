@@ -41,6 +41,7 @@ add_executable(
   pdata-test.c
   sjlj-test.c
   sscanf-double.c
+  static-constructor.cpp
   static-function-test.c
   static-function.c
   struct-test.c

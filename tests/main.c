@@ -16,6 +16,7 @@ TEST(Aarch64MinGW, PrintfDoubleTest);
 TEST(Aarch64MinGW, TestUnwindStack);
 TEST(Aarch64MinGW, SJLJTest);
 TEST(Aarch64MinGW, SscanfDoubleTest);
+TEST(Aarch64MinGW, StaticConstructorTest);
 TEST(Aarch64MinGW, StaticFunctionTest);
 TEST(Aarch64MinGW, StructTest);
 TEST(Aarch64MinGW, TestVaList);
@@ -60,6 +61,7 @@ int main(int argc, char **argv) {
         DECLARE_TEST(Aarch64MinGW, TestUnwindStack),
         DECLARE_TEST(Aarch64MinGW, SJLJTest),
         DECLARE_TEST(Aarch64MinGW, SscanfDoubleTest),
+        DECLARE_TEST(Aarch64MinGW, StaticConstructorTest),
         DECLARE_TEST(Aarch64MinGW, StaticFunctionTest),
         DECLARE_TEST(Aarch64MinGW, StructTest),
         DECLARE_TEST(Aarch64MinGW, TestVaList),
