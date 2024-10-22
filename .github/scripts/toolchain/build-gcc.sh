@@ -59,6 +59,11 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$GCC_BUILD_PATH/Makefile" ]]; then
                     --without-libintl-prefix"
                 ;;
             *mingw*)
+                # ADDED: --enable-plugin
+                # REMOVED: --with-gmp=$TOOLCHAIN_PATH
+                # REMOVED: --with-mpfr=$TOOLCHAIN_PATH
+                # REMOVED: --with-mpc=$TOOLCHAIN_PATH
+                # REMOVED: --with-isl=$TOOLCHAIN_PATH
                 TARGET_OPTIONS="$TARGET_OPTIONS \
                     --libexecdir=$TOOLCHAIN_PATH/lib \
                     --enable-threads=win32 \
@@ -69,6 +74,7 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$GCC_BUILD_PATH/Makefile" ]]; then
                     --enable-cloog-backend=isl \
                     --enable-version-specific-runtime-libs \
                     --enable-lto \
+                    --enable-plugin \
                     --enable-libgomp \
                     --enable-checking=release \
                     --disable-libstdcxx-pch \
