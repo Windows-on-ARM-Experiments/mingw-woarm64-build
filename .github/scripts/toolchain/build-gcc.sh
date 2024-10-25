@@ -13,7 +13,13 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$GCC_BUILD_PATH/Makefile" ]]; then
 
         if [[ "$DEBUG" = 1 ]]; then
             HOST_OPTIONS="$HOST_OPTIONS \
-                --enable-debug"
+                --enable-debug \
+                --enable-checking"
+            CFLAGS="-O0 -ggdb"
+            CXXFLAGS="-O0 -ggdb"
+        else
+            HOST_OPTIONS="$HOST_OPTIONS \
+                --enable-checking=release"
         fi
 
         case "$ARCH" in
@@ -70,7 +76,6 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$GCC_BUILD_PATH/Makefile" ]]; then
                     --enable-version-specific-runtime-libs \
                     --enable-lto \
                     --enable-libgomp \
-                    --enable-checking=release \
                     --disable-libstdcxx-pch \
                     --disable-libstdcxx-debug \
                     --disable-isl-version-check \
@@ -105,7 +110,13 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$GCC_BUILD_PATH/Makefile" ]]; then
             --with-gnu-as \
             --with-gnu-ld \
             $HOST_OPTIONS \
-            $TARGET_OPTIONS
+            $TARGET_OPTIONS \
+            BOOT_CFLAGS="$CFLAGS" \
+            LIBGCC2_CFLAGS="$CFLAGS" \
+            CFLAGS="$CFLAGS" \
+            CXXFLAGS="$CXXFLAGS" \
+            CFLAGS_FOR_TARGET="$CFLAGS" \
+            CXXFLAGS_FOR_TARGET="$CXXFLAGS"
     echo "::endgroup::"
 fi
 
