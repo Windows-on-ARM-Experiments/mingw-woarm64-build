@@ -14,7 +14,7 @@ on:
       gcc_branch:
         description: 'GCC branch to build'
         required: false
-        default: 'woarm64'
+        default: 'fix-va-list'
       mingw_branch:
         description: 'MinGW branch to build'
         required: false
@@ -72,7 +72,7 @@ env:
   BINUTILS_BRANCH: ${{ inputs.binutils_branch || 'woarm64' }}
 
   GCC_REPO: Windows-on-ARM-Experiments/gcc-woarm64
-  GCC_BRANCH: ${{ inputs.gcc_branch || 'woarm64' }}
+  GCC_BRANCH: ${{ inputs.gcc_branch || 'fix-va-list' }}
 
   MINGW_REPO: Windows-on-ARM-Experiments/mingw-woarm64
   MINGW_BRANCH: ${{ inputs.mingw_branch || 'woarm64' }}

@@ -3,17 +3,38 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-static void va_list_print(char *buf, size_t length, const char *fmt, ...)
+static int va_list_print_direct(char *buf, size_t length, const char *fmt, ...)
 {
     va_list argv;
     va_start(argv, fmt);
     register int retval = _vsnprintf(buf, length, fmt, argv);
     va_end(argv);
+    return retval;
 }
 
-void test_va_list(char *buf, size_t length)
+static int va_list_print_indirect_wrapper(char *buf, size_t length, const char *fmt, va_list argv)
 {
-    va_list_print(buf, length, "%s %d %x %f", "string", 11, 0x1919, 111.111);
+    register int retval = _vsnprintf(buf, length, fmt, argv);
+    return retval;
+}
+
+static int va_list_print_indirect(char *buf, size_t length, const char *fmt, ...)
+{
+    va_list argv;
+    va_start(argv, fmt);
+    register int retval = va_list_print_indirect_wrapper(buf, length, fmt, argv);
+    va_end(argv);
+    return retval;
+}
+
+void test_va_list_direct(char *buf, size_t length)
+{
+    va_list_print_direct(buf, length, "%s %d %x %f", "string", 11, 0x1919, 111.111);
+}
+
+void test_va_list_indirect(char *buf, size_t length)
+{
+    va_list_print_indirect(buf, length, "%s %d %x %f", "string", 11, 0x1919, 111.111);
 }
 
 void test_sprintf(char *buf, size_t length)
@@ -34,12 +55,24 @@ void test_va_arg_pack(char *buf, size_t length)
 // Test if the va_list builtin can be passed to CRT methods.
 // I would expect this to fail until the va_list builtin is implemented for
 // the Windows ABI.
-TEST(Aarch64MinGW, TestVaList)
+TEST(Aarch64MinGW, VaListDirectTest)
 {
     GTEST_SKIP();
     
     char sz[100];
-    test_va_list(sz, 100);
+    test_va_list_direct(sz, 100);
+    ASSERT_STREQ(sz, "string 11 1919 111.111000");
+}
+
+// Test if the va_list builtin can be passed to CRT methods.
+// I would expect this to fail until the va_list builtin is implemented for
+// the Windows ABI. Indirect variant according to https://c-faq.com/varargs/handoff.html
+TEST(Aarch64MinGW, VaListIndirectTest)
+{
+    GTEST_SKIP();
+    
+    char sz[100];
+    test_va_list_indirect(sz, 100);
     ASSERT_STREQ(sz, "string 11 1919 111.111000");
 }
 
