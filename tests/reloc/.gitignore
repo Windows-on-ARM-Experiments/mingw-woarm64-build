@@ -1,0 +1,13 @@
+*.bin
+*.cod
+*.dll
+*.exe
+*.exp
+*.gimple
+*.ilk
+*.lib
+*.pdb
+*.o
+*.obj
+*.so
+valist-all-*.s

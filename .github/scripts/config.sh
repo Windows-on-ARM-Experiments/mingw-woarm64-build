@@ -9,7 +9,7 @@ BINUTILS_REPO=${BINUTILS_REPO:-Windows-on-ARM-Experiments/binutils-woarm64}
 BINUTILS_BRANCH=${BINUTILS_BRANCH:-woarm64}
 
 GCC_REPO=${GCC_REPO:-Windows-on-ARM-Experiments/gcc-woarm64}
-GCC_BRANCH=${GCC_BRANCH:-woarm64}
+GCC_BRANCH=${GCC_BRANCH:-fix-va-list}
 
 MINGW_REPO=${MINGW_REPO:-Windows-on-ARM-Experiments/mingw-woarm64}
 MINGW_BRANCH=${MINGW_BRANCH:-woarm64}
@@ -101,7 +101,7 @@ TOOLCHAIN_CCACHE_LIB_DIR=$TOOLCHAIN_PATH/lib/ccache
 if [[ -f $SOURCE_PATH/gcc/gcc/BASE-VER ]]; then
     GCC_VERSION=$(cat $SOURCE_PATH/gcc/gcc/BASE-VER)
 else
-    GCC_VERSION="15.0.0"
+    GCC_VERSION="15.0.1"
 fi
 
 DEBUG=${DEBUG:-0} # Enable debug build.

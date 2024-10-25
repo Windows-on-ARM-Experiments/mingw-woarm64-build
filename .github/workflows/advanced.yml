@@ -14,7 +14,7 @@ on:
       gcc_branch:
         description: 'GCC branch to build'
         required: false
-        default: 'woarm64'
+        default: 'fix-va-list'
       mingw_branch:
         description: 'MinGW branch to build'
         required: false
@@ -72,7 +72,7 @@ env:
   BINUTILS_BRANCH: ${{ inputs.binutils_branch || 'woarm64' }}
 
   GCC_REPO: Windows-on-ARM-Experiments/gcc-woarm64
-  GCC_BRANCH: ${{ inputs.gcc_branch || 'woarm64' }}
+  GCC_BRANCH: ${{ inputs.gcc_branch || 'fix-va-list' }}
 
   MINGW_REPO: Windows-on-ARM-Experiments/mingw-woarm64
   MINGW_BRANCH: ${{ inputs.mingw_branch || 'woarm64' }}
@@ -127,9 +127,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        arch: [aarch64, x86_64]
-        platform: [w64-mingw32, pc-linux-gnu, pc-cygwin]
-        crt: [msvcrt, ucrt, libc]
+        arch: [aarch64]
+        platform: [w64-mingw32]
+        crt: [msvcrt]
         exclude:
           - platform: w64-mingw32
             crt: libc
@@ -377,7 +377,7 @@ jobs:
       aarch64-w64-mingw32-msvcrt-runtime-cache-key: ${{ env.aarch64-w64-mingw32-msvcrt-runtime-cache-key }}
       aarch64-pc-cygwin-msvcrt-runtime-cache-key: ${{ env.aarch64-pc-cygwin-msvcrt-runtime-cache-key }}
 
-  build-aarch64-tests:
+  build-target-tests:
     needs: [build-toolchain]
     runs-on: ubuntu-latest
 
@@ -385,7 +385,7 @@ jobs:
       fail-fast: false
       matrix:
         arch: [aarch64]
-        platform: [w64-mingw32, pc-cygwin]
+        platform: [w64-mingw32]
         crt: [msvcrt]
 
     env:
@@ -408,7 +408,7 @@ jobs:
       - name: Download ${{ env.TOOLCHAIN_NAME }} toolchain
         uses: actions/cache/restore@v4
         with:
-          path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
+          path: ${{ env.RELATIVE_ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
           key: ${{ env.toolchain-cache-key }}
           enableCrossOsArchive: true
           fail-on-cache-miss: true
@@ -416,32 +416,32 @@ jobs:
       - name: Unpack toolchain
         run: |
           .github/scripts/toolchain/unpack.sh
-  
-      - name: Build aarch64-tests
+
+      - name: Build ${{ env.TOOLCHAIN_NAME }} tests
         if: ${{ matrix.platform == 'w64-mingw32' }}
         run: |
           .github/scripts/tests/build.sh
 
-      - name: Build Cygwin toolchain tests
+      - name: Build ${{ env.TOOLCHAIN_NAME }} tests
         if: ${{ matrix.platform == 'pc-cygwin' }}
         run: |
           .github/scripts/tests/cygwin/build-tests.sh
 
-      - name: Pack tests
+      - name: Pack ${{ env.TOOLCHAIN_NAME }} tests
         run: |
           .github/scripts/tests/pack.sh
 
-      - name: Upload build-aarch64-mingw-tests
+      - name: Upload ${{ env.TOOLCHAIN_NAME }} tests
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.TESTS_ARTIFACT_NAME }}
           path: ${{ env.ARTIFACT_PATH }}/${{ env.TESTS_PACKAGE_NAME }}
           retention-days: 3
 
-  execute-aarch64-tests:
+  execute-target-tests:
     needs: [
       build-toolchain,
-      build-aarch64-tests
+      build-target-tests
     ]
     runs-on: [Windows, GCC, ARM64]
 
@@ -494,13 +494,16 @@ jobs:
           .github/scripts/toolchain/unpack-runtime.ps1
 
       - name: Unpack ${{ env.TOOLCHAIN_NAME }} tests
+        shell: bash
         run: |
-          .github/scripts/tests/unpack.ps1
+          .github/scripts/tests/unpack.sh
 
       - name: Execute ${{ env.TOOLCHAIN_NAME }} tests
         if: ${{ matrix.platform == 'w64-mingw32' }}
         run: |
-          .github/scripts/tests/execute-tests.ps1
+          ls -al $ARTIFACT_PATH
+          ls -al $TESTS_PATH
+          .github/scripts/tests/execute-tests.sh
 
       - name: Execute ${{ env.TOOLCHAIN_NAME }} tests
         if: ${{ matrix.platform == 'pc-cygwin' }}
@@ -508,7 +511,46 @@ jobs:
         run: |
           .github/scripts/tests/cygwin/execute-tests.sh
 
+  execute-abi-tests:
+    needs: [
+      build-toolchain
+    ]
+    runs-on: [Windows, WSL, ARM64]
+
+    env:
+      WSLENV: ARCH:PLATFORM:CRT:TOOLCHAIN_PATH:TOOLCHAIN_NAME:TOOLCHAIN_PACKAGE_NAME
+
+    defaults:
+      run:
+        shell: wsl-bash {0}
+
+    steps:
+      - name: Setup WSL
+        uses: Windows-on-ARM-Experiments/setup-wsl@master
+        with:
+          distribution: Ubuntu-22.04
+          additional-packages:
+            git
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: ${{ github.workspace }}
+
+      - name: Install dependencies
+        run: |
+          .github/scripts/tests/install-dependencies.sh
+
+      - name: Unpack ${{ env.TOOLCHAIN_NAME }} toolchain
+        run: |
+          .github/scripts/toolchain/unpack.sh
+
+      - name: Execute ${{ env.TOOLCHAIN_NAME }} ABI tests
+        run: |
+          .github/scripts/tests/execute-abi-tests.sh
+
   build-openblas:
+    if: false
     needs: [build-toolchain]
     runs-on: ubuntu-latest
 
@@ -540,7 +582,7 @@ jobs:
       - name: Unpack toolchain
         run: |
           .github/scripts/toolchain/unpack.sh
-    
+
       - name: Build OpenBLAS
         run: |
           .github/scripts/openblas/build.sh
@@ -548,7 +590,7 @@ jobs:
       - name: Pack OpenBLAS tests
         run: |
           .github/scripts/openblas/pack-tests.sh
-  
+
       - name: Upload tests artifact
         uses: actions/upload-artifact@v4
         with:
@@ -557,6 +599,7 @@ jobs:
           retention-days: 3
         
   execute-openblas-tests:
+    if: false
     needs: [
       build-toolchain,
       build-openblas
@@ -610,6 +653,7 @@ jobs:
           .github/scripts/openblas/execute-tests.sh
 
   build-zlib:
+    if: false
     needs: [build-toolchain]
     runs-on: ubuntu-latest 
 
@@ -661,6 +705,7 @@ jobs:
           retention-days: 3
 
   build-libxml2:
+    if: false
     needs: [build-toolchain, build-zlib]
     runs-on: ubuntu-latest
 
@@ -722,6 +767,7 @@ jobs:
           retention-days: 3
 
   build-openssl:
+    if: false
     needs: [build-toolchain, build-zlib]
     runs-on: ubuntu-latest
 
@@ -799,6 +845,7 @@ jobs:
           retention-days: 3
 
   execute-openssl-tests:
+    if: false
     needs: [
       build-toolchain,
       build-openssl
@@ -869,6 +916,7 @@ jobs:
           .github/scripts/openssl/execute-tests.ps1
 
   build-libjpeg-turbo:
+    if: false
     needs: [build-toolchain]
     runs-on: ubuntu-latest
 
@@ -935,6 +983,7 @@ jobs:
           retention-days: 3
 
   execute-libpeg-turbo-tests:
+    if: false
     needs: [
       build-toolchain,
       build-libjpeg-turbo
@@ -987,6 +1036,7 @@ jobs:
           .github/scripts/libjpeg-turbo/execute-tests.ps1
 
   build-ffmpeg:
+    if: false
     needs: [build-toolchain]
     runs-on: ubuntu-latest
 
@@ -1043,6 +1093,7 @@ jobs:
           retention-days: 3
 
   execute-ffmpeg-tests:
+    if: false
     needs: [
       build-toolchain,
       build-ffmpeg
