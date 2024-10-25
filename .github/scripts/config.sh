@@ -6,7 +6,7 @@ set -o pipefail # fail of any command in pipeline is an error
 
 # Branches that will be used for build when UPDATE_SOURCES=1.
 BINUTILS_BRANCH=${BINUTILS_BRANCH:-woarm64-cygwin}
-GCC_BRANCH=${GCC_BRANCH:-woarm64-cygwin}
+GCC_BRANCH=${GCC_BRANCH:-fix-va-list-ucrt}
 MINGW_BRANCH=${MINGW_BRANCH:-woarm64-cygwin}
 CYGWIN_BRANCH=${CYGWIN_BRANCH:-woarm64}
 CYGWIN_PACKAGES_BRANCH=${CYGWIN_PACKAGES_BRANCH:-main}
@@ -23,7 +23,7 @@ COCOM_BASE_BRANCH=master
 ARCH=${ARCH:-aarch64}
 PLATFORM=${PLATFORM:-w64-mingw32}
 if [[ "$PLATFORM" =~ (mingw|cygwin) ]]; then
-    CRT=${CRT:-msvcrt}
+    CRT=${CRT:-ucrt}
 else
     CRT=${CRT:-libc}
 fi
@@ -81,10 +81,10 @@ else
 fi
 
 DEBUG=${DEBUG:-1} # Enable debug build.
-CCACHE=${CCACHE:-0} # Enable usage of ccache.
+CCACHE=${CCACHE:-1} # Enable usage of ccache.
 RUN_BOOTSTRAP=${RUN_BOOTSTRAP:-0} # Bootstrap dependencies during the build.
-UPDATE_SOURCES=${UPDATE_SOURCES:-0} # Update source code repositories.
-FLAT_CLONE=${FLAT_CLONE:-1} # Whether the clone of source codes should be full or flat.
+UPDATE_SOURCES=${UPDATE_SOURCES:-1} # Update source code repositories.
+FLAT_CLONE=${FLAT_CLONE:-0} # Whether the clone of source codes should be full or flat.
 RESET_SOURCES=${RESET_SOURCES:-0} # Reset source code repositories before update.
 REBASE_SOURCES=${REBASE_SOURCES:-0} # Together with the update, rebase repositories
                                     # to the baseline branches and push the result.
