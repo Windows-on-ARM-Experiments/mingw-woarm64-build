@@ -1,8 +1,8 @@
 	.arch armv8-a
-;# GNU C17 (GCC) version 15.0.0 20241016 (experimental) (aarch64-w64-mingw32)
+;# GNU C17 (GCC) version 15.0.0 20241105 (experimental) (aarch64-w64-mingw32)
 ;#	compiled by GNU C version 11.4.0, GMP version 6.2.1, MPFR version 4.1.0, MPC version 1.2.1, isl version isl-0.24-GMP
 
-;# GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+;# GGC heuristics: --param ggc-min-expand=30 --param ggc-min-heapsize=4096
 ;# options passed: -march=armv8-a -mtune=cortex-a53 -O0
 	.text
 	.align	2
