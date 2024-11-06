@@ -11,7 +11,7 @@ if (NOT DEFINED ENV{TOOLCHAIN_PATH})
 endif()
 
 set(CMAKE_C_COMPILER "$ENV{TOOLCHAIN_PATH}/bin/$ENV{TARGET}-gcc")
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fopenmp")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fopenmp -static")
 set(CMAKE_RANLIB "$ENV{TOOLCHAIN_PATH}/bin/$ENV{TARGET}-ranlib")
 
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
@@ -28,6 +28,8 @@ add_executable(
   bigdata-test.c
   chkstk-test.c
   dll-test.c
+  exception-constructor-test.cpp
+  exception-chain-test.cpp
   large-alignment-test.c
   large-struct-test.c
   gtest_like_c.c
