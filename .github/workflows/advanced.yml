@@ -128,7 +128,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        arch: [aarch64, x86_64]
+        arch: [aarch64]
         platform: [w64-mingw32, pc-linux-gnu, pc-cygwin]
         crt: [msvcrt, ucrt, libc]
         exclude:
