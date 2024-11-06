@@ -5,38 +5,16 @@
 
 	AREA	|.drectve|, DRECTVE
 
-	EXPORT	|test_va_list|
 	EXPORT	|main|
-	IMPORT	|use_va_list|
+	IMPORT	|use_va_args|
 
 	AREA	|.pdata|, PDATA
-|$pdata$test_va_list| DCD |$LN3|
-	DCD	|$unwind$test_va_list|
 |$pdata$main| DCD |$LN3|
 	DCD	0x1600035
 	;Flags[SingleProEpi] functionLength[52] RegF[0] RegI[0] H[0] frameChainReturn[Chained] frameSize[32]
 
 	AREA	|.data|, DATA
-|$SG3267| DCB	"%d", 0xa, 0x0
-
-	AREA	|.xdata|, DATA
-|$unwind$test_va_list| DCD 0x1a200015
-	DCD	0xe3e385e1
-	DCD	0xe404e3e3
-	DCD	0xe3e40485
-	;Code Words[3], Epilog Start Index[8], E[1], X[0], Function Length[21]=84 bytes
-	;set_fp
-	;save_fplr_x
-	;nop
-	;nop
-	;nop
-	;nop
-	;alloc_s
-	;end
-	;save_fplr_x
-	;alloc_s
-	;end
-	;nop
+|$SG3256| DCB	"%d", 0xa, 0x0
 ; Function compile flags: /Odtp
 ; File W:\home\blachex\mingw-woarm64-build\tests\valist\valist-use-dll.c
 
@@ -44,7 +22,7 @@
 
   00000		 |main|	 PROC
 
-; 24   : {  
+; 7    : {
 
   00000		 |$LN3|
   00000	a9be7bfd	 stp         fp,lr,[sp,#-0x20]!
@@ -52,65 +30,18 @@
   00008	b90013e0	 str         w0,[sp,#0x10]
   0000c	f9000fe1	 str         x1,[sp,#0x18]
 
-; 25   :   return test_va_list("%d\n", 100, 42);
+; 8    :   return use_va_args ("%d\n", 11, 22);
 
-  00010	52800542	 mov         w2,#0x2A
-  00014	52800c81	 mov         w1,#0x64
-  00018	90000008	 adrp        x8,|$SG3267|
-  0001c	91000100	 add         x0,x8,|$SG3267|
-  00020	94000000	 bl          test_va_list
+  00010	528002c2	 mov         w2,#0x16
+  00014	52800161	 mov         w1,#0xB
+  00018	90000008	 adrp        x8,|$SG3256|
+  0001c	91000100	 add         x0,x8,|$SG3256|
+  00020	94000000	 bl          use_va_args
   00024	2a0003e0	 mov         w0,w0
   00028	2a0003e0	 mov         w0,w0
   0002c	a8c27bfd	 ldp         fp,lr,[sp],#0x20
   00030	d65f03c0	 ret
 
 			 ENDP  ; |main|
-
-; Function compile flags: /Odtp
-; File W:\home\blachex\mingw-woarm64-build\tests\valist\valist-use-dll.c
-
-	AREA	|.text$mn|, CODE, ARM64
-
-  00000		 |test_va_list| PROC
-
-; 15   : {
-
-  00000		 |$LN3|
-  00000	d10103ff	 sub         sp,sp,#0x40
-  00004	a9008be1	 stp         x1,x2,[sp,#8]
-  00008	a90193e3	 stp         x3,x4,[sp,#0x18]
-  0000c	a9029be5	 stp         x5,x6,[sp,#0x28]
-  00010	f9001fe7	 str         x7,[sp,#0x38]
-  00014	a9bd7bfd	 stp         fp,lr,[sp,#-0x30]!
-  00018	910003fd	 mov         fp,sp
-  0001c	f90013e0	 str         x0,[sp,#0x20]
-
-; 16   :   va_list argv;
-; 17   :   va_start(argv, format);
-
-  00020	9100e3e8	 add         x8,sp,#0x38
-  00024	f9000fe8	 str         x8,[sp,#0x18]
-
-; 18   :   int retval = use_va_list(format, argv);
-
-  00028	f9400fe1	 ldr         x1,[sp,#0x18]
-  0002c	f94013e0	 ldr         x0,[sp,#0x20]
-  00030	94000000	 bl          use_va_list
-  00034	2a0003e8	 mov         w8,w0
-  00038	b90013e8	 str         w8,[sp,#0x10]
-
-; 19   :   va_end(argv);
-
-  0003c	d2800008	 mov         x8,#0
-  00040	f9000fe8	 str         x8,[sp,#0x18]
-
-; 20   :   return retval;
-
-  00044	b94013e0	 ldr         w0,[sp,#0x10]
-  00048	a8c37bfd	 ldp         fp,lr,[sp],#0x30
-  0004c	910103ff	 add         sp,sp,#0x40
-  00050	d65f03c0	 ret
-
-			 ENDP  ; |test_va_list|
 
 	END

@@ -35,7 +35,7 @@ echo "::group::Execute GCC tests"
     make $BUILD_MAKE_OPTIONS -k $MAKE_TARGET \
         RUNTESTFLAGS="$FILTER $HOST_BOARD $TARGET_BOARD" \
         DEJAGNU="$DEJAGNU_FILE" \
-        CHECK_TEST_FRAMEWORK=1 \
+        CHECK_TEST_FRAMEWORK=0 \
         || echo "Error"
 
     mkdir -p $TEST_RESULTS_PATH

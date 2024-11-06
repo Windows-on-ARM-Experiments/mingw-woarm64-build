@@ -49,7 +49,12 @@ test_va_list:                           // @test_va_list
 	.scl	2;
 	.type	32;
 	.endef
-	.globl	main                            // -- Begin function main
+	.section	.rdata,"dr"
+	.p2align	3                               // -- Begin function main
+.LCPI1_0:
+	.xword	0x4045000000000000              // double 42
+	.text
+	.globl	main
 	.p2align	2
 main:                                   // @main
 .seh_proc main
@@ -65,7 +70,9 @@ main:                                   // @main
 	adrp	x0, .L.str
 	add	x0, x0, :lo12:.L.str
 	mov	w1, #100
-	mov	w2, #42
+	adrp	x8, .LCPI1_0
+	ldr	d0, [x8, :lo12:.LCPI1_0]
+	fmov	x2, d0
 	bl	test_va_list
 	.seh_startepilogue
 	ldr	x30, [sp, #16]                  // 8-byte Folded Reload

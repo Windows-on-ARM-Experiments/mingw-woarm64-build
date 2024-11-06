@@ -5,18 +5,14 @@
 
 	AREA	|.drectve|, DRECTVE
 
-	EXPORT	|use_va_list|
-	EXPORT	|use_va_arg|
+	EXPORT	|use_va_args|
 
 	AREA	|.pdata|, PDATA
-|$pdata$use_va_list| DCD |$LN3|
-	DCD	0x1000085
-	;Flags[SingleProEpi] functionLength[132] RegF[0] RegI[0] H[0] frameChainReturn[UnChained] frameSize[32]
-|$pdata$use_va_arg| DCD |$LN3|
-	DCD	|$unwind$use_va_arg|
+|$pdata$use_va_args| DCD |$LN3|
+	DCD	|$unwind$use_va_args|
 
 	AREA	|.xdata|, DATA
-|$unwind$use_va_arg| DCD 0x19e0002a
+|$unwind$use_va_args| DCD 0x19e0002a
 	DCD	0xe3e3e302
 	DCD	0x2e404e3
 	DCD	0xe3e3e404
@@ -38,9 +34,9 @@
 
 	AREA	|.text$mn|, CODE, ARM64
 
-  00000		 |use_va_arg| PROC
+  00000		 |use_va_args| PROC
 
-; 21   : {
+; 5    : {
 
   00000		 |$LN3|
   00000	d10103ff	 sub         sp,sp,#0x40
@@ -51,13 +47,13 @@
   00014	d10083ff	 sub         sp,sp,#0x20
   00018	f9000be0	 str         x0,[sp,#0x10]
 
-; 22   :   va_list argv;
-; 23   :   va_start (argv, format);
+; 6    :   va_list argv;
+; 7    :   va_start (argv, format);
 
   0001c	9100a3e8	 add         x8,sp,#0x28
   00020	f90007e8	 str         x8,[sp,#8]
 
-; 24   :   int a = va_arg (argv, int);
+; 8    :   int a = va_arg (argv, int);
 
   00024	d2800008	 mov         x8,#0
   00028	f94007e9	 ldr         x9,[sp,#8]
@@ -72,7 +68,7 @@
   0004c	b9400108	 ldr         w8,[x8]
   00050	b90003e8	 str         w8,[sp]
 
-; 25   :   int b = va_arg (argv, long);
+; 9    :   int b = va_arg (argv, int);
 
   00054	d2800008	 mov         x8,#0
   00058	f94007e9	 ldr         x9,[sp,#8]
@@ -87,12 +83,12 @@
   0007c	b9400108	 ldr         w8,[x8]
   00080	b90007e8	 str         w8,[sp,#4]
 
-; 26   :   va_end (argv);
+; 10   :   va_end (argv);
 
   00084	d2800008	 mov         x8,#0
   00088	f90007e8	 str         x8,[sp,#8]
 
-; 27   :   return a + b;
+; 11   :   return a + b;
 
   0008c	b94003e8	 ldr         w8,[sp]
   00090	b94007e9	 ldr         w9,[sp,#4]
@@ -102,61 +98,6 @@
   000a0	910103ff	 add         sp,sp,#0x40
   000a4	d65f03c0	 ret
 
-			 ENDP  ; |use_va_arg|
-
-; Function compile flags: /Odtp
-; File W:\home\blachex\mingw-woarm64-build\tests\valist\valist-dll.c
-
-	AREA	|.text$mn|, CODE, ARM64
-
-  00000		 |use_va_list| PROC
-
-; 13   : {
-
-  00000		 |$LN3|
-  00000	d10083ff	 sub         sp,sp,#0x20
-  00004	f9000be0	 str         x0,[sp,#0x10]
-  00008	f90007e1	 str         x1,[sp,#8]
-
-; 14   :   int a = va_arg (argv, int);
-
-  0000c	d2800008	 mov         x8,#0
-  00010	f94007e9	 ldr         x9,[sp,#8]
-  00014	cb090108	 sub         x8,x8,x9
-  00018	92400508	 and         x8,x8,#3
-  0001c	91002109	 add         x9,x8,#8
-  00020	f94007e8	 ldr         x8,[sp,#8]
-  00024	8b090108	 add         x8,x8,x9
-  00028	f90007e8	 str         x8,[sp,#8]
-  0002c	f94007e8	 ldr         x8,[sp,#8]
-  00030	d1002108	 sub         x8,x8,#8
-  00034	b9400108	 ldr         w8,[x8]
-  00038	b90003e8	 str         w8,[sp]
-
-; 15   :   int b = va_arg (argv, long);
-
-  0003c	d2800008	 mov         x8,#0
-  00040	f94007e9	 ldr         x9,[sp,#8]
-  00044	cb090108	 sub         x8,x8,x9
-  00048	92400508	 and         x8,x8,#3
-  0004c	91002109	 add         x9,x8,#8
-  00050	f94007e8	 ldr         x8,[sp,#8]
-  00054	8b090108	 add         x8,x8,x9
-  00058	f90007e8	 str         x8,[sp,#8]
-  0005c	f94007e8	 ldr         x8,[sp,#8]
-  00060	d1002108	 sub         x8,x8,#8
-  00064	b9400108	 ldr         w8,[x8]
-  00068	b90007e8	 str         w8,[sp,#4]
-
-; 16   :   return a + b;
-
-  0006c	b94003e8	 ldr         w8,[sp]
-  00070	b94007e9	 ldr         w9,[sp,#4]
-  00074	0b090100	 add         w0,w8,w9
-  00078	2a0003e0	 mov         w0,w0
-  0007c	910083ff	 add         sp,sp,#0x20
-  00080	d65f03c0	 ret
-
-			 ENDP  ; |use_va_list|
+			 ENDP  ; |use_va_args|
 
 	END

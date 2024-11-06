@@ -33,13 +33,13 @@ test_va_list:
 	str	q5, [sp, 192]	//,
 	str	q6, [sp, 208]	//,
 	str	q7, [sp, 224]	//,
-// valist-use-dll.c:15: {
+// valist-use-dll.c:16: {
 	adrp	x0, :got:__stack_chk_guard	// tmp95,
 	ldr	x0, [x0, #:got_lo12:__stack_chk_guard]	// tmp94, tmp95,
 	ldr	x1, [x0]	// tmp108,
 	str	x1, [sp, 104]	// tmp108, D.3866
 	mov	x1, 0	// tmp108
-// valist-use-dll.c:17:   va_start(argv, format);
+// valist-use-dll.c:18:   va_start (argv, format);
 	add	x0, sp, 304	// tmp113,,
 	str	x0, [sp, 72]	// tmp113, MEM[(struct  *)&argv].__stack
 	add	x0, sp, 304	// tmp114,,
@@ -50,7 +50,7 @@ test_va_list:
 	str	w0, [sp, 96]	// tmp98, MEM[(struct  *)&argv].__gr_offs
 	mov	w0, -128	// tmp99,
 	str	w0, [sp, 100]	// tmp99, MEM[(struct  *)&argv].__vr_offs
-// valist-use-dll.c:18:   int retval = use_va_list(format, argv);
+// valist-use-dll.c:19:   int retval = use_va_list (format, argv);
 	add	x0, sp, 16	// tmp100,,
 	add	x1, sp, 72	// tmp101,,
 	ldp	q0, q1, [x1]	// tmp102, tmp103, argv
@@ -60,10 +60,10 @@ test_va_list:
 	ldr	x0, [sp, 56]	//, format
 	bl	use_va_list		//
 	str	w0, [sp, 68]	//, retval
-// valist-use-dll.c:20:   return retval;
+// valist-use-dll.c:21:   return retval;
 	ldr	w0, [sp, 68]	// _7, retval
 	mov	w1, w0	// <retval>, _7
-// valist-use-dll.c:21: }
+// valist-use-dll.c:22: }
 	adrp	x0, :got:__stack_chk_guard	// tmp107,
 	ldr	x0, [x0, #:got_lo12:__stack_chk_guard]	// tmp106, tmp107,
 	ldr	x3, [sp, 104]	// tmp109, D.3866
@@ -93,23 +93,38 @@ test_va_list:
 main:
 .LFB1:
 	.cfi_startproc
-	stp	x29, x30, [sp, -32]!	//,,,
-	.cfi_def_cfa_offset 32
-	.cfi_offset 29, -32
-	.cfi_offset 30, -24
+	stp	x29, x30, [sp, -48]!	//,,,
+	.cfi_def_cfa_offset 48
+	.cfi_offset 29, -48
+	.cfi_offset 30, -40
 	mov	x29, sp	//,
-	str	w0, [sp, 28]	// argc, argc
-	str	x1, [sp, 16]	// argv, argv
-// valist-use-dll.c:25:   return test_va_list("%d\n", 100, 42);
-	mov	w2, 42	//,
+	str	x19, [sp, 16]	//,
+	.cfi_offset 19, -32
+	str	w0, [sp, 44]	// argc, argc
+	str	x1, [sp, 32]	// argv, argv
+// valist-use-dll.c:27:   return test_va_list ("%d\n", 100, 42.0) + use_va_args2 ("%d\n", 100, 42.0);
+	mov	x0, 4631107791820423168	// tmp99,
+	fmov	d0, x0	//, tmp99
 	mov	w1, 100	//,
-	adrp	x0, .LC0	// tmp94,
-	add	x0, x0, :lo12:.LC0	//, tmp94,
+	adrp	x0, .LC0	// tmp96,
+	add	x0, x0, :lo12:.LC0	//, tmp96,
 	bl	test_va_list		//
-// valist-use-dll.c:26: }
-	ldp	x29, x30, [sp], 32	//,,,
+	mov	w19, w0	// _1,
+// valist-use-dll.c:27:   return test_va_list ("%d\n", 100, 42.0) + use_va_args2 ("%d\n", 100, 42.0);
+	mov	x0, 4631107791820423168	// tmp100,
+	fmov	d0, x0	//, tmp100
+	mov	w1, 100	//,
+	adrp	x0, .LC0	// tmp97,
+	add	x0, x0, :lo12:.LC0	//, tmp97,
+	bl	use_va_args2		//
+// valist-use-dll.c:27:   return test_va_list ("%d\n", 100, 42.0) + use_va_args2 ("%d\n", 100, 42.0);
+	add	w0, w19, w0	// _6, _1, _2
+// valist-use-dll.c:28: }
+	ldr	x19, [sp, 16]	//,
+	ldp	x29, x30, [sp], 48	//,,,
 	.cfi_restore 30
 	.cfi_restore 29
+	.cfi_restore 19
 	.cfi_def_cfa_offset 0
 	ret	
 	.cfi_endproc
