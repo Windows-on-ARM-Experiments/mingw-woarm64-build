@@ -1,8 +1,6 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "gtest_like_c.h"
 
-#include <gtest/gtest.h>
+#include <stdio.h>
 
 #ifdef __USING_SJLJ_EXCEPTIONS__
 #error "__USING_SJLJ_EXCEPTIONS__ cannot be defined."
@@ -11,6 +9,8 @@
 #ifndef __SEH__
 #error "__SEH__ must be defined."
 #endif
+
+static bool exception_catch[2] = {false};
 
 struct scope
 {
@@ -22,6 +22,7 @@ struct scope
     ~scope()
     {
         printf("destruct\n");
+        exception_catch[0] = true;
     }
 };
 
@@ -32,10 +33,10 @@ int throw_func(void)
     throw 32;
 }
 
-TEST(Aarch64MinGW, ThrowTest)
-{
-    GTEST_SKIP();
+extern "C" {
 
+TEST(Aarch64MinGW, ExceptionConstructorTest)
+{
     printf("main start\n");
 
     try
@@ -45,7 +46,12 @@ TEST(Aarch64MinGW, ThrowTest)
     catch (...)
     {
         printf("catch\n");
+        exception_catch[1] = true;
     }
 
+    ASSERT_TRUE(exception_catch[0] && exception_catch[1]);
+
     printf("ok\n");
+}
+
 }
