@@ -11,53 +11,40 @@
 	.seh_proc	test_va_list
 test_va_list:
 	sub	x10, sp, #8192	;#,,
-	str	xzr, [x10, 3792]	;#,
-	stp	x29, x30, [sp, -304]!	;#,,,
+	str	xzr, [x10, 3856]	;#,
+	stp	x29, x30, [sp, -240]!	;#,,,
 	mov	x29, sp	;#,
 	.seh_endprologue
-	str	x0, [sp, 56]	;# format, format
-	str	x1, [sp, 248]	;#,
-	str	x2, [sp, 256]	;#,
-	str	x3, [sp, 264]	;#,
-	str	x4, [sp, 272]	;#,
-	str	x5, [sp, 280]	;#,
-	str	x6, [sp, 288]	;#,
-	str	x7, [sp, 296]	;#,
-	str	q0, [sp, 112]	;#,
-	str	q1, [sp, 128]	;#,
-	str	q2, [sp, 144]	;#,
-	str	q3, [sp, 160]	;#,
-	str	q4, [sp, 176]	;#,
-	str	q5, [sp, 192]	;#,
-	str	q6, [sp, 208]	;#,
-	str	q7, [sp, 224]	;#,
+	str	x0, [sp, 24]	;# format, format
+	str	x1, [sp, 184]	;#,
+	str	x2, [sp, 192]	;#,
+	str	x3, [sp, 200]	;#,
+	str	x4, [sp, 208]	;#,
+	str	x5, [sp, 216]	;#,
+	str	x6, [sp, 224]	;#,
+	str	x7, [sp, 232]	;#,
+	str	q0, [sp, 48]	;#,
+	str	q1, [sp, 64]	;#,
+	str	q2, [sp, 80]	;#,
+	str	q3, [sp, 96]	;#,
+	str	q4, [sp, 112]	;#,
+	str	q5, [sp, 128]	;#,
+	str	q6, [sp, 144]	;#,
+	str	q7, [sp, 160]	;#,
 ;# valist-use-dll.c:17:   va_start(argv, format);
-	add	x0, sp, 304	;# tmp114,,
-	str	x0, [sp, 72]	;# tmp114, MEM[(struct  *)&argv].__stack
-	add	x0, sp, 304	;# tmp115,,
-	str	x0, [sp, 80]	;# tmp115, MEM[(struct  *)&argv].__gr_top
 	add	x0, sp, 240	;# tmp104,,
-	str	x0, [sp, 88]	;# tmp104, MEM[(struct  *)&argv].__vr_top
-	mov	w0, -56	;# tmp105,
-	str	w0, [sp, 96]	;# tmp105, MEM[(struct  *)&argv].__gr_offs
-	mov	w0, -128	;# tmp106,
-	str	w0, [sp, 100]	;# tmp106, MEM[(struct  *)&argv].__vr_offs
+	sub	x0, x0, #56	;# tmp105, tmp104,
+	str	x0, [sp, 32]	;# tmp105, MEM[(void * *)&argv]
 ;# valist-use-dll.c:18:   int retval = use_va_list(format, argv);
-	add	x0, sp, 16	;# tmp107,,
-	add	x1, sp, 72	;# tmp108,,
-	ldr	q30, [x1]	;# tmp109, argv
-	ldr	q31, [x1, 16]	;# tmp110, argv
-	str	q30, [x0]	;# tmp109,
-	str	q31, [x0, 16]	;# tmp110,
-	add	x0, sp, 16	;# tmp111,,
-	mov	x1, x0	;#, tmp111
-	ldr	x0, [sp, 56]	;#, format
+	ldr	x0, [sp, 32]	;# argv.0_1, argv
+	mov	x1, x0	;#, argv.0_1
+	ldr	x0, [sp, 24]	;#, format
 	bl	use_va_list		;#
-	str	w0, [sp, 108]	;#, retval
+	str	w0, [sp, 44]	;#, retval
 ;# valist-use-dll.c:20:   return retval;
-	ldr	w0, [sp, 108]	;# _7, retval
+	ldr	w0, [sp, 44]	;# _8, retval
 ;# valist-use-dll.c:21: }
-	ldp	x29, x30, [sp], 304	;#,,,
+	ldp	x29, x30, [sp], 240	;#,,,
 	ret	
 	.seh_endproc
 	.section	.rdata,"dr"
