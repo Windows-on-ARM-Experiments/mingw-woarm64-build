@@ -38,7 +38,6 @@ add_executable(
   nested-functions-test.c
   omp-test.c
   printf-double.c
-  pdata-test.c
   sjlj-test.c
   sscanf-double.c
   static-constructor.cpp
@@ -46,6 +45,7 @@ add_executable(
   static-function.c
   struct-test.c
   varargs-test.c
+  unwind-stack-test.c
   weak-references-test.c
   weak-references.c
 )

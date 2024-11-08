@@ -13,7 +13,6 @@ TEST(Aarch64MinGW, MathTest);
 TEST(Aarch64MinGW, NestedFunction);
 TEST(Aarch64MinGW, OmpTest);
 TEST(Aarch64MinGW, PrintfDoubleTest);
-TEST(Aarch64MinGW, TestUnwindStack);
 TEST(Aarch64MinGW, SJLJTest);
 TEST(Aarch64MinGW, SscanfDoubleTest);
 TEST(Aarch64MinGW, StaticConstructorTest);
@@ -22,6 +21,7 @@ TEST(Aarch64MinGW, StructTest);
 TEST(Aarch64MinGW, TestVaList);
 TEST(Aarch64MinGW, TestSPrintf);
 TEST(Aarch64MinGW, TestVaArgPack);
+TEST(Aarch64MinGW, UnwindStackTest);
 TEST(Aarch64MinGW, WeakReferencesTest);
 
 int main(int argc, char **argv) {
@@ -58,7 +58,6 @@ int main(int argc, char **argv) {
         DECLARE_TEST(Aarch64MinGW, NestedFunction),
         DECLARE_TEST(Aarch64MinGW, OmpTest),
         DECLARE_TEST(Aarch64MinGW, PrintfDoubleTest),
-        DECLARE_TEST(Aarch64MinGW, TestUnwindStack),
         DECLARE_TEST(Aarch64MinGW, SJLJTest),
         DECLARE_TEST(Aarch64MinGW, SscanfDoubleTest),
         DECLARE_TEST(Aarch64MinGW, StaticConstructorTest),
@@ -67,6 +66,7 @@ int main(int argc, char **argv) {
         DECLARE_TEST(Aarch64MinGW, TestVaList),
         DECLARE_TEST(Aarch64MinGW, TestSPrintf),
         DECLARE_TEST(Aarch64MinGW, TestVaArgPack),
+        DECLARE_TEST(Aarch64MinGW, UnwindStackTest),
         DECLARE_TEST(Aarch64MinGW, WeakReferencesTest)
     };
 
