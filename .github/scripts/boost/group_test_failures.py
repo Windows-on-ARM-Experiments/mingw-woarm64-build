@@ -12,6 +12,8 @@ def process_logs(log_file: str) -> None:
     reading_init_lines = True
 
     failed_outputs = []
+    passed_outputs = []
+    skipped_outputs = []
     command_output = []
 
     with open(log_file, 'r', encoding="utf8") as file:
@@ -27,30 +29,39 @@ def process_logs(log_file: str) -> None:
             if line.startswith("...updated ") and line.rstrip().endswith("targets..."):
                 break
             
+            # Progress lines (e.g. ...on 200th target...)
             if line.startswith("...on ") and line.rstrip().endswith("target..."):
                 continue
+
+            # TODO: We can 'continue' here and then we won't need to handle "...skipped" anywhere later in the code
+            if line.startswith("...skipped"):
+                skipped_outputs.append(line)
 
             COMMANDS = ["common.copy", "common.mkdir", "link.mklink",
                         "gcc.compile.c", "gcc.compile.c++", "gcc.compile.asm", "gcc.link", "gcc.link.dll", "gcc.archive",
                         "capture-output", "testing.capture-output",
-                        "quickbook-testing.process-quickbook", "quickbook-testing.process-quickbook-html"]
+                        "quickbook-testing.process-quickbook", "quickbook-testing.process-quickbook-html",
+                        "**passed**"]
             if any(line.startswith(command) for command in COMMANDS):
                 if len(command_output) == 0:
                     print("Processing first command!")
                     command_output.append(line)
                     continue
 
-                look_back = 1
-                while command_output[-look_back].startswith("...skipped"):
-                    look_back += 1
-                if command_output[-look_back].startswith("...failed"):
-                    failed_outputs.append(command_output)
+                if command_output[0].startswith("**passed**"):
+                    passed_outputs.append(command_output)
+                else:
+                    look_back = 1
+                    while command_output[-look_back].startswith("...skipped"):
+                        look_back += 1
+                    if command_output[-look_back].startswith("...failed"):
+                        failed_outputs.append(command_output)
 
                 command_output = []
 
             command_output.append(line)
 
-    print(f"Found {len(failed_outputs)} failed logs") # Should be 8604
+    print(f"Found {len(failed_outputs)} failed, {len(skipped_outputs)} skipped and {len(passed_outputs)} passed logs")
     print()
 
     command_grouping = collections.defaultdict(int)
