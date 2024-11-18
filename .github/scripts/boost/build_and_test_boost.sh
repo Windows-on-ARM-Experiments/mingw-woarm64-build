@@ -3,6 +3,8 @@
 BOOST_BUILD_DIR=$1
 BOOST_TEMPLATE_DIR=$2
 
+export TOOLCHAIN_PATH=/home/vejby/cross-aarch64-w64-mingw32-msvcrt
+
 if [[ $# -lt 1 ]]; then
     echo "Expected at least 1 arguments!" >&2
     exit 1
@@ -12,6 +14,15 @@ if [[ -d $BOOST_BUILD_DIR ]]; then
     echo "Directory $BOOST_BUILD_DIR already exists!" >&2
     exit 1
 fi
+
+# Build toolchain
+# cd mingw-woarm64-build
+# export RESET_SOURCES=1
+# export BINUTILS_BRANCH=woarm64
+# export GCC_BRANCH=woarm64
+# export MINGW_BRANCH=woarm64
+# ./build.sh > "toolchain-building.log"
+# cd -
 
 mkdir -p $BOOST_BUILD_DIR
 
@@ -55,7 +66,7 @@ cd $BOOST_BUILD_DIR
 
 # WSL linux arm64 -> win arm64: aarch64-pc-linux-gnu -> aarch64-w64-mingw32 or
 # WSL linux x64 -> win arm64: x86_64-pc-linux-gnu -> aarch64-w64-mingw32
-# echo "using gcc : 15 : /home/vejby/cross-aarch64-w64-mingw32-msvcrt/bin/aarch64-w64-mingw32-g++ : : <target-os>windows <address-model>64 <architecture>arm ;" > "user-config.jam"
+echo "using gcc : 15 : $TOOLCHAIN_PATH/bin/aarch64-w64-mingw32-g++ : : <target-os>windows <address-model>64 <architecture>arm ;" > "user-config.jam"
 
 # MSYS x64 -> win x64: x86_64-pc-msys -> x86_64-pc-msys
 # echo "using gcc : 13 : /usr/bin/x86_64-pc-msys-g++ : : <target-os>windows <address-model>64 <architecture>x86 ;" > "user-config.jam"
@@ -64,7 +75,7 @@ cd $BOOST_BUILD_DIR
 # echo "using gcc : 15 : /opt/bin/aarch64-w64-mingw32-g++ : : <target-os>windows <address-model>64 <architecture>arm ;" > "user-config.jam"
 
 # MSYS arm64 -> win arm64: aarch64-w64-mingw32 -> aarch64-w64-mingw32
-echo "using gcc : 15 : /mingwarm64/bin/aarch64-w64-mingw32-g++ : : <target-os>windows <address-model>64 <architecture>arm ;" > "user-config.jam"
+# echo "using gcc : 15 : /mingwarm64/bin/aarch64-w64-mingw32-g++ : : <target-os>windows <address-model>64 <architecture>arm ;" > "user-config.jam"
 
 # Some gcc is needed for running this as well. I'm using MinGW from package manager (e.g. pacman -S gcc)
 echo "Running Boost bootstrap.."
@@ -108,9 +119,15 @@ cd status
 # building tests with static linking.
 
 # WSL linux x64 to win x64: x86_64-pc-linux-gnu -> x86_64-w64-mingw32
-cp /usr/x86_64-w64-mingw32/lib/libwinpthread-1.dll .
-cp /usr/lib/gcc/x86_64-w64-mingw32/13-win32/libstdc++-6.dll .
-cp /usr/lib/gcc/x86_64-w64-mingw32/13-win32/libgcc_s_seh-1.dll .
+# cp /usr/x86_64-w64-mingw32/lib/libwinpthread-1.dll .
+# cp /usr/lib/gcc/x86_64-w64-mingw32/13-win32/libstdc++-6.dll .
+# cp /usr/lib/gcc/x86_64-w64-mingw32/13-win32/libgcc_s_seh-1.dll .
+
+# WSL linux arm64 -> win arm64: aarch64-pc-linux-gnu -> aarch64-w64-mingw32 or
+# WSL linux x64 -> win arm64: x86_64-pc-linux-gnu -> aarch64-w64-mingw32
+cp $TOOLCHAIN_PATH/lib/gcc/aarch64-w64-mingw32/libgcc_s_seh-1.dll .
+cp $TOOLCHAIN_PATH/lib/gcc/aarch64-w64-mingw32/15.0.0/libstdc++-6.dll .
+cp $TOOLCHAIN_PATH/aarch64-w64-mingw32/bin/libwinpthread-1.dll .
 
 # MSYS x64 -> win x64: x86_64-w64-mingw32 -> x86_64-w64-mingw32
 # cp /mingw64/bin/libgcc_s_seh-1.dll .
@@ -121,8 +138,8 @@ cp /usr/lib/gcc/x86_64-w64-mingw32/13-win32/libgcc_s_seh-1.dll .
 # cp /opt/lib/gcc/aarch64-w64-mingw32/15.0.0/libstdc++-6.dll .
 
 # MSYS x64 -> arm64: x86_64-pc-msys -> aarch64-w64-mingw32
-cp /mingwarm64/bin/libgcc_s_seh-1.dll .
-cp /mingwarm64/bin/libstdc++-6.dll .
+# cp /mingwarm64/bin/libgcc_s_seh-1.dll .
+# cp /mingwarm64/bin/libstdc++-6.dll .
 
 # Can run quick/minimal or full test suite. When running full test suite, we can specify modules to
 # be excluded from testing like --exclude-tests=context,cobalt,coroutine,fiber,charconv,json,predef
