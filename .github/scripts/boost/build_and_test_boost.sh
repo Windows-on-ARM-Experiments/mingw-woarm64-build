@@ -107,6 +107,11 @@ cd status
 # We solve missing libraries from group 1 by copying them and missing libraries from group 2 by
 # building tests with static linking.
 
+# WSL linux x64 to win x64: x86_64-pc-linux-gnu -> x86_64-w64-mingw32
+cp /usr/x86_64-w64-mingw32/lib/libwinpthread-1.dll .
+cp /usr/lib/gcc/x86_64-w64-mingw32/13-win32/libstdc++-6.dll .
+cp /usr/lib/gcc/x86_64-w64-mingw32/13-win32/libgcc_s_seh-1.dll .
+
 # MSYS x64 -> win x64: x86_64-w64-mingw32 -> x86_64-w64-mingw32
 # cp /mingw64/bin/libgcc_s_seh-1.dll .
 # cp /mingw64/bin/libstdc++-6.dll .
