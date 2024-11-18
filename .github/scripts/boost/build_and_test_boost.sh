@@ -20,20 +20,25 @@ if [[ ! -z $BOOST_TEMPLATE_DIR && -d $BOOST_TEMPLATE_DIR ]]; then
     time cp -r $BOOST_TEMPLATE_DIR/* $BOOST_BUILD_DIR
 else
     echo "Cloning Boost GitHub repository.."
-    time git clone --recursive https://github.com/boostorg/boost.git $BOOST_BUILD_DIR
+    time git clone --recursive https://github.com/boostorg/boost.git --depth 1 --branch boost-1.86.0 $BOOST_BUILD_DIR
     # process module contained bug which prevented building it with MinGW, there's already fix
     # but it's not updated in Boost project yet.
     cd $BOOST_BUILD_DIR/libs/process
-    git checkout develop
+    git checkout 9761be99bbc62776d5fbf2d311d5ab9de2e81dd5
     cd -
 
     # Get version of charconv and json modules which have fast_float _umul128 fix
     cd $BOOST_BUILD_DIR/libs/charconv
-    git checkout develop
+    git checkout abb721d55633d75d9638798d57d0f0b77ca77a5e
     cd -
 
     cd $BOOST_BUILD_DIR/libs/json
-    git checkout develop
+    git checkout 7b16bf74e6de0246844f9c1f438631880b58772c
+    cd -
+
+    cd $BOOST_BUILD_DIR/libs
+    rm -rf context
+    git clone https://github.com/Windows-on-ARM-Experiments/boost-context.git --depth 1 --branch mingw-arm-asm context
     cd -
     
     # time git clone --recursive https://github.com/boostorg/boost.git $BOOST_BUILD_DIR
