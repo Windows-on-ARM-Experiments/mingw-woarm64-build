@@ -8,11 +8,34 @@ def print_dict_sorted_by_values(grouping_dict: dict) -> None:
         print(f"{value}: {key}")
 
 
+def find_failed_line_index(command_output: list[str]) -> int:
+    index = len(command_output) - 1
+    while command_output[index].startswith("...skipped") or command_output[index].startswith("...removing"):
+        index -= 1
+    if command_output[index].startswith("...failed"):
+        return index
+
+    assert not any(line.startswith("...failed") for line in command_output)
+    return -1
+
+
+def process_one_loaded_log(command_output: list[str], passed_outputs: list[str], failed_outputs: list[str]) -> None:
+    while command_output[-1] == "":
+        command_output.pop()
+    if command_output[0].startswith("**passed**"):
+        passed_outputs.append(command_output)
+    else:
+        if find_failed_line_index(command_output) >= 0:
+            failed_outputs.append(list(command_output))
+
+    command_output.clear()
+
+
 def process_logs(log_file: str) -> None:
     reading_init_lines = True
 
     failed_outputs = []
-    passed_outputs = []
+    passed_outputs = []  # TODO: There are also (failed-as-expected) results
     skipped_outputs = []
     command_output = []
 
@@ -27,6 +50,7 @@ def process_logs(log_file: str) -> None:
 
             # End of the output
             if line.startswith("...updated ") and line.rstrip().endswith("targets..."):
+                process_one_loaded_log(command_output, passed_outputs, failed_outputs)
                 break
             
             # Progress lines (e.g. ...on 200th target...)
@@ -48,16 +72,7 @@ def process_logs(log_file: str) -> None:
                     command_output.append(line)
                     continue
 
-                if command_output[0].startswith("**passed**"):
-                    passed_outputs.append(command_output)
-                else:
-                    look_back = 1
-                    while command_output[-look_back].startswith("...skipped"):
-                        look_back += 1
-                    if command_output[-look_back].startswith("...failed"):
-                        failed_outputs.append(command_output)
-
-                command_output = []
+                process_one_loaded_log(command_output, passed_outputs, failed_outputs)
 
             command_output.append(line)
 
@@ -84,16 +99,13 @@ def process_logs(log_file: str) -> None:
 
     grouping = collections.defaultdict(int)
     for output in failed_outputs:
-        look_back = 1
-        while output[-look_back].startswith("...skipped"):
-            look_back += 1
-        assert output[-look_back].startswith("...failed"), output[-look_back]
-        look_back += 1
+        error_line_index = find_failed_line_index(output) - 1
+        assert error_line_index >= 0
 
         command = output[0].strip().split(" ")[0]
 
         # e.g. <3>WSL (4090138) ERROR: UtilAcceptVsock:251: accept4 failed 110
-        if output[-look_back].startswith("<3>WSL (") and output[-look_back].endswith(") ERROR: UtilAcceptVsock:251: accept4 failed 110"):
+        if output[error_line_index].startswith("<3>WSL (") and output[error_line_index].endswith(") ERROR: UtilAcceptVsock:251: accept4 failed 110"):
             grouping[f"{command}: <3>WSL ERROR: UtilAcceptVsock:251: accept4 failed 110"] += 1
             continue
 
@@ -107,19 +119,19 @@ def process_logs(log_file: str) -> None:
                     break
             continue
         
-        if output[-look_back] == ("====== END OUTPUT ======"):
+        if output[error_line_index] == ("====== END OUTPUT ======"):
             for i, line in enumerate(output):
                 if line == "====== BEGIN OUTPUT ======":
                     break
             
             if output[i+1].startswith("<3>WSL (") and output[i+1].endswith(") ERROR: UtilAcceptVsock:251: accept4 failed 110"):
                 output[i+1] = "<3>WSL (...) ERROR: UtilAcceptVsock:251: accept4 failed 110"
-            log_str = "   ".join((line for line in output[i+1:-look_back] if line != ""))
+            log_str = "   ".join((line for line in output[i+1:error_line_index] if line != ""))
             grouping[f"{command}: {log_str}"] += 1
-            # grouping[f"{command}: {output[i:-look_back + 1]}"] += 1
+            # grouping[f"{command}: {output[i:error_line_index + 1]}"] += 1
             continue
 
-        grouping[f"{command}: {output[-look_back]}"] += 1
+        grouping[f"{command}: {output[error_line_index]}"] += 1
 
     print_dict_sorted_by_values(grouping)
 
