@@ -10,11 +10,15 @@ echo echo "::group::Patch MinGW"
         git clean -fdx
     fi
 
-    case "$ARCH" in
-        aarch64)
-            patch -p1 -i $PATCHES_PATH/mingw/0001-aarch64-cygwin.patch
-        ;;
-    esac
+    if [ ! -f .patched ]; then
+        case "$ARCH" in
+            aarch64)
+                patch -p1 -i $PATCHES_PATH/mingw/0001-aarch64-cygwin.patch
+            ;;
+        esac
+    fi
+
+    touch .patched
 echo "::endgroup::"
 
 echo 'Success!'

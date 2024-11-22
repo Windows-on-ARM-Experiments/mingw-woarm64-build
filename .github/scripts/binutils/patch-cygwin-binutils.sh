@@ -17,14 +17,15 @@ echo "::group::Patch Cygwin binutils"
         git clean -fdx
     fi
 
-    PATCH_DIR=$SOURCE_PATH/cygwin-packages/binutils
-    patch -p2 -i $PATCH_DIR/binutils-2.43-cygwin-config-rpath.patch
+    if [ ! -f .patched ]; then
+        case "$ARCH" in
+            aarch64)
+                patch -p1 -i $PATCHES_PATH/binutils/0001-aarch64-cygwin.patch
+            ;;
+        esac
+    fi
 
-    case "$ARCH" in
-        aarch64)
-            patch -p1 -i $PATCHES_PATH/binutils/0001-aarch64-cygwin.patch
-        ;;
-    esac
+    touch .patched
 echo "::endgroup::"
 
 echo 'Success!'

@@ -38,6 +38,7 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$GCC_BUILD_PATH/Makefile" ]]; then
                 # REMOVED: --libexecdir=/usr/lib
                 # CHANGED: --enable-__cxa_atexit to --disable-__cxa_atexit
                 TARGET_OPTIONS="$TARGET_OPTIONS \
+                    --disable-shared    \
                     --enable-version-specific-runtime-libs \
                     --disable-__cxa_atexit \
                     --enable-threads=posix \
@@ -60,6 +61,7 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$GCC_BUILD_PATH/Makefile" ]]; then
                 ;;
             *mingw*)
                 TARGET_OPTIONS="$TARGET_OPTIONS \
+                    --disable-shared    \
                     --libexecdir=$TOOLCHAIN_PATH/lib \
                     --enable-threads=win32 \
                     --enable-graphite \
@@ -98,8 +100,7 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$GCC_BUILD_PATH/Makefile" ]]; then
             --host=$HOST \
             --target=$TARGET \
             --enable-static \
-            --enable-shared \
-            --enable-languages=c,c++,d,fortran,lto,m2,objc,obj-c++ \
+            --enable-languages=c,c++ \
             --disable-bootstrap \
             --disable-multilib \
             --with-gnu-as \
