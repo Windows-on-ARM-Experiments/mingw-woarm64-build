@@ -5,6 +5,10 @@ BOOST_TEMPLATE_DIR=$2
 
 export TOOLCHAIN_PATH=/home/vejby/cross-aarch64-w64-mingw32-msvcrt
 
+GCC_VERSION=15
+ARCHITECTURE=arm
+ABI=aapcs
+
 if [[ $# -lt 1 ]]; then
     echo "Expected at least 1 arguments!" >&2
     exit 1
@@ -71,20 +75,25 @@ fi
 cd $BOOST_BUILD_DIR
 
 # WSL linux x64 to win x64: x86_64-pc-linux-gnu -> x86_64-w64-mingw32
-# echo "using gcc : 10 : x86_64-w64-mingw32-g++ : : <target-os>windows <address-model>64 <architecture>x86 ;" > "user-config.jam"
+# GCC_VERSION=10, ARCHITECTURE=x86, ABI=ms
+# echo "using gcc : $GCC_VERSION : x86_64-w64-mingw32-g++ : : <target-os>windows <address-model>64 <architecture>$ARCHITECTURE ;" > "user-config.jam"
 
 # WSL linux arm64 -> win arm64: aarch64-pc-linux-gnu -> aarch64-w64-mingw32 or
 # WSL linux x64 -> win arm64: x86_64-pc-linux-gnu -> aarch64-w64-mingw32
-echo "using gcc : 15 : $TOOLCHAIN_PATH/bin/aarch64-w64-mingw32-g++ : : <target-os>windows <address-model>64 <architecture>arm ;" > "user-config.jam"
+# GCC_VERSION=15, ARCHITECTURE=arm, ABI=aapcs
+echo "using gcc : $GCC_VERSION : $TOOLCHAIN_PATH/bin/aarch64-w64-mingw32-g++ : : <target-os>windows <address-model>64 <architecture>$ARCHITECTURE ;" > "user-config.jam"
 
 # MSYS x64 -> win x64: x86_64-pc-msys -> x86_64-pc-msys
-# echo "using gcc : 13 : /usr/bin/x86_64-pc-msys-g++ : : <target-os>windows <address-model>64 <architecture>x86 ;" > "user-config.jam"
+# GCC_VERSION=13, ARCHITECTURE=x86, ABI=ms
+# echo "using gcc : $GCC_VERSION : /usr/bin/x86_64-pc-msys-g++ : : <target-os>windows <address-model>64 <architecture>$ARCHITECTURE ;" > "user-config.jam"
 
 # MSYS x64 -> win arm64: x86_64-pc-msys -> aarch64-w64-mingw32
-# echo "using gcc : 15 : /opt/bin/aarch64-w64-mingw32-g++ : : <target-os>windows <address-model>64 <architecture>arm ;" > "user-config.jam"
+# GCC_VERSION=15, ARCHITECTURE=arm, ABI=aapcs
+# echo "using gcc : $GCC_VERSION : /opt/bin/aarch64-w64-mingw32-g++ : : <target-os>windows <address-model>64 <architecture>$ARCHITECTURE ;" > "user-config.jam"
 
 # MSYS arm64 -> win arm64: aarch64-w64-mingw32 -> aarch64-w64-mingw32
-# echo "using gcc : 15 : /mingwarm64/bin/aarch64-w64-mingw32-g++ : : <target-os>windows <address-model>64 <architecture>arm ;" > "user-config.jam"
+# GCC_VERSION=15, ARCHITECTURE=arm, ABI=aapcs
+# echo "using gcc : $GCC_VERSION : /mingwarm64/bin/aarch64-w64-mingw32-g++ : : <target-os>windows <address-model>64 <architecture>$ARCHITECTURE ;" > "user-config.jam"
 
 # Some gcc is needed for running this as well. I'm using MinGW from package manager (e.g. pacman -S gcc)
 echo "Running Boost bootstrap.."
@@ -106,8 +115,7 @@ echo "Running Boost b2 build..."
 
 # MinGW defaults to an older version of Windows header files, Process library of Boost needs newer
 # one, we default to the newest: define=_WIN32_WINNT=0x0A00
-# abi=ms architecture=x86
-time ./b2 --user-config=./user-config.jam -d2 --prefix=./build --debug-configuration target-os=windows address-model=64 variant=debug architecture=arm binary-format=pe abi=aapcs toolset=gcc-15 define=_WIN32_WINNT=0x0A00 cxxflags=-Wno-attributes linkflags=-static-libstdc++ linkflags=-static-libgcc link=static install > boost-build.log
+time ./b2 --user-config=./user-config.jam -d2 --prefix=./build --debug-configuration target-os=windows address-model=64 variant=debug architecture=$ARCHITECTURE binary-format=pe abi=$ABI toolset=gcc-$GCC_VERSION define=_WIN32_WINNT=0x0A00 cxxflags=-Wno-attributes linkflags=-static-libstdc++ linkflags=-static-libgcc link=static install > boost-build.log
 
 echo "Running Boost quick test.."
 cd status
@@ -157,10 +165,10 @@ cd status
 # link=static runtime-link=static (link=static is not enough for linking runtime libraries statically, because it appends -static only to compilation, not to linking commands)
 # linkflags=-static-libstdc++ linkflags=-static-libgcc (or just pass -static to linker?)
 # TODO: More granural usage of -mbig-obj (per modules)
-time ../b2 quick -a --user-config=../user-config.jam -d2 --debug-configuration --hash target-os=windows address-model=64 variant=debug architecture=arm binary-format=pe abi=aapcs toolset=gcc-15 define=_WIN32_WINNT=0x0A00 cxxflags=-Wno-error=attributes cxxflags=-Wno-attributes cxxflags=-Wa,-mbig-obj link=static linkflags=-static-libstdc++ linkflags=-static-libgcc > ../boost-test-quick-static.log
+time ../b2 quick -a --user-config=../user-config.jam -d2 --debug-configuration --hash target-os=windows address-model=64 variant=debug architecture=$ARCHITECTURE binary-format=pe abi=$ABI toolset=gcc-$GCC_VERSION define=_WIN32_WINNT=0x0A00 cxxflags=-Wno-error=attributes cxxflags=-Wno-attributes cxxflags=-Wa,-mbig-obj link=static linkflags=-static-libstdc++ linkflags=-static-libgcc > ../boost-test-quick-static.log
 
 echo "Running Boost minimal test.."
-time ../b2 minimal -a --user-config=../user-config.jam -d2 --debug-configuration --hash target-os=windows address-model=64 variant=debug architecture=arm binary-format=pe abi=aapcs toolset=gcc-15 define=_WIN32_WINNT=0x0A00 cxxflags=-Wno-error=attributes cxxflags=-Wno-attributes cxxflags=-Wa,-mbig-obj link=static linkflags=-static-libstdc++ linkflags=-static-libgcc > ../boost-test-minimal-static.log
+time ../b2 minimal -a --user-config=../user-config.jam -d2 --debug-configuration --hash target-os=windows address-model=64 variant=debug architecture=$ARCHITECTURE binary-format=pe abi=$ABI toolset=gcc-$GCC_VERSION define=_WIN32_WINNT=0x0A00 cxxflags=-Wno-error=attributes cxxflags=-Wno-attributes cxxflags=-Wa,-mbig-obj link=static linkflags=-static-libstdc++ linkflags=-static-libgcc > ../boost-test-minimal-static.log
 
 echo "Running Boost full test.."
 
@@ -169,4 +177,4 @@ echo "Running Boost full test.."
 # EXIT STATUS: 126
 chmod +x boost_check_library.py
 
-time ../b2 -a --user-config=../user-config.jam -d2 --debug-configuration --hash target-os=windows address-model=64 variant=debug architecture=arm binary-format=pe abi=aapcs toolset=gcc-15 define=_WIN32_WINNT=0x0A00 cxxflags=-Wno-error=attributes cxxflags=-Wno-attributes cxxflags=-Wa,-mbig-obj link=static linkflags=-static-libstdc++ linkflags=-static-libgcc > ../boost-test-full-static.log
+time ../b2 -a --user-config=../user-config.jam -d2 --debug-configuration --hash target-os=windows address-model=64 variant=debug architecture=$ARCHITECTURE binary-format=pe abi=$ABI toolset=gcc-$GCC_VERSION define=_WIN32_WINNT=0x0A00 cxxflags=-Wno-error=attributes cxxflags=-Wno-attributes cxxflags=-Wa,-mbig-obj link=static linkflags=-static-libstdc++ linkflags=-static-libgcc > ../boost-test-full-static.log
