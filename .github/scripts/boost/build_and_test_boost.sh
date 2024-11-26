@@ -31,7 +31,7 @@ if [[ ! -z $BOOST_TEMPLATE_DIR && -d $BOOST_TEMPLATE_DIR ]]; then
     time cp -r $BOOST_TEMPLATE_DIR/* $BOOST_BUILD_DIR
 else
     echo "Cloning Boost GitHub repository.."
-    time git clone --recursive https://github.com/boostorg/boost.git $BOOST_BUILD_DIR
+    time git clone --recursive --single-branch https://github.com/boostorg/boost.git $BOOST_BUILD_DIR
     # process module contained bug which prevented building it with MinGW, there's already fix
     # but it's not updated in Boost project yet.
 
