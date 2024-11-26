@@ -54,17 +54,18 @@ else
     git checkout 7b16bf74e6de0246844f9c1f438631880b58772c
     cd -
 
-    # TODO: Added missing assembler files definition for GCC+Win+Aarch64 in Boost.Context
-    # cd $BOOST_BUILD_DIR/libs
-    # rm -rf context
-    # git clone https://github.com/Windows-on-ARM-Experiments/boost-context.git --depth 1 --branch mingw-arm-asm context
-    # cd -
-    
-    # time git clone --recursive https://github.com/boostorg/boost.git $BOOST_BUILD_DIR
-    # cd $BOOST_BUILD_DIR
-    # git checkout develop
-    # git submodule update --init --recursive
-    # cd -
+    # Add missing assembler files definition for GCC+Win+Aarch64 in Boost.Context
+    # TODO: Not the smartest way how to apply patches but works for now
+    cd $BOOST_BUILD_DIR/libs
+    rm -rf context
+    git clone https://github.com/Windows-on-ARM-Experiments/boost-context.git --branch mingw-arm-asm context
+    cd context
+    git checkout f7c27e2293912466f2806cba5597a2e052242720 # Boost 1.86.0
+    # My commits
+    git cherry-pick 9068c08ee7e59a9806a5f6b74db525bade58767e
+    git cherry-pick 566fdee8ad2708ef46420fad87ee1f85faab62e6
+    git cherry-pick 2767c8e1f2081f035f1fca7288eb02557b405030
+    cd ../../..
 fi
 
 cd $BOOST_BUILD_DIR
