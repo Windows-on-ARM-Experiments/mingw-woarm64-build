@@ -1,6 +1,7 @@
 name: Build and test main toolchain
 
 on:
+  pull_request:
   workflow_dispatch:
     inputs:
       binutils_branch:
@@ -76,13 +77,18 @@ env:
   RUN_BOOTSTRAP: 1
   UPDATE_SOURCES: 1
 
+  WSL_WORK_DIR: ~/work
+  WSL_OUTPUT_DIR: /media/output
+  WSL_DISTRIBUTION: Ubuntu-22.04
+  WSL_USER: root
+
+  WSLENV: BINUTILS_BRANCH:GCC_BRANCH:MINGW_BRANCH:ARCH:PLATFORM:CRT:TAG:MODULE:FILTER:CCACHE:RUN_BOOTSTRAP:UPDATE_SOURCES:WSL_OUTPUT_DIR:GITHUB_OUTPUT/p:GITHUB_STEP_SUMMARY/p
+
 jobs:
-  build-and-test-toolchain:
-    name: Build and test toolchain
+  build-toolchain:
+    name: Build toolchain
     runs-on: windows-latest
 
-    env:
-      WSLENV: BINUTILS_BRANCH:GCC_BRANCH:MINGW_BRANCH:ARCH:PLATFORM:CRT:TAG:MODULE:FILTER:CCACHE:RUN_BOOTSTRAP:UPDATE_SOURCES:GITHUB_OUTPUT/p:GITHUB_STEP_SUMMARY/p
 
     defaults:
       run:
@@ -98,25 +104,19 @@ jobs:
       - name: Setup WSL
         uses: Windows-on-ARM-Experiments/setup-wsl@master
         with:
-          distribution: Ubuntu-22.04
+          distribution: ${{ env.WSL_DISTRIBUTION }}
+          wsl-shell-user: ${{ env.WSL_USER }}
           additional-packages:
             git
 
       - name: Checkout repository
         run: |
-          git clone --depth=1 ${{ github.server_url }}/${{ github.repository }}.git -b ${{ github.head_ref || github.ref_name || 'main' }} ~/work
+          git clone --depth=1 ${{ github.server_url }}/${{ github.repository }}.git -b ${{ github.head_ref || github.ref_name || 'main' }} ${{ env.WSL_WORK_DIR }}
 
       - name: Get WSL paths
         id: get-wsl-paths
         run: |
-          source ~/work/.github/scripts/config.sh
-          mkdir -p $BUILD_PATH
-          mkdir -p $CCACHE_DIR_PATH
-          mkdir -p $ARTIFACT_PATH
-          echo "build-path-win=`wslpath -w $BUILD_PATH`" >> $GITHUB_OUTPUT
-          echo "ccache-dir-path-win=`wslpath -w $CCACHE_DIR_PATH`" >> $GITHUB_OUTPUT
-          echo "artifact-path-win=`wslpath -w $ARTIFACT_PATH`" >> $GITHUB_OUTPUT
-          echo "artifact-path-wsl=$ARTIFACT_PATH" >> $GITHUB_OUTPUT
+          ${{ env.WSL_WORK_DIR }}/.github/scripts/get-wsl-paths.sh
 
       - name: Restore Ccache
         uses: actions/cache/restore@v4
@@ -127,7 +127,18 @@ jobs:
 
       - name: Build toolchain
         run: |
-          ~/work/.github/scripts/build.sh
+          ${{ env.WSL_WORK_DIR }}/.github/scripts/build.sh
+
+      - name: Pack work folder
+        run: |
+          tar -czf ${{ env.WSL_OUTPUT_DIR }}/work.tar.bz2 -C ${{ steps.get-wsl-paths.outputs.root-path-wsl }} .
+
+      - name: Upload work folder
+        uses: actions/upload-artifact@v4
+        with:
+          name: work
+          retention-days: 1
+          path: ${{ steps.get-wsl-paths.outputs.output-path-win }}/work.tar.bz2
 
       - name: Save Ccache
         if: always()
@@ -136,29 +147,64 @@ jobs:
           path: ${{ steps.get-wsl-paths.outputs.ccache-dir-path-win }}
           key: build-and-test-gcc-ccache-${{ steps.get-cache-key.outputs.timestamp }}
 
+  test-toolchain:
+    name: Test toolchain
+    needs: [
+      build-toolchain
+    ]
+    runs-on: windows-latest
+
+    defaults:
+      run:
+        shell: wsl-bash {0}
+
+    steps:
+      - name: Setup WSL
+        uses: Windows-on-ARM-Experiments/setup-wsl@master
+        with:
+          distribution: ${{ env.WSL_DISTRIBUTION }}
+          wsl-shell-user: ${{ env.WSL_USER }}
+          additional-packages:
+            git
+
+      - name: Checkout repository
+        run: |
+          git clone --depth=1 ${{ github.server_url }}/${{ github.repository }}.git -b ${{ github.head_ref || github.ref_name || 'main' }} ${{ env.WSL_WORK_DIR }}
+
+      - name: Install dependencies
+        run: |      
+          ${{ env.WSL_WORK_DIR }}/.github/scripts/install-dependencies.sh
+
+      - name: Get WSL paths
+        id: get-wsl-paths
+        run: |
+          ${{ env.WSL_WORK_DIR }}/.github/scripts/get-wsl-paths.sh
+
+      - name: Download work folder
+        uses: actions/download-artifact@v4
+        with:
+          name: work
+          path: ${{ steps.get-wsl-paths.outputs.output-path-win }}
+
+      - name: Unpack work folder
+        run: |
+          tar --overwrite -xzf ${{ env.WSL_OUTPUT_DIR }}/work.tar.bz2 -C ${{ steps.get-wsl-paths.outputs.root-path-wsl }}
+
       - name: Execute GCC tests
         run: |
-          ~/work/.github/scripts/toolchain/execute-gcc-tests.sh "gcc-tests-${{ env.TAG }}" \
+          ${{ env.WSL_WORK_DIR }}/.github/scripts/toolchain/execute-gcc-tests.sh "gcc-tests-${{ env.TAG }}" \
             "${{ env.MODULE }}" "${{ env.FILTER }}"
 
       - name: Create summary
         run: |
-          ~/work/.github/scripts/toolchain/create-gcc-summary.sh " \
+          ${{ env.WSL_WORK_DIR }}/.github/scripts/toolchain/create-gcc-summary.sh " \
             ${{ steps.get-wsl-paths.outputs.artifact-path-wsl }}/gcc-tests-${{ env.TAG }}" >> \
             ${{ steps.get-wsl-paths.outputs.artifact-path-wsl }}/gcc-tests-${{ env.TAG }}/summary.md
           cat ${{ steps.get-wsl-paths.outputs.artifact-path-wsl }}/gcc-tests-${{ env.TAG }}/summary.md >> $GITHUB_STEP_SUMMARY
 
       - name: Group test failures
         run: |
-          ~/work/.github/scripts/toolchain/group-gcc-test-failures.sh "gcc-tests-${{ env.TAG }}" >> $GITHUB_STEP_SUMMARY
-
-      - name: Upload build folder
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: build
-          retention-days: 1
-          path: ${{ steps.get-wsl-paths.outputs.build-path-win }}
+          ${{ env.WSL_WORK_DIR }}/.github/scripts/toolchain/group-gcc-test-failures.sh "gcc-tests-${{ env.TAG }}" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
