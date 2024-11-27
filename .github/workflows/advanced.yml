@@ -421,6 +421,11 @@ jobs:
           path: ${{ env.ARTIFACT_PATH }}/${{ env.TESTS_PACKAGE_NAME }}
           retention-days: 3
 
+      # This test builds and also runs on Ubuntu as it doesn't need to run any executable on Windows
+      - name: Test PE/COFF big object format
+        run: |
+          .github/scripts/tests/test-gas-big-obj.sh
+
   execute-aarch64-tests:
     needs: [
       build-toolchain,
