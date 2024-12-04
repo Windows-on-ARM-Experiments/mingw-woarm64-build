@@ -2,7 +2,7 @@
 
 source `dirname ${BASH_SOURCE[0]}`/config.sh
 
-UPSTREAM_URL=$1 
+UPSTREAM_URL=$1
 UPSTREAM_BRANCH=$2
 REBASE_BRANCH=$3
 

@@ -53,6 +53,7 @@ target_link_libraries(
   simple-dll
 )
 
+set_source_files_properties(large-alignment-test.c PROPERTIES COMPILE_OPTIONS "-fno-lto")
 set_target_properties(simple-dll PROPERTIES SUFFIX ".dll")
 set_target_properties(simple-dll PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 set_target_properties(aarch64-mingw-tests.exe PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
