@@ -247,10 +247,15 @@ jobs:
       url: ${{steps.create-release.outputs.url }}
 
     steps:
-      - name: Download artifact
+      - name: Download toolchain artifact
         uses: actions/download-artifact@v4
         with:
-          name: ${{ needs.build.outputs.toolchain-package-name }}
+          name: ${{ needs.build.outputs.toolchain-artifact-name }}
+
+      - name: Download runtime artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.build.outputs.runtime-artifact-name }}
 
       - name: Create tag
         run: |
@@ -258,7 +263,9 @@ jobs:
 
       - name: Create release
         id: create-release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
-          files: ${{ needs.build.outputs.toolchain-package-name }}
+          files: |
+            ${{ needs.build.outputs.toolchain-package-name }}
+            ${{ needs.build.outputs.runtime-package-name }}
           tag_name: ${{ env.TAG }}
