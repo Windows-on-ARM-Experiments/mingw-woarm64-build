@@ -29,7 +29,7 @@ env:
   MINGW_REPO: Windows-on-ARM-Experiments/mingw-woarm64
   MINGW_UPSTREAM_URL: https://git.code.sf.net/p/mingw-w64/mingw-w64
   CYGWIN_REPO: Windows-on-ARM-Experiments/newlib-cygwin
-  CYGWIN_UPSTREAM_URL: https://cygwin.com/git/newlib-cygwin.git
+  CYGWIN_UPSTREAM_URL: git://sourceware.org/git/newlib-cygwin.git
 
   SOURCE_PATH: ${{ github.workspace }}/code
   ORIGIN_BRANCH: ${{ inputs.origin_branch || 'woarm64' }}
