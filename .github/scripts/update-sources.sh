@@ -24,7 +24,11 @@ function update_repository() {
     fi
 
     if [[ ! -d $DIRECTORY ]]; then
-        git clone $REPOSITORY -b $BRANCH --single-branch --depth 1 $DIRECTORY
+        if [[ "$FLAT_CLONE" = 1 ]]; then
+            git clone $REPOSITORY -b $BRANCH --single-branch --depth 1 $DIRECTORY
+        else
+            git clone $REPOSITORY -b $BRANCH $DIRECTORY
+        fi
         pushd $DIRECTORY
             git config pull.rebase true
             git submodule init
@@ -32,6 +36,12 @@ function update_repository() {
         popd
     else
         pushd $DIRECTORY
+            if [[ "$FLAT_CLONE" = 1 ]]; then
+                git fetch origin --prune
+            else
+                git fetch --all --prune
+            fi
+
             if [[ "$RESET_SOURCES" = 1 ]]; then
                 git reset --hard HEAD
                 if ! is_remote_branch $BRANCH && ! is_tag $BRANCH; then
