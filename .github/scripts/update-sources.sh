@@ -7,7 +7,7 @@ function update_repository() {
     REPOSITORY=$2
     BRANCH=$3
     if [[ ! -d $DIRECTORY ]]; then
-        git clone $REPOSITORY -b $BRANCH --single-branch --depth 1 $DIRECTORY
+        git clone $REPOSITORY -b $BRANCH $DIRECTORY
         pushd $DIRECTORY
             git config pull.rebase true
             git submodule init
@@ -15,15 +15,24 @@ function update_repository() {
         popd
     else
         pushd $DIRECTORY
+            git fetch origin --prune
+
             if [[ "$RESET_SOURCES" = 1 ]]; then
                 git reset --hard HEAD
                 if ! git show-ref --verify --quiet refs/remotes/origin/$BRANCH; then
                     git remote set-branches --add origin $BRANCH
                     git fetch origin --prune
                 fi
+            fi
+
+            if [[ $(git rev-parse --abbrev-ref HEAD) != "$BRANCH" ]]; then
                 git switch $BRANCH
+            fi
+
+            if [[ "$RESET_SOURCES" = 1 ]]; then
                 git clean -fdx
             fi
+
             git pull
             git submodule update
         popd
