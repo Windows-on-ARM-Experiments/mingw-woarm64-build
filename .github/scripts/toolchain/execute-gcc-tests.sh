@@ -46,4 +46,10 @@ echo "::group::Execute GCC tests"
     done
 echo "::endgroup::"
 
+echo "::group::Create GCC test results"
+     $ROOT_PATH/.github/scripts/toolchain/create-gcc-summary.sh $TEST_RESULTS_PATH >> $TEST_RESULTS_PATH/summary.md
+     cat $TEST_RESULTS_PATH/summary.md >> $GITHUB_STEP_SUMMARY
+     $ROOT_PATH/.github/scripts/toolchain/group-gcc-test-failures.sh $TEST_RESULTS_PATH >> $GITHUB_STEP_SUMMARY
+echo "::endgroup::"
+
 echo 'Success!'

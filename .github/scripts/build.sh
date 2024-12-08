@@ -2,9 +2,9 @@
 
 source `dirname ${BASH_SOURCE[0]}`/config.sh
 
-if [[ "$RUN_BOOTSTRAP" = 1 ]]; then
-    $ROOT_PATH/.github/scripts/install-dependencies.sh
-fi
+#if [[ "$RUN_BOOTSTRAP" = 1 ]]; then
+#    $ROOT_PATH/.github/scripts/install-dependencies.sh
+#fi
 
 if [[ "$CCACHE" = 1 ]]; then
     source $ROOT_PATH/.github/scripts/enable-ccache.sh
