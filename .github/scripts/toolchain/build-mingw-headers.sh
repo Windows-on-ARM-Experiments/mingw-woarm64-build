@@ -57,8 +57,12 @@ if [[ "$RUN_INSTALL" = 1 ]]; then
     echo "::group::Install MinGW headers"
         make install
 
-        # Symlink for gcc
-        ln -sf $TOOLCHAIN_PATH/$TARGET $TOOLCHAIN_PATH/mingw
+        case "$PLATFORM" in
+            *mingw*)
+                # Symlink for gcc
+                ln -sf $TOOLCHAIN_PATH/$TARGET $TOOLCHAIN_PATH/mingw
+                ;;
+        esac
 
         if [[ "$DELETE_BUILD" = 1 ]]; then
             rm -rf $MINGW_HEADERS_BUILD_PATH
