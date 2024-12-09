@@ -411,8 +411,12 @@ jobs:
       - name: Unpack toolchain
         run: |
           .github/scripts/toolchain/unpack.sh
+
+      - name: Run toolchain tests
+        run: |
+          .github/scripts/tests/test-toolchain.sh
   
-      - name: Build aarch64-tests
+      - name: Build aarch64-tests (for running on Windows)
         run: |
           .github/scripts/tests/build.sh
 
