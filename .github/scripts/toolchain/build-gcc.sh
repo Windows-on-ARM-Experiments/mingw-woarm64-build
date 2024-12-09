@@ -32,13 +32,15 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$GCC_BUILD_PATH/Makefile" ]]; then
         case "$PLATFORM" in
             *linux*)
                 TARGET_OPTIONS="$TARGET_OPTIONS \
+                    --enable-shared \
                     --enable-threads=posix"
                 ;;
             *cygwin*)
                 # REMOVED: --libexecdir=/usr/lib
+                # REMOVED: --enable-shared for aarch64-pc-cygwin
+                # REMOVED: --enable-shared-libgcc for aarch64-pc-cygwin
                 # CHANGED: --enable-__cxa_atexit to --disable-__cxa_atexit
                 TARGET_OPTIONS="$TARGET_OPTIONS \
-                    --enable-shared-libgcc \
                     --enable-version-specific-runtime-libs \
                     --disable-__cxa_atexit \
                     --enable-threads=posix \
@@ -61,6 +63,7 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$GCC_BUILD_PATH/Makefile" ]]; then
             *mingw*)
                 TARGET_OPTIONS="$TARGET_OPTIONS \
                     --libexecdir=$TOOLCHAIN_PATH/lib \
+                    --enable-shared \
                     --enable-threads=win32 \
                     --enable-graphite \
                     --enable-fully-dynamic-string \
@@ -89,6 +92,16 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$GCC_BUILD_PATH/Makefile" ]]; then
                 TARGET_OPTIONS="$TARGET_OPTIONS \
                     --disable-libsanitizer"
                 ;;
+            aarch64-pc-cygwin)
+                TARGET_OPTIONS="$TARGET_OPTIONS \
+                    --disable-shared \
+                    --enable-shared-libgcc"
+                ;;
+            x86_64-pc-cygwin)
+                TARGET_OPTIONS="$TARGET_OPTIONS \
+                    --enable-shared \
+                    --enable-shared-libgcc"
+                ;;
         esac
 
         # REMOVED: --enable-languages=ada,go,jit
@@ -98,7 +111,6 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$GCC_BUILD_PATH/Makefile" ]]; then
             --host=$HOST \
             --target=$TARGET \
             --enable-static \
-            --enable-shared \
             --enable-languages=c,c++,d,fortran,lto,m2,objc,obj-c++ \
             --disable-bootstrap \
             --disable-multilib \
