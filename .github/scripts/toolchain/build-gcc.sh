@@ -38,10 +38,10 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$GCC_BUILD_PATH/Makefile" ]]; then
                 # REMOVED: --libexecdir=/usr/lib
                 # CHANGED: --enable-__cxa_atexit to --disable-__cxa_atexit
                 TARGET_OPTIONS="$TARGET_OPTIONS \
+                    --enable-shared-libgcc \
                     --enable-version-specific-runtime-libs \
                     --disable-__cxa_atexit \
                     --enable-threads=posix \
-                    --enable-linker-build-id \
                     --enable-graphite \
                     --enable-libatomic \
                     --enable-libgomp \

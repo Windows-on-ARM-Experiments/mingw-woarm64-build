@@ -4,10 +4,10 @@ set -e # exit on error
 set -x # echo on
 set -o pipefail # fail of any command in pipeline is an error
 
-BINUTILS_BRANCH=${BINUTILS_BRANCH:-woarm64}
-GCC_BRANCH=${GCC_BRANCH:-woarm64}
-MINGW_BRANCH=${MINGW_BRANCH:-woarm64}
-CYGWIN_BRANCH=${CYGWIN_BRANCH:-main}
+BINUTILS_BRANCH=${BINUTILS_BRANCH:-woarm64-cygwin}
+GCC_BRANCH=${GCC_BRANCH:-woarm64-cygwin}
+MINGW_BRANCH=${MINGW_BRANCH:-woarm64-cygwin}
+CYGWIN_BRANCH=${CYGWIN_BRANCH:-woarm64}
 CYGWIN_PACKAGES_BRANCH=${CYGWIN_PACKAGES_BRANCH:-main}
 COCOM_BRANCH=${COCOM_BRANCH:-master}
 
@@ -76,7 +76,6 @@ CCACHE=${CCACHE:-0} # Enable usage of ccache.
 RUN_BOOTSTRAP=${RUN_BOOTSTRAP:-0} # Bootstrap dependencies during the build.
 UPDATE_SOURCES=${UPDATE_SOURCES:-0} # Update source code repositories.
 RESET_SOURCES=${RESET_SOURCES:-0} # Reset source code repositories before update.
-APPLY_PATCHES=${APPLY_PATCHES:-1} # Patch source repositories for targets requiring it.
 RUN_CONFIG=${RUN_CONFIG:-1} # Run configuration step.
 RUN_INSTALL=${RUN_INSTALL:-1} # Run installation step.
 DELETE_BUILD=${DELETE_BUILD:-0} # Delete build folders after successful builds.
