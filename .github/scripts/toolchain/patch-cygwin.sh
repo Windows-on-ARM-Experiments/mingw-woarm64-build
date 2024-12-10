@@ -52,7 +52,6 @@ echo "::group::Patch Cygwin"
     fi
 
     patch -p1 -i $PATCH_DIR/0003-fix-mingw.patch
-    patch -p1 -i $PATCH_DIR/0005-fix-winsup-gcc-15.patch
 echo "::endgroup::"
 
 echo 'Success!'
