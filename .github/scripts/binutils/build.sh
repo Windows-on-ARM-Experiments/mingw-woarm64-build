@@ -53,6 +53,10 @@ echo "::group::Build binutils"
     make $BUILD_MAKE_OPTIONS
 echo "::endgroup::"
 
+echo "::group::Execute binutils tests"
+    $ROOT_PATH/.github/scripts/toolchain/execute-binutils-tests.sh
+echo "::endgroup::"
+
 if [[ "$RUN_INSTALL" = 1 ]]; then
     echo "::group::Install binutils"
         make install
