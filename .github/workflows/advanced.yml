@@ -123,7 +123,6 @@ env:
   RELATIVE_ARTIFACT_PATH: ./artifact
 
   CCACHE: 1
-  DELETE_BUILD: 1
 
 jobs:
   build-toolchain:
@@ -272,6 +271,11 @@ jobs:
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
         run: |
           .github/scripts/binutils/build.sh
+
+      - name: Execute binutils tests
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
+        run: |
+          .github/scripts/toolchain/execute-binutils-tests.sh
 
       - name: Install cross headers and libraries
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform == 'pc-linux-gnu' }}
