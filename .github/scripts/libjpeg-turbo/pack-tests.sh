@@ -2,8 +2,6 @@
 
 source `dirname ${BASH_SOURCE[0]}`/../config.sh
 
-LIBJPEG_TURBO_BUILD_PATH=$BUILD_PATH/libjpeg-turbo
-
 echo "::group::Pack libjpeg-turbo tests"
     mkdir -p $ARTIFACT_PATH
     cd $LIBJPEG_TURBO_BUILD_PATH

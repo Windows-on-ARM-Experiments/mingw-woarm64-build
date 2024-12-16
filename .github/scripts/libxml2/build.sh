@@ -23,7 +23,7 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f $LIBXML2_BUILD_PATH/CMakeCache.txt ]]; the
 fi
 
 echo "::group::Build libxml2"
-    cmake --build $LIBXML2_BUILD_PATH ${BUILD_MAKE_OPTIONS//V=1/-v}
+    cmake --build $LIBXML2_BUILD_PATH $BUILD_CMAKE_OPTIONS
 echo "::endgroup::"
 
 if [[ "$RUN_INSTALL" = 1 ]]; then
