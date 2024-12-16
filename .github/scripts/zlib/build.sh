@@ -17,7 +17,7 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f $ZLIB_BUILD_PATH/CMakeCache.txt ]]; then
 fi
 
 echo "::group::Build zlib"
-    cmake --build $ZLIB_BUILD_PATH ${BUILD_MAKE_OPTIONS//V=1/-v}
+    cmake --build $ZLIB_BUILD_PATH $BUILD_CMAKE_OPTIONS
 echo "::endgroup::"
 
 if [[ "$RUN_INSTALL" = 1 ]]; then
