@@ -2,8 +2,6 @@
 
 source `dirname ${BASH_SOURCE[0]}`/../config.sh
 
-OPENSSL_BUILD_PATH=$BUILD_PATH/openssl
-
 echo "::group::Pack OpenSSL tests"
     mkdir -p $ARTIFACT_PATH
     cd $OPENSSL_BUILD_PATH
