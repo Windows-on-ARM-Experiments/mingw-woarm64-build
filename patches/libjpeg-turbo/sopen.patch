@@ -1,0 +1,26 @@
+diff --git a/md5/md5hl.c b/md5/md5hl.c
+index 849a1366..4e2588bd 100644
+--- a/md5/md5hl.c
++++ b/md5/md5hl.c
+@@ -43,6 +43,7 @@
+ #include <fcntl.h>
+ #ifdef _WIN32
+ #include <io.h>
++#include <share.h>
+ #define close  _close
+ #define fstat  _fstat
+ #define lseek  _lseek
+@@ -94,7 +95,13 @@ char *MD5FileChunk(const char *filename, char *buf, off_t ofs, off_t len)
+ 
+   MD5Init(&ctx);
+ #ifdef _WIN32
++#ifdef __aarch64__
++  if (_sopen_s(&f, filename, _O_RDONLY | _O_BINARY, _SH_DENYRW, _S_IREAD | _S_IWRITE)) {
++    f = -1;
++  }
++#else
+   f = _open(filename, O_RDONLY | O_BINARY);
++#endif
+ #else
+   f = open(filename, O_RDONLY);
+ #endif
