@@ -1,0 +1,38 @@
+diff --git a/cmake/system_check.cmake b/cmake/system_check.cmake
+index fc81e9797..9fb1071d3 100644
+--- a/cmake/system_check.cmake
++++ b/cmake/system_check.cmake
+@@ -28,7 +28,7 @@ if(MINGW)
+     execute_process(COMMAND ${CMAKE_C_COMPILER} -dumpmachine
+               OUTPUT_VARIABLE OPENBLAS_MINGW_TARGET_MACHINE
+               OUTPUT_STRIP_TRAILING_WHITESPACE)
+-    if(OPENBLAS_MINGW_TARGET_MACHINE MATCHES "amd64|x86_64|AMD64")
++    if(OPENBLAS_MINGW_TARGET_MACHINE MATCHES "amd64|x86_64|AMD64|aarch64")
+       set(MINGW64 1)
+     endif()
+ endif()
+diff --git a/ctest/CMakeLists.txt b/ctest/CMakeLists.txt
+index 4496eff82..227430a78 100644
+--- a/ctest/CMakeLists.txt
++++ b/ctest/CMakeLists.txt
+@@ -14,7 +14,7 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL GNU)
+ 	set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fno-tree-vectorize")
+ endif()
+ 
+-if(WIN32)
++if(WIN32 AND NOT CMAKE_CROSSCOMPILING)
+ FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}/test_cblas_helper.ps1
+ "$ErrorActionPreference = \"Stop\"\n"
+ "Get-Content $args[1] | & $args[0]\n"
+diff --git a/utest/CMakeLists.txt b/utest/CMakeLists.txt
+index 6a61899da..d1a8dc6dd 100644
+--- a/utest/CMakeLists.txt
++++ b/utest/CMakeLists.txt
+@@ -160,5 +160,5 @@ add_custom_command(TARGET ${OpenBLAS_utest_bin}
+ )
+ endif()
+ 
+-add_test(${OpenBLAS_utest_bin} ${CMAKE_CURRENT_BINARY_DIR}/${OpenBLAS_utest_bin})
+-add_test(${OpenBLAS_utest_ext_bin} ${CMAKE_CURRENT_BINARY_DIR}/${OpenBLAS_utest_bin})
++add_test(${OpenBLAS_utest_bin} ${CMAKE_CROSSCOMPILING_EMULATOR} ${CMAKE_CURRENT_BINARY_DIR}/${OpenBLAS_utest_bin})
++add_test(${OpenBLAS_utest_ext_bin} ${CMAKE_CROSSCOMPILING_EMULATOR} ${CMAKE_CURRENT_BINARY_DIR}/${OpenBLAS_utest_bin})
