@@ -480,7 +480,7 @@ jobs:
       - name: Unpack toolchain
         run: |
           .github/scripts/toolchain/unpack.sh
-    
+
       - name: Build OpenBLAS
         run: |
           .github/scripts/openblas/build.sh
@@ -488,14 +488,14 @@ jobs:
       - name: Pack OpenBLAS tests
         run: |
           .github/scripts/openblas/pack-tests.sh
-  
+
       - name: Upload tests artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.TOOLCHAIN_NAME }}-openblas-tests
           path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_NAME }}-openblas-tests.zip
           retention-days: 3
-        
+
   execute-openblas-tests:
     needs: [
       build-toolchain,
@@ -706,7 +706,7 @@ jobs:
       - name: Pack OpenSSL tests
         run: |
           .github/scripts/openssl/pack-tests.sh
-    
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
@@ -781,7 +781,7 @@ jobs:
       - name: Unpack zlib
         run: |
           .github/scripts/zlib/unpack.ps1
-  
+
       - name: Execute OpenSSL tests
         run: |
           .github/scripts/openssl/execute-tests.ps1
