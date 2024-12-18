@@ -18,6 +18,7 @@ function update_repository() {
     DIRECTORY=$1
     REPOSITORY=$2
     BRANCH=$3
+    BASE_BRANCH=$4
 
     if [[ ! $REPOSITORY =~ ^(http://|https://|git://) ]]; then
         REPOSITORY="https://github.com/$REPOSITORY.git"
@@ -31,6 +32,7 @@ function update_repository() {
         fi
         pushd $DIRECTORY
             git config pull.rebase true
+            git config rebase.autoStash true
             git submodule init
             git submodule update
         popd
@@ -70,19 +72,26 @@ function update_repository() {
             git submodule update
         popd
     fi
+
+    if [[ "$FLAT_CLONE" = 0 && "$REBASE_SOURCES" = 1 && -n "$BASE_BRANCH" ]]; then
+        pushd $DIRECTORY
+            git rebase origin/$BASE_BRANCH
+            git push --force-with-lease
+        popd
+    fi
 }
 
 echo "::group::Update source code repositories"
     mkdir -p "$SOURCE_PATH"
 
     cd "$SOURCE_PATH"
-    update_repository binutils $BINUTILS_REPO $BINUTILS_BRANCH
-    update_repository gcc $GCC_REPO $GCC_BRANCH
-    update_repository mingw $MINGW_REPO $MINGW_BRANCH
+    update_repository binutils $BINUTILS_REPO $BINUTILS_BRANCH $BINUTILS_BASE_BRANCH
+    update_repository gcc $GCC_REPO $GCC_BRANCH $GCC_BASE_BRANCH
+    update_repository mingw $MINGW_REPO $MINGW_BRANCH $MINGW_BASE_BRANCH
     if [[ "$PLATFORM" =~ cygwin ]]; then 
-        update_repository cygwin $CYGWIN_REPO $CYGWIN_BRANCH
-        update_repository cygwin-packages $CYGWIN_PACKAGES_REPO $CYGWIN_PACKAGES_BRANCH
-        update_repository cocom $COCOM_REPO $COCOM_BRANCH
+        update_repository cygwin $CYGWIN_REPO $CYGWIN_BRANCH $CYGWIN_BASE_BRANCH
+        update_repository cygwin-packages $CYGWIN_PACKAGES_REPO $CYGWIN_PACKAGES_BRANCH $CYGWIN_PACKAGES_BASE_BRANCH
+        update_repository cocom $COCOM_REPO $COCOM_BRANCH $COCOM_BASE_BRANCH
     fi
 
     if [[ "$UPDATE_LIBRARIES" = 1 ]]; then
