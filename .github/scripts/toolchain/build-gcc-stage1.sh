@@ -12,8 +12,17 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$GCC_BUILD_PATH/Makefile" ]]; then
         rm -rf $GCC_BUILD_PATH/*
 
         if [[ "$DEBUG" = 1 ]]; then
+            CFLAGS="-O0 -ggdb"
+            CXXFLAGS="-O0 -ggdb"
             HOST_OPTIONS="$HOST_OPTIONS \
-                --enable-debug"
+                --enable-debug \
+                --enable-cxx-flags=-ggdb \
+                --enable-libstdcxx-debug \
+                --enable-libstdcxx-debug-flags=-ggdb \
+                --enable-checking"
+        else
+            HOST_OPTIONS="$HOST_OPTIONS \
+                --enable-checking=release"
         fi
 
         case "$ARCH" in
@@ -55,28 +64,35 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$GCC_BUILD_PATH/Makefile" ]]; then
                 ;;
         esac
 
-    $SOURCE_PATH/gcc/configure \
-        --prefix=$TOOLCHAIN_PATH \
-        --build=$BUILD \
-        --host=$HOST \
-        --target=$TARGET \
-        --enable-static \
-        --disable-shared \
-        --disable-bootstrap \
-        --disable-multilib \
-        --disable-plugins \
-        --disable-gcov \
-        --disable-libatomic \
-        --disable-libgomp \
-        --disable-libvtv \
-        --disable-libquadmath \
-        --disable-libssp \
-        --disable-nls \
-        --with-gnu-as \
-        --with-gnu-ld \
-        --without-headers \
-        $HOST_OPTIONS \
-        $TARGET_OPTIONS
+        CFLAGS=$CFLAGS \
+        CXXFLAGS=$CXXFLAGS \
+        BOOT_CFLAGS=$CFLAGS \
+        LIBGCC2_CFLAGS=$CFLAGS \
+        CRTSTUFF_T_CFLAGS=$CFLAGS \
+        CRTSTUFF_T_CFLAGS_S=$CFLAGS \
+        CFLAGS_FOR_TARGET=$CFLAGS \
+        $SOURCE_PATH/gcc/configure \
+            --prefix=$TOOLCHAIN_PATH \
+            --build=$BUILD \
+            --host=$HOST \
+            --target=$TARGET \
+            --enable-static \
+            --disable-shared \
+            --disable-bootstrap \
+            --disable-multilib \
+            --disable-plugins \
+            --disable-gcov \
+            --disable-libatomic \
+            --disable-libgomp \
+            --disable-libvtv \
+            --disable-libquadmath \
+            --disable-libssp \
+            --disable-nls \
+            --with-gnu-as \
+            --with-gnu-ld \
+            --without-headers \
+            $HOST_OPTIONS \
+            $TARGET_OPTIONS
     echo "::endgroup::"
 fi
 

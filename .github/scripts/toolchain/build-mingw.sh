@@ -56,6 +56,8 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$MINGW_BUILD_PATH/Makefile" ]]; then
             ;;
         esac
 
+        CFLAGS=$CFLAGS \
+        CXXFLAGS=$CXXFLAGS \
         $SOURCE_PATH/mingw/configure \
             --prefix=$TOOLCHAIN_PATH/$TARGET \
             --build=$BUILD \
@@ -63,8 +65,7 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$MINGW_BUILD_PATH/Makefile" ]]; then
             --enable-static \
             --enable-shared \
             $HOST_OPTIONS \
-            $TARGET_OPTIONS \
-            CFLAGS="$CFLAGS"
+            $TARGET_OPTIONS
     echo "::endgroup::"
 fi
 

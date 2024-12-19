@@ -122,6 +122,7 @@ env:
   ARTIFACT_PATH: ${{ github.workspace }}/artifact
   RELATIVE_ARTIFACT_PATH: ./artifact
 
+  DEBUG: 1
   CCACHE: 1
   DELETE_BUILD: 1
 

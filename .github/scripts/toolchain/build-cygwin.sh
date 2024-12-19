@@ -13,6 +13,14 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$CYGWIN_BUILD_PATH/Makefile" ]]; then
     echo "::group::Configure Cygwin"
         rm -rf $CYGWIN_BUILD_PATH/*
 
+        if [ "$DEBUG" = 1 ] ; then
+            HOST_OPTIONS="$HOST_OPTIONS \
+                --enable-debug \
+                --disable-lto"
+            CFLAGS="$CFLAGS -O0 -ggdb"
+            CXXFLAGS="$CXXFLAGS -O0 -ggdb"
+        fi
+
         case "$STAGE" in
             1)
                 TARGET_OPTIONS="$TARGET_OPTIONS \
@@ -26,7 +34,10 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$CYGWIN_BUILD_PATH/Makefile" ]]; then
         esac
 
         # ADDED: --disable-dumper
-        CXXFLAGS_FOR_TARGET="-Wno-error -Wno-narrowing" \
+        CFLAGS=$CFLAGS \
+        CXXFLAGS=$CXXFLAGS \
+        CFLAGS_FOR_TARGET=$CFLAGS
+        CXXFLAGS_FOR_TARGET="$CXXFLAGS -Wno-error -Wno-narrowing" \
         $CYGWIN_SOURCE_PATH/configure \
             --prefix=$TOOLCHAIN_PATH \
             --build=$HOST \
@@ -37,6 +48,7 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$CYGWIN_BUILD_PATH/Makefile" ]]; then
             --with-sysroot=$TOOLCHAIN_PATH \
             --with-build-sysroot=$TOOLCHAIN_PATH \
             --with-cross-bootstrap \
+            $HOST_OPTIONS \
             $TARGET_OPTIONS
     echo "::endgroup::"
 fi

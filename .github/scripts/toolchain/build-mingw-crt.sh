@@ -56,13 +56,14 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$MINGW_BUILD_PATH/Makefile" ]]; then
             ;;
         esac
 
+        CFLAGS=$CFLAGS \
+        CXXFLAGS=$CXXFLAGS \
         $SOURCE_PATH/mingw/mingw-w64-crt/configure \
             --prefix=$TOOLCHAIN_PATH/$TARGET \
             --build=$BUILD \
             --host=$TARGET \
             $HOST_OPTIONS \
-            $TARGET_OPTIONS \
-            CFLAGS="$CFLAGS"
+            $TARGET_OPTIONS
     echo "::endgroup::"
 fi
 
