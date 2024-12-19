@@ -26,7 +26,7 @@ on:
       crt:
         description: 'C runtime to build for'
         required: false
-        default: 'msvcrt'
+        default: 'ucrt'
       tag:
         description: 'Tag to use for the artifact'
         required: true
@@ -66,7 +66,7 @@ env:
 
   ARCH: ${{ inputs.arch || 'x86_64' }}
   PLATFORM: ${{ inputs.platform || 'w64-mingw32' }}
-  CRT: ${{ inputs.crt || 'msvcrt' }}
+  CRT: ${{ inputs.crt || 'ucrt' }}
   
   TAG: ${{ inputs.tag || 'test' }}
   MODULE: ${{ inputs.gcc_module || '' }}
@@ -75,6 +75,7 @@ env:
   CCACHE: 1
   RUN_BOOTSTRAP: 1
   UPDATE_SOURCES: 1
+  FLAT_CLONE: 1
 
 jobs:
   build-and-test-toolchain:
@@ -82,7 +83,7 @@ jobs:
     runs-on: windows-latest
 
     env:
-      WSLENV: BINUTILS_BRANCH:GCC_BRANCH:MINGW_BRANCH:ARCH:PLATFORM:CRT:TAG:MODULE:FILTER:CCACHE:RUN_BOOTSTRAP:UPDATE_SOURCES:GITHUB_OUTPUT/p:GITHUB_STEP_SUMMARY/p
+      WSLENV: BINUTILS_BRANCH:GCC_BRANCH:MINGW_BRANCH:ARCH:PLATFORM:CRT:TAG:MODULE:FILTER:CCACHE:RUN_BOOTSTRAP:UPDATE_SOURCES:FLAT_CLONE:GITHUB_OUTPUT/p:GITHUB_STEP_SUMMARY/p
 
     defaults:
       run:
