@@ -2,7 +2,7 @@ Set-PSDebug -Trace 2 # echo on
 
 if ( -not $env:ARCH ) { $env:ARCH = "aarch64" }
 if ( -not $env:PLATFORM ) { $env:PLATFORM = "w64-mingw32" }
-if ( -not $env:CRT ) { $env:CRT = "msvcrt" }
+if ( -not $env:CRT ) { $env:CRT = "ucrt" }
 if ( -not $env:TARGET ) { $env:TARGET = "$env:ARCH-$env:PLATFORM" }
 if ( -not $env:TOOLCHAIN_NAME ) { $env:TOOLCHAIN_NAME = "$env:ARCH-$env:PLATFORM-$env:CRT" }
 
@@ -10,6 +10,9 @@ if ( -not $env:SOURCE_PATH ) { $env:SOURCE_PATH= "$PWD\code" }
 if ( -not $env:BUILD_PATH ) { $env:BUILD_PATH = "$PWD\build-$env:TOOLCHAIN_NAME" }
 if ( -not $env:ARTIFACT_PATH ) { $env:ARTIFACT_PATH = "$PWD\artifact" }
 if ( -not $env:PERL_PATH ) { $env:PERL_PATH = "C:\Strawberry\perl\bin" }
+
+$NPROC = (Get-WmiObject -Class Win32_Processor | Measure-Object -Property NumberOfLogicalProcessors -Sum).Sum
+if ( -not $env:TEST_CMAKE_OPTIONS ) { $env:TEST_CMAKE_OPTIONS = "--verbose --output-on-failure -j$NPROC" }
 
 if ( -not $env:ZLIB_PATH ) { $env:ZLIB_PATH = "$PWD\zlib" }
 if ( -not $env:OPENBLAS_TESTS_PATH ) { $env:OPENBLAS_TESTS_PATH = "$PWD\openblas-tests" }
