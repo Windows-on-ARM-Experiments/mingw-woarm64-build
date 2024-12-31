@@ -75,6 +75,7 @@ DEBUG=${DEBUG:-0} # Enable debug build.
 CCACHE=${CCACHE:-0} # Enable usage of ccache.
 RUN_BOOTSTRAP=${RUN_BOOTSTRAP:-0} # Bootstrap dependencies during the build.
 UPDATE_SOURCES=${UPDATE_SOURCES:-0} # Update source code repositories.
+FLAT_CLONE=${FLAT_CLONE:-1} # Whether the clone of source codes should be full or flat.
 RESET_SOURCES=${RESET_SOURCES:-0} # Reset source code repositories before update.
 APPLY_PATCHES=${APPLY_PATCHES:-1} # Patch source repositories for targets requiring it.
 RUN_CONFIG=${RUN_CONFIG:-1} # Run configuration step.
