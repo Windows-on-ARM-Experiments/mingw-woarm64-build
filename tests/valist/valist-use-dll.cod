@@ -10,11 +10,8 @@
 
 	AREA	|.pdata|, PDATA
 |$pdata$main| DCD |$LN3|
-	DCD	0x1600035
-	;Flags[SingleProEpi] functionLength[52] RegF[0] RegI[0] H[0] frameChainReturn[Chained] frameSize[32]
-
-	AREA	|.data|, DATA
-|$SG6343| DCB	"%d", 0xa, 0x0
+	DCD	0x1600055
+	;Flags[SingleProEpi] functionLength[84] RegF[0] RegI[0] H[0] frameChainReturn[Chained] frameSize[32]
 ; Function compile flags: /Odtp
 ; File W:\home\blachex\mingw-woarm64-build\tests\valist\valist-use-dll.c
 
@@ -22,25 +19,33 @@
 
   00000		 |main|	 PROC
 
-; 7    : {
+; 8    : {
 
   00000		 |$LN3|
   00000	a9be7bfd	 stp         fp,lr,[sp,#-0x20]!
   00004	910003fd	 mov         fp,sp
-  00008	b90013e0	 str         w0,[sp,#0x10]
-  0000c	f9000fe1	 str         x1,[sp,#0x18]
+  00008	d10043ff	 sub         sp,sp,#0x10
+  0000c	b90023e0	 str         w0,[sp,#0x20]
+  00010	f90017e1	 str         x1,[sp,#0x28]
 
-; 8    :   return use_va_args ("%d\n", 11, 22);
+; 9    :   return use_va_args (1, 2, 3, 5, 8, 13, 21, 34, 55);
 
-  00010	528002c2	 mov         w2,#0x16
-  00014	52800161	 mov         w1,#0xB
-  00018	90000008	 adrp        x8,|$SG6343|
-  0001c	91000100	 add         x0,x8,|$SG6343|
-  00020	94000000	 bl          use_va_args
-  00024	2a0003e0	 mov         w0,w0
-  00028	2a0003e0	 mov         w0,w0
-  0002c	a8c27bfd	 ldp         fp,lr,[sp],#0x20
-  00030	d65f03c0	 ret
+  00014	528006e8	 mov         w8,#0x37
+  00018	b90003e8	 str         w8,[sp]
+  0001c	52800447	 mov         w7,#0x22
+  00020	528002a6	 mov         w6,#0x15
+  00024	528001a5	 mov         w5,#0xD
+  00028	52800104	 mov         w4,#8
+  0002c	528000a3	 mov         w3,#5
+  00030	52800062	 mov         w2,#3
+  00034	52800041	 mov         w1,#2
+  00038	52800020	 mov         w0,#1
+  0003c	94000000	 bl          use_va_args
+  00040	2a0003e0	 mov         w0,w0
+  00044	2a0003e0	 mov         w0,w0
+  00048	910043ff	 add         sp,sp,#0x10
+  0004c	a8c27bfd	 ldp         fp,lr,[sp],#0x20
+  00050	d65f03c0	 ret
 
 			 ENDP  ; |main|
 

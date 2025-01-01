@@ -16,38 +16,26 @@ main:
 .LM1:
 	.cfi_startproc
 	sub	x10, sp, #8192	;#,,
-	str	xzr, [x10, 4048]	;#,
-	sub	sp, sp, #48	;#,,
-	.cfi_def_cfa_offset 48
-	stp	x29, x30, [sp, 16]	;#,,
+	str	xzr, [x10, 4064]	;#,
+	stp	x29, x30, [sp, -32]!	;#,,,
+	.cfi_def_cfa_offset 32
 	.cfi_offset 29, -32
 	.cfi_offset 30, -24
-	add	x29, sp, 16	;#,,
+	mov	x29, sp	;#,
 	.seh_endprologue
-	str	w0, [sp, 44]	;# argc, argc
-	str	x1, [sp, 32]	;# argv, argv
-;# valist-use-dll.c:8: {
+	str	w0, [sp, 28]	;# argc, argc
+	str	x1, [sp, 16]	;# argv, argv
+;# reloc-use-dll.c:3: int main(int argc, char **argv) {
 .LM2:
 	bl	__main		;#
-;# valist-use-dll.c:9:   return use_va_args (1, 2, 3, 5, 8, 13, 21, 34, 55);
+;# reloc-use-dll.c:4:   return test_reloc();
 .LM3:
-	mov	w0, 55	;# tmp103,
-	str	w0, [sp]	;# tmp103,
-	mov	w7, 34	;#,
-	mov	w6, 21	;#,
-	mov	w5, 13	;#,
-	mov	w4, 8	;#,
-	mov	w3, 5	;#,
-	mov	w2, 3	;#,
-	mov	w1, 2	;#,
-	mov	w0, 1	;#,
-	bl	use_va_args		;#
-;# valist-use-dll.c:10: }
+	bl	test_reloc		;#
+;# reloc-use-dll.c:5: }
 .LM4:
-	ldp	x29, x30, [sp, 16]	;#,,
-	add	sp, sp, 48	;#,,
-	.cfi_restore 29
+	ldp	x29, x30, [sp], 32	;#,,,
 	.cfi_restore 30
+	.cfi_restore 29
 	.cfi_def_cfa_offset 0
 	ret	
 	.cfi_endproc
@@ -56,85 +44,67 @@ main:
 .Letext0:
 	.section	.debug_info,"dr"
 .Ldebug_info0:
-	.word	0x138
+	.word	0x11c
 	.hword	0x5
 	.byte	0x1
 	.byte	0x8
 	.secrel32	.Ldebug_abbrev0
-	.uleb128 0x5
+	.uleb128 0x4
 	.ascii "GNU C23 15.0.0 20241219 (experimental) -march=armv8-a -mtune=cortex-a53 -ggdb -O0\0"
 	.byte	0x1d
-	.ascii "valist-use-dll.c\0"
+	.ascii "reloc-use-dll.c\0"
 	.ascii "/home/blachex/mingw-woarm64-build/tests/valist\0"
 	.xword	.Ltext0
 	.xword	.Letext0-.Ltext0
 	.secrel32	.Ldebug_line0
-	.uleb128 0x2
+	.uleb128 0x5
+	.ascii "test_reloc\0"
 	.byte	0x1
-	.byte	0x6
-	.ascii "char\0"
-	.uleb128 0x6
-	.ascii "use_va_args\0"
 	.byte	0x1
-	.byte	0x4
-	.byte	0x1
-	.word	0xea
-	.word	0xea
+	.byte	0x5
+	.word	0xc6
 	.uleb128 0x1
-	.word	0xea
-	.uleb128 0x1
-	.word	0xea
-	.uleb128 0x1
-	.word	0xea
-	.uleb128 0x1
-	.word	0xea
-	.uleb128 0x7
-	.byte	0
-	.uleb128 0x2
 	.byte	0x4
 	.byte	0x5
 	.ascii "int\0"
-	.uleb128 0x8
+	.uleb128 0x6
 	.ascii "main\0"
 	.byte	0x1
-	.byte	0x7
-	.byte	0x1
-	.word	0xea
+	.byte	0x3
+	.byte	0x5
+	.word	0xc6
 	.xword	.LFB0
 	.xword	.LFE0-.LFB0
 	.uleb128 0x1
 	.byte	0x9c
-	.word	0x131
-	.uleb128 0x3
+	.word	0x10d
+	.uleb128 0x2
 	.ascii "argc\0"
-	.byte	0xb
-	.word	0xea
+	.byte	0xe
+	.word	0xc6
 	.uleb128 0x2
 	.byte	0x91
 	.sleb128 -4
-	.uleb128 0x3
+	.uleb128 0x2
 	.ascii "argv\0"
-	.byte	0x17
-	.word	0x131
+	.byte	0x1b
+	.word	0x10d
 	.uleb128 0x2
 	.byte	0x91
 	.sleb128 -16
 	.byte	0
-	.uleb128 0x4
-	.word	0x136
-	.uleb128 0x4
-	.word	0xb4
+	.uleb128 0x3
+	.word	0x112
+	.uleb128 0x3
+	.word	0x117
+	.uleb128 0x1
+	.byte	0x1
+	.byte	0x6
+	.ascii "char\0"
 	.byte	0
 	.section	.debug_abbrev,"dr"
 .Ldebug_abbrev0:
 	.uleb128 0x1
-	.uleb128 0x5
-	.byte	0
-	.uleb128 0x49
-	.uleb128 0x13
-	.byte	0
-	.byte	0
-	.uleb128 0x2
 	.uleb128 0x24
 	.byte	0
 	.uleb128 0xb
@@ -145,7 +115,7 @@ main:
 	.uleb128 0x8
 	.byte	0
 	.byte	0
-	.uleb128 0x3
+	.uleb128 0x2
 	.uleb128 0x5
 	.byte	0
 	.uleb128 0x3
@@ -155,7 +125,7 @@ main:
 	.sleb128 1
 	.uleb128 0x3b
 	.uleb128 0x21
-	.sleb128 7
+	.sleb128 3
 	.uleb128 0x39
 	.uleb128 0xb
 	.uleb128 0x49
@@ -164,7 +134,7 @@ main:
 	.uleb128 0x18
 	.byte	0
 	.byte	0
-	.uleb128 0x4
+	.uleb128 0x3
 	.uleb128 0xf
 	.byte	0
 	.uleb128 0xb
@@ -174,7 +144,7 @@ main:
 	.uleb128 0x13
 	.byte	0
 	.byte	0
-	.uleb128 0x5
+	.uleb128 0x4
 	.uleb128 0x11
 	.byte	0x1
 	.uleb128 0x25
@@ -193,9 +163,9 @@ main:
 	.uleb128 0x17
 	.byte	0
 	.byte	0
-	.uleb128 0x6
+	.uleb128 0x5
 	.uleb128 0x2e
-	.byte	0x1
+	.byte	0
 	.uleb128 0x3f
 	.uleb128 0x19
 	.uleb128 0x3
@@ -212,16 +182,9 @@ main:
 	.uleb128 0x13
 	.uleb128 0x3c
 	.uleb128 0x19
-	.uleb128 0x1
-	.uleb128 0x13
 	.byte	0
 	.byte	0
-	.uleb128 0x7
-	.uleb128 0x18
-	.byte	0
-	.byte	0
-	.byte	0
-	.uleb128 0x8
+	.uleb128 0x6
 	.uleb128 0x2e
 	.byte	0x1
 	.uleb128 0x3f
@@ -301,25 +264,25 @@ main:
 	.uleb128 0x2
 	.uleb128 0xb
 	.uleb128 0x2
-	.ascii "valist-use-dll.c\0"
+	.ascii "reloc-use-dll.c\0"
 	.byte	0
-	.ascii "valist-use-dll.c\0"
+	.ascii "reloc-use-dll.c\0"
 	.byte	0
 .LELTP0:
 	.byte	0
 	.uleb128 0x9
 	.byte	0x2
 	.xword	.LM1
-	.byte	0x1e
+	.byte	0x19
 	.byte	0x5
-	.uleb128 0x1
+	.uleb128 0x21
 	.byte	0
 	.uleb128 0x9
 	.byte	0x2
 	.xword	.LM2
 	.byte	0x1
 	.byte	0x5
-	.uleb128 0x1
+	.uleb128 0x21
 	.byte	0
 	.uleb128 0x9
 	.byte	0x2
@@ -344,4 +307,4 @@ main:
 .LELT0:
 	.section	.debug_str,"dr"
 	.def	__main;	.scl	2;	.type	32;	.endef
-	.def	use_va_args;	.scl	2;	.type	32;	.endef
+	.def	test_reloc;	.scl	2;	.type	32;	.endef

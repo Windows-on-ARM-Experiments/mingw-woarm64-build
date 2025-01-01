@@ -2,6 +2,7 @@
 
 set -e # exit on error
 set -x # echo on
+set -o pipefail # fail of any command in pipeline is an error
 
 NAME=${1:-valist}
 TARGET=aarch64-w64-mingw32
@@ -74,7 +75,7 @@ if [ $LINUX = 1 ]; then
 fi
 
 if [ $MSVC = 1 ]; then
-        cmd.exe /c `wslpath -w valist-compile.bat` `wslpath -w $PWD` $NAME $MSVC_ARCH
+        cmd.exe /c `wslpath -w compile.bat` `wslpath -w $PWD` $NAME $MSVC_ARCH
 fi
 
 # Link DLLs
@@ -103,7 +104,7 @@ fi
 
 if [ $MSVC = 1 ]; then
         if [ $LINK = 1 ]; then
-                cmd.exe /c `wslpath -w valist-link-dll.bat` `wslpath -w $PWD` $NAME $MSVC_ARCH
+                cmd.exe /c `wslpath -w link-dll.bat` `wslpath -w $PWD` $NAME $MSVC_ARCH
         else
                 $PREFIX/bin/$TARGET-gcc -shared -L$GCC_LIB_DIR -O0 -ggdb $NAME-dll-msvc.obj -o $NAME-dll-msvc.dll
                 $PREFIX/bin/$TARGET-dlltool -l $NAME-dll-msvc.lib --dllname $NAME-dll-msvc.dll --def $NAME-dll-msvc.def -k
@@ -114,8 +115,12 @@ fi
 
 if [ $GCC = 1 ]; then
         $PREFIX/bin/$TARGET-gcc -O0 -ggdb $NAME-use-dll-gcc.o -l$NAME-dll-gcc -L. -o $NAME-gcc.exe
-        if [ -f $NAME-use-dll-gcc-fixed.s ] && [ -f $NAME-dll-gcc-fixed.s ]; then
-                $PREFIX/bin/$TARGET-gcc -O0 -ggdb $NAME-use-dll-gcc-fixed.o -l$NAME-dll-gcc-fixed -L. -o $NAME-gcc-fixed.exe
+        if [ -f $NAME-use-dll-gcc-fixed.s ] || [ -f $NAME-dll-gcc-fixed.s ]; then
+                if [ -f $NAME-use-dll-gcc-fixed.s ]; then
+                        $PREFIX/bin/$TARGET-gcc -O0 -ggdb $NAME-use-dll-gcc-fixed.o -l$NAME-dll-gcc-fixed -L. -o $NAME-gcc-fixed.exe
+                else
+                        $PREFIX/bin/$TARGET-gcc -O0 -ggdb $NAME-use-dll-gcc.o -l$NAME-dll-gcc-fixed -L. -o $NAME-gcc-fixed.exe
+                fi
         fi
         if [ $CLANG = 1 ]; then
                 $PREFIX/bin/$TARGET-gcc -O0 -ggdb $NAME-use-dll-gcc.o -l$NAME-dll-clang -L. -o $NAME-gcc-clang.exe
@@ -154,11 +159,11 @@ fi
 
 if [ $MSVC = 1 ]; then
         if [ $LINK = 1 ]; then
-                cmd.exe /c `wslpath -w valist-link-exe.bat` `wslpath -w $PWD` $NAME $MSVC_ARCH
+                cmd.exe /c `wslpath -w link-exe.bat` `wslpath -w $PWD` $NAME $MSVC_ARCH
         else
                 $PREFIX/bin/$TARGET-gcc -O0 -ggdb $NAME-use-dll-msvc.obj -l$NAME-dll-msvc -L. -o $NAME-msvc.exe
                 $PREFIX/bin/$TARGET-gcc -O0 -ggdb $NAME-use-dll-msvc.obj -l$NAME-dll-gcc -L. -o $NAME-msvc-gcc.exe
-                if [ -f $NAME-use-dll-gcc-fixed.s ]; then
+                if [ -f $NAME-dll-gcc-fixed.s ]; then
                         $PREFIX/bin/$TARGET-gcc -O0 -ggdb $NAME-use-dll-msvc.obj -l$NAME-dll-gcc-fixed -L. -o $NAME-msvc-gcc-fixed.exe
                 fi
         fi
@@ -174,11 +179,23 @@ rm -rf $DEBUG_DIR/*
 cp $NAME-dll.c $NAME-use-dll.c $DEBUG_DIR
 if [ $GCC = 1 ]; then
         cp $NAME-dll-gcc.dll $NAME-gcc.exe $DEBUG_DIR
+        if [ -f $NAME-use-dll-gcc-fixed.s ] || [ -f $NAME-dll-gcc-fixed.s ]; then
+                cp $NAME-gcc-fixed.exe $DEBUG_DIR
+        fi
+        if  [ -f $NAME-dll-gcc-fixed.s ]; then
+                cp $NAME-dll-gcc-fixed.dll $DEBUG_DIR
+        fi
 fi
 if [ $MSVC = 1 ]; then
         cp $NAME-dll-msvc.dll $NAME-msvc.exe $DEBUG_DIR
+        if [ -f $NAME-use-dll-gcc-fixed.s ]; then
+              cp $NAME-gcc-fixed-msvc.exe $DEBUG_DIR
+        fi
+        if [ -f $NAME-dll-gcc-fixed.s ]; then
+              cp $NAME-msvc-gcc-fixed.exe $DEBUG_DIR
+        fi
         if [ $LINK = 1 ]; then
-                cp valist-dll-msvc.pdb $DEBUG_DIR
+                cp $NAME-dll-msvc.pdb $DEBUG_DIR
         fi
 fi
 if [ $GCC = 1 ] && [ $MSVC = 1 ]; then
@@ -206,13 +223,13 @@ if [ $GCC = 1 ]; then
         fi
         if [ $MSVC = 1 ]; then
                 run "GCC (MSVC DLL)" ./$NAME-gcc-msvc.exe
-                if [ -f $NAME-use-dll-gcc-fixed.s ]; then
+                if [ -f $NAME-use-gcc-fixed.s ]; then
                         run "GCC fixed (MSVC DLL)" ./$NAME-gcc-fixed-msvc.exe
                 fi
         fi
         if [ $CLANG = 1 ]; then
                 run "GCC (Clang DLL)" ./$NAME-gcc-clang.exe
-                if [ -f $NAME-use-dll-gcc-fixed.s ]; then
+                if [ -f $NAME-use-gcc-fixed.s ]; then
                         run "GCC fixed (Clang DLL)" ./$NAME-gcc-fixed-clang.exe
                 fi
         fi

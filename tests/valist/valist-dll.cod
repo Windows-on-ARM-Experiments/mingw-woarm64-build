@@ -12,22 +12,17 @@
 	DCD	|$unwind$use_va_args|
 
 	AREA	|.xdata|, DATA
-|$unwind$use_va_args| DCD 0x19e0002a
-	DCD	0xe3e3e302
-	DCD	0x2e404e3
-	DCD	0xe3e3e404
-	;Code Words[3], Epilog Start Index[7], E[1], X[0], Function Length[42]=168 bytes
+|$unwind$use_va_args| DCD 0x1120005c
+	DCD	0xe402e303
+	DCD	0xe3e40203
+	;Code Words[2], Epilog Start Index[4], E[1], X[0], Function Length[92]=368 bytes
 	;alloc_s
-	;nop
-	;nop
-	;nop
 	;nop
 	;alloc_s
 	;end
 	;alloc_s
 	;alloc_s
 	;end
-	;nop
 	;nop
 ; Function compile flags: /Odtp
 ; File W:\home\blachex\mingw-woarm64-build\tests\valist\valist-dll.c
@@ -39,64 +34,123 @@
 ; 5    : {
 
   00000		 |$LN3|
-  00000	d10103ff	 sub         sp,sp,#0x40
-  00004	a9008be1	 stp         x1,x2,[sp,#8]
-  00008	a90193e3	 stp         x3,x4,[sp,#0x18]
-  0000c	a9029be5	 stp         x5,x6,[sp,#0x28]
-  00010	f9001fe7	 str         x7,[sp,#0x38]
-  00014	d10083ff	 sub         sp,sp,#0x20
-  00018	f9000be0	 str         x0,[sp,#0x10]
+  00000	a9be17e4	 stp         x4,x5,[sp,#-0x20]!
+  00004	a9011fe6	 stp         x6,x7,[sp,#0x10]
+  00008	d100c3ff	 sub         sp,sp,#0x30
+  0000c	b9000be0	 str         w0,[sp,#8]
+  00010	b9000fe1	 str         w1,[sp,#0xC]
+  00014	b90013e2	 str         w2,[sp,#0x10]
+  00018	b90017e3	 str         w3,[sp,#0x14]
 
 ; 6    :   va_list argv;
-; 7    :   va_start (argv, format);
+; 7    :   va_start (argv, d);
 
-  0001c	9100a3e8	 add         x8,sp,#0x28
-  00020	f90007e8	 str         x8,[sp,#8]
+  0001c	9100c3e8	 add         x8,sp,#0x30
+  00020	f90003e8	 str         x8,[sp]
 
-; 8    :   int a = va_arg (argv, int);
+; 8    :   int e = va_arg (argv, int);
 
   00024	d2800008	 mov         x8,#0
-  00028	f94007e9	 ldr         x9,[sp,#8]
+  00028	f94003e9	 ldr         x9,[sp]
   0002c	cb090108	 sub         x8,x8,x9
   00030	92400508	 and         x8,x8,#3
   00034	91002109	 add         x9,x8,#8
-  00038	f94007e8	 ldr         x8,[sp,#8]
+  00038	f94003e8	 ldr         x8,[sp]
   0003c	8b090108	 add         x8,x8,x9
-  00040	f90007e8	 str         x8,[sp,#8]
-  00044	f94007e8	 ldr         x8,[sp,#8]
+  00040	f90003e8	 str         x8,[sp]
+  00044	f94003e8	 ldr         x8,[sp]
   00048	d1002108	 sub         x8,x8,#8
   0004c	b9400108	 ldr         w8,[x8]
-  00050	b90003e8	 str         w8,[sp]
+  00050	b9001be8	 str         w8,[sp,#0x18]
 
-; 9    :   int b = va_arg (argv, int);
+; 9    :   int f = va_arg (argv, int);
 
   00054	d2800008	 mov         x8,#0
-  00058	f94007e9	 ldr         x9,[sp,#8]
+  00058	f94003e9	 ldr         x9,[sp]
   0005c	cb090108	 sub         x8,x8,x9
   00060	92400508	 and         x8,x8,#3
   00064	91002109	 add         x9,x8,#8
-  00068	f94007e8	 ldr         x8,[sp,#8]
+  00068	f94003e8	 ldr         x8,[sp]
   0006c	8b090108	 add         x8,x8,x9
-  00070	f90007e8	 str         x8,[sp,#8]
-  00074	f94007e8	 ldr         x8,[sp,#8]
+  00070	f90003e8	 str         x8,[sp]
+  00074	f94003e8	 ldr         x8,[sp]
   00078	d1002108	 sub         x8,x8,#8
   0007c	b9400108	 ldr         w8,[x8]
-  00080	b90007e8	 str         w8,[sp,#4]
+  00080	b9001fe8	 str         w8,[sp,#0x1C]
 
-; 10   :   va_end (argv);
+; 10   :   int g = va_arg (argv, int);
 
   00084	d2800008	 mov         x8,#0
-  00088	f90007e8	 str         x8,[sp,#8]
+  00088	f94003e9	 ldr         x9,[sp]
+  0008c	cb090108	 sub         x8,x8,x9
+  00090	92400508	 and         x8,x8,#3
+  00094	91002109	 add         x9,x8,#8
+  00098	f94003e8	 ldr         x8,[sp]
+  0009c	8b090108	 add         x8,x8,x9
+  000a0	f90003e8	 str         x8,[sp]
+  000a4	f94003e8	 ldr         x8,[sp]
+  000a8	d1002108	 sub         x8,x8,#8
+  000ac	b9400108	 ldr         w8,[x8]
+  000b0	b90023e8	 str         w8,[sp,#0x20]
 
-; 11   :   return a + b;
+; 11   :   int h = va_arg (argv, int);
 
-  0008c	b94003e8	 ldr         w8,[sp]
-  00090	b94007e9	 ldr         w9,[sp,#4]
-  00094	0b090100	 add         w0,w8,w9
-  00098	2a0003e0	 mov         w0,w0
-  0009c	910083ff	 add         sp,sp,#0x20
-  000a0	910103ff	 add         sp,sp,#0x40
-  000a4	d65f03c0	 ret
+  000b4	d2800008	 mov         x8,#0
+  000b8	f94003e9	 ldr         x9,[sp]
+  000bc	cb090108	 sub         x8,x8,x9
+  000c0	92400508	 and         x8,x8,#3
+  000c4	91002109	 add         x9,x8,#8
+  000c8	f94003e8	 ldr         x8,[sp]
+  000cc	8b090108	 add         x8,x8,x9
+  000d0	f90003e8	 str         x8,[sp]
+  000d4	f94003e8	 ldr         x8,[sp]
+  000d8	d1002108	 sub         x8,x8,#8
+  000dc	b9400108	 ldr         w8,[x8]
+  000e0	b90027e8	 str         w8,[sp,#0x24]
+
+; 12   :   int i = va_arg (argv, int);
+
+  000e4	d2800008	 mov         x8,#0
+  000e8	f94003e9	 ldr         x9,[sp]
+  000ec	cb090108	 sub         x8,x8,x9
+  000f0	92400508	 and         x8,x8,#3
+  000f4	91002109	 add         x9,x8,#8
+  000f8	f94003e8	 ldr         x8,[sp]
+  000fc	8b090108	 add         x8,x8,x9
+  00100	f90003e8	 str         x8,[sp]
+  00104	f94003e8	 ldr         x8,[sp]
+  00108	d1002108	 sub         x8,x8,#8
+  0010c	b9400108	 ldr         w8,[x8]
+  00110	b9002be8	 str         w8,[sp,#0x28]
+
+; 13   :   va_end (argv);
+
+  00114	d2800008	 mov         x8,#0
+  00118	f90003e8	 str         x8,[sp]
+
+; 14   :   return a + b + c + d + e + f + g + h + i;
+
+  0011c	b9400be8	 ldr         w8,[sp,#8]
+  00120	b9400fe9	 ldr         w9,[sp,#0xC]
+  00124	0b090108	 add         w8,w8,w9
+  00128	b94013e9	 ldr         w9,[sp,#0x10]
+  0012c	0b090108	 add         w8,w8,w9
+  00130	b94017e9	 ldr         w9,[sp,#0x14]
+  00134	0b090108	 add         w8,w8,w9
+  00138	b9401be9	 ldr         w9,[sp,#0x18]
+  0013c	0b090108	 add         w8,w8,w9
+  00140	b9401fe9	 ldr         w9,[sp,#0x1C]
+  00144	0b090108	 add         w8,w8,w9
+  00148	b94023e9	 ldr         w9,[sp,#0x20]
+  0014c	0b090108	 add         w8,w8,w9
+  00150	b94027e9	 ldr         w9,[sp,#0x24]
+  00154	0b090108	 add         w8,w8,w9
+  00158	b9402be9	 ldr         w9,[sp,#0x28]
+  0015c	0b090100	 add         w0,w8,w9
+  00160	2a0003e0	 mov         w0,w0
+  00164	9100c3ff	 add         sp,sp,#0x30
+  00168	910083ff	 add         sp,sp,#0x20
+  0016c	d65f03c0	 ret
 
 			 ENDP  ; |use_va_args|
 
