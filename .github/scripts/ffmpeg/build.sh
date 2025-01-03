@@ -2,7 +2,6 @@
 
 source `dirname ${BASH_SOURCE[0]}`/../config.sh
 
-FFMPEG_BUILD_PATH=$BUILD_PATH/ffmpeg
 FFMPEG_SOURCE_PATH=$SOURCE_PATH/ffmpeg
 
 mkdir -p $FFMPEG_BUILD_PATH
@@ -33,11 +32,19 @@ echo "::group::Build FFmpeg"
     make $BUILD_MAKE_OPTIONS
 echo "::endgroup::"
 
-echo "::group::Build FFmpeg tests"
-    make fate-rsync SAMPLES=samples
-    make fate | tee fate.log.orig
-    sed -E "/^warning: |^HOSTCC\t|^HOSTLD\t|^AS\t|^CC\t|^LD\t|TEST    source|fate-source/d" fate.log.orig > fate.log
-    sed -i "s@$FFMPEG_SOURCE_PATH@\$FFMPEG_SOURCE_PATH@g" fate.log
-echo "::endgroup::"
+if [[ "$RUN_INSTALL" = 1 ]]; then
+    echo "::group::Install libjpeg-turbo"
+        make install
+    echo "::endgroup::"
+fi
+
+if [ ! -v WSLENV ]; then
+    echo "::group::Build FFmpeg tests"
+        make fate-rsync SAMPLES=samples
+        make fate | tee fate.log.orig
+        sed -E "/^warning: |^HOSTCC\t|^HOSTLD\t|^AS\t|^CC\t|^LD\t|TEST    source|fate-source/d" fate.log.orig > fate.log
+        sed -i "s@$FFMPEG_SOURCE_PATH@\$FFMPEG_SOURCE_PATH@g" fate.log
+    echo "::endgroup::"
+fi
 
 echo 'Success!'

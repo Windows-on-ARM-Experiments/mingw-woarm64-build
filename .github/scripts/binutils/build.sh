@@ -14,6 +14,8 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$BINUTILS_BUILD_PATH/Makefile" ]]; then
         if [[ "$DEBUG" = 1 ]]; then
             HOST_OPTIONS="$HOST_OPTIONS \
                 --enable-debug"
+            CFLAGS="-O0 -ggdb"
+            CXXFLAGS="-O0 -ggdb"
         fi
 
         case "$PLATFORM" in
@@ -39,6 +41,18 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$BINUTILS_BUILD_PATH/Makefile" ]]; then
                 ;;
         esac
 
+        case "$ARCH-$PLATFORM" in
+            aarch64-*cygwin*)
+                # ADDED: --enable-targets=aarch64-pep
+                # ADDED: --disable-sim
+                TARGET_OPTIONS="$TARGET_OPTIONS \
+                    --enable-targets=aarch64-pep \
+                    --disable-sim"
+                ;;
+        esac
+
+        CFLAGS=$CFLAGS \
+        CXXFLAGS=$CXXFLAGS \
         $SOURCE_PATH/binutils/configure \
             --prefix=$TOOLCHAIN_PATH \
             --build=$BUILD \

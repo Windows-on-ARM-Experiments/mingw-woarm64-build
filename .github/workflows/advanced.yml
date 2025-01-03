@@ -10,19 +10,19 @@ on:
       binutils_branch:
         description: 'Binutils branch to build'
         required: false
-        default: 'woarm64'
+        default: 'woarm64-cygwin'
       gcc_branch:
         description: 'GCC branch to build'
         required: false
-        default: 'woarm64'
+        default: 'fix-va-list-ucrt'
       mingw_branch:
         description: 'MinGW branch to build'
         required: false
-        default: 'woarm64'
+        default: 'woarm64-cygwin'
       cygwin_branch:
         description: 'Cygwin branch to build'
         required: false
-        default: 'main'
+        default: 'woarm64'
       cygwin_packages_branch:
         description: 'Cygwin packages branch to build'
         required: false
@@ -69,16 +69,16 @@ on:
 
 env:
   BINUTILS_REPO: Windows-on-ARM-Experiments/binutils-woarm64
-  BINUTILS_BRANCH: ${{ inputs.binutils_branch || 'woarm64' }}
+  BINUTILS_BRANCH: ${{ inputs.binutils_branch || 'woarm64-cygwin' }}
 
   GCC_REPO: Windows-on-ARM-Experiments/gcc-woarm64
-  GCC_BRANCH: ${{ inputs.gcc_branch || 'woarm64' }}
+  GCC_BRANCH: ${{ inputs.gcc_branch || 'fix-va-list-ucrt' }}
 
   MINGW_REPO: Windows-on-ARM-Experiments/mingw-woarm64
-  MINGW_BRANCH: ${{ inputs.mingw_branch || 'woarm64' }}
+  MINGW_BRANCH: ${{ inputs.mingw_branch || 'woarm64-cygwin' }}
 
   CYGWIN_REPO: Windows-on-ARM-Experiments/newlib-cygwin
-  CYGWIN_BRANCH: ${{ inputs.cygwin_branch || 'main' }}
+  CYGWIN_BRANCH: ${{ inputs.cygwin_branch || 'woarm64' }}
 
   CYGWIN_PACKAGES_REPO: Windows-on-ARM-Experiments/cygwin-packages
   CYGWIN_PACKAGES_BRANCH: ${{ inputs.cygwin_packages_branch || 'main' }}
@@ -86,7 +86,7 @@ env:
   COCOM_REPO: https://git.code.sf.net/p/cocom/git
   COCOM_BRANCH: ${{ inputs.cocom_branch || 'master' }}
 
-  OPENBLAS_REPO: OpenMathLib/OpenBLAS.git
+  OPENBLAS_REPO: OpenMathLib/OpenBLAS
   OPENBLAS_BRANCH: ${{ inputs.openblas_branch || 'develop' }}
 
   ZLIB_REPO: madler/zlib
@@ -106,15 +106,15 @@ env:
 
   ARCH: aarch64
   PLATFORM: w64-mingw32
-  CRT: msvcrt
+  CRT: ucrt
   TOOLCHAIN_PATH: ${{ github.workspace }}/cross
-  TOOLCHAIN_NAME: aarch64-w64-mingw32-msvcrt
-  TOOLCHAIN_ARTIFACT_NAME: aarch64-w64-mingw32-msvcrt-toolchain
-  TOOLCHAIN_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-toolchain.tar.gz
-  RUNTIME_ARTIFACT_NAME: aarch64-w64-mingw32-msvcrt-toolchain
-  RUNTIME_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-runtime.tar.gz
-  TESTS_ARTIFACT_NAME: aarch64-w64-mingw32-msvcrt-tests
-  TESTS_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-tests.tar.gz
+  TOOLCHAIN_NAME: aarch64-w64-mingw32-ucrt
+  TOOLCHAIN_ARTIFACT_NAME: aarch64-w64-mingw32-ucrt-toolchain
+  TOOLCHAIN_PACKAGE_NAME: aarch64-w64-mingw32-ucrt-toolchain.tar.gz
+  RUNTIME_ARTIFACT_NAME: aarch64-w64-mingw32-ucrt-toolchain
+  RUNTIME_PACKAGE_NAME: aarch64-w64-mingw32-ucrt-runtime.tar.gz
+  TESTS_ARTIFACT_NAME: aarch64-w64-mingw32-ucrt-tests
+  TESTS_PACKAGE_NAME: aarch64-w64-mingw32-ucrt-tests.tar.gz
 
   SOURCE_PATH: ${{ github.workspace }}/code
   BUILD_PATH: ${{ github.workspace }}/build
@@ -122,6 +122,7 @@ env:
   ARTIFACT_PATH: ${{ github.workspace }}/artifact
   RELATIVE_ARTIFACT_PATH: ./artifact
 
+  DEBUG: 1
   CCACHE: 1
   DELETE_BUILD: 1
 
@@ -146,14 +147,12 @@ jobs:
             crt: ucrt
           - platform: pc-cygwin
             crt: libc
-          - platform: pc-cygwin
-            arch: aarch64
 
     env:
       ARCH: ${{ matrix.arch }}
       PLATFORM: ${{ matrix.platform }}
       CRT: ${{ matrix.crt }}
-      PACK_TOOLCHAIN: ${{ matrix.arch == 'aarch64' && matrix.platform == 'w64-mingw32' && matrix.crt == 'msvcrt' }}
+      PACK_TOOLCHAIN: ${{ matrix.arch == 'aarch64' && matrix.platform == 'w64-mingw32' && matrix.crt == 'ucrt' }}
       TOOLCHAIN_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}
       TOOLCHAIN_ARTIFACT_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}-toolchain
       TOOLCHAIN_PACKAGE_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}-toolchain.tar.gz
@@ -245,16 +244,6 @@ jobs:
         run: |
           .github/scripts/install-dependencies.sh
 
-      - name: Patch binutils stage1
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform == 'pc-cygwin' }}
-        run: |
-          .github/scripts/binutils/patch-cygwin.sh 1
-
-      - name: Patch toolchain stage1
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform == 'pc-cygwin' }}
-        run: |
-          .github/scripts/toolchain/patch-cygwin.sh 1
-
       - name: Install libraries
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
         run: |
@@ -326,16 +315,6 @@ jobs:
         run: |
           .github/scripts/toolchain/build-cygwin.sh 1
 
-      - name: Patch toolchain stage2
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform == 'pc-cygwin' }}
-        run: |
-          .github/scripts/toolchain/patch-cygwin.sh 2
-
-      - name: Install libraries
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
-        run: |
-          .github/scripts/install-libraries.sh
-
       - name: Build GCC stage2
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
         run: |
@@ -405,7 +384,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      TESTS_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-tests.tar.gz
+      TESTS_PACKAGE_NAME: aarch64-w64-mingw32-ucrt-tests.tar.gz
 
     steps:
       - name: Checkout repository
@@ -448,7 +427,7 @@ jobs:
     runs-on: [Windows, GCC, ARM64]
 
     env:
-      TESTS_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-tests.tar.gz
+      TESTS_PACKAGE_NAME: aarch64-w64-mingw32-ucrt-tests.tar.gz
 
     steps:
       - name: Checkout repository
@@ -515,7 +494,7 @@ jobs:
       - name: Unpack toolchain
         run: |
           .github/scripts/toolchain/unpack.sh
-    
+
       - name: Build OpenBLAS
         run: |
           .github/scripts/openblas/build.sh
@@ -523,14 +502,14 @@ jobs:
       - name: Pack OpenBLAS tests
         run: |
           .github/scripts/openblas/pack-tests.sh
-  
+
       - name: Upload tests artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.TOOLCHAIN_NAME }}-openblas-tests
           path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_NAME }}-openblas-tests.zip
           retention-days: 3
-        
+
   execute-openblas-tests:
     needs: [
       build-toolchain,
@@ -741,7 +720,7 @@ jobs:
       - name: Pack OpenSSL tests
         run: |
           .github/scripts/openssl/pack-tests.sh
-    
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
@@ -812,11 +791,11 @@ jobs:
       - name: Unpack OpenSSL tests
         run: |
           .github/scripts/openssl/unpack-tests.ps1
-  
+
       - name: Unpack zlib
         run: |
           .github/scripts/zlib/unpack.ps1
-  
+
       - name: Execute OpenSSL tests
         run: |
           .github/scripts/openssl/execute-tests.ps1

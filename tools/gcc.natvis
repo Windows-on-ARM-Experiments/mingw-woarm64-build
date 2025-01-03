@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+        <!-- GENERIC and GIMPLE tree node.  -->
+        <Type Name="tree">
+                <AlternativeType Name="const_tree"/>
+
+                <!-- This could be used to simplify the expressions bellow but it does not work with
+                     VSCode GDB integration. Kept here for reference -->
+                <Intrinsic Name="TREE_CODE" Expression="base.code" />
+                <Intrinsic Name="TREE_CHAIN" Expression="common.chain" />
+                <Intrinsic Name="TREE_TYPE" Expression="typed.type" />
+                <Intrinsic Name="TREE_PURPOSE" Expression="list.purpose" />
+                <Intrinsic Name="TREE_VALUE" Expression="list.value" />
+                <Intrinsic Name="TREE_OPERAND_LENGTH" Expression="tree_code_length[base.code]" />
+                <Intrinsic Name="TREE_OPERAND" Expression="exp.operands[$i]" />
+                <Intrinsic Name="TREE_CODE_CLASS" Expression="tree_code_type[base.code]" />
+                <Intrinsic Name="TREE_CODE_CLASS_STRING" Expression="tree_code_class_strings[tree_code_type[base.code]]" />
+                <Intrinsic Name="TREE_CODE_NAME" Expression="tree_code_name[base.code]" />
+                <Intrinsic Name="DECL_NAME" Expression="decl_minimal.name" />
+                <Intrinsic Name="DECL_ARGUMENTS" Expression="function_decl.arguments" />
+                <Intrinsic Name="DECL_RESULT" Expression="decl_non_common.result" />
+                <Intrinsic Name="TYPE_NAME" Expression="type_common.name" />
+                <Intrinsic Name="TYPE_ARG_TYPES" Expression="type_non_common.values" />
+                <Intrinsic Name="TYPE_ATTRIBUTES" Expression="type_common.attributes" />
+                <Intrinsic Name="TYPE_NO_NAMED_ARGS_STDARG_P" Expression="type_common.no_named_args_stdarg_p" />
+                <Intrinsic Name="IDENTIFIER_POINTER" Expression="identifier.id.str" />
+                <Intrinsic Name="SSA_VERSION" Expression="base.u.version" />
+
+                <!-- Short displays. -->
+                <DisplayString Condition="&amp;base.code == 0">{(void*)&amp;base.code}</DisplayString>
+                <DisplayString Condition="base.code == INTEGER_CST">{{ code={base.code} type_size={typed.type.type_common.size.int_cst.val[0]} value_0={int_cst.val[0]} }}</DisplayString>
+                <DisplayString Condition="tree_code_type[base.code] == tcc_type">{{ code={base.code} type_size={type_common.size.int_cst.val[0]} identifier={type_common.name.decl_minimal.name.identifier.id.str} }}</DisplayString>
+                <DisplayString>{{ code={base.code} }}</DisplayString>
+
+                <!-- Detailed displays. -->
+                <Expand>
+                        <!-- Common fields for all nodes. -->
+                        <Item Name="[code]">base.code</Item>
+                        <Item Name="[code_class]">tree_code_type[base.code]</Item>
+                        <Item Name="[code_string]">tree_code_class_strings[tree_code_type[base.code]]</Item>
+                        <Item Name="[code_name]">tree_code_name[base.code]</Item>
+
+                        <!-- Tree container. -->
+                        <Item Name="[purpose]" Condition="base.code == TREE_LIST">list.purpose</Item>
+                        <Item Name="[value]" Condition="base.code == TREE_LIST">list.value</Item>
+                        <Item Name="[next]" Condition="base.code == TREE_LIST">common.chain</Item>
+
+                        <!-- Typed expression and declaration nodes. -->
+                        <Item Name="[tree_type]" Condition="tree_code_type[base.code] == tcc_declaration || tree_code_type[base.code] == tcc_expression">typed.type</Item>
+
+                        <!-- Declaration nodes. -->
+                        <Item Name="[decl_name]" Condition="tree_code_type[base.code] == tcc_declaration">decl_minimal.name</Item>
+                        <Item Name="[decl_identifier]" Condition="tree_code_type[base.code] == tcc_declaration">decl_minimal.name.identifier.id.str</Item>
+
+                        <!-- Function declaration. -->
+                        <Item Name="[arguments]" Condition="base.code == FUNCTION_DECL">function_decl.arguments</Item>
+                        <Item Name="[result]" Condition="base.code == FUNCTION_DECL">decl_non_common.result</Item>
+
+                        <!-- Type nodes. -->
+                        <Item Name="[name]" Condition="tree_code_type[base.code] == tcc_type">type_common.name</Item>
+                        <Item Name="[size]" Condition="tree_code_type[base.code] == tcc_type">type_common.size.int_cst.val[0]</Item>
+                        <Item Name="[identifier]" Condition="tree_code_type[base.code] == tcc_type">type_common.name.decl_minimal.name.identifier.id.str</Item>
+                        <Item Name="[attributes]" Condition="tree_code_type[base.code] == tcc_type">type_common.attributes</Item>
+
+                        <!-- Identfier nodes. -->
+                        <Item Name="[pointer]" Condition="base.code == IDENTIFIER_NODE">identifier.id.str</Item>
+                        <Item Name="[length]" Condition="base.code == IDENTIFIER_NODE">identifier.id.len</Item>
+
+                        <!-- Expression nodes. -->
+                        <Item Name="[location]" Condition="tree_code_type[base.code] == tcc_reference || tree_code_type[base.code] == tcc_vl_exp || tree_code_type[base.code] == tcc_expression">expand_location (exp.locus)</Item>
+                        <Item Name="[operand_0]" Condition="tree_code_length[base.code] > 0 &amp;&amp; (tree_code_type[base.code] == tcc_reference || tree_code_type[base.code] == tcc_vl_exp || tree_code_type[base.code] == tcc_expression)">exp.operands[0]</Item>
+                        <Item Name="[operand_1]" Condition="tree_code_length[base.code] > 1 &amp;&amp; (tree_code_type[base.code] == tcc_reference || tree_code_type[base.code] == tcc_vl_exp || tree_code_type[base.code] == tcc_expression)">exp.operands[1]</Item>
+                        <Item Name="[operand_2]" Condition="tree_code_length[base.code] > 2 &amp;&amp; (tree_code_type[base.code] == tcc_reference || tree_code_type[base.code] == tcc_vl_exp || tree_code_type[base.code] == tcc_expression)">exp.operands[2]</Item>
+
+                        <!-- Call expression nodes. -->
+                        <Item Name="[function]" Condition="base.code == CALL_EXPR">exp.operands[1]</Item>
+                        <Item Name="[static_chain]" Condition="base.code == CALL_EXPR">exp.operands[2]</Item>
+                        <Item Name="[arguments_0]" Condition="base.code == CALL_EXPR">exp.operands[3]</Item>
+                        <Item Name="[arguments_1]" Condition="base.code == CALL_EXPR">exp.operands[4]</Item>
+                        <Item Name="[arguments_2]" Condition="base.code == CALL_EXPR">exp.operands[5]</Item>
+                        <Item Name="[ifn]" Condition="base.code == CALL_EXPR">base.u.ifn</Item>
+
+                        <!-- Pointer and reference nodes. -->
+                        <Item Name="[target_type]" Condition="base.code == POINTER_TYPE || base.code == MEM_REF">typed.type</Item>
+
+                        <!-- Function type. -->
+                        <Item Name="[arguments]" Condition="base.code == FUNCTION_TYPE">type_non_common.values</Item>
+                        <Item Name="[stdarg_no_named_arguments]" Condition="base.code == FUNCTION_TYPE">type_common.no_named_args_stdarg_p</Item>
+
+                        <!-- Constant nodes. -->
+                        <Item Name="[value_0]" Condition="base.code == INTEGER_CST">int_cst.val[0]</Item>
+
+                        <Item Name="[ssa_version]" Condition="base.code == SSA_NAME">base.u.version</Item>
+                </Expand>
+        </Type>
+
+        <!-- RTL expression.  -->
+        <Type Name="rtx">
+                <DisplayString Condition="&amp;code == 0">{(void*)&amp;code}</DisplayString>
+                <DisplayString>{{ code={code} name={rtx_name[code]} }}</DisplayString>
+                <Expand>
+                        <Item Name="[code]">code</Item>
+                        <Item Name="[name]">rtx_name[code]</Item>
+                        <Item Name="[length]">rtx_length[code]</Item>
+                        <Item Name="[format]">rtx_format[code]</Item>
+                        <Item Name="[class]">rtx_class[code]</Item>
+                        <Item Name="[next]">*(rtx *)(((void*)&amp;code) + rtx_next[code])</Item>
+                        <IndexListItems Name="[formats]">
+                                <Size>rtx_length[code]</Size>
+                                <ValueNode>*rtx_format[code][$i]</ValueNode>
+                        </IndexListItems>
+                        <Item Name="[expr_list]" Condition="code == EXPR_LIST">{(rtx_expr_list*) &amp;code}</Item>
+                </Expand>
+        </Type>
+</AutoVisualizer>
