@@ -57,14 +57,28 @@
                         <Item Name="[result]" Condition="base.code == FUNCTION_DECL">decl_non_common.result</Item>
 
                         <!-- Type nodes. -->
-                        <Item Name="[type_name]" Condition="tree_code_type[base.code] == tcc_type">type_common.name</Item>
-                        <Item Name="[type_size]" Condition="tree_code_type[base.code] == tcc_type">type_common.size.int_cst.val[0]</Item>
-                        <Item Name="[type_identifier]" Condition="tree_code_type[base.code] == tcc_type">type_common.name.decl_minimal.name.identifier.id.str</Item>
+                        <Item Name="[name]" Condition="tree_code_type[base.code] == tcc_type">type_common.name</Item>
+                        <Item Name="[size]" Condition="tree_code_type[base.code] == tcc_type">type_common.size.int_cst.val[0]</Item>
+                        <Item Name="[identifier]" Condition="tree_code_type[base.code] == tcc_type">type_common.name.decl_minimal.name.identifier.id.str</Item>
+                        <Item Name="[attributes]" Condition="tree_code_type[base.code] == tcc_type">type_common.attributes</Item>
+
+                        <!-- Identfier nodes. -->
+                        <Item Name="[pointer]" Condition="base.code == IDENTIFIER_NODE">identifier.id.str</Item>
+                        <Item Name="[length]" Condition="base.code == IDENTIFIER_NODE">identifier.id.len</Item>
 
                         <!-- Expression nodes. -->
-                        <Item Name="[operand_0]" Condition="tree_code_length[base.code] > 0 &amp;&amp; (tree_code_type[base.code] == tcc_reference || tree_code_type[base.code] == tcc_expression)">exp.operands[0]</Item>
-                        <Item Name="[operand_1]" Condition="tree_code_length[base.code] > 1 &amp;&amp; (tree_code_type[base.code] == tcc_reference || tree_code_type[base.code] == tcc_expression)">exp.operands[1]</Item>
-                        <Item Name="[operand_2]" Condition="tree_code_length[base.code] > 2 &amp;&amp; (tree_code_type[base.code] == tcc_reference || tree_code_type[base.code] == tcc_expression)">exp.operands[2]</Item>
+                        <Item Name="[location]" Condition="tree_code_type[base.code] == tcc_reference || tree_code_type[base.code] == tcc_vl_exp || tree_code_type[base.code] == tcc_expression">expand_location (exp.locus)</Item>
+                        <Item Name="[operand_0]" Condition="tree_code_length[base.code] > 0 &amp;&amp; (tree_code_type[base.code] == tcc_reference || tree_code_type[base.code] == tcc_vl_exp || tree_code_type[base.code] == tcc_expression)">exp.operands[0]</Item>
+                        <Item Name="[operand_1]" Condition="tree_code_length[base.code] > 1 &amp;&amp; (tree_code_type[base.code] == tcc_reference || tree_code_type[base.code] == tcc_vl_exp || tree_code_type[base.code] == tcc_expression)">exp.operands[1]</Item>
+                        <Item Name="[operand_2]" Condition="tree_code_length[base.code] > 2 &amp;&amp; (tree_code_type[base.code] == tcc_reference || tree_code_type[base.code] == tcc_vl_exp || tree_code_type[base.code] == tcc_expression)">exp.operands[2]</Item>
+
+                        <!-- Call expression nodes. -->
+                        <Item Name="[function]" Condition="base.code == CALL_EXPR">exp.operands[1]</Item>
+                        <Item Name="[static_chain]" Condition="base.code == CALL_EXPR">exp.operands[2]</Item>
+                        <Item Name="[arguments_0]" Condition="base.code == CALL_EXPR">exp.operands[3]</Item>
+                        <Item Name="[arguments_1]" Condition="base.code == CALL_EXPR">exp.operands[4]</Item>
+                        <Item Name="[arguments_2]" Condition="base.code == CALL_EXPR">exp.operands[5]</Item>
+                        <Item Name="[ifn]" Condition="base.code == CALL_EXPR">base.u.ifn</Item>
 
                         <!-- Pointer and reference nodes. -->
                         <Item Name="[target_type]" Condition="base.code == POINTER_TYPE || base.code == MEM_REF">typed.type</Item>
