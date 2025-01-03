@@ -14,6 +14,7 @@ function update_repository() {
     DIRECTORY=$1
     REPOSITORY=$2
     BRANCH=$3
+    BASE_BRANCH=$4
     if [[ ! -d $DIRECTORY ]]; then
         if [[ "$FLAT_CLONE" = 1 ]]; then
             git clone $REPOSITORY -b $BRANCH --single-branch --depth 1 $DIRECTORY
@@ -22,6 +23,7 @@ function update_repository() {
         fi
         pushd $DIRECTORY
             git config pull.rebase true
+            git config rebase.autoStash true
             git submodule init
             git submodule update
         popd
@@ -54,19 +56,26 @@ function update_repository() {
             git submodule update
         popd
     fi
+
+    if [[ "$FLAT_CLONE" = 0 && "$REBASE_SOURCES" = 1 && -n "$BASE_BRANCH" ]]; then
+        pushd $DIRECTORY
+            git rebase origin/$BASE_BRANCH
+            git push --force-with-lease
+        popd
+    fi
 }
 
 echo "::group::Update source code repositories"
     mkdir -p "$SOURCE_PATH"
 
     cd "$SOURCE_PATH"
-    update_repository binutils https://github.com/Windows-on-ARM-Experiments/binutils-woarm64.git $BINUTILS_BRANCH
-    update_repository gcc https://github.com/Windows-on-ARM-Experiments/gcc-woarm64.git $GCC_BRANCH
-    update_repository mingw https://github.com/Windows-on-ARM-Experiments/mingw-woarm64.git $MINGW_BRANCH
+    update_repository binutils https://github.com/Windows-on-ARM-Experiments/binutils-woarm64.git $BINUTILS_BRANCH $BINUTILS_BASE_BRANCH
+    update_repository gcc https://github.com/Windows-on-ARM-Experiments/gcc-woarm64.git $GCC_BRANCH $GCC_BASE_BRANCH
+    update_repository mingw https://github.com/Windows-on-ARM-Experiments/mingw-woarm64.git $MINGW_BRANCH $MINGW_BASE_BRANCH
     if [[ "$PLATFORM" =~ cygwin ]]; then 
-        update_repository cygwin https://github.com/Windows-on-ARM-Experiments/newlib-cygwin.git $CYGWIN_BRANCH
-        update_repository cygwin-packages https://github.com/Windows-on-ARM-Experiments/cygwin-packages.git $CYGWIN_PACKAGES_BRANCH
-        update_repository cocom https://git.code.sf.net/p/cocom/git $COCOM_BRANCH
+        update_repository cygwin https://github.com/Windows-on-ARM-Experiments/newlib-cygwin.git $CYGWIN_BRANCH $CYGWIN_BASE_BRANCH
+        update_repository cygwin-packages https://github.com/Windows-on-ARM-Experiments/cygwin-packages.git $CYGWIN_PACKAGES_BRANCH $CYGWIN_PACKAGES_BASE_BRANCH
+        update_repository cocom https://git.code.sf.net/p/cocom/git $COCOM_BRANCH $COCOM_BASE_BRANCH
     fi
 echo "::endgroup::"
 
