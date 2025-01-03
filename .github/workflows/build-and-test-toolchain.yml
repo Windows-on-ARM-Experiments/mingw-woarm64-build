@@ -1,6 +1,7 @@
 name: Build and test main toolchain
 
 on:
+  pull_request:
   workflow_dispatch:
     inputs:
       binutils_branch:
@@ -18,7 +19,7 @@ on:
       arch:
         description: 'Architecture to build for'
         required: false
-        default: 'x86_64'
+        default: 'aarch64'
       platform:
         description: 'Platform to build for'
         required: false
@@ -64,7 +65,7 @@ env:
   GCC_BRANCH: ${{ inputs.gcc_branch || 'woarm64' }}
   MINGW_BRANCH: ${{ inputs.mingw_branch || 'woarm64' }}
 
-  ARCH: ${{ inputs.arch || 'x86_64' }}
+  ARCH: ${{ inputs.arch || 'aarch64' }}
   PLATFORM: ${{ inputs.platform || 'w64-mingw32' }}
   CRT: ${{ inputs.crt || 'msvcrt' }}
   
@@ -72,21 +73,20 @@ env:
   MODULE: ${{ inputs.gcc_module || '' }}
   FILTER: ${{ inputs.gcc_test_filter || '' }}
 
+  TOOLCHAIN_PATH: ~/work/install
+
   CCACHE: 1
   RUN_BOOTSTRAP: 1
   UPDATE_SOURCES: 1
+  RESET_SOURCES: 1
 
 jobs:
   build-and-test-toolchain:
     name: Build and test toolchain
-    runs-on: windows-latest
+    runs-on: [Windows, ARM64, WSL]
 
     env:
       WSLENV: BINUTILS_BRANCH:GCC_BRANCH:MINGW_BRANCH:ARCH:PLATFORM:CRT:TAG:MODULE:FILTER:CCACHE:RUN_BOOTSTRAP:UPDATE_SOURCES:GITHUB_OUTPUT/p:GITHUB_STEP_SUMMARY/p
-
-    defaults:
-      run:
-        shell: wsl-bash {0}
 
     steps:
       - name: Get cache key
@@ -95,28 +95,24 @@ jobs:
         run: |
           Write-Output "timestamp=$((Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ"))" >> "$env:GITHUB_OUTPUT"
 
-      - name: Setup WSL
-        uses: Windows-on-ARM-Experiments/setup-wsl@master
-        with:
-          distribution: Ubuntu-22.04
-          additional-packages:
-            git
+      - name: Install WSL
+        if: false
+        run: |
+          wsl --install --enable-wsl1 --no-launch --distribution Ubuntu-22.04
+
+      - name: Clean up previous build
+        run: |
+          wsl whoami
+          wsl rm -rf ~/work
 
       - name: Checkout repository
         run: |
-          git clone --depth=1 ${{ github.server_url }}/${{ github.repository }}.git -b ${{ github.head_ref || github.ref_name || 'main' }} ~/work
+          wsl git clone --depth=1 ${{ github.server_url }}/${{ github.repository }}.git -b ${{ github.head_ref || github.ref_name || 'main' }} ~/work
 
       - name: Get WSL paths
         id: get-wsl-paths
         run: |
-          source ~/work/.github/scripts/config.sh
-          mkdir -p $BUILD_PATH
-          mkdir -p $CCACHE_DIR_PATH
-          mkdir -p $ARTIFACT_PATH
-          echo "build-path-win=`wslpath -w $BUILD_PATH`" >> $GITHUB_OUTPUT
-          echo "ccache-dir-path-win=`wslpath -w $CCACHE_DIR_PATH`" >> $GITHUB_OUTPUT
-          echo "artifact-path-win=`wslpath -w $ARTIFACT_PATH`" >> $GITHUB_OUTPUT
-          echo "artifact-path-wsl=$ARTIFACT_PATH" >> $GITHUB_OUTPUT
+          wsl ~/work/.github/scripts/setup-wsl.sh
 
       - name: Restore Ccache
         uses: actions/cache/restore@v4
@@ -127,7 +123,7 @@ jobs:
 
       - name: Build toolchain
         run: |
-          ~/work/.github/scripts/build.sh
+          wsl ~/work/.github/scripts/build.sh
 
       - name: Save Ccache
         if: always()
@@ -138,19 +134,7 @@ jobs:
 
       - name: Execute GCC tests
         run: |
-          ~/work/.github/scripts/toolchain/execute-gcc-tests.sh "gcc-tests-${{ env.TAG }}" \
-            "${{ env.MODULE }}" "${{ env.FILTER }}"
-
-      - name: Create summary
-        run: |
-          ~/work/.github/scripts/toolchain/create-gcc-summary.sh " \
-            ${{ steps.get-wsl-paths.outputs.artifact-path-wsl }}/gcc-tests-${{ env.TAG }}" >> \
-            ${{ steps.get-wsl-paths.outputs.artifact-path-wsl }}/gcc-tests-${{ env.TAG }}/summary.md
-          cat ${{ steps.get-wsl-paths.outputs.artifact-path-wsl }}/gcc-tests-${{ env.TAG }}/summary.md >> $GITHUB_STEP_SUMMARY
-
-      - name: Group test failures
-        run: |
-          ~/work/.github/scripts/toolchain/group-gcc-test-failures.sh "gcc-tests-${{ env.TAG }}" >> $GITHUB_STEP_SUMMARY
+          wsl ~/work/.github/scripts/toolchain/execute-gcc-tests.sh "gcc-tests-${{ env.TAG }}" "${{ env.MODULE }}" "${{ env.FILTER }}"
 
       - name: Upload build folder
         if: failure()
@@ -164,5 +148,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: gcc-tests-${{ env.TAG }}
-          path: ${{ steps.get-wsl-paths.outputs.artifact-path-win }}\gcc-tests-${{ env.TAG }}
+          path: ${{ steps.get-wsl-paths.outputs.artifact-path-win }}/gcc-tests-${{ env.TAG }}
           retention-days: 30
