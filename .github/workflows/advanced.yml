@@ -123,6 +123,7 @@ env:
   RELATIVE_ARTIFACT_PATH: ./artifact
 
   CCACHE: 1
+  DELETE_BUILD: 1
 
 jobs:
   build-toolchain:
@@ -269,6 +270,9 @@ jobs:
 
       - name: Build binutils
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
+        env:
+          # Don't delete build files, they're needed for running binutils tests in the next step.
+          DELETE_BUILD: 0
         run: |
           .github/scripts/binutils/build.sh
 
@@ -276,6 +280,11 @@ jobs:
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
         run: |
           .github/scripts/toolchain/execute-binutils-tests.sh
+
+      - name: Delete binutils build files
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && env.DELETE_BUILD == 1 }}
+        run: |
+          .github/scripts/binutils/delete-build.sh
 
       - name: Install cross headers and libraries
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform == 'pc-linux-gnu' }}
