@@ -13,7 +13,14 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$GCC_BUILD_PATH/Makefile" ]]; then
 
         if [[ "$DEBUG" = 1 ]]; then
             HOST_OPTIONS="$HOST_OPTIONS \
-                --enable-debug"
+                --enable-debug \
+                --enable-libstdcxx-debug \
+                --enable-checking"
+            CFLAGS="-O0 -ggdb"
+            CXXFLAGS="-O0 -ggdb"
+        else
+            HOST_OPTIONS="$HOST_OPTIONS \
+                --enable-checking=release"
         fi
 
         case "$ARCH" in
@@ -55,28 +62,34 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$GCC_BUILD_PATH/Makefile" ]]; then
                 ;;
         esac
 
-    $SOURCE_PATH/gcc/configure \
-        --prefix=$TOOLCHAIN_PATH \
-        --build=$BUILD \
-        --host=$HOST \
-        --target=$TARGET \
-        --enable-static \
-        --disable-shared \
-        --disable-bootstrap \
-        --disable-multilib \
-        --disable-plugins \
-        --disable-gcov \
-        --disable-libatomic \
-        --disable-libgomp \
-        --disable-libvtv \
-        --disable-libquadmath \
-        --disable-libssp \
-        --disable-nls \
-        --with-gnu-as \
-        --with-gnu-ld \
-        --without-headers \
-        $HOST_OPTIONS \
-        $TARGET_OPTIONS
+        CFLAGS=$CFLAGS \
+        CXXFLAGS=$CXXFLAGS \
+        BOOT_CFLAGS=$CFLAGS \
+        LIBGCC2_CFLAGS=$CFLAGS \
+        CFLAGS_FOR_TARGET=$CFLAGS \
+        CXXFLAGS_FOR_TARGET=$CXXFLAGS \
+        $SOURCE_PATH/gcc/configure \
+            --prefix=$TOOLCHAIN_PATH \
+            --build=$BUILD \
+            --host=$HOST \
+            --target=$TARGET \
+            --enable-static \
+            --disable-shared \
+            --disable-bootstrap \
+            --disable-multilib \
+            --disable-plugins \
+            --disable-gcov \
+            --disable-libatomic \
+            --disable-libgomp \
+            --disable-libvtv \
+            --disable-libquadmath \
+            --disable-libssp \
+            --disable-nls \
+            --with-gnu-as \
+            --with-gnu-ld \
+            --without-headers \
+            $HOST_OPTIONS \
+            $TARGET_OPTIONS
     echo "::endgroup::"
 fi
 

@@ -10,19 +10,19 @@ on:
       binutils_branch:
         description: 'Binutils branch to build'
         required: false
-        default: 'woarm64'
+        default: 'woarm64-cygwin'
       gcc_branch:
         description: 'GCC branch to build'
         required: false
-        default: 'woarm64'
+        default: 'woarm64-cygwin'
       mingw_branch:
         description: 'Mingw branch to build'
         required: false
-        default: 'woarm64'
+        default: 'woarm64-cygwin'
 env:
-  BINUTILS_BRANCH: ${{ inputs.binutils_branch || 'woarm64' }}
-  GCC_BRANCH: ${{ inputs.gcc_branch || 'woarm64' }}
-  MINGW_BRANCH: ${{ inputs.mingw_branch || 'woarm64' }}
+  BINUTILS_BRANCH: ${{ inputs.binutils_branch || 'woarm64-cygwin' }}
+  GCC_BRANCH: ${{ inputs.gcc_branch || 'woarm64-cygwin' }}
+  MINGW_BRANCH: ${{ inputs.mingw_branch || 'woarm64-cygwin' }}
 
   BUILD_PATH: ${{ github.workspace }}/build
   CCACHE_DIR_PATH: ${{ github.workspace }}/ccache
