@@ -86,7 +86,7 @@ env:
   COCOM_REPO: https://git.code.sf.net/p/cocom/git
   COCOM_BRANCH: ${{ inputs.cocom_branch || 'master' }}
 
-  OPENBLAS_REPO: OpenMathLib/OpenBLAS.git
+  OPENBLAS_REPO: OpenMathLib/OpenBLAS
   OPENBLAS_BRANCH: ${{ inputs.openblas_branch || 'develop' }}
 
   ZLIB_REPO: madler/zlib
