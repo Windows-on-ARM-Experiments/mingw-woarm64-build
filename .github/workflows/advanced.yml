@@ -329,10 +329,15 @@ jobs:
         run: |
           .github/scripts/toolchain/build-cygwin.sh 2
 
-      - name: Validate Cygwin toolchain
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform == 'pc-cygwin' }}
+      - name: Build Cygwin toolchain tests
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.arch == 'aarch64' && matrix.platform == 'pc-cygwin' }}
         run: |
-          .github/scripts/cygwin/execute-tests.sh
+          .github/scripts/cygwin/build-tests.sh
+
+      - name: Pack Cygwin toolchain tests
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.arch == 'aarch64' && matrix.platform == 'pc-cygwin' }}
+        run: |
+          .github/scripts/tests/pack.sh
 
       - name: Save Ccache
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && always() }}
@@ -386,6 +391,12 @@ jobs:
   build-aarch64-tests:
     needs: [build-toolchain]
     runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [aarch64]
+        platform: [w64-mingw32, pc-cygwin]
 
     env:
       TESTS_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-tests.tar.gz
