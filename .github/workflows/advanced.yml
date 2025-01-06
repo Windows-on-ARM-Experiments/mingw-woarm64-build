@@ -329,16 +329,6 @@ jobs:
         run: |
           .github/scripts/toolchain/build-cygwin.sh 2
 
-      - name: Build Cygwin toolchain tests
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.arch == 'aarch64' && matrix.platform == 'pc-cygwin' }}
-        run: |
-          .github/scripts/cygwin/build-tests.sh
-
-      - name: Pack Cygwin toolchain tests
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.arch == 'aarch64' && matrix.platform == 'pc-cygwin' }}
-        run: |
-          .github/scripts/tests/pack.sh
-
       - name: Save Ccache
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && always() }}
         uses: actions/cache/save@v4
@@ -399,7 +389,7 @@ jobs:
         platform: [w64-mingw32, pc-cygwin]
 
     env:
-      TESTS_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-tests.tar.gz
+      TESTS_PACKAGE_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-msvcrt-tests.tar.gz
 
     steps:
       - name: Checkout repository
@@ -422,6 +412,11 @@ jobs:
       - name: Build aarch64-tests
         run: |
           .github/scripts/tests/build.sh
+
+      - name: Build Cygwin toolchain tests
+        if: ${{ matrix.platform == 'pc-cygwin' }}
+        run: |
+          .github/scripts/cygwin/build-tests.sh
 
       - name: Pack tests
         run: |
