@@ -329,6 +329,11 @@ jobs:
         run: |
           .github/scripts/toolchain/build-cygwin.sh 2
 
+      - name: Validate Cygwin toolchain
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform == 'pc-cygwin' }}
+        run: |
+          .github/scripts/cygwin/execute-tests.sh
+
       - name: Save Ccache
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && always() }}
         uses: actions/cache/save@v4
