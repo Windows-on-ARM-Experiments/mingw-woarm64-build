@@ -2,7 +2,7 @@
 
 source `dirname ${BASH_SOURCE[0]}`/../config.sh
 
-PATH="$TOOLCHAIN_PATH/bin:$TOOLCHAIN_PATH/lib/gcc/aarch64-pc-cygwin/:$TOOLCHAIN_PATH/lib/gcc/$TARGET/$GCC_VERSION/"
+PATH="$TOOLCHAIN_PATH/bin:$TOOLCHAIN_PATH/lib/gcc/aarch64-pc-cygwin/:$TOOLCHAIN_PATH/lib/gcc/$TARGET/$GCC_VERSION/:$PATH"
 
 echo "::group::Build Cygwin AArch64 tests"
     pushd $ROOT_PATH/tests/cygwin
