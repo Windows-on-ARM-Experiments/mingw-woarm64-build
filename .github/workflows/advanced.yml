@@ -394,6 +394,7 @@ jobs:
     env:
       TOOLCHAIN_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}
       TOOLCHAIN_PACKAGE_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}-toolchain.tar.gz
+      TESTS_ARTIFACT_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}-tests
       TESTS_PACKAGE_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}-tests.tar.gz
 
     steps:
@@ -402,11 +403,9 @@ jobs:
         with:
           path: ${{ github.workspace }}
 
-      - name: Get toolchaing cache key
+      - name: Extract toolchain cache key
         run: |
-          json='${{ toJSON(needs.build-toolchain.outputs) }}'
-          toolchain_cache_key=$(echo $json | jq -r '.["${{ env.TOOLCHAIN_NAME }}-toolchain-cache-key"]')
-          echo "toolchain-cache-key=$toolchain_cache_key" >> "$GITHUB_ENV"
+          .github/scripts/extract-toolchain-cache-key.sh
 
       - name: Download ${{ env.TOOLCHAIN_NAME }} toolchain
         uses: actions/cache/restore@v4
@@ -613,11 +612,15 @@ jobs:
           ref: ${{ env.ZLIB_BRANCH }}
           path: ${{ env.SOURCE_PATH }}/zlib
 
+      - name: Extract toolchain cache key
+        run: |
+          .github/scripts/extract-toolchain-cache-key.sh
+
       - name: Download ${{ env.TOOLCHAIN_NAME }} toolchain
         uses: actions/cache/restore@v4
         with:
           path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
-          key: ${{ needs.build-toolchain.outputs.toolchain-cache-key }}
+          key: ${{ env.toolchain-cache-key }}
           enableCrossOsArchive: true
           fail-on-cache-miss: true
 
