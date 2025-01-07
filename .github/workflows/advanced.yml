@@ -405,7 +405,7 @@ jobs:
 
       - name: Extract toolchain cache key
         run: |
-          .github/scripts/extract-toolchain-cache-key.sh '${{ toJSON(needs.build-toolchain.outputs) }}'
+          .github/scripts/extract-cache-keys.sh '${{ toJSON(needs.build-toolchain.outputs) }}'
 
       - name: Download ${{ env.TOOLCHAIN_NAME }} toolchain
         uses: actions/cache/restore@v4
@@ -614,7 +614,7 @@ jobs:
 
       - name: Extract toolchain cache key
         run: |
-          .github/scripts/extract-toolchain-cache-key.sh '${{ toJSON(needs.build-toolchain.outputs) }}'
+          .github/scripts/extract-cache-keys.sh '${{ toJSON(needs.build-toolchain.outputs) }}'
 
       - name: Download ${{ env.TOOLCHAIN_NAME }} toolchain
         uses: actions/cache/restore@v4
