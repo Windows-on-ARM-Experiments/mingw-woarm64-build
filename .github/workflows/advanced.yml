@@ -151,7 +151,7 @@ jobs:
       ARCH: ${{ matrix.arch }}
       PLATFORM: ${{ matrix.platform }}
       CRT: ${{ matrix.crt }}
-      PACK_TOOLCHAIN: ${{ matrix.arch == 'aarch64' && matrix.platform == 'w64-mingw32' && matrix.crt == 'msvcrt' }}
+      PACK_TOOLCHAIN: ${{ matrix.arch == 'aarch64' && (matrix.platform == 'w64-mingw32' || matrix.platform == 'pc-cygwin') && matrix.crt == 'msvcrt' }}
       TOOLCHAIN_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}
       TOOLCHAIN_ARTIFACT_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}-toolchain
       TOOLCHAIN_PACKAGE_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}-toolchain.tar.gz
@@ -377,6 +377,7 @@ jobs:
       runtime-artifact-name: ${{ env.PACK_TOOLCHAIN == 'true' && env.RUNTIME_ARTIFACT_NAME || '' }}
       toolchain-cache-key: ${{ env.PACK_TOOLCHAIN == 'true' && steps.cache-keys.outputs.toolchain-cache-key || '' }}
       runtime-cache-key: ${{ env.PACK_TOOLCHAIN == 'true' && steps.cache-keys.outputs.runtime-cache-key || '' }}
+      ${{ TOOLCHAIN_NAME }}-toolchain-cache-key: ${{ steps.cache-keys.outputs.toolchain-cache-key }}
 
   build-aarch64-tests:
     needs: [build-toolchain]
@@ -387,9 +388,11 @@ jobs:
       matrix:
         arch: [aarch64]
         platform: [w64-mingw32, pc-cygwin]
+        crt: [msvcrt]
 
     env:
-      TESTS_PACKAGE_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-msvcrt-tests.tar.gz
+      TOOLCHAIN_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}
+      TESTS_PACKAGE_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}-tests.tar.gz
 
     steps:
       - name: Checkout repository
@@ -401,7 +404,7 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
-          key: ${{ needs.build-toolchain.outputs.toolchain-cache-key }}
+          key: ${{ needs.build-toolchain.outputs.${{ TOOLCHAIN_NAME }}-toolchain-cache-key }}
           enableCrossOsArchive: true
           fail-on-cache-miss: true
 
