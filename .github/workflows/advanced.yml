@@ -371,7 +371,6 @@ jobs:
           retention-days: 3
 
     outputs:
-      if: ${{ env.PACK_TOOLCHAIN == 'true' }}
       toolchain-package-name: ${{ env.PACK_TOOLCHAIN == 'true' && env.TOOLCHAIN_PACKAGE_NAME || '' }}
       toolchain-artifact-name: ${{ env.PACK_TOOLCHAIN == 'true' && env.TOOLCHAIN_ARTIFACT_NAME || '' }}
       runtime-package-name: ${{ env.PACK_TOOLCHAIN == 'true' && env.RUNTIME_PACKAGE_NAME || '' }}
@@ -405,7 +404,7 @@ jobs:
       - name: Get toolchaing cache key
         run: |
           json='${{ toJSON(needs.build-toolchain.outputs) }}'
-          toolchain-cache-key=$(echo $json | jq -r ".${{ env.TOOLCHAIN_NAME }}-toolchain-cache-key")
+          toolchain-cache-key=$(echo $json | jq -r '.["${{ env.TOOLCHAIN_NAME }}-toolchain-cache-key"]')
           echo "toolchain-cache-key=$toolchain-cache-key" >> "$GITHUB_ENV"
 
       - name: Download ${{ env.TOOLCHAIN_NAME }} toolchain
