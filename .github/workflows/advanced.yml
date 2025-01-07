@@ -377,6 +377,7 @@ jobs:
       runtime-package-name: ${{ env.PACK_TOOLCHAIN == 'true' && env.RUNTIME_PACKAGE_NAME || '' }}
       runtime-artifact-name: ${{ env.PACK_TOOLCHAIN == 'true' && env.RUNTIME_ARTIFACT_NAME || '' }}
       toolchain-cache-key: ${{ env.PACK_TOOLCHAIN == 'true' && steps.cache-keys.outputs.toolchain-cache-key || '' }}
+      pc-cygwin-toolchain-cache-key: ${{ env.PACK_TOOLCHAIN == 'true' && steps.cache-keys.outputs.toolchain-cache-key || needs.build-toolchain.outputs.pc-cygwin-toolchain-cache-key }}
       runtime-cache-key: ${{ env.PACK_TOOLCHAIN == 'true' && steps.cache-keys.outputs.runtime-cache-key || '' }}
 
   build-aarch64-tests:
@@ -404,7 +405,7 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
-          key: ${{ needs.build-toolchain.outputs.${{ env.TOOLCHAIN_NAME }}-toolchain-cache-key }}
+          key: ${{ matrix.platform == 'pc-cygwin' == 'true' }} && ${{ needs.build-toolchain.outputs.pc-cygwin-toolchain-cache-key }} || ${{ needs.build-toolchain.outputs.toolchain-cache-key }}
           enableCrossOsArchive: true
           fail-on-cache-miss: true
 
