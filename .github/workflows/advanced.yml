@@ -404,8 +404,8 @@ jobs:
       - name: Get toolchaing cache key
         run: |
           json='${{ toJSON(needs.build-toolchain.outputs) }}'
-          toolchain-cache-key=$(echo $json | jq -r '.["${{ env.TOOLCHAIN_NAME }}-toolchain-cache-key"]')
-          echo "toolchain-cache-key=$toolchain-cache-key" >> "$GITHUB_ENV"
+          toolchain_cache_key=$(echo $json | jq -r '.["${{ env.TOOLCHAIN_NAME }}-toolchain-cache-key"]')
+          echo "toolchain-cache-key=$toolchain_cache_key" >> "$GITHUB_ENV"
 
       - name: Download ${{ env.TOOLCHAIN_NAME }} toolchain
         uses: actions/cache/restore@v4
@@ -420,6 +420,7 @@ jobs:
           .github/scripts/toolchain/unpack.sh
   
       - name: Build aarch64-tests
+        if: ${{ matrix.platform == 'w64-mingw32' }}
         run: |
           .github/scripts/tests/build.sh
 
@@ -445,6 +446,13 @@ jobs:
       build-aarch64-tests
     ]
     runs-on: [Windows, GCC, ARM64]
+
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [aarch64]
+        platform: [w64-mingw32, pc-cygwin]
+        crt: [msvcrt]
 
     env:
       TESTS_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-tests.tar.gz
@@ -483,8 +491,14 @@ jobs:
           .github/scripts/tests/unpack.ps1
 
       - name: Execute ${{ env.TOOLCHAIN_NAME }} tests
-        run:
+        if: ${{ matrix.platform == 'w64-mingw32' }}
+        run: |
           .github/scripts/tests/execute-tests.ps1
+
+      - name: Execute ${{ env.TOOLCHAIN_NAME }} tests
+        if: ${{ matrix.platform == 'pc-cygwin' }}
+        run: |
+          .github/scripts/cygwin/execute-tests.sh
 
   build-openblas:
     needs: [build-toolchain]
