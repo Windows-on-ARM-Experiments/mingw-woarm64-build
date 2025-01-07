@@ -377,7 +377,7 @@ jobs:
       runtime-artifact-name: ${{ env.PACK_TOOLCHAIN == 'true' && env.RUNTIME_ARTIFACT_NAME || '' }}
       toolchain-cache-key: ${{ env.PACK_TOOLCHAIN == 'true' && steps.cache-keys.outputs.toolchain-cache-key || '' }}
       runtime-cache-key: ${{ env.PACK_TOOLCHAIN == 'true' && steps.cache-keys.outputs.runtime-cache-key || '' }}
-      ${{ TOOLCHAIN_NAME }}-toolchain-cache-key: ${{ steps.cache-keys.outputs.toolchain-cache-key }}
+      ${{ env.TOOLCHAIN_NAME }}-toolchain-cache-key: ${{ steps.cache-keys.outputs.toolchain-cache-key }}
 
   build-aarch64-tests:
     needs: [build-toolchain]
@@ -404,7 +404,7 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
-          key: ${{ needs.build-toolchain.outputs.${{ TOOLCHAIN_NAME }}-toolchain-cache-key }}
+          key: ${{ needs.build-toolchain.outputs.${{ env.TOOLCHAIN_NAME }}-toolchain-cache-key }}
           enableCrossOsArchive: true
           fail-on-cache-miss: true
 
