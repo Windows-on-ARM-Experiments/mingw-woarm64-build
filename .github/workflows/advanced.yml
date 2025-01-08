@@ -83,7 +83,7 @@ env:
   CYGWIN_PACKAGES_REPO: Windows-on-ARM-Experiments/cygwin-packages
   CYGWIN_PACKAGES_BRANCH: ${{ inputs.cygwin_packages_branch || 'main' }}
 
-  COCOM_REPO: https://git.code.sf.net/p/cocom/git
+  COCOM_REPO: git://git.code.sf.net/p/cocom/git
   COCOM_BRANCH: ${{ inputs.cocom_branch || 'master' }}
 
   OPENBLAS_REPO: OpenMathLib/OpenBLAS

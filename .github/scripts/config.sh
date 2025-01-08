@@ -20,7 +20,7 @@ CYGWIN_BRANCH=${CYGWIN_BRANCH:-main}
 CYGWIN_PACKAGES_REPO=${CYGWIN_PACKAGES_REPO:-Windows-on-ARM-Experiments/cygwin-packages}
 CYGWIN_PACKAGES_BRANCH=${CYGWIN_PACKAGES_BRANCH:-main}
 
-COCOM_REPO=${COCOM_REPO:-https://git.code.sf.net/p/cocom/git}
+COCOM_REPO=${COCOM_REPO:-git://git.code.sf.net/p/cocom/git}
 COCOM_BRANCH=${COCOM_BRANCH:-master}
 
 # Baseline branches used for rebase when REBASE_SOURCES=1.
