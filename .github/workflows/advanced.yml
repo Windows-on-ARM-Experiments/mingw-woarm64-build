@@ -457,7 +457,7 @@ jobs:
         crt: [msvcrt]
 
     env:
-      TESTS_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-tests.tar.gz
+      TESTS_PACKAGE_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}-tests.tar.gz
 
     steps:
       - name: Checkout repository
@@ -470,6 +470,7 @@ jobs:
           .github/scripts/install-zstd.ps1
 
       - name: Extract cache keys
+        shell: bash
         run: |
           .github/scripts/extract-cache-keys.sh '${{ toJSON(needs.build-toolchain.outputs) }}'
 
@@ -503,6 +504,7 @@ jobs:
 
       - name: Execute ${{ env.TOOLCHAIN_NAME }} tests
         if: ${{ matrix.platform == 'pc-cygwin' }}
+        shell: bash
         run: |
           .github/scripts/cygwin/execute-tests.sh
 
@@ -824,6 +826,7 @@ jobs:
           .github/scripts/install-zstd.ps1
 
       - name: Extract cache keys
+        shell: bash
         run: |
           .github/scripts/extract-cache-keys.sh '${{ toJSON(needs.build-toolchain.outputs) }}'
 
@@ -951,6 +954,7 @@ jobs:
           .github/scripts/install-zstd.ps1
 
       - name: Extract cache keys
+        shell: bash
         run: |
           .github/scripts/extract-cache-keys.sh '${{ toJSON(needs.build-toolchain.outputs) }}'
 
@@ -1071,6 +1075,7 @@ jobs:
           .github/scripts/ffmpeg/patch.sh
 
       - name: Extract cache keys
+        shell: bash
         run: |
           .github/scripts/extract-cache-keys.sh '${{ toJSON(needs.build-toolchain.outputs) }}'
 
