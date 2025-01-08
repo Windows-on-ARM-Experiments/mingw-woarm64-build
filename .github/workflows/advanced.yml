@@ -379,6 +379,8 @@ jobs:
       aarch64-w64-mingw32-msvcrt-toolchain-cache-key: ${{ env.aarch64-w64-mingw32-msvcrt-toolchain-cache-key }}
       aarch64-pc-cygwin-msvcrt-toolchain-cache-key: ${{ env.aarch64-pc-cygwin-msvcrt-toolchain-cache-key }}
       runtime-cache-key: ${{ env.PACK_TOOLCHAIN == 'true' && steps.cache-keys.outputs.runtime-cache-key || '' }}
+      aarch64-w64-mingw32-msvcrt-runtime-cache-key: ${{ env.aarch64-w64-mingw32-msvcrt-runtime-cache-key }}
+      aarch64-pc-cygwin-msvcrt-runtime-cache-key: ${{ env.aarch64-pc-cygwin-msvcrt-runtime-cache-key }}
 
   build-aarch64-tests:
     needs: [build-toolchain]
@@ -403,7 +405,7 @@ jobs:
         with:
           path: ${{ github.workspace }}
 
-      - name: Extract toolchain cache key
+      - name: Extract cache keys
         run: |
           .github/scripts/extract-cache-keys.sh '${{ toJSON(needs.build-toolchain.outputs) }}'
 
@@ -467,12 +469,16 @@ jobs:
         run: |
           .github/scripts/install-zstd.ps1
 
+      - name: Extract cache keys
+        run: |
+          .github/scripts/extract-cache-keys.sh '${{ toJSON(needs.build-toolchain.outputs) }}'
+
       - name: Download ${{ env.TOOLCHAIN_NAME }} runtime
         uses: actions/cache/restore@v4
         with:
           path: ${{ env.RELATIVE_ARTIFACT_PATH }}/${{ env.RUNTIME_PACKAGE_NAME }}
-          key: ${{ needs.build-toolchain.outputs.runtime-cache-key }}
-          restore-keys: ${{ needs.build-toolchain.outputs.runtime-cache-key }}
+          key: ${{ env.runtime-cache-key }}
+          restore-keys: ${{ env.runtime-cache-key }}
           enableCrossOsArchive: true
           fail-on-cache-miss: true
 
@@ -517,11 +523,15 @@ jobs:
           ref: ${{ env.OPENBLAS_BRANCH }}
           path: ${{ env.SOURCE_PATH }}/openblas
 
+      - name: Extract cache keys
+        run: |
+          .github/scripts/extract-cache-keys.sh '${{ toJSON(needs.build-toolchain.outputs) }}'
+
       - name: Download ${{ env.TOOLCHAIN_NAME }} toolchain
         uses: actions/cache/restore@v4
         with:
           path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
-          key: ${{ needs.build-toolchain.outputs.toolchain-cache-key }}
+          key: ${{ env.toolchain-cache-key }}
           enableCrossOsArchive: true
           fail-on-cache-miss: true
 
@@ -564,12 +574,16 @@ jobs:
         run: |
           .github/scripts/install-zstd.ps1
 
+      - name: Extract cache keys
+        run: |
+          .github/scripts/extract-cache-keys.sh '${{ toJSON(needs.build-toolchain.outputs) }}'
+
       - name: Download ${{ env.TOOLCHAIN_NAME }} runtime
         uses: actions/cache/restore@v4
         with:
           path: ${{ env.RELATIVE_ARTIFACT_PATH }}/${{ env.RUNTIME_PACKAGE_NAME }}
-          key: ${{ needs.build-toolchain.outputs.runtime-cache-key }}
-          restore-keys: ${{ needs.build-toolchain.outputs.runtime-cache-key }}
+          key: ${{ env.runtime-cache-key }}
+          restore-keys: ${{ env.runtime-cache-key }}
           enableCrossOsArchive: true
           fail-on-cache-miss: true
 
@@ -612,7 +626,7 @@ jobs:
           ref: ${{ env.ZLIB_BRANCH }}
           path: ${{ env.SOURCE_PATH }}/zlib
 
-      - name: Extract toolchain cache key
+      - name: Extract cache keys
         run: |
           .github/scripts/extract-cache-keys.sh '${{ toJSON(needs.build-toolchain.outputs) }}'
 
@@ -663,11 +677,15 @@ jobs:
           ref: ${{ env.LIBXML2_BRANCH }}
           path: ${{ env.SOURCE_PATH }}/libxml2
 
+      - name: Extract cache keys
+        run: |
+          .github/scripts/extract-cache-keys.sh '${{ toJSON(needs.build-toolchain.outputs) }}'
+
       - name: Download ${{ env.TOOLCHAIN_NAME }} toolchain
         uses: actions/cache/restore@v4
         with:
           path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
-          key: ${{ needs.build-toolchain.outputs.toolchain-cache-key }}
+          key: ${{ env.toolchain-cache-key }}
           enableCrossOsArchive: true
           fail-on-cache-miss: true
 
@@ -725,11 +743,15 @@ jobs:
         run: |
           .github/scripts/openssl/install-dependencies.sh
 
+      - name: Extract cache keys
+        run: |
+          .github/scripts/extract-cache-keys.sh '${{ toJSON(needs.build-toolchain.outputs) }}'
+
       - name: Download ${{ env.TOOLCHAIN_NAME }} toolchain
         uses: actions/cache/restore@v4
         with:
           path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
-          key: ${{ needs.build-toolchain.outputs.toolchain-cache-key }}
+          key: ${{ env.toolchain-cache-key }}
           enableCrossOsArchive: true
           fail-on-cache-miss: true
 
@@ -801,12 +823,16 @@ jobs:
         run: |
           .github/scripts/install-zstd.ps1
 
+      - name: Extract cache keys
+        run: |
+          .github/scripts/extract-cache-keys.sh '${{ toJSON(needs.build-toolchain.outputs) }}'
+
       - name: Download ${{ env.TOOLCHAIN_NAME }} runtime
         uses: actions/cache/restore@v4
         with:
           path: ${{ env.RELATIVE_ARTIFACT_PATH }}/${{ env.RUNTIME_PACKAGE_NAME }}
-          key: ${{ needs.build-toolchain.outputs.runtime-cache-key }}
-          restore-keys: ${{ needs.build-toolchain.outputs.runtime-cache-key }}
+          key: ${{ env.runtime-cache-key }}
+          restore-keys: ${{ env.runtime-cache-key }}
           enableCrossOsArchive: true
           fail-on-cache-miss: true
 
@@ -862,11 +888,15 @@ jobs:
         run: |
           .github/scripts/libjpeg-turbo/patch.sh
 
+      - name: Extract cache keys
+        run: |
+          .github/scripts/extract-cache-keys.sh '${{ toJSON(needs.build-toolchain.outputs) }}'
+
       - name: Download ${{ env.TOOLCHAIN_NAME }} toolchain
         uses: actions/cache/restore@v4
         with:
           path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
-          key: ${{ needs.build-toolchain.outputs.toolchain-cache-key }}
+          key: ${{ env.toolchain-cache-key }}
           enableCrossOsArchive: true
           fail-on-cache-miss: true
 
@@ -920,12 +950,16 @@ jobs:
         run: |
           .github/scripts/install-zstd.ps1
 
+      - name: Extract cache keys
+        run: |
+          .github/scripts/extract-cache-keys.sh '${{ toJSON(needs.build-toolchain.outputs) }}'
+
       - name: Download ${{ env.TOOLCHAIN_NAME }} runtime
         uses: actions/cache/restore@v4
         with:
           path: ${{ env.RELATIVE_ARTIFACT_PATH }}/${{ env.RUNTIME_PACKAGE_NAME }}
-          key: ${{ needs.build-toolchain.outputs.runtime-cache-key }}
-          restore-keys: ${{ needs.build-toolchain.outputs.runtime-cache-key }}
+          key: ${{ env.runtime-cache-key }}
+          restore-keys: ${{ env.runtime-cache-key }}
           enableCrossOsArchive: true
           fail-on-cache-miss: true
 
@@ -968,11 +1002,15 @@ jobs:
           path: ${{ env.SOURCE_PATH }}/ffmpeg
           fetch-depth: 0
 
+      - name: Extract cache keys
+        run: |
+          .github/scripts/extract-cache-keys.sh '${{ toJSON(needs.build-toolchain.outputs) }}'
+
       - name: Download ${{ env.TOOLCHAIN_NAME }} toolchain
         uses: actions/cache/restore@v4
         with:
           path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
-          key: ${{ needs.build-toolchain.outputs.toolchain-cache-key }}
+          key: ${{ env.toolchain-cache-key }}
           enableCrossOsArchive: true
           fail-on-cache-miss: true
 
@@ -1032,12 +1070,16 @@ jobs:
         run: |
           .github/scripts/ffmpeg/patch.sh
 
+      - name: Extract cache keys
+        run: |
+          .github/scripts/extract-cache-keys.sh '${{ toJSON(needs.build-toolchain.outputs) }}'
+
       - name: Download ${{ env.TOOLCHAIN_NAME }} runtime
         uses: actions/cache/restore@v4
         with:
           path: ${{ env.RELATIVE_ARTIFACT_PATH }}/${{ env.RUNTIME_PACKAGE_NAME }}
-          key: ${{ needs.build-toolchain.outputs.runtime-cache-key }}
-          restore-keys: ${{ needs.build-toolchain.outputs.runtime-cache-key }}
+          key: ${{ env.runtime-cache-key }}
+          restore-keys: ${{ env.runtime-cache-key }}
           enableCrossOsArchive: true
           fail-on-cache-miss: true
 
