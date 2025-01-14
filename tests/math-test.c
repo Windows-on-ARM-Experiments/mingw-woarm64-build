@@ -25,22 +25,13 @@ _Float128 bar(_Float128 x)
     return x * __builtin_huge_valf128();
 }
 
-_Float128 baz(_Float128 x)
-{
-    return x * __builtin_huge_valf128();
-}
-
 void float_128_test()
 {
     // Based on test from gcc/libgfortran/configure
-    foo(1.2Q);
-    bar(1.2Q);
     foo(1.2F128);
     bar(1.2F128);
-    baz(1.2F128);
     foo(1.2Q);
     bar(1.2Q);
-    baz(1.2Q);
 }
 
 void sizeof_test()
