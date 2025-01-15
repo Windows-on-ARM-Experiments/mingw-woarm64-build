@@ -223,14 +223,14 @@ jobs:
           ref: ${{ env.CYGWIN_BRANCH }}
           path: ${{ env.SOURCE_PATH }}/cygwin
 
-      - name: Checkout Cygwin packages
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform == 'pc-cygwin' }}
-        uses: actions/checkout@v4
-        with:
-          repository: ${{ env.CYGWIN_PACKAGES_REPO }}
-          ref: ${{ env.CYGWIN_PACKAGES_BRANCH }}
-          submodules: 'recursive'
-          path: ${{ env.SOURCE_PATH }}/cygwin-packages
+      # - name: Checkout Cygwin packages
+      #   if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform == 'pc-cygwin' }}
+      #   uses: actions/checkout@v4
+      #   with:
+      #     repository: ${{ env.CYGWIN_PACKAGES_REPO }}
+      #     ref: ${{ env.CYGWIN_PACKAGES_BRANCH }}
+      #     submodules: 'recursive'
+      #     path: ${{ env.SOURCE_PATH }}/cygwin-packages
 
       - name: Checkout COCOM
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform == 'pc-cygwin' }}
