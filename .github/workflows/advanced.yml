@@ -130,6 +130,7 @@ env:
 
   CCACHE: 1
   DELETE_BUILD: 1
+  UPLOAD_ARTIFACTS: ${{ inputs.upload_artifacts }}
 
 jobs:
   build-toolchain:
@@ -365,17 +366,17 @@ jobs:
           key: ccache-${{ steps.cache-keys.outputs.ccache-key }}
 
       - name: Pack toolchain
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && upload_artifacts && env.PACK_TOOLCHAIN == 'true' }}
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && env.UPLOAD_ARTIFACTS && env.PACK_TOOLCHAIN == 'true' }}
         run: |
           .github/scripts/toolchain/pack.sh
 
       - name: Pack runtime
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && upload_artifacts && env.PACK_TOOLCHAIN == 'true' }}
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && env.UPLOAD_ARTIFACTS && env.PACK_TOOLCHAIN == 'true' }}
         run: |
           .github/scripts/toolchain/pack-runtime.sh
 
       - name: Upload build folder
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && upload_artifacts && failure() }}
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && env.UPLOAD_ARTIFACTS && failure() }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.BUILD_ARTIFACT_NAME }}
@@ -383,7 +384,7 @@ jobs:
           path: ${{ env.BUILD_PATH }}
 
       - name: Upload toolchain artifact
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && upload_artifacts && env.PACK_TOOLCHAIN == 'true' }}
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && env.UPLOAD_ARTIFACTS && env.PACK_TOOLCHAIN == 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.TOOLCHAIN_ARTIFACT_NAME }}

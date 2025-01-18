@@ -34,6 +34,7 @@ env:
 
   CCACHE: 1
   DELETE_BUILD: 1
+  UPLOAD_ARTIFACTS: ${{ inputs.upload_artifacts }}
 
 jobs:
   build-toolchain:
@@ -71,7 +72,7 @@ jobs:
           key: main-gcc-ccache-${{ steps.get-cache-key.outputs.timestamp }}
 
       - name: Upload build folder
-        if: ${{ failure() && upload_artifacts }}
+        if: ${{ failure() && env.UPLOAD_ARTIFACTS }}
         uses: actions/upload-artifact@v4
         with:
           name: main-aarch64-w64-mingw32-build
