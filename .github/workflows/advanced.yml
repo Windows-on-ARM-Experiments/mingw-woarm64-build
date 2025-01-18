@@ -39,6 +39,10 @@ on:
         description: 'OpenSSL branch to test'
         required: false
         default: 'fix-tests'
+      upload_artifacts:
+        description: 'Upload artifacts'
+        required: false
+        default: false
   workflow_call:
     inputs:
       binutils_branch:
@@ -53,6 +57,8 @@ on:
         type: string
       cocom_branch:
         type: string
+      upload_artifacts:
+        type: boolean
     outputs:
       toolchain-package-name:
         value: ${{ jobs.build-toolchain.outputs.toolchain-package-name }}
@@ -359,17 +365,17 @@ jobs:
           key: ccache-${{ steps.cache-keys.outputs.ccache-key }}
 
       - name: Pack toolchain
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && env.PACK_TOOLCHAIN == 'true' }}
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && upload_artifacts && env.PACK_TOOLCHAIN == 'true' }}
         run: |
           .github/scripts/toolchain/pack.sh
 
       - name: Pack runtime
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && env.PACK_TOOLCHAIN == 'true' }}
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && upload_artifacts && env.PACK_TOOLCHAIN == 'true' }}
         run: |
           .github/scripts/toolchain/pack-runtime.sh
 
       - name: Upload build folder
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && failure() }}
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && upload_artifacts && failure() }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.BUILD_ARTIFACT_NAME }}
@@ -377,7 +383,7 @@ jobs:
           path: ${{ env.BUILD_PATH }}
 
       - name: Upload toolchain artifact
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && env.PACK_TOOLCHAIN == 'true' }}
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && upload_artifacts && env.PACK_TOOLCHAIN == 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.TOOLCHAIN_ARTIFACT_NAME }}

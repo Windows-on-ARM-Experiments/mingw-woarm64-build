@@ -19,6 +19,10 @@ on:
         description: 'Mingw branch to build'
         required: false
         default: 'woarm64'
+      upload_artifacts:
+        description: 'Upload artifacts'
+        required: false
+        default: false
 env:
   BINUTILS_BRANCH: ${{ inputs.binutils_branch || 'woarm64' }}
   GCC_BRANCH: ${{ inputs.gcc_branch || 'woarm64' }}
@@ -67,7 +71,7 @@ jobs:
           key: main-gcc-ccache-${{ steps.get-cache-key.outputs.timestamp }}
 
       - name: Upload build folder
-        if: failure()
+        if: ${{ failure() && upload_artifacts }}
         uses: actions/upload-artifact@v4
         with:
           name: main-aarch64-w64-mingw32-build
@@ -75,6 +79,7 @@ jobs:
           path: ${{ env.BUILD_PATH }}
 
       - name: Upload artifact
+        if: ${{ upload_artifacts }}
         uses: actions/upload-artifact@v4
         with:
           name: main-aarch64-w64-mingw32-toolchain
