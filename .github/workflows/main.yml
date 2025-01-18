@@ -80,7 +80,7 @@ jobs:
           path: ${{ env.BUILD_PATH }}
 
       - name: Upload artifact
-        if: ${{ upload_artifacts }}
+        if: ${{ env.UPLOAD_ARTIFACTS }}
         uses: actions/upload-artifact@v4
         with:
           name: main-aarch64-w64-mingw32-toolchain
