@@ -366,12 +366,12 @@ jobs:
           key: ccache-${{ steps.cache-keys.outputs.ccache-key }}
 
       - name: Pack toolchain
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && env.UPLOAD_ARTIFACTS && env.PACK_TOOLCHAIN == 'true' }}
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && env.PACK_TOOLCHAIN == 'true' }}
         run: |
           .github/scripts/toolchain/pack.sh
 
       - name: Pack runtime
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && env.UPLOAD_ARTIFACTS && env.PACK_TOOLCHAIN == 'true' }}
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && env.PACK_TOOLCHAIN == 'true' }}
         run: |
           .github/scripts/toolchain/pack-runtime.sh
 
