@@ -130,7 +130,7 @@ env:
 
   CCACHE: 1
   DELETE_BUILD: 1
-  UPLOAD_ARTIFACTS: ${{ inputs.upload_artifacts }}
+  UPLOAD_ARTIFACTS: ${{ inputs.upload_artifacts == 'true' && 1 || 0 }}
 
 jobs:
   build-toolchain:
@@ -949,6 +949,14 @@ jobs:
         uses: actions/checkout@v4
         with:
           path: ${{ github.workspace }}
+      
+      - name: Cache toolchain
+        id: cache-toolchain
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_NAME }}-ffmpeg-tests.zip
+          key: ${{ needs.build-toolchain.outputs.toolchain-cache-key }}-ffmpeg-tests
+          enableCrossOsArchive: true
 
       - name: Checkout FFmpeg
         uses: actions/checkout@v4
@@ -983,6 +991,7 @@ jobs:
           .github/scripts/ffmpeg/pack-tests.sh
 
       - name: Upload tests artifact
+        if: ${{ env.UPLOAD_ARTIFACTS }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.TOOLCHAIN_NAME }}-ffmpeg-tests
@@ -1032,10 +1041,13 @@ jobs:
           fail-on-cache-miss: true
 
       - name: Download FFmpeg tests
-        uses: actions/download-artifact@v4
+        uses: actions/cache/restore@v4
         with:
-          name: ${{ env.TOOLCHAIN_NAME }}-ffmpeg-tests
-          path: ${{ env.ARTIFACT_PATH }}
+          path: ${{ env.RELATIVE_ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}-ffmpeg-tests.zip
+          key: ${{ needs.build-toolchain.outputs.toolchain-cache-key }}-ffmpeg-tests
+          restore-keys: ${{ needs.build-toolchain.outputs.runtime-cache-key }}-ffmpeg-tests
+          enableCrossOsArchive: true
+          fail-on-cache-miss: true
 
       - name: Unpack ${{ env.TOOLCHAIN_NAME }} runtime
         run: |
