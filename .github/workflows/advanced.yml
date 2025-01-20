@@ -815,7 +815,7 @@ jobs:
         with:
           path: ${{ env.RELATIVE_ARTIFACT_PATH }}/${{ env.TOOLCHAIN_NAME }}-openssl-tests.zip
           key: ${{ needs.build-toolchain.outputs.toolchain-cache-key }}-openssl-tests
-          restore-keys: ${{ needs.build-toolchain.outputs.runtime-cache-key }}-openssl-tests
+          restore-keys: ${{ needs.build-toolchain.outputs.toolchain-cache-key }}-openssl-tests
           enableCrossOsArchive: true
           fail-on-cache-miss: true
 
@@ -1064,7 +1064,7 @@ jobs:
         with:
           path: ${{ env.RELATIVE_ARTIFACT_PATH }}/${{ env.TOOLCHAIN_NAME }}-ffmpeg-tests.zip
           key: ${{ needs.build-toolchain.outputs.toolchain-cache-key }}-ffmpeg-tests
-          restore-keys: ${{ needs.build-toolchain.outputs.runtime-cache-key }}-ffmpeg-tests
+          restore-keys: ${{ needs.build-toolchain.outputs.toolchain-cache-key }}-ffmpeg-tests
           enableCrossOsArchive: true
           fail-on-cache-miss: true
 
