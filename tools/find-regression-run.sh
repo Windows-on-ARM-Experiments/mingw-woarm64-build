@@ -11,7 +11,6 @@ set +e
     RUN_BOOTSTRAP=0 \
     UPDATE_SOURCES=0 \
     RESET_SOURCES=1 \
-    APPLY_PATCHES=1 \
       $ROOT_PATH/.github/scripts/build.sh
     RESULT=$?
 set -e

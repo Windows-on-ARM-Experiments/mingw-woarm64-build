@@ -13,18 +13,12 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$CYGWIN_BUILD_PATH/Makefile" ]]; then
     echo "::group::Configure Cygwin"
         rm -rf $CYGWIN_BUILD_PATH/*
 
-        case "$STAGE" in
-            1)
-                TARGET_OPTIONS="$TARGET_OPTIONS \
-                    --disable-shared \
-                    --disable-doc"
-                ;;
-            2)
-                TARGET_OPTIONS="$TARGET_OPTIONS \
-                    --enable-shared"
-                ;;
-        esac
+        (cd $CYGWIN_SOURCE_PATH/winsup && ./autogen.sh)
+        if [[ "$STAGE" = "1" ]]; then
+            (cd $CYGWIN_SOURCE_PATH && patch -p1 -i $PATCHES_PATH/cygwin/0001-fix-autogen.patch)
+        fi
 
+        # ADDED: --disable-doc
         # ADDED: --disable-dumper
         CXXFLAGS_FOR_TARGET="-Wno-error -Wno-narrowing" \
         $CYGWIN_SOURCE_PATH/configure \
@@ -32,7 +26,9 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$CYGWIN_BUILD_PATH/Makefile" ]]; then
             --build=$HOST \
             --host=$HOST \
             --target=$TARGET \
+            --enable-shared \
             --enable-static \
+            --disable-doc \
             --disable-dumper \
             --with-sysroot=$TOOLCHAIN_PATH \
             --with-build-sysroot=$TOOLCHAIN_PATH \

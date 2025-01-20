@@ -22,7 +22,7 @@ on:
       cygwin_branch:
         description: 'Cygwin branch to build'
         required: false
-        default: 'main'
+        default: 'woarm64'
       cygwin_packages_branch:
         description: 'Cygwin packages branch to build'
         required: false
@@ -78,7 +78,7 @@ env:
   MINGW_BRANCH: ${{ inputs.mingw_branch || 'woarm64' }}
 
   CYGWIN_REPO: Windows-on-ARM-Experiments/newlib-cygwin
-  CYGWIN_BRANCH: ${{ inputs.cygwin_branch || 'main' }}
+  CYGWIN_BRANCH: ${{ inputs.cygwin_branch || 'woarm64' }}
 
   CYGWIN_PACKAGES_REPO: Windows-on-ARM-Experiments/cygwin-packages
   CYGWIN_PACKAGES_BRANCH: ${{ inputs.cygwin_packages_branch || 'main' }}
@@ -245,16 +245,6 @@ jobs:
         run: |
           .github/scripts/install-dependencies.sh
 
-      - name: Patch binutils stage1
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform == 'pc-cygwin' }}
-        run: |
-          .github/scripts/binutils/patch-cygwin.sh 1
-
-      - name: Patch toolchain stage1
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform == 'pc-cygwin' }}
-        run: |
-          .github/scripts/toolchain/patch-cygwin.sh 1
-
       - name: Install libraries
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
         run: |
@@ -325,16 +315,6 @@ jobs:
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform == 'pc-cygwin' }}
         run: |
           .github/scripts/toolchain/build-cygwin.sh 1
-
-      - name: Patch toolchain stage2
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform == 'pc-cygwin' }}
-        run: |
-          .github/scripts/toolchain/patch-cygwin.sh 2
-
-      - name: Install libraries
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
-        run: |
-          .github/scripts/install-libraries.sh
 
       - name: Build GCC stage2
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
@@ -812,7 +792,7 @@ jobs:
       - name: Unpack OpenSSL tests
         run: |
           .github/scripts/openssl/unpack-tests.ps1
-  
+
       - name: Unpack zlib
         run: |
           .github/scripts/zlib/unpack.ps1

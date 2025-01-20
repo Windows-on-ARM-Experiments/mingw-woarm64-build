@@ -14,15 +14,6 @@ if [[ "$UPDATE_SOURCES" = 1 ]]; then
     $ROOT_PATH/.github/scripts/update-sources.sh
 fi
 
-if [[ "$APPLY_PATCHES" = 1 ]]; then
-    case "$PLATFORM" in
-        *cygwin*)
-            $ROOT_PATH/.github/scripts/binutils/patch-cygwin.sh 1
-            $ROOT_PATH/.github/scripts/toolchain/patch-cygwin.sh 1
-            ;;
-    esac
-fi
-
 if [[ "$RUN_BOOTSTRAP" = 1 || "$RESET_SOURCES" = 1 ]]; then
     $ROOT_PATH/.github/scripts/install-libraries.sh
 fi
@@ -56,19 +47,6 @@ fi
 if [[ "$PLATFORM" =~ cygwin ]]; then
     $ROOT_PATH/.github/scripts/toolchain/build-cocom.sh
     $ROOT_PATH/.github/scripts/toolchain/build-cygwin.sh 1
-fi
-
-if [[ "$APPLY_PATCHES" = 1 ]]; then
-    case "$PLATFORM" in
-        *cygwin*)
-            $ROOT_PATH/.github/scripts/binutils/patch-cygwin.sh 2
-            $ROOT_PATH/.github/scripts/toolchain/patch-cygwin.sh 2
-            ;;
-    esac
-fi
-
-if [[ "$RUN_BOOTSTRAP" = 1 || "$RESET_SOURCES" = 1 ]]; then
-    $ROOT_PATH/.github/scripts/install-libraries.sh
 fi
 
 $ROOT_PATH/.github/scripts/toolchain/build-gcc.sh
