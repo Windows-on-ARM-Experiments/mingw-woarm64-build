@@ -376,9 +376,11 @@ jobs:
       runtime-package-name: ${{ env.PACK_TOOLCHAIN == 'true' && env.RUNTIME_PACKAGE_NAME || '' }}
       runtime-artifact-name: ${{ env.PACK_TOOLCHAIN == 'true' && env.RUNTIME_ARTIFACT_NAME || '' }}
       toolchain-cache-key: ${{ env.PACK_TOOLCHAIN == 'true' && steps.cache-keys.outputs.toolchain-cache-key || '' }}
-      ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}-toolchain-cache-key: ${{ steps.cache-keys.outputs.toolchain-cache-key }}
+      aarch64-w64-mingw32-msvcrt-toolchain-cache-key: ${{ env.aarch64-w64-mingw32-msvcrt-toolchain-cache-key }}
+      aarch64-pc-cygwin-msvcrt-toolchain-cache-key: ${{ env.aarch64-pc-cygwin-msvcrt-toolchain-cache-key }}
       runtime-cache-key: ${{ env.PACK_TOOLCHAIN == 'true' && steps.cache-keys.outputs.runtime-cache-key || '' }}
-      ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}-runtime-cache-key: ${{ steps.cache-keys.outputs.runtime-cache-key }}
+      aarch64-w64-mingw32-msvcrt-runtime-cache-key: ${{ env.aarch64-w64-mingw32-msvcrt-runtime-cache-key }}
+      aarch64-pc-cygwin-msvcrt-runtime-cache-key: ${{ env.aarch64-pc-cygwin-msvcrt-runtime-cache-key }}
 
   build-aarch64-tests:
     needs: [build-toolchain]
