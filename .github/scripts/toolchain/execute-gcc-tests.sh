@@ -11,7 +11,6 @@ TARGET_BOARD=${4:-wsl-sim}
 HOST_BOARD=${5:-}
 
 GCC_BUILD_PATH=$BUILD_PATH/gcc
-TEST_RESULTS_PATH=$ARTIFACT_PATH/$DIR
 
 PATH="$TOOLCHAIN_PATH/bin:$PATH"
 
@@ -38,12 +37,17 @@ echo "::group::Execute GCC tests"
         CHECK_TEST_FRAMEWORK=1 \
         || echo "Error"
 
-    mkdir -p $TEST_RESULTS_PATH
-    rm -rf $TEST_RESULTS_PATH/*
+    mkdir -p $DIR
+    rm -rf $DIR/*
 
     for FILE in `find $GCC_BUILD_PATH -path '*testsuite*.log' -or -path '*testsuite*.sum'`; do
-        cp $FILE $TEST_RESULTS_PATH/
+        cp $FILE $DIR/
     done
+echo "::endgroup::"
+
+echo "::group::Create GCC tests summary"
+     $ROOT_PATH/.github/scripts/toolchain/create-gcc-summary.sh $DIR >> $DIR/summary.md
+     $ROOT_PATH/.github/scripts/toolchain/group-gcc-test-failures.sh $DIR >> $DIR/most-frequent-groups.md
 echo "::endgroup::"
 
 echo 'Success!'
