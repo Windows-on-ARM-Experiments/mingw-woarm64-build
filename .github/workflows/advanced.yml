@@ -394,6 +394,7 @@ jobs:
         crt: [msvcrt]
 
     env:
+      TARGET: ${{ matrix.arch }}-${{ matrix.platform }}
       TESTS_ARTIFACT_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}-tests
       TESTS_PACKAGE_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}-tests.tar.gz
       TOOLCHAIN_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}
