@@ -2,7 +2,7 @@ Set-PSDebug -Trace 2 # echo on
 
 if ( -not $env:ARCH ) { $env:ARCH = "aarch64" }
 if ( -not $env:PLATFORM ) { $env:PLATFORM = "w64-mingw32" }
-if ( -not $env:CRT ) { $env:CRT = "msvcrt" }
+if ( -not $env:CRT ) { $env:CRT = "ucrt" }
 if ( -not $env:TARGET ) { $env:TARGET = "$env:ARCH-$env:PLATFORM" }
 if ( -not $env:TOOLCHAIN_NAME ) { $env:TOOLCHAIN_NAME = "$env:ARCH-$env:PLATFORM-$env:CRT" }
 
