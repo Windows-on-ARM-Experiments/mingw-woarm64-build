@@ -19,8 +19,6 @@ if [[ "$PLATFORM" =~ cygwin ]]; then
 fi
 
 echo "toolchain-cache-key=$TOOLCHAIN_CACHE_KEY" >> "$GITHUB_OUTPUT"
-echo "$TOOLCHAIN_NAME-toolchain-cache-key=$TOOLCHAIN_CACHE_KEY" >> "$GITHUB_ENV"
 echo "runtime-cache-key=$RUNTIME_CACHE_KEY" >> "$GITHUB_OUTPUT"
-echo "$TOOLCHAIN_NAME-runtime-cache-key=$RUNTIME_CACHE_KEY" >> "$GITHUB_ENV"
 echo "ccache-key=$TARGET-ccache-$(date -u --iso-8601=seconds)" >> "$GITHUB_OUTPUT"
 echo "ccache-restore-keys=$TARGET-ccache-" >> "$GITHUB_OUTPUT"
