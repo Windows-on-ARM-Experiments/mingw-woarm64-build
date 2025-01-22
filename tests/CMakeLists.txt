@@ -17,14 +17,14 @@ set(CMAKE_RANLIB "$ENV{TOOLCHAIN_PATH}/bin/$ENV{TARGET}-ranlib")
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 
 cmake_minimum_required(VERSION 3.14)
-project(aarch64_mingw_tests)
+project(target_tests)
 
 enable_testing()
 
 add_library(simple-dll SHARED dll.c)
 
 add_executable(
-  aarch64-mingw-tests.exe
+  $ENV{TARGET}-tests.exe
   bigdata-test.c
   chkstk-test.c
   dll-test.c
@@ -49,11 +49,11 @@ add_executable(
 )
 
 target_link_libraries(
-  aarch64-mingw-tests.exe
+  $ENV{TARGET}-tests.exe
   simple-dll
 )
 
 set_source_files_properties(large-alignment-test.c PROPERTIES COMPILE_OPTIONS "-fno-lto")
 set_target_properties(simple-dll PROPERTIES SUFFIX ".dll")
 set_target_properties(simple-dll PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
-set_target_properties(aarch64-mingw-tests.exe PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+set_target_properties($ENV{TARGET}-tests.exe PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
