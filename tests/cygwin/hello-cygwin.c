@@ -1,4 +1,4 @@
-int puts (char const * s) __declspec(dllimport);
+#include <stdio.h>
 
 int main() {
     puts("Hello Cygwin!");

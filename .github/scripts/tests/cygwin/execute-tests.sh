@@ -1,11 +1,11 @@
 #!/bin/bash
 
-source `dirname ${BASH_SOURCE[0]}`/../config.sh
+source `dirname ${BASH_SOURCE[0]}`/../../config.sh
 
-echo "::group::Execute Cygwin AArch64 tests"
+echo "::group::Execute Cygwin $TARGET tests"
     pushd $ARTIFACT_PATH
         set +e
-        message=$(powershell -Command ".\hello-cygwin.exe; echo \$LASTEXITCODE")
+        message=$(./hello-cygwin.exe; echo $?)
         set -e
         message=$(echo $message | tr '\n' ' ')
         if [[ "$message" == "Hello Cygwin! 11 " ]]; then
