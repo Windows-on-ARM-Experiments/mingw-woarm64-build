@@ -334,7 +334,7 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: ${{ env.CCACHE_DIR_PATH }}
-          key: ccache-${{ steps.cache-keys.outputs.ccache-key }}
+          key: ${{ steps.cache-keys.outputs.ccache-key }}
 
       - name: Pack toolchain
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && env.PACK_TOOLCHAIN == 'true' }}
