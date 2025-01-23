@@ -126,13 +126,18 @@ def process_logs(log_file: str) -> None:
             
             if output[i+1].startswith("<3>WSL (") and output[i+1].endswith(") ERROR: UtilAcceptVsock:251: accept4 failed 110"):
                 output[i+1] = "<3>WSL (...) ERROR: UtilAcceptVsock:251: accept4 failed 110"
-            log_str = "   ".join((line for line in output[i+1:error_line_index] if line != ""))
-            grouping[f"{command}: {log_str}"] += 1
-            # grouping[f"{command}: {output[i:error_line_index + 1]}"] += 1
+
+            if "EXIT STATUS:" in output[error_line_index - 1]:
+                # If error message contains "EXIT STATUS:", group only by this exit status and ignore the rest of the log
+                grouping[f"{command}: {output[error_line_index - 1]}"] += 1
+            else:
+                log_str = "   ".join((line for line in output[i+1:error_line_index] if line != ""))
+                grouping[f"{command}: {log_str}"] += 1
             continue
 
         grouping[f"{command}: {output[error_line_index]}"] += 1
 
+    print(f"Grouping per error message:")
     print_dict_sorted_by_values(grouping)
 
 def main() -> None:
