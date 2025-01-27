@@ -104,17 +104,7 @@ env:
   FFMPEG_REPO: FFmpeg/FFmpeg
   FFMPEG_BRANCH: release/6.1
 
-  ARCH: aarch64
-  PLATFORM: w64-mingw32
-  CRT: msvcrt
   TOOLCHAIN_PATH: ${{ github.workspace }}/cross
-  TOOLCHAIN_NAME: aarch64-w64-mingw32-msvcrt
-  TOOLCHAIN_ARTIFACT_NAME: aarch64-w64-mingw32-msvcrt-toolchain
-  TOOLCHAIN_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-toolchain.tar.gz
-  RUNTIME_ARTIFACT_NAME: aarch64-w64-mingw32-msvcrt-toolchain
-  RUNTIME_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-runtime.tar.gz
-  TESTS_ARTIFACT_NAME: aarch64-w64-mingw32-msvcrt-tests
-  TESTS_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-tests.tar.gz
 
   SOURCE_PATH: ${{ github.workspace }}/code
   BUILD_PATH: ${{ github.workspace }}/build
