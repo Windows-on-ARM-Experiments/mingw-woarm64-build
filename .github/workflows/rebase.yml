@@ -141,6 +141,7 @@ jobs:
       binutils_branch: ${{ inputs.rebase_branch || 'rebase-upstream' }}
       gcc_branch: ${{ inputs.rebase_branch || 'rebase-upstream' }}
       mingw_branch: ${{ inputs.rebase_branch || 'rebase-upstream' }}
+      cygwin_branch: ${{ inputs.rebase_branch || 'rebase-upstream' }}
 
   finish-binutils-rebase:
     needs: [build]
@@ -235,6 +236,7 @@ jobs:
           ${{ github.workspace }}/.github/scripts/rebase-finish.sh ${{ env.REBASE_BRANCH }} ${{ env.ORIGIN_BRANCH }}
 
   deploy:
+    if: github.ref == 'refs/heads/woarm64'
     needs: [build]
     runs-on: ubuntu-latest
 
