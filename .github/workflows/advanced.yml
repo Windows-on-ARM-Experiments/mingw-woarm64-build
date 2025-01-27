@@ -104,17 +104,12 @@ env:
   FFMPEG_REPO: FFmpeg/FFmpeg
   FFMPEG_BRANCH: release/6.1
 
-  ARCH: aarch64
-  PLATFORM: w64-mingw32
-  CRT: msvcrt
   TOOLCHAIN_PATH: ${{ github.workspace }}/cross
   TOOLCHAIN_NAME: aarch64-w64-mingw32-msvcrt
   TOOLCHAIN_ARTIFACT_NAME: aarch64-w64-mingw32-msvcrt-toolchain
   TOOLCHAIN_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-toolchain.tar.gz
   RUNTIME_ARTIFACT_NAME: aarch64-w64-mingw32-msvcrt-toolchain
   RUNTIME_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-runtime.tar.gz
-  TESTS_ARTIFACT_NAME: aarch64-w64-mingw32-msvcrt-tests
-  TESTS_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-tests.tar.gz
 
   SOURCE_PATH: ${{ github.workspace }}/code
   BUILD_PATH: ${{ github.workspace }}/build
@@ -151,7 +146,7 @@ jobs:
       ARCH: ${{ matrix.arch }}
       PLATFORM: ${{ matrix.platform }}
       CRT: ${{ matrix.crt }}
-      PACK_TOOLCHAIN: ${{ matrix.arch == 'aarch64' && matrix.platform == 'w64-mingw32' && matrix.crt == 'msvcrt' }}
+      PACK_TOOLCHAIN: ${{ matrix.arch == 'aarch64' && (matrix.platform == 'w64-mingw32' || matrix.platform == 'pc-cygwin') && matrix.crt == 'msvcrt' }}
       TOOLCHAIN_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}
       TOOLCHAIN_ARTIFACT_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}-toolchain
       TOOLCHAIN_PACKAGE_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}-toolchain.tar.gz
@@ -224,7 +219,7 @@ jobs:
           path: ${{ env.SOURCE_PATH }}/cygwin
 
       - name: Checkout Cygwin packages
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform == 'pc-cygwin' }}
+        if: ${{ false && steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform == 'pc-cygwin' }}
         uses: actions/checkout@v4
         with:
           repository: ${{ env.CYGWIN_PACKAGES_REPO }}
@@ -376,14 +371,29 @@ jobs:
       runtime-package-name: ${{ env.PACK_TOOLCHAIN == 'true' && env.RUNTIME_PACKAGE_NAME || '' }}
       runtime-artifact-name: ${{ env.PACK_TOOLCHAIN == 'true' && env.RUNTIME_ARTIFACT_NAME || '' }}
       toolchain-cache-key: ${{ env.PACK_TOOLCHAIN == 'true' && steps.cache-keys.outputs.toolchain-cache-key || '' }}
+      aarch64-w64-mingw32-msvcrt-toolchain-cache-key: ${{ env.aarch64-w64-mingw32-msvcrt-toolchain-cache-key }}
+      aarch64-pc-cygwin-msvcrt-toolchain-cache-key: ${{ env.aarch64-pc-cygwin-msvcrt-toolchain-cache-key }}
       runtime-cache-key: ${{ env.PACK_TOOLCHAIN == 'true' && steps.cache-keys.outputs.runtime-cache-key || '' }}
+      aarch64-w64-mingw32-msvcrt-runtime-cache-key: ${{ env.aarch64-w64-mingw32-msvcrt-runtime-cache-key }}
+      aarch64-pc-cygwin-msvcrt-runtime-cache-key: ${{ env.aarch64-pc-cygwin-msvcrt-runtime-cache-key }}
 
   build-aarch64-tests:
     needs: [build-toolchain]
     runs-on: ubuntu-latest
 
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [aarch64]
+        platform: [w64-mingw32, pc-cygwin]
+        crt: [msvcrt]
+
     env:
-      TESTS_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-tests.tar.gz
+      PLATFORM: ${{ matrix.platform }}
+      TESTS_ARTIFACT_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}-tests
+      TESTS_PACKAGE_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}-tests.tar.gz
+      TOOLCHAIN_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}
+      TOOLCHAIN_PACKAGE_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}-toolchain.tar.gz
 
     steps:
       - name: Checkout repository
@@ -391,11 +401,15 @@ jobs:
         with:
           path: ${{ github.workspace }}
 
+      - name: Extract cache keys
+        run: |
+          .github/scripts/extract-cache-keys.sh '${{ toJSON(needs.build-toolchain.outputs) }}'
+
       - name: Download ${{ env.TOOLCHAIN_NAME }} toolchain
         uses: actions/cache/restore@v4
         with:
           path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
-          key: ${{ needs.build-toolchain.outputs.toolchain-cache-key }}
+          key: ${{ env.toolchain-cache-key }}
           enableCrossOsArchive: true
           fail-on-cache-miss: true
 
@@ -404,8 +418,14 @@ jobs:
           .github/scripts/toolchain/unpack.sh
   
       - name: Build aarch64-tests
+        if: ${{ matrix.platform == 'w64-mingw32' }}
         run: |
           .github/scripts/tests/build.sh
+
+      - name: Build Cygwin toolchain tests
+        if: ${{ matrix.platform == 'pc-cygwin' }}
+        run: |
+          .github/scripts/tests/cygwin/build-tests.sh
 
       - name: Pack tests
         run: |
@@ -425,8 +445,19 @@ jobs:
     ]
     runs-on: [Windows, GCC, ARM64]
 
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [aarch64]
+        platform: [w64-mingw32, pc-cygwin]
+        crt: [msvcrt]
+
     env:
-      TESTS_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-tests.tar.gz
+      RUNTIME_PACKAGE_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}-runtime.tar.gz
+      TESTS_ARTIFACT_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}-tests
+      TESTS_PACKAGE_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}-tests.tar.gz
+      TOOLCHAIN_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}
+      TOOLCHAIN_PACKAGE_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}-toolchain.tar.gz
 
     steps:
       - name: Checkout repository
@@ -438,12 +469,17 @@ jobs:
         run: |
           .github/scripts/install-zstd.ps1
 
+      - name: Extract cache keys
+        shell: bash
+        run: |
+          .github/scripts/extract-cache-keys.sh '${{ toJSON(needs.build-toolchain.outputs) }}'
+
       - name: Download ${{ env.TOOLCHAIN_NAME }} runtime
         uses: actions/cache/restore@v4
         with:
           path: ${{ env.RELATIVE_ARTIFACT_PATH }}/${{ env.RUNTIME_PACKAGE_NAME }}
-          key: ${{ needs.build-toolchain.outputs.runtime-cache-key }}
-          restore-keys: ${{ needs.build-toolchain.outputs.runtime-cache-key }}
+          key: ${{ env.runtime-cache-key }}
+          restore-keys: ${{ env.runtime-cache-key }}
           enableCrossOsArchive: true
           fail-on-cache-miss: true
 
@@ -462,8 +498,15 @@ jobs:
           .github/scripts/tests/unpack.ps1
 
       - name: Execute ${{ env.TOOLCHAIN_NAME }} tests
-        run:
+        if: ${{ matrix.platform == 'w64-mingw32' }}
+        run: |
           .github/scripts/tests/execute-tests.ps1
+
+      - name: Execute ${{ env.TOOLCHAIN_NAME }} tests
+        if: ${{ matrix.platform == 'pc-cygwin' }}
+        shell: bash
+        run: |
+          .github/scripts/tests/cygwin/execute-tests.sh
 
   build-openblas:
     needs: [build-toolchain]
@@ -482,11 +525,15 @@ jobs:
           ref: ${{ env.OPENBLAS_BRANCH }}
           path: ${{ env.SOURCE_PATH }}/openblas
 
+      - name: Extract cache keys
+        run: |
+          .github/scripts/extract-cache-keys.sh '${{ toJSON(needs.build-toolchain.outputs) }}'
+
       - name: Download ${{ env.TOOLCHAIN_NAME }} toolchain
         uses: actions/cache/restore@v4
         with:
           path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
-          key: ${{ needs.build-toolchain.outputs.toolchain-cache-key }}
+          key: ${{ env.toolchain-cache-key }}
           enableCrossOsArchive: true
           fail-on-cache-miss: true
 
@@ -529,12 +576,17 @@ jobs:
         run: |
           .github/scripts/install-zstd.ps1
 
+      - name: Extract cache keys
+        shell: bash
+        run: |
+          .github/scripts/extract-cache-keys.sh '${{ toJSON(needs.build-toolchain.outputs) }}'
+
       - name: Download ${{ env.TOOLCHAIN_NAME }} runtime
         uses: actions/cache/restore@v4
         with:
           path: ${{ env.RELATIVE_ARTIFACT_PATH }}/${{ env.RUNTIME_PACKAGE_NAME }}
-          key: ${{ needs.build-toolchain.outputs.runtime-cache-key }}
-          restore-keys: ${{ needs.build-toolchain.outputs.runtime-cache-key }}
+          key: ${{ env.runtime-cache-key }}
+          restore-keys: ${{ env.runtime-cache-key }}
           enableCrossOsArchive: true
           fail-on-cache-miss: true
 
@@ -577,11 +629,15 @@ jobs:
           ref: ${{ env.ZLIB_BRANCH }}
           path: ${{ env.SOURCE_PATH }}/zlib
 
+      - name: Extract cache keys
+        run: |
+          .github/scripts/extract-cache-keys.sh '${{ toJSON(needs.build-toolchain.outputs) }}'
+
       - name: Download ${{ env.TOOLCHAIN_NAME }} toolchain
         uses: actions/cache/restore@v4
         with:
           path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
-          key: ${{ needs.build-toolchain.outputs.toolchain-cache-key }}
+          key: ${{ env.toolchain-cache-key }}
           enableCrossOsArchive: true
           fail-on-cache-miss: true
 
@@ -624,11 +680,15 @@ jobs:
           ref: ${{ env.LIBXML2_BRANCH }}
           path: ${{ env.SOURCE_PATH }}/libxml2
 
+      - name: Extract cache keys
+        run: |
+          .github/scripts/extract-cache-keys.sh '${{ toJSON(needs.build-toolchain.outputs) }}'
+
       - name: Download ${{ env.TOOLCHAIN_NAME }} toolchain
         uses: actions/cache/restore@v4
         with:
           path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
-          key: ${{ needs.build-toolchain.outputs.toolchain-cache-key }}
+          key: ${{ env.toolchain-cache-key }}
           enableCrossOsArchive: true
           fail-on-cache-miss: true
 
@@ -686,11 +746,15 @@ jobs:
         run: |
           .github/scripts/openssl/install-dependencies.sh
 
+      - name: Extract cache keys
+        run: |
+          .github/scripts/extract-cache-keys.sh '${{ toJSON(needs.build-toolchain.outputs) }}'
+
       - name: Download ${{ env.TOOLCHAIN_NAME }} toolchain
         uses: actions/cache/restore@v4
         with:
           path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
-          key: ${{ needs.build-toolchain.outputs.toolchain-cache-key }}
+          key: ${{ env.toolchain-cache-key }}
           enableCrossOsArchive: true
           fail-on-cache-miss: true
 
@@ -762,12 +826,17 @@ jobs:
         run: |
           .github/scripts/install-zstd.ps1
 
+      - name: Extract cache keys
+        shell: bash
+        run: |
+          .github/scripts/extract-cache-keys.sh '${{ toJSON(needs.build-toolchain.outputs) }}'
+
       - name: Download ${{ env.TOOLCHAIN_NAME }} runtime
         uses: actions/cache/restore@v4
         with:
           path: ${{ env.RELATIVE_ARTIFACT_PATH }}/${{ env.RUNTIME_PACKAGE_NAME }}
-          key: ${{ needs.build-toolchain.outputs.runtime-cache-key }}
-          restore-keys: ${{ needs.build-toolchain.outputs.runtime-cache-key }}
+          key: ${{ env.runtime-cache-key }}
+          restore-keys: ${{ env.runtime-cache-key }}
           enableCrossOsArchive: true
           fail-on-cache-miss: true
 
@@ -823,11 +892,15 @@ jobs:
         run: |
           .github/scripts/libjpeg-turbo/patch.sh
 
+      - name: Extract cache keys
+        run: |
+          .github/scripts/extract-cache-keys.sh '${{ toJSON(needs.build-toolchain.outputs) }}'
+
       - name: Download ${{ env.TOOLCHAIN_NAME }} toolchain
         uses: actions/cache/restore@v4
         with:
           path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
-          key: ${{ needs.build-toolchain.outputs.toolchain-cache-key }}
+          key: ${{ env.toolchain-cache-key }}
           enableCrossOsArchive: true
           fail-on-cache-miss: true
 
@@ -881,12 +954,17 @@ jobs:
         run: |
           .github/scripts/install-zstd.ps1
 
+      - name: Extract cache keys
+        shell: bash
+        run: |
+          .github/scripts/extract-cache-keys.sh '${{ toJSON(needs.build-toolchain.outputs) }}'
+
       - name: Download ${{ env.TOOLCHAIN_NAME }} runtime
         uses: actions/cache/restore@v4
         with:
           path: ${{ env.RELATIVE_ARTIFACT_PATH }}/${{ env.RUNTIME_PACKAGE_NAME }}
-          key: ${{ needs.build-toolchain.outputs.runtime-cache-key }}
-          restore-keys: ${{ needs.build-toolchain.outputs.runtime-cache-key }}
+          key: ${{ env.runtime-cache-key }}
+          restore-keys: ${{ env.runtime-cache-key }}
           enableCrossOsArchive: true
           fail-on-cache-miss: true
 
@@ -929,11 +1007,15 @@ jobs:
           path: ${{ env.SOURCE_PATH }}/ffmpeg
           fetch-depth: 0
 
+      - name: Extract cache keys
+        run: |
+          .github/scripts/extract-cache-keys.sh '${{ toJSON(needs.build-toolchain.outputs) }}'
+
       - name: Download ${{ env.TOOLCHAIN_NAME }} toolchain
         uses: actions/cache/restore@v4
         with:
           path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
-          key: ${{ needs.build-toolchain.outputs.toolchain-cache-key }}
+          key: ${{ env.toolchain-cache-key }}
           enableCrossOsArchive: true
           fail-on-cache-miss: true
 
@@ -993,12 +1075,17 @@ jobs:
         run: |
           .github/scripts/ffmpeg/patch.sh
 
+      - name: Extract cache keys
+        shell: bash
+        run: |
+          .github/scripts/extract-cache-keys.sh '${{ toJSON(needs.build-toolchain.outputs) }}'
+
       - name: Download ${{ env.TOOLCHAIN_NAME }} runtime
         uses: actions/cache/restore@v4
         with:
           path: ${{ env.RELATIVE_ARTIFACT_PATH }}/${{ env.RUNTIME_PACKAGE_NAME }}
-          key: ${{ needs.build-toolchain.outputs.runtime-cache-key }}
-          restore-keys: ${{ needs.build-toolchain.outputs.runtime-cache-key }}
+          key: ${{ env.runtime-cache-key }}
+          restore-keys: ${{ env.runtime-cache-key }}
           enableCrossOsArchive: true
           fail-on-cache-miss: true
 
