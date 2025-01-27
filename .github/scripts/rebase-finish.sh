@@ -4,13 +4,27 @@ source `dirname ${BASH_SOURCE[0]}`/config.sh
 
 REBASE_BRANCH=$1
 ORIGIN_BRANCH=$2
+BACKUP_BRANCH=$3
+
+function cleanup {
+    git switch $ORIGIN_BRANCH
+    git branch -D $REBASE_BRANCH
+    git branch -D $BACKUP_BRANCH
+}
 
 git fetch --all --prune
 
+# Check if $ORIGIN_BRANCH didn't change.
+if [ "$(git rev-parse origin/$BACKUP_BRANCH)" != "$(git rev-parse origin/$ORIGIN_BRANCH)" ]; then
+    echo "$ORIGIN_BRANCH has changed!"
+    cleanup
+    exit 1
+fi
+
 # Check if $REBASE_BRANCH exists.
 if ! git show-ref --verify --quiet refs/remotes/origin/$REBASE_BRANCH; then
-  echo "$REBASE_BRANCH does not exist!"
-  exit 1
+    echo "$REBASE_BRANCH does not exist!"
+    exit 1
 fi
 
 git switch $ORIGIN_BRANCH
@@ -27,6 +41,7 @@ git push --set-upstream origin $ORIGIN_BRANCH-$TAG
 
 # Overwrite origin/$REBASE_BRANCH.
 git push --force-with-lease --set-upstream origin $ORIGIN_BRANCH
-git push origin -d $REBASE_BRANCH
+
+cleanup
 
 echo 'Success!'

@@ -17,6 +17,10 @@ on:
         description: 'Rebase branch'
         required: true
         default: 'rebase-upstream'
+      backup_branch:
+        description: 'Backup branch'
+        required: true
+        default: 'rebase-upstream-backup'
 
 permissions:
   repository-projects: write
@@ -35,6 +39,7 @@ env:
   ORIGIN_BRANCH: ${{ inputs.origin_branch || 'woarm64' }}
   UPSTREAM_BRANCH: ${{ inputs.upstream_branch || 'master' }}
   REBASE_BRANCH: ${{ inputs.rebase_branch || 'rebase-upstream' }}
+  BACKUP_BRANCH: ${{ inputs.backup_branch || 'rebase-upstream-backup' }}
 
 jobs:
   start-binutils-rebase:
@@ -58,7 +63,11 @@ jobs:
       - name: Start binutils rebase
         working-directory: ${{ env.SOURCE_PATH }}/binutils
         run: |
-          ${{ github.workspace }}/.github/scripts/rebase-start.sh ${{ env.BINUTILS_UPSTREAM_URL }} ${{ env.UPSTREAM_BRANCH }} ${{ env.REBASE_BRANCH }}
+          ${{ github.workspace }}/.github/scripts/rebase-start.sh \
+            ${{ env.BINUTILS_UPSTREAM_URL }} \
+            ${{ env.UPSTREAM_BRANCH }} \
+            ${{ env.REBASE_BRANCH }} \
+            ${{ env.BACKUP_BRANCH }}
 
   start-gcc-rebase:
     runs-on: ubuntu-latest
@@ -81,7 +90,11 @@ jobs:
       - name: Start GCC rebase
         working-directory: ${{ env.SOURCE_PATH }}/gcc
         run: |
-          ${{ github.workspace }}/.github/scripts/rebase-start.sh ${{ env.GCC_UPSTREAM_URL }} ${{ env.UPSTREAM_BRANCH }} ${{ env.REBASE_BRANCH }}
+          ${{ github.workspace }}/.github/scripts/rebase-start.sh \
+            ${{ env.GCC_UPSTREAM_URL }} \
+            ${{ env.UPSTREAM_BRANCH }} \
+            ${{ env.REBASE_BRANCH }} \
+            ${{ env.BACKUP_BRANCH }}
 
   start-mingw-rebase:
     runs-on: ubuntu-latest
@@ -104,7 +117,11 @@ jobs:
       - name: Start MinGW rebase
         working-directory: ${{ env.SOURCE_PATH }}/mingw
         run: |
-          ${{ github.workspace }}/.github/scripts/rebase-start.sh ${{ env.MINGW_UPSTREAM_URL }} ${{ env.UPSTREAM_BRANCH }} ${{ env.REBASE_BRANCH }}
+          ${{ github.workspace }}/.github/scripts/rebase-start.sh \
+            ${{ env.MINGW_UPSTREAM_URL }} \
+            ${{ env.UPSTREAM_BRANCH }} \
+            ${{ env.REBASE_BRANCH }} \
+            ${{ env.BACKUP_BRANCH }}
 
   start-cygwin-rebase:
     runs-on: ubuntu-latest
@@ -127,7 +144,11 @@ jobs:
       - name: Start Cygwin rebase
         working-directory: ${{ env.SOURCE_PATH }}/cygwin
         run: |
-          ${{ github.workspace }}/.github/scripts/rebase-start.sh ${{ env.CYGWIN_UPSTREAM_URL }} ${{ env.UPSTREAM_BRANCH }} ${{ env.REBASE_BRANCH }}
+          ${{ github.workspace }}/.github/scripts/rebase-start.sh \
+            ${{ env.CYGWIN_UPSTREAM_URL }} \
+            ${{ env.UPSTREAM_BRANCH }} \
+            ${{ env.REBASE_BRANCH }} \
+            ${{ env.BACKUP_BRANCH }}
 
   build:
     needs: [
@@ -164,7 +185,10 @@ jobs:
       - name: Finish binutils rebase
         working-directory: ${{ env.SOURCE_PATH }}/binutils
         run: |
-          ${{ github.workspace }}/.github/scripts/rebase-finish.sh ${{ env.REBASE_BRANCH }} ${{ env.ORIGIN_BRANCH }}
+          ${{ github.workspace }}/.github/scripts/rebase-finish.sh \
+            ${{ env.REBASE_BRANCH }} \
+            ${{ env.ORIGIN_BRANCH }} \
+            ${{ env.BACKUP_BRANCH }}
 
   finish-gcc-rebase:
     needs: [build]
@@ -187,7 +211,10 @@ jobs:
       - name: Finish GCC rebase
         working-directory: ${{ env.SOURCE_PATH }}/gcc
         run: |
-          ${{ github.workspace }}/.github/scripts/rebase-finish.sh ${{ env.REBASE_BRANCH }} ${{ env.ORIGIN_BRANCH }}
+          ${{ github.workspace }}/.github/scripts/rebase-finish.sh \
+            ${{ env.REBASE_BRANCH }} \
+            ${{ env.ORIGIN_BRANCH }} \
+            ${{ env.BACKUP_BRANCH }}
 
   finish-mingw-rebase:
     needs: [build]
@@ -210,7 +237,10 @@ jobs:
       - name: Finish MinGW rebase
         working-directory: ${{ env.SOURCE_PATH }}/mingw
         run: |
-          ${{ github.workspace }}/.github/scripts/rebase-finish.sh ${{ env.REBASE_BRANCH }} ${{ env.ORIGIN_BRANCH }}
+          ${{ github.workspace }}/.github/scripts/rebase-finish.sh \
+            ${{ env.REBASE_BRANCH }} \
+            ${{ env.ORIGIN_BRANCH }} \
+            ${{ env.BACKUP_BRANCH }}
 
   finish-cygwin-rebase:
     needs: [build]
@@ -233,7 +263,10 @@ jobs:
       - name: Finish Cygwin rebase
         working-directory: ${{ env.SOURCE_PATH }}/cygwin
         run: |
-          ${{ github.workspace }}/.github/scripts/rebase-finish.sh ${{ env.REBASE_BRANCH }} ${{ env.ORIGIN_BRANCH }}
+          ${{ github.workspace }}/.github/scripts/rebase-finish.sh \
+            ${{ env.REBASE_BRANCH }} \
+            ${{ env.ORIGIN_BRANCH }} \
+            ${{ env.BACKUP_BRANCH }}
 
   deploy:
     if: github.ref == 'refs/heads/woarm64'

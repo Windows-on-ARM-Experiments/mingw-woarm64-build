@@ -5,6 +5,7 @@ source `dirname ${BASH_SOURCE[0]}`/config.sh
 UPSTREAM_URL=$1
 UPSTREAM_BRANCH=$2
 REBASE_BRANCH=$3
+BACKUP_BRANCH=$4
 
 git config pull.rebase true
 git config user.name github-actions
@@ -17,11 +18,18 @@ fi
 
 git fetch --all --prune
 
-# Checkout or create $REBASE_BRANCH.
 if git show-ref --verify --quiet refs/remotes/origin/$REBASE_BRANCH; then
+    # Checkout already existing $REBASE_BRANCH.
     git switch $REBASE_BRANCH
     git pull origin $REBASE_BRANCH
 else
+    # Create backup branch.
+    if ! git show-ref --verify --quiet refs/remotes/origin/$BACKUP_BRANCH; then
+        git switch -c $BACKUP_BRANCH
+        git push --set-upstream origin $BACKUP_BRANCH
+    fi
+
+    # Create $REBASE_BRANCH.
     git switch -c $REBASE_BRANCH
 fi
 
