@@ -22,3 +22,13 @@ __declspec(dllexport) int __stdcall add_std_export(int a, int b)
 {
   return a + b;
 }
+
+__declspec(dllexport) _Complex double __cdecl complex_add_c_export(_Complex double a, _Complex double b)
+{
+  return a + b;
+}
+
+__declspec(dllexport) _Complex double __stdcall complex_add_std_export(_Complex double a, _Complex double b)
+{
+  return a + b;
+}
