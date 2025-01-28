@@ -1,6 +1,6 @@
 #include <stdio.h>
 
 int main() {
-    puts("Hello Cygwin!");
+    printf("Hello %s%c\n", "Cygwin", '!');
     return 11;
 }
