@@ -62,6 +62,7 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$MINGW_BUILD_PATH/Makefile" ]]; then
             --host=$TARGET \
             --enable-static \
             --enable-shared \
+            --with-libraries=all \
             $HOST_OPTIONS \
             $TARGET_OPTIONS \
             CFLAGS="$CFLAGS"
