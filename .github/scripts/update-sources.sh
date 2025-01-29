@@ -1,18 +1,7 @@
 #!/bin/bash
 
 source `dirname ${BASH_SOURCE[0]}`/config.sh
-
-function is_remote_branch() {
-    return $(git show-ref --verify --quiet refs/remotes/origin/$1)
-}
-
-function is_tag() {
-    return $(git show-ref --verify --quiet refs/tags/$1)
-}
-
-function is_current_branch() {
-    [[ $(git rev-parse --abbrev-ref HEAD) == "$1" ]]
-}
+source `dirname ${BASH_SOURCE[0]}`/git-utils.sh
 
 function update_repository() {
     DIRECTORY=$1
