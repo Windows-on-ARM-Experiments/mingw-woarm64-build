@@ -98,6 +98,7 @@ def process_logs(log_file: str) -> None:
     input()
 
     grouping = collections.defaultdict(int)
+    grouping_linker_undef_refs = collections.defaultdict(int)
     for output in failed_outputs:
         error_line_index = find_failed_line_index(output) - 1
         assert error_line_index >= 0
@@ -118,6 +119,10 @@ def process_logs(log_file: str) -> None:
                         grouping[f"{command}: {line}"] += 1
                     break
             continue
+
+        if output[0].startswith("gcc.link") and "undefined reference to" in output[5]:
+            str_index = output[5].index("undefined reference to")
+            grouping_linker_undef_refs[f"{command}: {output[5][str_index:]}"] += 1
         
         if output[error_line_index] == ("====== END OUTPUT ======"):
             for i, line in enumerate(output):
@@ -139,6 +144,10 @@ def process_logs(log_file: str) -> None:
 
     print(f"Grouping per error message:")
     print_dict_sorted_by_values(grouping)
+
+    input()
+    print(f"Grouping per linker error message:")
+    print_dict_sorted_by_values(grouping_linker_undef_refs)
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Aggregate test results from log files")
