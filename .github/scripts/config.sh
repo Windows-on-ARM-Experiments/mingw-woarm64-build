@@ -68,8 +68,8 @@ DEJAGNU_FILE=${DEJAGNU_FILE:-$ROOT_PATH/.github/scripts/toolchain/site.exp}
 OPENBLAS_REPO=${OPENBLAS_REPO:-OpenMathLib/OpenBLAS}
 OPENBLAS_BRANCH=${OPENBLAS_BRANCH:-develop}
 
-ZLIB_REPO=${ZLIB_REPO:-Windows-on-ARM-Experiments/zlib}
-ZLIB_BRANCH=${ZLIB_BRANCH:-validated}
+ZLIB_REPO=${ZLIB_REPO:-madler/zlib}
+ZLIB_BRANCH=${ZLIB_BRANCH:-master}
 ZLIB_PATH=${ZLIB_PATH:-~/zlib}
 ZLIB_TESTS_PATH=${ZLIB_TESTS_PATH:-~/zlib-tests}
 
