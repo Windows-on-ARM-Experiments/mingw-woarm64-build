@@ -89,8 +89,8 @@ env:
   OPENBLAS_REPO: OpenMathLib/OpenBLAS
   OPENBLAS_BRANCH: ${{ inputs.openblas_branch || 'develop' }}
 
-  ZLIB_REPO: madler/zlib
-  ZLIB_BRANCH: 'develop'
+  ZLIB_REPO: Windows-on-ARM-Experiments/zlib
+  ZLIB_BRANCH: 'validated'
 
   LIBXML2_REPO: GNOME/libxml2
   LIBXML2_BRANCH: 'master'
