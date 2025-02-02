@@ -1,0 +1,82 @@
+name: Build and test git
+
+on:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      git_branch:
+        description: 'Git branch to build'
+        required: false
+        default: 'v2.47.1'
+      git_revision:
+        description: 'Git for Windows revision to build'
+        required: false
+        default: 'windows.2'
+
+env:
+  GIT_REPO: git/git
+  GIT_BRANCH: ${{ github.event.inputs.git_branch || 'v2.47.1' }}
+  GIT_REVISION: ${{ github.event.inputs.git_revision || 'windows.2' }}
+
+jobs:
+  build-and-test-git:
+    name: Build and test git
+    runs-on: ${{ matrix.platform == 'w64-mingw32' && 'windows-latest' || 'ubuntu-latest' }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [aarch64, x86_64]
+        platform: [w64-mingw32, pc-linux-gnu, pc-cygwin]
+        exclude:
+          - arch: aarch64
+          - platform: pc-cygwin
+
+    defaults:
+      run:
+        shell: 'bash'
+
+    env:
+      ARCH: ${{ matrix.arch }}
+      PLATFORM: ${{ matrix.platform }}
+      TARGET: ${{ matrix.arch }}-${{ matrix.platform }}
+      SOURCE_PATH: ${{ matrix.platform == 'w64-mingw32' && '/usr/src/' || format('{0}/code', github.workspace) }} 
+
+    steps:
+      - name: Setup Git for Windows SDK
+        if: ${{ env.PLATFORM == 'w64-mingw32' }}
+        uses: git-for-windows/setup-git-for-windows-sdk@v1
+        with:
+          flavor: full
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Checkout git repository (pc-linux-gnu)
+        if: ${{ env.PLATFORM == 'pc-linux-gnu' }}
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.GIT_REPO }}
+          ref: ${{ env.GIT_BRANCH }}
+          path: ${{ env.SOURCE_PATH }}/git
+
+      - name: Checkout git repository (w64-mingw32)
+        if: ${{ env.PLATFORM == 'w64-mingw32' }}
+        run: |
+          /git-bash.exe -c sdk init git
+          cd ${{ env.SOURCE_PATH }}/git
+          git fetch --all
+          git checkout ${{ env.GIT_BRANCH }}.${{ env.GIT_REVISION }}
+
+      - name: Install dependencies
+        if: ${{ env.PLATFORM == 'pc-linux-gnu' }}
+        run: |
+          .github/scripts/git/install-dependencies.sh
+
+      - name: Build ${{ env.TARGET }} git
+        run: |
+          .github/scripts/git/build.sh
+
+      - name: Test ${{ env.TARGET }} git
+        run: |
+          .github/scripts/git/execute-tests.sh
