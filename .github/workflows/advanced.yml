@@ -82,7 +82,7 @@ env:
   OPENBLAS_BRANCH: ${{ inputs.openblas_branch || 'develop' }}
 
   ZLIB_REPO: madler/zlib
-  ZLIB_BRANCH: 'develop'
+  ZLIB_BRANCH: 'master'
 
   LIBXML2_REPO: GNOME/libxml2
   LIBXML2_BRANCH: 'master'
