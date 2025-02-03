@@ -6,17 +6,21 @@ on:
   workflow_dispatch:
     inputs:
       origin_branch:
-        description: 'Origin branch'
+        description: 'Name of origin branch that should be rebased onto upstream branch'
         required: true
         default: 'woarm64'
       upstream_branch:
-        description: 'Upstream branch'
+        description: 'Name of upstream branch the origin branch should be rebased onto'
         required: true
         default: 'master'
       rebase_branch:
-        description: 'Rebase branch'
+        description: 'Name of temporary branch used to verify the rebase'
         required: true
         default: 'rebase-upstream'
+      backup_branch:
+        description: 'Name for backup of origin branch from time when the rebase started'
+        required: true
+        default: 'rebase-upstream-backup'
 
 permissions:
   repository-projects: write
@@ -35,6 +39,7 @@ env:
   ORIGIN_BRANCH: ${{ inputs.origin_branch || 'woarm64' }}
   UPSTREAM_BRANCH: ${{ inputs.upstream_branch || 'master' }}
   REBASE_BRANCH: ${{ inputs.rebase_branch || 'rebase-upstream' }}
+  BACKUP_BRANCH: ${{ inputs.backup_branch || 'rebase-upstream-backup' }}
 
 jobs:
   start-binutils-rebase:
@@ -58,7 +63,11 @@ jobs:
       - name: Start binutils rebase
         working-directory: ${{ env.SOURCE_PATH }}/binutils
         run: |
-          ${{ github.workspace }}/.github/scripts/rebase-start.sh ${{ env.BINUTILS_UPSTREAM_URL }} ${{ env.UPSTREAM_BRANCH }} ${{ env.REBASE_BRANCH }}
+          ${{ github.workspace }}/.github/scripts/rebase-start.sh \
+            ${{ env.BINUTILS_UPSTREAM_URL }} \
+            ${{ env.UPSTREAM_BRANCH }} \
+            ${{ env.REBASE_BRANCH }} \
+            ${{ env.BACKUP_BRANCH }}
 
   start-gcc-rebase:
     runs-on: ubuntu-latest
@@ -81,7 +90,11 @@ jobs:
       - name: Start GCC rebase
         working-directory: ${{ env.SOURCE_PATH }}/gcc
         run: |
-          ${{ github.workspace }}/.github/scripts/rebase-start.sh ${{ env.GCC_UPSTREAM_URL }} ${{ env.UPSTREAM_BRANCH }} ${{ env.REBASE_BRANCH }}
+          ${{ github.workspace }}/.github/scripts/rebase-start.sh \
+            ${{ env.GCC_UPSTREAM_URL }} \
+            ${{ env.UPSTREAM_BRANCH }} \
+            ${{ env.REBASE_BRANCH }} \
+            ${{ env.BACKUP_BRANCH }}
 
   start-mingw-rebase:
     runs-on: ubuntu-latest
@@ -104,7 +117,11 @@ jobs:
       - name: Start MinGW rebase
         working-directory: ${{ env.SOURCE_PATH }}/mingw
         run: |
-          ${{ github.workspace }}/.github/scripts/rebase-start.sh ${{ env.MINGW_UPSTREAM_URL }} ${{ env.UPSTREAM_BRANCH }} ${{ env.REBASE_BRANCH }}
+          ${{ github.workspace }}/.github/scripts/rebase-start.sh \
+            ${{ env.MINGW_UPSTREAM_URL }} \
+            ${{ env.UPSTREAM_BRANCH }} \
+            ${{ env.REBASE_BRANCH }} \
+            ${{ env.BACKUP_BRANCH }}
 
   start-cygwin-rebase:
     runs-on: ubuntu-latest
@@ -127,7 +144,11 @@ jobs:
       - name: Start Cygwin rebase
         working-directory: ${{ env.SOURCE_PATH }}/cygwin
         run: |
-          ${{ github.workspace }}/.github/scripts/rebase-start.sh ${{ env.CYGWIN_UPSTREAM_URL }} ${{ env.UPSTREAM_BRANCH }} ${{ env.REBASE_BRANCH }}
+          ${{ github.workspace }}/.github/scripts/rebase-start.sh \
+            ${{ env.CYGWIN_UPSTREAM_URL }} \
+            ${{ env.UPSTREAM_BRANCH }} \
+            ${{ env.REBASE_BRANCH }} \
+            ${{ env.BACKUP_BRANCH }}
 
   build:
     needs: [
@@ -164,7 +185,10 @@ jobs:
       - name: Finish binutils rebase
         working-directory: ${{ env.SOURCE_PATH }}/binutils
         run: |
-          ${{ github.workspace }}/.github/scripts/rebase-finish.sh ${{ env.REBASE_BRANCH }} ${{ env.ORIGIN_BRANCH }}
+          ${{ github.workspace }}/.github/scripts/rebase-finish.sh \
+            ${{ env.REBASE_BRANCH }} \
+            ${{ env.ORIGIN_BRANCH }} \
+            ${{ env.BACKUP_BRANCH }}
 
   finish-gcc-rebase:
     needs: [build]
@@ -187,7 +211,10 @@ jobs:
       - name: Finish GCC rebase
         working-directory: ${{ env.SOURCE_PATH }}/gcc
         run: |
-          ${{ github.workspace }}/.github/scripts/rebase-finish.sh ${{ env.REBASE_BRANCH }} ${{ env.ORIGIN_BRANCH }}
+          ${{ github.workspace }}/.github/scripts/rebase-finish.sh \
+            ${{ env.REBASE_BRANCH }} \
+            ${{ env.ORIGIN_BRANCH }} \
+            ${{ env.BACKUP_BRANCH }}
 
   finish-mingw-rebase:
     needs: [build]
@@ -210,7 +237,10 @@ jobs:
       - name: Finish MinGW rebase
         working-directory: ${{ env.SOURCE_PATH }}/mingw
         run: |
-          ${{ github.workspace }}/.github/scripts/rebase-finish.sh ${{ env.REBASE_BRANCH }} ${{ env.ORIGIN_BRANCH }}
+          ${{ github.workspace }}/.github/scripts/rebase-finish.sh \
+            ${{ env.REBASE_BRANCH }} \
+            ${{ env.ORIGIN_BRANCH }} \
+            ${{ env.BACKUP_BRANCH }}
 
   finish-cygwin-rebase:
     needs: [build]
@@ -233,7 +263,117 @@ jobs:
       - name: Finish Cygwin rebase
         working-directory: ${{ env.SOURCE_PATH }}/cygwin
         run: |
-          ${{ github.workspace }}/.github/scripts/rebase-finish.sh ${{ env.REBASE_BRANCH }} ${{ env.ORIGIN_BRANCH }}
+          ${{ github.workspace }}/.github/scripts/rebase-finish.sh \
+            ${{ env.REBASE_BRANCH }} \
+            ${{ env.ORIGIN_BRANCH }} \
+            ${{ env.BACKUP_BRANCH }}
+
+  clean-binutils-rebase:
+    if: always()
+    needs: [finish-binutils-rebase]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: ${{ github.workspace }}
+
+      - name: Checkout binutils
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GNU_PUSH_PAT }}
+          repository: ${{ env.BINUTILS_REPO }}
+          ref: ${{ env.ORIGIN_BRANCH }}
+          fetch-depth: 0
+          path: ${{ env.SOURCE_PATH }}/binutils
+
+      - name: Clean binutils rebase
+        working-directory: ${{ env.SOURCE_PATH }}/binutils
+        run: |
+          ${{ github.workspace }}/.github/scripts/rebase-clean.sh \
+            ${{ env.REBASE_BRANCH }} \
+            ${{ env.BACKUP_BRANCH }}
+
+  clean-gcc-rebase:
+    if: always()
+    needs: [finish-gcc-rebase]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: ${{ github.workspace }}
+
+      - name: Checkout GCC
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GNU_PUSH_PAT }}
+          repository: ${{ env.GCC_REPO }}
+          ref: ${{ env.ORIGIN_BRANCH }}
+          fetch-depth: 0
+          path: ${{ env.SOURCE_PATH }}/gcc
+
+      - name: Clean GCC rebase
+        working-directory: ${{ env.SOURCE_PATH }}/gcc
+        run: |
+          ${{ github.workspace }}/.github/scripts/rebase-clean.sh \
+            ${{ env.REBASE_BRANCH }} \
+            ${{ env.BACKUP_BRANCH }}
+
+  clean-mingw-rebase:
+    if: always()
+    needs: [finish-mingw-rebase]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: ${{ github.workspace }}
+
+      - name: Checkout MinGW
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GNU_PUSH_PAT }}
+          repository: ${{ env.MINGW_REPO }}
+          ref: ${{ env.ORIGIN_BRANCH }}
+          fetch-depth: 0
+          path: ${{ env.SOURCE_PATH }}/mingw
+
+      - name: Clean MinGW rebase
+        working-directory: ${{ env.SOURCE_PATH }}/mingw
+        run: |
+          ${{ github.workspace }}/.github/scripts/rebase-clean.sh \
+            ${{ env.REBASE_BRANCH }} \
+            ${{ env.BACKUP_BRANCH }}
+
+  clean-cygwin-rebase:
+    if: always()
+    needs: [finish-cygwin-rebase]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: ${{ github.workspace }}
+
+      - name: Checkout Cygwin
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GNU_PUSH_PAT }}
+          repository: ${{ env.CYGWIN_REPO }}
+          ref: ${{ env.ORIGIN_BRANCH }}
+          path: ${{ env.SOURCE_PATH }}/cygwin
+
+      - name: Clean Cygwin rebase
+        working-directory: ${{ env.SOURCE_PATH }}/cygwin
+        run: |
+          ${{ github.workspace }}/.github/scripts/rebase-clean.sh \
+            ${{ env.REBASE_BRANCH }} \
+            ${{ env.BACKUP_BRANCH }}
 
   deploy:
     if: github.ref == 'refs/heads/woarm64'
