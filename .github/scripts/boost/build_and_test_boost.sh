@@ -3,6 +3,8 @@
 BOOST_BUILD_DIR=$1
 BOOST_TEMPLATE_DIR=$2
 
+source `dirname ${BASH_SOURCE[0]}`/config.sh
+
 export TOOLCHAIN_PATH=/home/vejby/cross-aarch64-w64-mingw32-msvcrt
 
 GCC_VERSION=15
@@ -36,20 +38,20 @@ if [[ ! -z $BOOST_TEMPLATE_DIR && -d $BOOST_TEMPLATE_DIR ]]; then
 else
     echo "Cloning Boost GitHub repository.."
     time git clone --recursive --single-branch https://github.com/boostorg/boost.git $BOOST_BUILD_DIR
-    # process module contained bug which prevented building it with MinGW, there's already fix
-    # but it's not updated in Boost project yet.
 
-    # Known snapshot where all builds worked
+    # Known snapshot where all builds worked (Boost 1.87).
     cd $BOOST_BUILD_DIR
-    git checkout 20fbf90552e3205acf754a7559b672c38d15a4a1
+    git checkout c89e6267665516192015a9e40955e154466f4f68
     git submodule update --init --recursive
     cd -
 
+    # Fix for undefined reference to ws2_32 library.
+    # Error: undefined reference to `__imp_WSAStartup'
     cd $BOOST_BUILD_DIR/libs/process
-    git checkout 9761be99bbc62776d5fbf2d311d5ab9de2e81dd5
+    git checkout 8df45b8f6861ed6bbc87f9b351942c0b239c7982
     cd -
 
-    # Get version of charconv and json modules which have fast_float _umul128 fix
+    # Get version of charconv and json modules which have fast_float _umul128 fix.
     cd $BOOST_BUILD_DIR/libs/charconv
     git checkout abb721d55633d75d9638798d57d0f0b77ca77a5e
     cd -
@@ -58,18 +60,25 @@ else
     git checkout 7b16bf74e6de0246844f9c1f438631880b58772c
     cd -
 
+    # Switch serialization to current (as of 3rd Feb 2025) develop to get fix for missing dependency
+    # on filesystem library.
+    # Error: undefined reference to `boost::filesystem::detail::path_traits::convert(...)
+    cd $BOOST_BUILD_DIR/libs/serialization
+    git fetch --all --prune
+    git checkout 8a8c62864f05732131bf6785d54466d8ac6cd477
+    cd -
+
+    # Unmerged fix: https://github.com/boostorg/thread/pull/408
+    # Error: ../boost/thread/future.hpp:4671:19: error: ‘struct boost::detail::run_it<FutureExecutorContinuationSharedState>’ has no member named ‘that’; did you mean ‘that_’?
+    cd $BOOST_BUILD_DIR/libs/thread
+    git apply $ROOT_PATH/.github/scripts/boost/thread.patch
+    cd -
+
     # Add missing assembler files definition for GCC+Win+Aarch64 in Boost.Context
-    # TODO: Not the smartest way how to apply patches but works for now
-    cd $BOOST_BUILD_DIR/libs
-    rm -rf context
-    git clone https://github.com/Windows-on-ARM-Experiments/boost-context.git --branch mingw-arm-asm context
-    cd context
-    git checkout f7c27e2293912466f2806cba5597a2e052242720 # Boost 1.86.0
-    # My commits
-    git cherry-pick 9068c08ee7e59a9806a5f6b74db525bade58767e
-    git cherry-pick 566fdee8ad2708ef46420fad87ee1f85faab62e6
-    git cherry-pick 2767c8e1f2081f035f1fca7288eb02557b405030
-    cd ../../..
+    cd $BOOST_BUILD_DIR/libs/context
+    git fetch --all --prune
+    git checkout e4c91576d27c359f4b38a009409e5b611132de04
+    cd -
 fi
 
 cd $BOOST_BUILD_DIR
