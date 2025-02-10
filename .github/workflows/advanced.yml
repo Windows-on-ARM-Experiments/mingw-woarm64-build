@@ -1096,3 +1096,111 @@ jobs:
   #       shell: bash
   #       run: |
   #         .github/scripts/ffmpeg/execute-tests.sh
+
+  build-boost:
+    needs: [build-toolchain]
+    runs-on: ubuntu-latest
+
+    env:
+      BOOST_PATH: ${{ github.workspace }}/boost
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: ${{ github.workspace }}
+
+      - name: Checkout Boost
+        run: |
+          .github/scripts/boost/checkout.sh
+
+      - name: Extract cache keys
+        run: |
+          .github/scripts/extract-cache-keys.sh '${{ toJSON(needs.build-toolchain.outputs) }}'
+
+      - name: Download ${{ env.TOOLCHAIN_NAME }} toolchain
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
+          key: ${{ env.toolchain-cache-key }}
+          enableCrossOsArchive: true
+          fail-on-cache-miss: true
+
+      - name: Unpack toolchain
+        run: |
+          .github/scripts/toolchain/unpack.sh
+
+      - name: Build Boost
+        run: |
+          .github/scripts/boost/build.sh
+
+      - name: Pack Boost tests
+        run: |
+          .github/scripts/boost/pack-tests.sh
+
+      # - name: Upload artifact
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: ${{ env.TOOLCHAIN_NAME }}-boost
+      #     path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_NAME }}-boost.zip
+      #     retention-days: 3
+
+      - name: Upload tests artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.TOOLCHAIN_NAME }}-boost-tests
+          path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_NAME }}-boost-tests.zip
+          retention-days: 3
+
+  execute-boost-tests:
+    needs: [
+      build-toolchain,
+      build-boost
+    ]
+    runs-on: [Windows, GCC, ARM64]
+
+    env:
+      BOOST_TESTS_PATH: ${{ github.workspace }}/boost-tests
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: ${{ github.workspace }}
+
+      - name: Install zstd
+        run: |
+          .github/scripts/install-zstd.ps1
+
+      - name: Extract cache keys
+        shell: bash
+        run: |
+          .github/scripts/extract-cache-keys.sh '${{ toJSON(needs.build-toolchain.outputs) }}'
+
+      - name: Download ${{ env.TOOLCHAIN_NAME }} runtime
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ env.RELATIVE_ARTIFACT_PATH }}/${{ env.RUNTIME_PACKAGE_NAME }}
+          key: ${{ env.runtime-cache-key }}
+          restore-keys: ${{ env.runtime-cache-key }}
+          enableCrossOsArchive: true
+          fail-on-cache-miss: true
+
+      - name: Download Boost tests
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.TOOLCHAIN_NAME }}-boost-tests
+          path: ${{ env.ARTIFACT_PATH }}
+
+      - name: Unpack ${{ env.TOOLCHAIN_NAME }} runtime
+        run: |
+          .github/scripts/toolchain/unpack-runtime.ps1
+
+      - name: Unpack Boost tests
+        run: |
+          .github/scripts/boost/unpack-tests.ps1
+
+      - name: Execute Boost tests
+        shell: bash
+        run: |
+          .github/scripts/boost/execute-tests.sh
