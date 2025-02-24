@@ -16,6 +16,7 @@ if ( -not $env:OPENBLAS_TESTS_PATH ) { $env:OPENBLAS_TESTS_PATH = "$PWD\openblas
 if ( -not $env:OPENSSL_TESTS_PATH ) { $env:OPENSSL_TESTS_PATH = "$PWD\openssl-tests" }
 if ( -not $env:LIBJPEG_TURBO_TESTS_PATH ) { $env:LIBJPEG_TURBO_TESTS_PATH = "$PWD\libjpeg-turbo-tests" }
 if ( -not $env:FFMPEG_TESTS_PATH ) { $env:FFMPEG_TESTS_PATH = "$PWD\ffmpeg-tests" }
+if ( -not $env:BOOST_TESTS_PATH ) { $env:BOOST_TESTS_PATH = "$PWD\boost-tests" }
 
 if ( -not $env:RUNTIME_PACKAGE_NAME ) { $env:RUNTIME_PACKAGE_NAME = "$env:TOOLCHAIN_NAME-runtime.tar.gz" }
 if ( -not $env:TESTS_PACKAGE_NAME ) { $env:TESTS_PACKAGE_NAME = "$env:TOOLCHAIN_NAME-tests.tar.gz" }
