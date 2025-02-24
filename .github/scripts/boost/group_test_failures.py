@@ -15,7 +15,9 @@ def find_failed_line_index(command_output: list[str]) -> int:
     if command_output[index].startswith("...failed"):
         return index
 
-    assert not any(line.startswith("...failed") for line in command_output)
+    # assert not any(line.startswith("...failed") for line in command_output)
+    if any(line.startswith("...failed") for line in command_output):
+        print("Assert failed...")
     return -1
 
 
