@@ -9,6 +9,19 @@ function update_repository() {
     BRANCH=$3
     BASE_BRANCH=$4
 
+    if [[ $REPOSITORY =~ (\.tar\.gz|\.tar\.bz2|\.tar|\.tar\.lz|\.tar\.xz|\.tar\.zst)$ ]]; then
+        FILE=$(basename $REPOSITORY)
+        wget $REPOSITORY -O $FILE
+
+        mkdir -p $DIRECTORY
+        rm -rf $DIRECTORY/*
+        tar -xf $FILE -C $DIRECTORY --strip-components=1
+
+        rm -f $FILE
+
+        return 0
+    fi
+
     if [[ ! $REPOSITORY =~ ^(http://|https://|git://) ]]; then
         REPOSITORY="https://github.com/$REPOSITORY.git"
     fi
@@ -84,6 +97,8 @@ echo "::group::Update source code repositories"
     fi
 
     if [[ "$UPDATE_LIBRARIES" = 1 ]]; then
+        update_repository gmp $GMP_REPO $GMP_BRANCH
+        update_repository mpfr $MPFR_REPO $MPFR_BRANCH
         update_repository openblas $OPENBLAS_REPO $OPENBLAS_BRANCH
         update_repository zlib $ZLIB_REPO $ZLIB_BRANCH
         update_repository libxml2 $LIBXML2_REPO $LIBXML2_BRANCH
