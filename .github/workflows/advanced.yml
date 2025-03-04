@@ -162,7 +162,7 @@ jobs:
         if: ${{ env.PACK_TOOLCHAIN == 'true' }}
         uses: actions/cache@v4
         with:
-          path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
+          path: ${{ env.RELATIVE_ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
           key: ${{ steps.cache-keys.outputs.toolchain-cache-key }}
           enableCrossOsArchive: true
 
@@ -1099,7 +1099,7 @@ jobs:
 
   build-boost:
     needs: [build-toolchain]
-    runs-on: ubuntu-latest
+    runs-on: [Linux, x64, GCC, D2ds_v6]
 
     env:
       BOOST_PATH: ${{ github.workspace }}/boost
@@ -1121,8 +1121,9 @@ jobs:
       - name: Download ${{ env.TOOLCHAIN_NAME }} toolchain
         uses: actions/cache/restore@v4
         with:
-          path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
+          path: ${{ env.RELATIVE_ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
           key: ${{ env.toolchain-cache-key }}
+          restore-keys: ${{ env.toolchain-cache-key }}
           enableCrossOsArchive: true
           fail-on-cache-miss: true
 
