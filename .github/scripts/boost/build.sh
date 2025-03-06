@@ -2,6 +2,22 @@
 
 source `dirname ${BASH_SOURCE[0]}`/../config.sh
 
+IS_X64=$1
+if [[ "$IS_X64" == "true" ]]; then
+    echo "IS_X64 is true"
+    sudo apt-get install mingw-w64
+    ls /usr/bin | grep mingw
+    echo $PATH | sed 's/:/\n/g'
+    TOOLCHAIN_FILE=$ROOT_PATH/.github/cmake/x86_64-w64-mingw32.cmake
+    BOOST_CONTEXT_ARCHITECTURE=x86_64
+    BOOST_CONTEXT_ABI=ms
+else
+    echo "IS_X64 is false"
+    TOOLCHAIN_FILE=$ROOT_PATH/.github/cmake/aarch64-w64-mingw32.cmake
+    BOOST_CONTEXT_ARCHITECTURE=arm64
+    BOOST_CONTEXT_ABI=aapcs
+fi
+
 BOOST_BUILD_PATH=$BUILD_PATH/boost
 BOOST_SOURCE_PATH=$SOURCE_PATH/boost
 
@@ -40,9 +56,9 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$BOOST_BUILD_PATH/Makefile" ]]; then
             -DBUILD_TESTING=ON \
             -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN_FILE \
             -DBOOST_CHARCONV_QUADMATH_FOUND_EXITCODE=0 \
-            -DBOOST_CONTEXT_ARCHITECTURE=arm64 \
+            -DBOOST_CONTEXT_ARCHITECTURE=$BOOST_CONTEXT_ARCHITECTURE \
             -DBOOST_CONTEXT_BINARY_FORMAT=pe \
-            -DBOOST_CONTEXT_ABI=aapcs \
+            -DBOOST_CONTEXT_ABI=$BOOST_CONTEXT_ABI \
             -DBOOST_FIBER_NUMA_TARGET_OS=windows \
             -DBOOST_LOCALE_ENABLE_POSIX=OFF \
             -DBOOST_LOCALE_ENABLE_WINAPI=ON \

@@ -1097,6 +1097,28 @@ jobs:
   #       run: |
   #         .github/scripts/ffmpeg/execute-tests.sh
 
+
+  build-x64-boost:
+    runs-on: [ubuntu-latest]
+
+    env:
+      BOOST_PATH: ${{ github.workspace }}/boost
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: ${{ github.workspace }}
+
+      - name: Checkout Boost
+        run: |
+          .github/scripts/boost/checkout.sh
+
+      - name: Build Boost
+        run: |
+          .github/scripts/boost/build.sh true
+
+
   build-boost:
     needs: [build-toolchain]
     runs-on: [Linux, x64, GCC, D2ds_v6]
@@ -1133,7 +1155,7 @@ jobs:
 
       - name: Build Boost
         run: |
-          .github/scripts/boost/build.sh
+          .github/scripts/boost/build.sh false
 
       - name: Pack Boost tests
         run: |
