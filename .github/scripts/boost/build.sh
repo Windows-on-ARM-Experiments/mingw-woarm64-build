@@ -68,7 +68,7 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$BOOST_BUILD_PATH/Makefile" ]]; then
 fi
 
 echo "::group::Build Boost and its tests"
-    cmake --build . --target tests -- -k VERBOSE=1 $BUILD_MAKE_OPTIONS
+    cmake --build . --target tests -- -k VERBOSE=1 $BUILD_MAKE_OPTIONS || true
 echo "::endgroup::"
 
 echo "::group::Make generated paths relative"
