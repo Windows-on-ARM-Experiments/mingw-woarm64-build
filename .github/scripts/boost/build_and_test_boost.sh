@@ -1,15 +1,6 @@
 #!/bin/bash
 
 BOOST_BUILD_DIR=$1
-BOOST_TEMPLATE_DIR=$2
-
-source `dirname ${BASH_SOURCE[0]}`/config.sh
-
-export TOOLCHAIN_PATH=/home/vejby/cross-aarch64-w64-mingw32-msvcrt
-
-GCC_VERSION=15
-ARCHITECTURE=arm
-ABI=aapcs
 
 if [[ $# -lt 1 ]]; then
     echo "Expected at least 1 arguments!" >&2
@@ -21,7 +12,14 @@ if [[ -d $BOOST_BUILD_DIR ]]; then
     exit 1
 fi
 
-# Build toolchain
+source `dirname ${BASH_SOURCE[0]}`/config.sh
+
+GCC_VERSION=15
+ARCHITECTURE=arm
+ABI=aapcs
+
+### Build toolchain
+# export TOOLCHAIN_PATH=/home/vejby/cross-aarch64-w64-mingw32-msvcrt
 # cd mingw-woarm64-build
 # export RESET_SOURCES=1
 # export BINUTILS_BRANCH=woarm64
@@ -30,59 +28,33 @@ fi
 # ./build.sh > "toolchain-building.log"
 # cd -
 
+echo "Cloning Boost GitHub repository.."
 mkdir -p $BOOST_BUILD_DIR
-
-if [[ ! -z $BOOST_TEMPLATE_DIR && -d $BOOST_TEMPLATE_DIR ]]; then
-    echo "Found Boost template dir '$BOOST_TEMPLATE_DIR', using it instead of cloning.."
-    time cp -r $BOOST_TEMPLATE_DIR/* $BOOST_BUILD_DIR
-else
-    echo "Cloning Boost GitHub repository.."
-    time git clone --recursive --single-branch https://github.com/boostorg/boost.git $BOOST_BUILD_DIR
-
-    # Known snapshot where all builds worked (Boost 1.87).
-    cd $BOOST_BUILD_DIR
-    git checkout c89e6267665516192015a9e40955e154466f4f68
-    git submodule update --init --recursive
-    cd -
-
-    # Fix for undefined reference to ws2_32 library.
-    # Error: undefined reference to `__imp_WSAStartup'
-    cd $BOOST_BUILD_DIR/libs/process
-    git checkout 8df45b8f6861ed6bbc87f9b351942c0b239c7982
-    cd -
-
-    # Get version of charconv and json modules which have fast_float _umul128 fix.
-    cd $BOOST_BUILD_DIR/libs/charconv
-    git checkout abb721d55633d75d9638798d57d0f0b77ca77a5e
-    cd -
-
-    cd $BOOST_BUILD_DIR/libs/json
-    git checkout 7b16bf74e6de0246844f9c1f438631880b58772c
-    cd -
-
-    # Switch serialization to current (as of 3rd Feb 2025) develop to get fix for missing dependency
-    # on filesystem library.
-    # Error: undefined reference to `boost::filesystem::detail::path_traits::convert(...)
-    cd $BOOST_BUILD_DIR/libs/serialization
-    git fetch --all --prune
-    git checkout 8a8c62864f05732131bf6785d54466d8ac6cd477
-    cd -
-
-    # Unmerged fix: https://github.com/boostorg/thread/pull/408
-    # Error: ../boost/thread/future.hpp:4671:19: error: ‘struct boost::detail::run_it<FutureExecutorContinuationSharedState>’ has no member named ‘that’; did you mean ‘that_’?
-    cd $BOOST_BUILD_DIR/libs/thread
-    git apply $ROOT_PATH/.github/scripts/boost/thread.patch
-    cd -
-
-    # Add missing assembler files definition for GCC+Win+Aarch64 in Boost.Context
-    cd $BOOST_BUILD_DIR/libs/context
-    git fetch --all --prune
-    git checkout e4c91576d27c359f4b38a009409e5b611132de04
-    cd -
-fi
-
+# Known snapshot where all builds worked (Boost 1.87)
+git clone --recurse-submodules --single-branch https://github.com/boostorg/boost.git -b boost-1.87.0 $BOOST_BUILD_DIR
 cd $BOOST_BUILD_DIR
 
+# Add missing assembler files definition for GCC+Win+Aarch64 in Boost.Context
+pushd libs/context
+git checkout e4c91576d27c359f4b38a009409e5b611132de04
+popd
+
+# Switch serialization to current (as of 3rd Feb 2025) develop to get fix for missing dependency
+# on filesystem library.
+# Fixes error: undefined reference to `boost::filesystem::detail::path_traits::convert(...)
+pushd libs/serialization
+git checkout 8a8c62864f05732131bf6785d54466d8ac6cd477
+popd
+
+# Unmerged fix: https://github.com/boostorg/thread/pull/408
+# Fixes error: ../boost/thread/future.hpp:4671:19: error: ‘struct boost::detail::run_it<FutureExecutorContinuationSharedState>’ has no member named ‘that’; did you mean ‘that_’?
+pushd libs/thread
+git apply $ROOT_PATH/.github/scripts/boost/thread.patch
+popd
+
+
+### Generate user-config.jam file which specifies desired toolchain, uncomment the line
+### according to the system you're using
 # WSL linux x64 to win x64: x86_64-pc-linux-gnu -> x86_64-w64-mingw32
 # GCC_VERSION=10, ARCHITECTURE=x86, ABI=ms
 # echo "using gcc : $GCC_VERSION : x86_64-w64-mingw32-g++ : : <target-os>windows <address-model>64 <architecture>$ARCHITECTURE ;" > "user-config.jam"
@@ -104,29 +76,19 @@ echo "using gcc : $GCC_VERSION : $TOOLCHAIN_PATH/bin/aarch64-w64-mingw32-g++ : :
 # GCC_VERSION=15, ARCHITECTURE=arm, ABI=aapcs
 # echo "using gcc : $GCC_VERSION : /mingwarm64/bin/aarch64-w64-mingw32-g++ : : <target-os>windows <address-model>64 <architecture>$ARCHITECTURE ;" > "user-config.jam"
 
-# Some gcc is needed for running this as well. I'm using MinGW from package manager (e.g. pacman -S gcc)
+# Gcc is needed for running this as well but since this builds b2 system which will run on host,
+# I'm using system gcc from package manager. On Linux it should be installed, on MSYS2 it might
+# need to be installed manually (e.g. pacman -S gcc).
 echo "Running Boost bootstrap.."
-time ./bootstrap.sh > boost-bootstrap.log
+./bootstrap.sh > boost-bootstrap.log
 
 echo "Running Boost b2 build..."
-# --without-context --without-coroutine --without-fiber
-#    context contains assembler and it doesn't have specified target for MinGW Win ARM64
-#    coroutine and fiber depends on context and they invoke its build, so we have to skip them
-#    (also Cobalt depends on it but build seems to work just fine with it)
-#    TODO: Investigate if I just didn't specify args uncorrectly as I had problems with that even
-#       for x64 MinGW compilator
-# --without-charconv --without-json
-#    answer.low = _umul128(a, b, &high); // _umul128 not available on ARM64
-# --without-predef
-#    a library that defines a set of compiler architecture, operating system, library, and other
-#    version numbers it can gather from predefined macros
-#    -> needs to have specified target for MinGW Win ARM 64 as well
-
 # MinGW defaults to an older version of Windows header files, Process library of Boost needs newer
 # one, we default to the newest: define=_WIN32_WINNT=0x0A00
-time ./b2 --user-config=./user-config.jam -d2 --prefix=./build --debug-configuration target-os=windows address-model=64 variant=debug architecture=$ARCHITECTURE binary-format=pe abi=$ABI toolset=gcc-$GCC_VERSION define=_WIN32_WINNT=0x0A00 cxxflags=-Wno-attributes linkflags=-static-libstdc++ linkflags=-static-libgcc link=static install > boost-build.log
+time ./b2 --user-config=./user-config.jam -d2 --prefix=./build --debug-configuration target-os=windows address-model=64 variant=debug architecture=$ARCHITECTURE binary-format=pe abi=$ABI toolset=gcc-$GCC_VERSION define=_WIN32_WINNT=0x0A00 cxxflags=-Wno-attributes link=static linkflags=-static-libstdc++ linkflags=-static-libgcc install > boost-build.log
 
-echo "Running Boost quick test.."
+
+echo "Running Boost tests..."
 cd status
 
 # Built test executables can depend on various DLLs. These can be categorized into two groups:
@@ -141,10 +103,14 @@ cd status
 # This doesn't work as test .exe files are actually run on Windows which doesn't understand
 # LD_LIBRARY_PATH.
 #
-# We solve missing libraries from group 1 by copying them and missing libraries from group 2 by
-# building tests with static linking.
+# We solve missing libraries:
+#    from group 1 by using `linkflags=-static-libstdc++ linkflags=-static-libgcc` alt. `runtime-link=static`
+#    from group 2 by using `link=static` to compile static version of libraries (Note: link=static
+#       is not enough for linking runtime libraries statically, because it appends -static only
+#       to compilation, not to linking commands)
 
-### Not needed to copy these if we link runtime statically
+### When our toolchain will be capable of linking dynamic runtime, we can copy these dlls instead
+### of using `linkflags=-static-libstdc++ linkflags=-static-libgcc` to save disc space.
 # WSL linux x64 to win x64: x86_64-pc-linux-gnu -> x86_64-w64-mingw32
 # cp /usr/x86_64-w64-mingw32/lib/libwinpthread-1.dll .
 # cp /usr/lib/gcc/x86_64-w64-mingw32/13-win32/libstdc++-6.dll .
@@ -168,22 +134,19 @@ cd status
 # cp /mingwarm64/bin/libgcc_s_seh-1.dll .
 # cp /mingwarm64/bin/libstdc++-6.dll .
 
-# Can run quick/minimal or full test suite. When running full test suite, we can specify modules to
-# be excluded from testing like --exclude-tests=context,cobalt,coroutine,fiber,charconv,json,predef
-
-# link=static runtime-link=static (link=static is not enough for linking runtime libraries statically, because it appends -static only to compilation, not to linking commands)
-# linkflags=-static-libstdc++ linkflags=-static-libgcc (or just pass -static to linker?)
-# TODO: More granural usage of -mbig-obj (per modules)
-time ../b2 quick -a --user-config=../user-config.jam -d2 --debug-configuration --hash target-os=windows address-model=64 variant=debug architecture=$ARCHITECTURE binary-format=pe abi=$ABI toolset=gcc-$GCC_VERSION define=_WIN32_WINNT=0x0A00 cxxflags=-Wno-error=attributes cxxflags=-Wno-attributes cxxflags=-Wa,-mbig-obj link=static linkflags=-static-libstdc++ linkflags=-static-libgcc > ../boost-test-quick-static.log
-
-echo "Running Boost minimal test.."
-time ../b2 minimal -a --user-config=../user-config.jam -d2 --debug-configuration --hash target-os=windows address-model=64 variant=debug architecture=$ARCHITECTURE binary-format=pe abi=$ABI toolset=gcc-$GCC_VERSION define=_WIN32_WINNT=0x0A00 cxxflags=-Wno-error=attributes cxxflags=-Wno-attributes cxxflags=-Wa,-mbig-obj link=static linkflags=-static-libstdc++ linkflags=-static-libgcc > ../boost-test-minimal-static.log
-
-echo "Running Boost full test.."
+# There are multiple test suites in Boost:
+#    quick - contains ~28 tests mostly each from different module (can be run with `b2 quick [other options]`)
+#    minimal - contains hundreds of tests but not from all modules (can be run with `b2 minimal [other options]`)
+#    full - contains all tests from all modules (can be run with `b2 [other options]`)
+# When running e.g. minimal and then full test suite, use `-a` to rerun all tests from minimal
+# in full as well to get complete log output.
+# When running full test suite, we can specify modules to exclude from testing with
+# `--exclude-tests=context,cobalt,coroutine,fiber,charconv,json,predef``
 
 # Workaround failure:
 # /bin/sh: 5: /home/vejby/boost-build-34-test-full-pthread-lib/status/boost_check_library.py: Permission denied
 # EXIT STATUS: 126
 chmod +x boost_check_library.py
 
+# TODO: More granural usage of -mbig-obj (per modules)
 time ../b2 -a --user-config=../user-config.jam -d2 --debug-configuration --hash target-os=windows address-model=64 variant=debug architecture=$ARCHITECTURE binary-format=pe abi=$ABI toolset=gcc-$GCC_VERSION define=_WIN32_WINNT=0x0A00 cxxflags=-Wno-error=attributes cxxflags=-Wno-attributes cxxflags=-Wa,-mbig-obj link=static linkflags=-static-libstdc++ linkflags=-static-libgcc > ../boost-test-full-static.log
