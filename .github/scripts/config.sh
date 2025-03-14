@@ -6,16 +6,16 @@ set -o pipefail # fail of any command in pipeline is an error
 
 # Branches that will be used for build when UPDATE_SOURCES=1.
 BINUTILS_REPO=${BINUTILS_REPO:-Windows-on-ARM-Experiments/binutils-woarm64}
-BINUTILS_BRANCH=${BINUTILS_BRANCH:-woarm64}
+BINUTILS_BRANCH=${BINUTILS_BRANCH:-woarm64-v3}
 
 GCC_REPO=${GCC_REPO:-Windows-on-ARM-Experiments/gcc-woarm64}
-GCC_BRANCH=${GCC_BRANCH:-woarm64}
+GCC_BRANCH=${GCC_BRANCH:-woarm64-v8}
 
 MINGW_REPO=${MINGW_REPO:-Windows-on-ARM-Experiments/mingw-woarm64}
 MINGW_BRANCH=${MINGW_BRANCH:-woarm64}
 
 CYGWIN_REPO=${CYGWIN_REPO:-Windows-on-ARM-Experiments/newlib-cygwin}
-CYGWIN_BRANCH=${CYGWIN_BRANCH:-woarm64}
+CYGWIN_BRANCH=${CYGWIN_BRANCH:-test-winsup}
 
 CYGWIN_PACKAGES_REPO=${CYGWIN_PACKAGES_REPO:-Windows-on-ARM-Experiments/cygwin-packages}
 CYGWIN_PACKAGES_BRANCH=${CYGWIN_PACKAGES_BRANCH:-main}
@@ -59,6 +59,7 @@ BUILD_PATH=${BUILD_PATH:-$ROOT_PATH/build-$TOOLCHAIN_NAME}
 CCACHE_DIR_PATH=${CCACHE_DIR_PATH:-$ROOT_PATH/ccache}
 ARTIFACT_PATH=${ARTIFACT_PATH:-$ROOT_PATH/artifact}
 BUILD_MAKE_OPTIONS=${BUILD_MAKE_OPTIONS:-V=1 -j$(nproc)}
+CHECK_MAKE_OPTIONS=${CHECK_MAKE_OPTIONS:-V=1 -j$(nproc) -k}
 TOOLCHAIN_PATH=${TOOLCHAIN_PATH:-~/cross-$TOOLCHAIN_NAME}
 TOOLCHAIN_FILE=${TOOLCHAIN_FILE:-$ROOT_PATH/.github/cmake/$TARGET.cmake}
 TOOLCHAIN_PACKAGE_NAME=${TOOLCHAIN_PACKAGE_NAME:-$TOOLCHAIN_NAME-toolchain.tar.gz}
