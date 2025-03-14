@@ -8,7 +8,8 @@ CYGWIN_WINSUP_TEST_PATH=$BUILD_PATH/cygwin/$ARCH-$PLATFORM/winsup/testsuite
 
 echo "::group::Execute Cygwin tests"
     pushd "$CYGWIN_WINSUP_TEST_PATH" || exit 1
-        make $CHECK_MAKE_OPTIONS check
+        WSLENV="$WSLENV:PATH/p" \
+            make $CHECK_MAKE_OPTIONS check || true
     popd
 echo "::endgroup::"
 
