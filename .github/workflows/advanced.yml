@@ -22,7 +22,7 @@ on:
       cygwin_branch:
         description: 'Cygwin branch to build'
         required: false
-        default: 'woarm64'
+        default: 'test-winsup'
       cygwin_packages_branch:
         description: 'Cygwin packages branch to build'
         required: false
@@ -78,7 +78,7 @@ env:
   MINGW_BRANCH: ${{ inputs.mingw_branch || 'woarm64' }}
 
   CYGWIN_REPO: Windows-on-ARM-Experiments/newlib-cygwin
-  CYGWIN_BRANCH: ${{ inputs.cygwin_branch || 'woarm64' }}
+  CYGWIN_BRANCH: ${{ inputs.cygwin_branch || 'test-winsup' }}
 
   CYGWIN_PACKAGES_REPO: Windows-on-ARM-Experiments/cygwin-packages
   CYGWIN_PACKAGES_BRANCH: ${{ inputs.cygwin_packages_branch || 'main' }}
@@ -512,6 +512,96 @@ jobs:
         shell: bash
         run: |
           .github/scripts/tests/cygwin/execute-tests.sh
+
+  execute-cygwin-tests:
+    needs: [
+      build-toolchain
+    ]
+    runs-on: [Windows, WSL, ARM64]
+
+    defaults:
+      run:
+        shell: wsl --user root bash --noprofile --norc -euo pipefail "$(s="$(wslpath '{0}')" && sed -i 's/\r$//' "$s" && echo "$s")"
+
+    env:
+      PLATFORM: pc-cygwin
+      ROOT_PATH: /root
+      SOURCE_PATH:
+      BUILD_PATH:
+      BUILD_PACKAGE_NAME: cygwin-build.tar.gz
+      TOOLCHAIN_PATH:
+      TOOLCHAIN_NAME: aarch64-pc-cygwin-msvcrt
+      TOOLCHAIN_PACKAGE_NAME: aarch64-pc-cygwin-msvcrt-toolchain.tar.gz
+
+      WSLENV: CYGWIN_REPO:CYGWIN_BRANCH:PLATFORM:ROOT_PATH:SOURCE_PATH/p:BUILD_PATH/p:BUILD_PACKAGE_NAME:ARTIFACT_PATH/p:TOOLCHAIN_PATH/p:TOOLCHAIN_NAME:TOOLCHAIN_PACKAGE_NAME:GITHUB_ENV/p:GITHUB_OUTPUT/p:GITHUB_STEP_SUMMARY/p
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: ${{ github.workspace }}
+
+      - name: Install zstd
+        shell: powershell
+        run: |
+          .github/scripts/install-zstd.ps1
+
+      - name: Fix line endings
+        run: |
+          apt-get update
+          apt-get install -y dos2unix
+          dos2unix .github/scripts/*.sh
+          dos2unix .github/scripts/toolchain/*.sh
+
+      - name: Clean previous build
+        run: |
+          .github/scripts/delete-build.sh
+          .github/scripts/delete-code.sh
+
+      - name: Install dependencies
+        run: |
+          .github/scripts/install-dependencies.sh
+
+      - name: Extract cache keys
+        run: | 
+          .github/scripts/extract-cache-keys.sh '${{ toJSON(needs.build-toolchain.outputs) }}'
+
+      - name: Download ${{ env.TOOLCHAIN_NAME }} toolchain
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ env.RELATIVE_ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
+          key: ${{ env.toolchain-cache-key }}
+          enableCrossOsArchive: true
+          fail-on-cache-miss: true
+
+      - name: Unpack toolchain
+        run: |
+          .github/scripts/toolchain/unpack.sh
+
+      - name: Checkout Cygwin
+        run: |
+          .github/scripts/update-sources.sh cygwin
+
+      - name: Build Cygwin
+        run: |
+          .github/scripts/toolchain/build-cygwin.sh 2
+
+      - name: Execute Cygwin tests
+        run: |
+          .github/scripts/toolchain/execute-cygwin-tests.sh
+
+      - name: Pack build folder
+        if: failure()
+        run: |
+          .github/scripts/pack-build.sh
+
+      - name: Upload build folder
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cygwin-build
+          retention-days: 1
+          path: ${{ env.ARTIFACT_PATH }}/${{ env.BUILD_PACKAGE_NAME }}
 
   build-bash:
     needs: [build-toolchain]
