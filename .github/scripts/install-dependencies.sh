@@ -12,11 +12,13 @@ echo "::group::Install Dependencies"
       binutils-for-build \
       bison \
       build-essential \
+      busybox \
       ccache \
       dejagnu \
       docbook2x \
       flex \
       gdc \
+      jq \
       libc6-dev-arm64-cross \
       libc6-dev-amd64-cross \
       texinfo \
