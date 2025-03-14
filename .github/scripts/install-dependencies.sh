@@ -12,6 +12,7 @@ echo "::group::Install Dependencies"
       binutils-for-build \
       bison \
       build-essential \
+      busybox \
       ccache \
       dejagnu \
       docbook2x \
