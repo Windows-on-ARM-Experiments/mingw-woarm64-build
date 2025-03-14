@@ -36,6 +36,7 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$CYGWIN_BUILD_PATH/Makefile" ]]; then
             --enable-static \
             --disable-doc \
             --disable-dumper \
+            --disable-cygserver \
             --with-sysroot=$TOOLCHAIN_PATH \
             --with-build-sysroot=$TOOLCHAIN_PATH \
             --with-cross-bootstrap \
