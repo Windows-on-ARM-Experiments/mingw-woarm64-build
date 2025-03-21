@@ -6,7 +6,7 @@ set -o pipefail # fail of any command in pipeline is an error
 
 # Branches that will be used for build when UPDATE_SOURCES=1.
 BINUTILS_REPO=${BINUTILS_REPO:-Windows-on-ARM-Experiments/binutils-woarm64}
-BINUTILS_BRANCH=${BINUTILS_BRANCH:-woarm64}
+BINUTILS_BRANCH=${BINUTILS_BRANCH:-enable-sim}
 
 GCC_REPO=${GCC_REPO:-Windows-on-ARM-Experiments/gcc-woarm64}
 GCC_BRANCH=${GCC_BRANCH:-woarm64}
