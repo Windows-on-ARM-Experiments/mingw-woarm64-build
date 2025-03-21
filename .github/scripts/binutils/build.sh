@@ -18,9 +18,13 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$BINUTILS_BUILD_PATH/Makefile" ]]; then
 
         case "$PLATFORM" in
             *cygwin*)
+                # Compared to the upstream recipe:
+                #   ADDED: --with-sysroot to avoid using the host sysroot.
+                #   CHANGED: --enable-shared to --disable-shared to allow easier transfer
+                #            the produced host binaries across different build environments.
                 TARGET_OPTIONS="$TARGET_OPTIONS \
                     --enable-static \
-                    --enable-shared \
+                    --disable-shared \
                     --enable-host-shared \
                     --enable-install-libiberty \
                     --with-sysroot=$TOOLCHAIN_PATH \
