@@ -173,7 +173,7 @@ jobs:
         if: ${{ env.PACK_TOOLCHAIN == 'true' }}
         uses: actions/cache@v4
         with:
-          path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
+          path: ${{ env.RELATIVE_ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
           key: ${{ steps.cache-keys.outputs.toolchain-cache-key }}
           enableCrossOsArchive: true
 
@@ -408,7 +408,7 @@ jobs:
       - name: Download ${{ env.TOOLCHAIN_NAME }} toolchain
         uses: actions/cache/restore@v4
         with:
-          path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
+          path: ${{ env.RELATIVE_ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
           key: ${{ env.toolchain-cache-key }}
           enableCrossOsArchive: true
           fail-on-cache-miss: true
@@ -532,7 +532,7 @@ jobs:
       - name: Download ${{ env.TOOLCHAIN_NAME }} toolchain
         uses: actions/cache/restore@v4
         with:
-          path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
+          path: ${{ env.RELATIVE_ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
           key: ${{ env.toolchain-cache-key }}
           enableCrossOsArchive: true
           fail-on-cache-miss: true
@@ -548,7 +548,7 @@ jobs:
       - name: Pack OpenBLAS tests
         run: |
           .github/scripts/openblas/pack-tests.sh
-  
+
       - name: Upload tests artifact
         uses: actions/upload-artifact@v4
         with:
@@ -636,7 +636,7 @@ jobs:
       - name: Download ${{ env.TOOLCHAIN_NAME }} toolchain
         uses: actions/cache/restore@v4
         with:
-          path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
+          path: ${{ env.RELATIVE_ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
           key: ${{ env.toolchain-cache-key }}
           enableCrossOsArchive: true
           fail-on-cache-miss: true
@@ -687,7 +687,7 @@ jobs:
       - name: Download ${{ env.TOOLCHAIN_NAME }} toolchain
         uses: actions/cache/restore@v4
         with:
-          path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
+          path: ${{ env.RELATIVE_ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
           key: ${{ env.toolchain-cache-key }}
           enableCrossOsArchive: true
           fail-on-cache-miss: true
@@ -753,7 +753,7 @@ jobs:
       - name: Download ${{ env.TOOLCHAIN_NAME }} toolchain
         uses: actions/cache/restore@v4
         with:
-          path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
+          path: ${{ env.RELATIVE_ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
           key: ${{ env.toolchain-cache-key }}
           enableCrossOsArchive: true
           fail-on-cache-miss: true
@@ -899,7 +899,7 @@ jobs:
       - name: Download ${{ env.TOOLCHAIN_NAME }} toolchain
         uses: actions/cache/restore@v4
         with:
-          path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
+          path: ${{ env.RELATIVE_ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
           key: ${{ env.toolchain-cache-key }}
           enableCrossOsArchive: true
           fail-on-cache-miss: true
@@ -1014,7 +1014,7 @@ jobs:
       - name: Download ${{ env.TOOLCHAIN_NAME }} toolchain
         uses: actions/cache/restore@v4
         with:
-          path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
+          path: ${{ env.RELATIVE_ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
           key: ${{ env.toolchain-cache-key }}
           enableCrossOsArchive: true
           fail-on-cache-miss: true
