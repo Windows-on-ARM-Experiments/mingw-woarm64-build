@@ -221,7 +221,74 @@ if [ $LAUNCH -eq 1 ] || [ $DEBUG -eq 1 ]; then
         fi
     fi
 
-    # Add any WinDbg commands here
+    # bm cygwin1!threadfunc_fe
+    # bm cygwin1!munge_threadfunc
+    # bm main
+    # bm cygwin1!dofork
+    # bm cygwin1!setjmp
+    # bm cygwin1!sigsetjmp
+    # bm cygwin1!longjmp
+    # bm cygwin1!siglongjmp
+    # bm cygwin1!frok::parent
+    # bm cygwin1!child_copy
+    # bm cygwin1!frok::child
+    # .watch (_TEB*) @x18
+    # .watch ((_TEB*) @x18)->Tib.StackBase
+    # .watch (void*[20]) (((_TEB*) @x18)->Tib.StackBase - 12800)
+    # .watch (_cygtls*) (((_TEB*) @x18)->Tib.StackBase - 12800)
+    # .watch ((child_info_fork*) child_proc_info)->jmp
+    # .childdbg 1
+    # .open W:\home\blackhex\mingw-woarm64-build\code\cygwin\winsup\cygwin\fork.cc
+    # .childdbg 1
+    # bm cygwin1!child_copy "g; bp cygwin1!dofork+0x194;"
+    # g
+
+    # Debug fork child process
+    #  bm main
+    #  .childdbg 1
+    #  bm cygwin1!fork
+    #  bm cygwin1!dofork
+    #  bp cygwin1!dofork+0x180
+    #  bm cygwin1!frok::parent
+    #  bm cygwin1!child_copy
+    #  bp cygwin1!child_copy+0xc8
+    #  sxe -c "bp cygwin1!dofork+0x194; g" ibp
+    #  g
+
+    # Process lifecycle
+    #  bm cygwin1!dll_entry
+    #  bm cygwin1!dll_crt0_0
+    #  bm cygwin1!dll_crt0_1
+    #  bp cygwin1!dll_crt0_1+0x5b0
+    #  bm cygwin1!threadfunc_fe
+    #  bm cygwin1!munge_threadfunc
+    #  bm main
+    #  bm cygwin1!__main
+    #  bm cygwin1!fork
+    #  bm cygwin1!dofork
+    #  bm cygwin1!setjmp
+    #  bm cygwin1!sigsetjmp
+    #  bm cygwin1!longjmp
+    #  bm cygwin1!siglongjmp
+    #  bm cygwin1!frok::parent
+    #  bm cygwin1!child_copy
+    #  bm cygwin1!frok::child
+    #  bm cygwin1!cygwin_exit
+    #  bm cygwin1!exit
+    #  bm cygwin1!__call_exitprocs
+    #    bm cygwin1!do_global_dtors
+    #    bm cygwin1!dll_global_dtors
+    #    bm cygwin1!stdio_exit_handler
+    #      bm cygwin1!_fwalk_sglue
+    #        bm cygwin1!__sflushw_r
+    #          bm cygwin1!__sflush_r
+    #  bm cygwin1!_exit
+    #    bm cygwin1!do_exit
+    #      bm cygwin1!signal
+    #      bm cygwin1!close_all_files
+    #      bm cygwin1!pinfo::exit
+    #        bm cygwin1!pinfo::proc_terminate
+
     cat <<EOF > $EXECUTABLE_DIR/script
       bm main
       g
