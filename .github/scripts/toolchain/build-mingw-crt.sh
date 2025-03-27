@@ -91,6 +91,7 @@ if [[ "$RUN_INSTALL" = 1 ]]; then
                     ln -fs w32api/libdbghelp.a .
                     ln -fs w32api/libonecore.a .
                     ln -fs w32api/libpdh.a .
+                    ln -fs w32api/libwinmm.a .
                 popd
                 ;;
         esac
