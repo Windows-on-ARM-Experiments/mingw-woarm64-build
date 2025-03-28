@@ -35,6 +35,7 @@ function update_repository() {
 
             if [[ "$RESET_SOURCES" = 1 ]]; then
                 git reset --hard HEAD
+                git clean -fdx
             fi
 
             if [[ "$FLAT_CLONE" = 1 ]] && ! is_remote_branch $BRANCH && ! is_tag $BRANCH; then

@@ -1,0 +1,14 @@
+*.a
+*.bin
+*.cod
+*.dll
+*.def
+*.exe
+*.exp
+*.gimple
+*.ilk
+*.lib
+*.pdb
+*.o
+*.obj
+*.so
