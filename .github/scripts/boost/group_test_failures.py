@@ -15,6 +15,7 @@ def find_failed_line_index(command_output: list[str]) -> int:
     if command_output[index].startswith("...failed"):
         return index
 
+    # TODO: Not sure how this can happen but it happens very rarely, so it doesn't affect statistics
     # assert not any(line.startswith("...failed") for line in command_output)
     if any(line.startswith("...failed") for line in command_output):
         print("Assert failed...")
@@ -85,6 +86,7 @@ def process_logs(log_file: str) -> None:
     for output in failed_outputs:
         command_grouping[output[0].strip().split(" ")[0]] += 1
     print_dict_sorted_by_values(command_grouping)
+    print("\n[Press enter to continue]")
     input()
 
     module_grouping = collections.defaultdict(int)
@@ -97,6 +99,7 @@ def process_logs(log_file: str) -> None:
         module_grouping[module] += 1
     print(f"Found error logs for {len(module_grouping) - 2} modules")
     print_dict_sorted_by_values(module_grouping)
+    print("\n[Press enter to continue]")
     input()
 
     grouping = collections.defaultdict(int)
@@ -147,6 +150,7 @@ def process_logs(log_file: str) -> None:
     print(f"Grouping per error message:")
     print_dict_sorted_by_values(grouping)
 
+    print("\n[Press enter to continue]")
     input()
     print(f"Grouping per linker error message:")
     print_dict_sorted_by_values(grouping_linker_undef_refs)
