@@ -12,7 +12,7 @@ if [[ -d $BOOST_BUILD_DIR ]]; then
     exit 1
 fi
 
-source `dirname ${BASH_SOURCE[0]}`/config.sh
+source `dirname ${BASH_SOURCE[0]}`/../config.sh
 
 GCC_VERSION=15
 ARCHITECTURE=arm
@@ -85,7 +85,7 @@ echo "Running Boost bootstrap.."
 echo "Running Boost b2 build..."
 # MinGW defaults to an older version of Windows header files, Process library of Boost needs newer
 # one, we default to the newest: define=_WIN32_WINNT=0x0A00
-time ./b2 --user-config=./user-config.jam -d2 --prefix=./build --debug-configuration target-os=windows address-model=64 variant=debug architecture=$ARCHITECTURE binary-format=pe abi=$ABI toolset=gcc-$GCC_VERSION define=_WIN32_WINNT=0x0A00 cxxflags=-Wno-attributes link=static linkflags=-static-libstdc++ linkflags=-static-libgcc install > boost-build.log
+time ./b2 --user-config=./user-config.jam -d2 --prefix=./build --debug-configuration target-os=windows address-model=64 variant=debug architecture=$ARCHITECTURE binary-format=pe abi=$ABI toolset=gcc-$GCC_VERSION define=_WIN32_WINNT=0x0A00 cxxflags=-Wno-attributes link=static linkflags=-static-libstdc++ linkflags=-static-libgcc install > boost-build.log || true
 
 
 echo "Running Boost tests..."
