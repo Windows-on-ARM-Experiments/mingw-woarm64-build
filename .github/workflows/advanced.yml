@@ -515,6 +515,10 @@ jobs:
     needs: [build-toolchain]
     runs-on: ubuntu-latest
 
+    env:
+      PLATFORM: pc-cygwin
+      TOOLCHAIN_NAME: aarch64-pc-cygwin-msvcrt
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
