@@ -2,7 +2,7 @@
 
 source `dirname ${BASH_SOURCE[0]}`/../config.sh
 
-#BASH_PATH=${BASH_PATH:-~/$TARGET/bash}
+BASH_PATH=${BASH_PATH:-~/$TARGET/bash}
 BASH_BUILD_PATH=$BUILD_PATH/bash
 BASH_SOURCE_PATH=$SOURCE_PATH/bash-5.2.37
 
@@ -28,7 +28,6 @@ fi
 
 echo "::group::Build Bash"
     make $BUILD_MAKE_OPTIONS
-#    make install
 echo "::endgroup::"
 
 echo 'Success!'
