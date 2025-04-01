@@ -15,7 +15,7 @@ MINGW_REPO=${MINGW_REPO:-Windows-on-ARM-Experiments/mingw-woarm64}
 MINGW_BRANCH=${MINGW_BRANCH:-woarm64}
 
 CYGWIN_REPO=${CYGWIN_REPO:-Windows-on-ARM-Experiments/newlib-cygwin}
-CYGWIN_BRANCH=${CYGWIN_BRANCH:-woarm64}
+CYGWIN_BRANCH=${CYGWIN_BRANCH:-fork-exec-api}
 
 CYGWIN_PACKAGES_REPO=${CYGWIN_PACKAGES_REPO:-Windows-on-ARM-Experiments/cygwin-packages}
 CYGWIN_PACKAGES_BRANCH=${CYGWIN_PACKAGES_BRANCH:-main}
@@ -109,12 +109,12 @@ else
     GCC_VERSION="15.0.0"
 fi
 
-DEBUG=${DEBUG:-0} # Enable debug build.
+DEBUG=${DEBUG:-1} # Enable debug build.
 CCACHE=${CCACHE:-0} # Enable usage of ccache.
 RUN_BOOTSTRAP=${RUN_BOOTSTRAP:-0} # Bootstrap dependencies during the build.
 UPDATE_SOURCES=${UPDATE_SOURCES:-0} # Update source code repositories.
 UPDATE_LIBRARIES=${UPDATE_LIBRARIES:-0} # Update also source code of tested libraries repositories.
-FLAT_CLONE=${FLAT_CLONE:-1} # Whether the clone of source codes should be full or flat.
+FLAT_CLONE=${FLAT_CLONE:-0} # Whether the clone of source codes should be full or flat.
 RESET_SOURCES=${RESET_SOURCES:-0} # Reset source code repositories before update.
 REBASE_SOURCES=${REBASE_SOURCES:-0} # Together with the update, rebase repositories
                                     # to the baseline branches and push the result.
