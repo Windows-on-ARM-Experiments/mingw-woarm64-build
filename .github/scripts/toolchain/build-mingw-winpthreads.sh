@@ -25,7 +25,8 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$MINGW_BUILD_PATH/Makefile" ]]; then
             --disable-shared \
             $HOST_OPTIONS \
             $TARGET_OPTIONS \
-            CFLAGS="$CFLAGS"
+            CFLAGS="$CFLAGS" \
+            CXXFLAGS="$CXXFLAGS"
     echo "::endgroup::"
 fi
 
