@@ -24,13 +24,15 @@ show_help() {
     echo "  -o, --output <file>        Specify output .run file for TTD recording"
     echo "  -w, --windbg <path>        Specify WinDbgX path (optional)"
     echo "  -t, --ttd <path>           Specify TTD engine path (optional)"
+    echo "  -c, --collect              Launch TDD recording"
     echo "  -l, --launch               Launch WinDbgX immediately after recording"
-    echo "  -c, --copy-folder <path>   Specify folder to copy binary and cygwin1.dll (optional)"
+    echo "  -f, --folder <path>        Specify folder to copy binary and cygwin1.dll (optional)"
     echo ""
     echo "Example:"
-    echo "  $0 -o myrecording.run -l ./myprogram.exe arg1 arg2"
+    echo "  $0 -o myrecording.run -c -l ./myprogram.exe arg1 arg2"
 }
 
+LAUNCH_TTD=0
 LAUNCH_WINDBG=0
 OUTPUT_FILE=""
 EXECUTABLE=""
@@ -59,11 +61,15 @@ while [[ $# -gt 0 ]]; do
             TTD_ENGINE="$2"
             shift 2
             ;;
+        -c|--collect)
+            LAUNCH_TTD=1
+            shift
+            ;;
         -l|--launch)
             LAUNCH_WINDBG=1
             shift
             ;;
-        -c|--copy-folder)
+        -f|--folder)
             COPY_FOLDER="$2"
             shift 2
             ;;
@@ -130,29 +136,34 @@ WIN_EXECUTABLE_DIR=$(wslpath -w "$EXECUTABLE_DIR")
 WIN_OUTPUT_FILE=$(wslpath -w "$OUTPUT_FILE")
 WIN_TTD_ENGINE=$(wslpath -w "$TTD_ENGINE")
 WIN_SOURCE_PATH=$(wslpath -w "$SOURCE_PATH")
-
-# Run the TTD recording with elevated privileges
-echo "Starting TTD recording for: $EXECUTABLE"
-echo "Recording will be saved to: $OUTPUT_FILE"
-powershell.exe -Command "Start-Process -FilePath \"$WIN_TTD_ENGINE\" -ArgumentList \"-out $WIN_OUTPUT_FILE -children  $WIN_EXECUTABLE $EXECUTABLE_ARGS\" -Verb RunAs"
-
-TTD_RESULT=$?
-if [ $TTD_RESULT -ne 0 ]; then
-    echo "Error: TTD recording failed with exit code $TTD_RESULT"
-    exit $TTD_RESULT
-fi
-
-echo "TTD recording complete: $OUTPUT_FILE"
-
 WIN_SOURCE_PATH="W:\\${WIN_SOURCE_PATH#\\\\wsl.localhost\\Ubuntu-22.04\\}"
-cat <<EOF > $EXECUTABLE_DIR/script
-.open $WIN_SOURCE_PATH\\cygwin\\winsup\\testsuite\\winsup.api\\$EXECUTABLE_NAME.c
-bm main
-g
-EOF
+
+if [ $LAUNCH_WINDBG -eq 1 ]; then
+    # Run the TTD recording with elevated privileges
+    echo "Starting TTD recording for: $EXECUTABLE"
+    echo "Recording will be saved to: $OUTPUT_FILE"
+    powershell.exe -Command "Start-Process -FilePath \"$WIN_TTD_ENGINE\" -ArgumentList \"-out $WIN_OUTPUT_FILE -children  $WIN_EXECUTABLE $EXECUTABLE_ARGS\" -Verb RunAs"
+
+    TTD_RESULT=$?
+    if [ $TTD_RESULT -ne 0 ]; then
+        echo "Error: TTD recording failed with exit code $TTD_RESULT"
+        exit $TTD_RESULT
+    fi
+
+    echo "TTD recording complete: $OUTPUT_FILE"
+fi
 
 # Launch WinDbgX if requested
 if [ $LAUNCH_WINDBG -eq 1 ]; then
+    cat <<EOF > $EXECUTABLE_DIR/script
+        bm main
+        bm cygwin1!dofork
+        bm cygwin1!frok::parent
+        bm cygwin1!pthread_wrapper
+        g
+EOF
+    unix2dos $EXECUTABLE_DIR/script
+
     echo "Launching WinDbgX with recording..."
     "$WINDBGX_PATH" -z "$WIN_OUTPUT_FILE" -lsrcpath $WIN_SOURCE_PATH -c "$<$WIN_EXECUTABLE_DIR\\script"
 fi
