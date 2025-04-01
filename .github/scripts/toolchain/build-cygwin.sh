@@ -16,6 +16,7 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$CYGWIN_BUILD_PATH/Makefile" ]]; then
         if [ "$DEBUG" = 1 ] ; then
             HOST_OPTIONS="$HOST_OPTIONS \
                 --enable-debug \
+                --enable-debugging \
                 --disable-lto"
         fi
 
