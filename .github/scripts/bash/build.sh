@@ -21,7 +21,6 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$BASH_BUILD_PATH/Makefile" ]]; then
             --prefix=$BASH_PATH \
             --build=$TARGET \
             --host=$TARGET \
-            --target=$TARGET
 
     echo "::endgroup::"
 fi
