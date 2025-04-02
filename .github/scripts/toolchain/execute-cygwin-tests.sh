@@ -13,6 +13,7 @@ echo "::group::Execute Cygwin tests"
         if [[ -z "$NAME" ]]; then
             MAKE_TARGET="check"
         else
+            rm -rf $CYGWIN_BUILD_PATH/aarch64-pc-cygwin/winsup/testsuite/winsup.api/$NAME.exe
             MAKE_TARGET="winsup.api/$NAME.log"
         fi
 
