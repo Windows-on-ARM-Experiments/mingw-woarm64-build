@@ -518,6 +518,7 @@ jobs:
     env:
       PLATFORM: pc-cygwin
       TOOLCHAIN_NAME: aarch64-pc-cygwin-msvcrt
+      TOOLCHAIN_PACKAGE_NAME: aarch64-pc-cygwin-msvcrt-toolchain.tar.gz
 
     steps:
       - name: Checkout repository
