@@ -17,7 +17,8 @@ TEST(Aarch64MinGW, SscanfDoubleTest);
 TEST(Aarch64MinGW, StaticConstructorTest);
 TEST(Aarch64MinGW, StaticFunctionTest);
 TEST(Aarch64MinGW, StructTest);
-TEST(Aarch64MinGW, TestVaList);
+TEST(Aarch64MinGW, VaListDirectTest);
+TEST(Aarch64MinGW, VaListIndirectTest);
 TEST(Aarch64MinGW, TestSPrintf);
 TEST(Aarch64MinGW, TestVaArgPack);
 TEST(Aarch64MinGW, WeakReferencesTest);
@@ -60,7 +61,8 @@ int main(int argc, char **argv) {
         DECLARE_TEST(Aarch64MinGW, StaticConstructorTest),
         DECLARE_TEST(Aarch64MinGW, StaticFunctionTest),
         DECLARE_TEST(Aarch64MinGW, StructTest),
-        DECLARE_TEST(Aarch64MinGW, TestVaList),
+        DECLARE_TEST(Aarch64MinGW, VaListDirectTest),
+        DECLARE_TEST(Aarch64MinGW, VaListIndirectTest),
         DECLARE_TEST(Aarch64MinGW, TestSPrintf),
         DECLARE_TEST(Aarch64MinGW, TestVaArgPack),
         DECLARE_TEST(Aarch64MinGW, WeakReferencesTest)

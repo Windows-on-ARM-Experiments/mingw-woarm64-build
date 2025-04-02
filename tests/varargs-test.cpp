@@ -7,12 +7,20 @@ extern "C" void test_va_arg_pack(char *buf, size_t length);
 // Test if the va_list builtin can be passed to CRT methods.
 // I would expect this to fail until the va_list builtin is implemented for
 // the Windows ABI.
-TEST(Aarch64MinGW, TestVaList)
+TEST(Aarch64MinGW, VaListDirectTest)
 {
-    GTEST_SKIP();
-    
     char sz[100];
-    test_va_list(sz, 100);
+    test_va_list_direct(sz, 100);
+    ASSERT_STREQ(sz, "string 11 1919 111.111000");
+}
+
+// Test if the va_list builtin can be passed to CRT methods.
+// I would expect this to fail until the va_list builtin is implemented for
+// the Windows ABI. Indirect variant according to https://c-faq.com/varargs/handoff.html
+TEST(Aarch64MinGW, VaListIndirectTest)
+{
+    char sz[100];
+    test_va_list_indirect(sz, 100);
     ASSERT_STREQ(sz, "string 11 1919 111.111000");
 }
 
