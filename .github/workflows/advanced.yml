@@ -122,7 +122,7 @@ env:
 
 jobs:
   build-toolchain:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.arch == 'aarch64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
 
     strategy:
       fail-fast: false
@@ -379,7 +379,7 @@ jobs:
 
   build-aarch64-tests:
     needs: [build-toolchain]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
 
     strategy:
       fail-fast: false
@@ -510,7 +510,7 @@ jobs:
 
   build-openblas:
     needs: [build-toolchain]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
 
     steps:
       - name: Checkout repository
@@ -611,7 +611,7 @@ jobs:
 
   build-zlib:
     needs: [build-toolchain]
-    runs-on: ubuntu-latest 
+    runs-on: ubuntu-24.04-arm
 
     env:
       ZLIB_PATH: ${{ github.workspace }}/zlib
@@ -662,7 +662,7 @@ jobs:
 
   build-libxml2:
     needs: [build-toolchain, build-zlib]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
 
     env:
       ZLIB_PATH: ${{ github.workspace }}/zlib
@@ -723,7 +723,7 @@ jobs:
 
   build-openssl:
     needs: [build-toolchain, build-zlib]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
 
     env:
       ZLIB_PATH: ${{ github.workspace }}/zlib
@@ -870,7 +870,7 @@ jobs:
 
   build-libjpeg-turbo:
     needs: [build-toolchain]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
 
     env:
       LIBJPEG_TURBO_PATH: ${{ github.workspace }}/libjpeg-turbo
@@ -988,7 +988,7 @@ jobs:
 
   build-ffmpeg:
     needs: [build-toolchain]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
 
     env:
       FFMPEG_PATH: ${{ github.workspace }}/ffmpeg
