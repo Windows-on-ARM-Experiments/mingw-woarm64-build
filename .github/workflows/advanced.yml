@@ -513,7 +513,7 @@ jobs:
 
   build-bash:
     needs: [build-toolchain]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
 
     env:
       PLATFORM: pc-cygwin
