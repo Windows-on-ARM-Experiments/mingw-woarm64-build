@@ -119,6 +119,7 @@ fi
 # If a copy folder is specified, copy the binary and cygwin1.dll to that folder.
 if [ -n "$COPY_FOLDER" ]; then
     mkdir -p "$COPY_FOLDER"
+    rm -rf "$COPY_FOLDER/*"
     cp "$EXECUTABLE" "$COPY_FOLDER"
     cp "$TOOLCHAIN_PATH/bin/cygwin1.dll" "$COPY_FOLDER"
     EXECUTABLE="$COPY_FOLDER/$EXECUTABLE_NAME.exe"
@@ -129,6 +130,7 @@ fi
 if [ -z "$OUTPUT_FILE" ]; then
     OUTPUT_FILE="$EXECUTABLE_DIR/$EXECUTABLE_NAME.run"
 fi
+LOG_FILE="$EXECUTABLE_DIR/$EXECUTABLE_NAME.out"
 
 # Convert paths to Windows format.
 WIN_EXECUTABLE=$(wslpath -w "$EXECUTABLE")
@@ -138,11 +140,12 @@ WIN_TTD_ENGINE=$(wslpath -w "$TTD_ENGINE")
 WIN_SOURCE_PATH=$(wslpath -w "$SOURCE_PATH")
 WIN_SOURCE_PATH="W:\\${WIN_SOURCE_PATH#\\\\wsl.localhost\\Ubuntu-22.04\\}"
 
-if [ $LAUNCH_WINDBG -eq 1 ]; then
+if [ $LAUNCH_TTD -eq 1 ]; then
     # Run the TTD recording with elevated privileges
     echo "Starting TTD recording for: $EXECUTABLE"
     echo "Recording will be saved to: $OUTPUT_FILE"
-    powershell.exe -Command "Start-Process -FilePath \"$WIN_TTD_ENGINE\" -ArgumentList \"-out $WIN_OUTPUT_FILE -children  $WIN_EXECUTABLE $EXECUTABLE_ARGS\" -Verb RunAs"
+    echo "Log will be saved to: $LOG_FILE"
+    powershell.exe -Command "& { Start-Process -FilePath \"$WIN_TTD_ENGINE\" -ArgumentList \"-out $WIN_OUTPUT_FILE -mode full -children $WIN_EXECUTABLE $EXECUTABLE_ARGS\" -Verb RunAs; Wait-Process -Name TTD; exit \$LASTEXITCODE }"
 
     TTD_RESULT=$?
     if [ $TTD_RESULT -ne 0 ]; then
@@ -155,11 +158,20 @@ fi
 
 # Launch WinDbgX if requested
 if [ $LAUNCH_WINDBG -eq 1 ]; then
+    if [ ! -f "$OUTPUT_FILE" ] && [ ! -f "$LOG_FILE" ]; then
+        echo "Error: Output file $OUTPUT_FILE does not exist. Please run TTD recording first."
+        exit 1
+    fi
+    if [ ! -f "$OUTPUT_FILE" ]; then
+        echo "Error: Recording failed."
+        cat "$LOG_FILE"
+        exit 1
+    fi
+
     cat <<EOF > $EXECUTABLE_DIR/script
         bm main
-        bm cygwin1!dofork
-        bm cygwin1!frok::parent
-        bm cygwin1!pthread_wrapper
+        bm cygwin1!setjmp
+        bm cygwin1!longjmp
         g
 EOF
     unix2dos $EXECUTABLE_DIR/script
