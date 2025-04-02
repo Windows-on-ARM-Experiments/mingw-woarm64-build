@@ -10,7 +10,7 @@ on:
       binutils_branch:
         description: 'Binutils branch to build'
         required: false
-        default: 'woarm64'
+        default: 'enable-sim'
       gcc_branch:
         description: 'GCC branch to build'
         required: false
@@ -69,7 +69,7 @@ on:
 
 env:
   BINUTILS_REPO: Windows-on-ARM-Experiments/binutils-woarm64
-  BINUTILS_BRANCH: ${{ inputs.binutils_branch || 'woarm64' }}
+  BINUTILS_BRANCH: ${{ inputs.binutils_branch || 'enable-sim' }}
 
   GCC_REPO: Windows-on-ARM-Experiments/gcc-woarm64
   GCC_BRANCH: ${{ inputs.gcc_branch || 'woarm64' }}
