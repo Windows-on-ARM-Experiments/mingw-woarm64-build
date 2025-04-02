@@ -56,15 +56,23 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$MINGW_BUILD_PATH/Makefile" ]]; then
             ;;
         esac
 
+        case "$ARCH-$PLATFORM" in
+            x86_64-w64-mingw32)
+                LDFLAGS="$LDFLAGS -L$TOOLCHAIN_PATH/lib/gcc/$TARGET/lib"
+            ;;
+        esac
+
         $SOURCE_PATH/mingw/configure \
             --prefix=$TOOLCHAIN_PATH/$TARGET \
             --build=$BUILD \
             --host=$TARGET \
             --enable-static \
             --enable-shared \
+            --with-libraries=all \
             $HOST_OPTIONS \
             $TARGET_OPTIONS \
-            CFLAGS="$CFLAGS"
+            CFLAGS="$CFLAGS" \
+            LDFLAGS="$LDFLAGS"
     echo "::endgroup::"
 fi
 
