@@ -26,7 +26,7 @@ on:
       crt:
         description: 'C runtime to build for'
         required: false
-        default: 'msvcrt'
+        default: 'ucrt'
       tag:
         description: 'Tag to use for the artifact'
         required: true
@@ -66,7 +66,7 @@ env:
 
   ARCH: ${{ inputs.arch || 'x86_64' }}
   PLATFORM: ${{ inputs.platform || 'w64-mingw32' }}
-  CRT: ${{ inputs.crt || 'msvcrt' }}
+  CRT: ${{ inputs.crt || 'ucrt' }}
   
   TAG: ${{ inputs.tag || 'test' }}
   MODULE: ${{ inputs.gcc_module || '' }}
