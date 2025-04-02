@@ -540,7 +540,7 @@ jobs:
       - name: Download ${{ env.TOOLCHAIN_NAME }} toolchain
         uses: actions/cache/restore@v4
         with:
-          path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
+          path: ${{ env.RELATIVE_ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
           key: ${{ env.toolchain-cache-key }}
           enableCrossOsArchive: true
           fail-on-cache-miss: true
