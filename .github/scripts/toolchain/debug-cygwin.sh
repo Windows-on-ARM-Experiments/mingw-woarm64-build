@@ -145,7 +145,13 @@ if [ $LAUNCH_TTD -eq 1 ]; then
     echo "Starting TTD recording for: $EXECUTABLE"
     echo "Recording will be saved to: $OUTPUT_FILE"
     echo "Log will be saved to: $LOG_FILE"
-    powershell.exe -Command "& { Start-Process -FilePath \"$WIN_TTD_ENGINE\" -ArgumentList \"-out $WIN_OUTPUT_FILE -mode full -children $WIN_EXECUTABLE $EXECUTABLE_ARGS\" -Verb RunAs; Wait-Process -Name TTD; exit \$LASTEXITCODE }"
+    powershell.exe "
+        Set-Location -Path $WIN_EXECUTABLE_DIR; \
+        Start-Process \
+            -Verb RunAs \
+            -FilePath $WIN_TTD_ENGINE \
+            -ArgumentList \"-out $WIN_OUTPUT_FILE -nowaitformain -noUI -children $WIN_EXECUTABLE $EXECUTABLE_ARGS\"; \
+        exit \$LASTEXITCODE"
 
     TTD_RESULT=$?
     if [ $TTD_RESULT -ne 0 ]; then
@@ -153,25 +159,31 @@ if [ $LAUNCH_TTD -eq 1 ]; then
         exit $TTD_RESULT
     fi
 
+    if [ -f "$LOG_FILE" ]; then
+        cat "$LOG_FILE"
+    fi
+
+    if [ ! -f "$OUTPUT_FILE" ]; then
+        echo "Error: TTD output file $OUTPUT_FILE has not been created."
+        exit 1
+    fi
+
     echo "TTD recording complete: $OUTPUT_FILE"
 fi
 
 # Launch WinDbgX if requested
 if [ $LAUNCH_WINDBG -eq 1 ]; then
-    if [ ! -f "$OUTPUT_FILE" ] && [ ! -f "$LOG_FILE" ]; then
-        echo "Error: Output file $OUTPUT_FILE does not exist. Please run TTD recording first."
-        exit 1
-    fi
     if [ ! -f "$OUTPUT_FILE" ]; then
-        echo "Error: Recording failed."
-        cat "$LOG_FILE"
+        echo "Error: Output file $OUTPUT_FILE does not exist. Please run TTD recording first."
         exit 1
     fi
 
     cat <<EOF > $EXECUTABLE_DIR/script
         bm main
         bm cygwin1!setjmp
+        bm cygwin1!sigsetjmp
         bm cygwin1!longjmp
+        bm cygwin1!siglongjmp
         g
 EOF
     unix2dos $EXECUTABLE_DIR/script
