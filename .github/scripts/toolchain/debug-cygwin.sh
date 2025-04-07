@@ -119,7 +119,14 @@ fi
 # If a copy folder is specified, copy the binary and cygwin1.dll to that folder.
 if [ -n "$COPY_FOLDER" ]; then
     mkdir -p "$COPY_FOLDER"
-    rm -rf "$COPY_FOLDER/*"
+
+    rm -rf $COPY_FOLDER/*
+    sleep 1
+    if [ "$(ls -A $COPY_FOLDER)" ]; then
+        echo "Error: Failed to clean $COPY_FOLDER."
+        exit 1
+    fi
+
     cp "$EXECUTABLE" "$COPY_FOLDER"
     cp "$TOOLCHAIN_PATH/bin/cygwin1.dll" "$COPY_FOLDER"
     EXECUTABLE="$COPY_FOLDER/$EXECUTABLE_NAME.exe"
@@ -145,13 +152,7 @@ if [ $LAUNCH_TTD -eq 1 ]; then
     echo "Starting TTD recording for: $EXECUTABLE"
     echo "Recording will be saved to: $OUTPUT_FILE"
     echo "Log will be saved to: $LOG_FILE"
-    powershell.exe "
-        Set-Location -Path $WIN_EXECUTABLE_DIR; \
-        Start-Process \
-            -Verb RunAs \
-            -FilePath $WIN_TTD_ENGINE \
-            -ArgumentList \"-out $WIN_OUTPUT_FILE -nowaitformain -noUI -children $WIN_EXECUTABLE $EXECUTABLE_ARGS\"; \
-        exit \$LASTEXITCODE"
+    powershell.exe "Set-Location -Path $WIN_EXECUTABLE_DIR; Start-Process -Wait -Verb RunAs -FilePath $WIN_TTD_ENGINE -ArgumentList \"-out $WIN_OUTPUT_FILE -noUI -children $WIN_EXECUTABLE $EXECUTABLE_ARGS\"; exit \$LASTEXITCODE"
 
     TTD_RESULT=$?
     if [ $TTD_RESULT -ne 0 ]; then
