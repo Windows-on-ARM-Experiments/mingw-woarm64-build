@@ -26,6 +26,7 @@ show_help() {
     echo "  -t, --ttd <path>           Specify TTD engine path (optional)"
     echo "  -c, --collect              Launch TDD recording"
     echo "  -l, --launch               Launch WinDbgX immediately after recording"
+    echo "  --child <id>                Launch WinDbgx session for child process recording (optional)"
     echo "  -f, --folder <path>        Specify folder to copy binary and cygwin1.dll (optional)"
     echo ""
     echo "Example:"
@@ -42,6 +43,8 @@ EXECUTABLE_ARGS=""
 WINDBGX_PATH=""
 TTD_ENGINE=""
 COPY_FOLDER=""
+CHILD=0
+CHILD_ID="01"
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -68,6 +71,11 @@ while [[ $# -gt 0 ]]; do
         -l|--launch)
             LAUNCH_WINDBG=1
             shift
+            ;;
+        --child)
+            CHILD=1
+            CHILD_ID="$2"
+            shift 2
             ;;
         -f|--folder)
             COPY_FOLDER="$2"
@@ -161,7 +169,13 @@ if [ $LAUNCH_TTD -eq 1 ]; then
     fi
 
     if [ -f "$LOG_FILE" ]; then
+        echo "Parent recording log:"
         cat "$LOG_FILE"
+    fi
+
+    if [ $CHILD -eq 1 ]; then
+        echo "Child $CHILD_ID recording log:"
+        cat "${LOG_FILE%.out}$CHILD_ID.out"
     fi
 
     if [ ! -f "$OUTPUT_FILE" ]; then
@@ -177,6 +191,10 @@ if [ $LAUNCH_WINDBG -eq 1 ]; then
     if [ ! -f "$OUTPUT_FILE" ]; then
         echo "Error: Output file $OUTPUT_FILE does not exist. Please run TTD recording first."
         exit 1
+    fi
+
+    if [ $CHILD -eq 1 ]; then
+        WIN_OUTPUT_FILE="${WIN_OUTPUT_FILE%.run}$CHILD_ID.run"
     fi
 
     cat <<EOF > $EXECUTABLE_DIR/script
