@@ -16,6 +16,7 @@ echo "::group::Install Dependencies"
       dejagnu \
       docbook2x \
       flex \
+      gettext \
       gdc \
       libc6-dev-arm64-cross \
       libc6-dev-amd64-cross \
