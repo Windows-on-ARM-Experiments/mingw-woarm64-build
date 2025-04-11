@@ -120,7 +120,7 @@ env:
   ARTIFACT_PATH: ${{ github.workspace }}/artifact
   RELATIVE_ARTIFACT_PATH: ./artifact
 
-  CCACHE: 1
+  CCACHE: 0
   DELETE_BUILD: 1
 
 jobs:
