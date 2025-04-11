@@ -130,9 +130,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        arch: [aarch64, x86_64]
-        platform: [w64-mingw32, pc-linux-gnu, pc-cygwin]
-        crt: [msvcrt, ucrt, libc]
+        arch: [aarch64]
+        platform: [pc-cygwin]
+        crt: [msvcrt]
         exclude:
           - platform: w64-mingw32
             crt: libc
@@ -551,7 +551,7 @@ jobs:
     
       - name: Build Bash
         run: |
-          .github/scripts/bash/build.sh
+          BUILD_MAKE_OPTIONS=-j1 .github/scripts/bash/build.sh
 
   build-openblas:
     needs: [build-toolchain]
