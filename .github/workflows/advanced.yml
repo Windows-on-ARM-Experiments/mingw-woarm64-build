@@ -120,7 +120,7 @@ env:
   ARTIFACT_PATH: ${{ github.workspace }}/artifact
   RELATIVE_ARTIFACT_PATH: ./artifact
 
-  CCACHE: 0
+  CCACHE: 1
   DELETE_BUILD: 1
 
 jobs:
@@ -551,7 +551,7 @@ jobs:
     
       - name: Build Bash
         run: |
-          BUILD_MAKE_OPTIONS=-j1 .github/scripts/bash/build.sh
+          .github/scripts/bash/build.sh
 
   build-openblas:
     needs: [build-toolchain]

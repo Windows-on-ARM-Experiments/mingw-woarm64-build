@@ -19,6 +19,7 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$BASH_BUILD_PATH/Makefile" ]]; then
         CFLAGS="-std=gnu89 -DNEED_EXTERN_PC" \
         $BASH_SOURCE_PATH/configure \
             --prefix=$BASH_PATH \
+            --build=$BUILD \
             --host=$TARGET \
 
     echo "::endgroup::"
