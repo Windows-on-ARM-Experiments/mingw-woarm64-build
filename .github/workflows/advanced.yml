@@ -14,7 +14,7 @@ on:
       gcc_branch:
         description: 'GCC branch to build'
         required: false
-        default: 'woarm64'
+        default: 'fix-va-list'
       mingw_branch:
         description: 'MinGW branch to build'
         required: false
@@ -72,7 +72,7 @@ env:
   BINUTILS_BRANCH: ${{ inputs.binutils_branch || 'woarm64' }}
 
   GCC_REPO: Windows-on-ARM-Experiments/gcc-woarm64
-  GCC_BRANCH: ${{ inputs.gcc_branch || 'woarm64' }}
+  GCC_BRANCH: ${{ inputs.gcc_branch || 'fix-va-list' }}
 
   MINGW_REPO: Windows-on-ARM-Experiments/mingw-woarm64
   MINGW_BRANCH: ${{ inputs.mingw_branch || 'woarm64' }}
@@ -108,11 +108,11 @@ env:
   BASH_BRANCH: woarm64
 
   TOOLCHAIN_PATH: ${{ github.workspace }}/cross
-  TOOLCHAIN_NAME: aarch64-w64-mingw32-msvcrt
-  TOOLCHAIN_ARTIFACT_NAME: aarch64-w64-mingw32-msvcrt-toolchain
-  TOOLCHAIN_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-toolchain.tar.gz
-  RUNTIME_ARTIFACT_NAME: aarch64-w64-mingw32-msvcrt-toolchain
-  RUNTIME_PACKAGE_NAME: aarch64-w64-mingw32-msvcrt-runtime.tar.gz
+  TOOLCHAIN_NAME: aarch64-w64-mingw32-ucrt
+  TOOLCHAIN_ARTIFACT_NAME: aarch64-w64-mingw32-ucrt-toolchain
+  TOOLCHAIN_PACKAGE_NAME: aarch64-w64-mingw32-ucrt-toolchain.tar.gz
+  RUNTIME_ARTIFACT_NAME: aarch64-w64-mingw32-ucrt-toolchain
+  RUNTIME_PACKAGE_NAME: aarch64-w64-mingw32-ucrt-runtime.tar.gz
 
   SOURCE_PATH: ${{ github.workspace }}/code
   BUILD_PATH: ${{ github.workspace }}/build
@@ -149,7 +149,7 @@ jobs:
       ARCH: ${{ matrix.arch }}
       PLATFORM: ${{ matrix.platform }}
       CRT: ${{ matrix.crt }}
-      PACK_TOOLCHAIN: ${{ matrix.arch == 'aarch64' && (matrix.platform == 'w64-mingw32' || matrix.platform == 'pc-cygwin') && matrix.crt == 'msvcrt' }}
+      PACK_TOOLCHAIN: ${{ matrix.arch == 'aarch64' && (matrix.platform == 'w64-mingw32' || matrix.platform == 'pc-cygwin') && matrix.crt == 'ucrt' }}
       TOOLCHAIN_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}
       TOOLCHAIN_ARTIFACT_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}-toolchain
       TOOLCHAIN_PACKAGE_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}-toolchain.tar.gz
@@ -374,11 +374,11 @@ jobs:
       runtime-package-name: ${{ env.PACK_TOOLCHAIN == 'true' && env.RUNTIME_PACKAGE_NAME || '' }}
       runtime-artifact-name: ${{ env.PACK_TOOLCHAIN == 'true' && env.RUNTIME_ARTIFACT_NAME || '' }}
       toolchain-cache-key: ${{ env.PACK_TOOLCHAIN == 'true' && steps.cache-keys.outputs.toolchain-cache-key || '' }}
-      aarch64-w64-mingw32-msvcrt-toolchain-cache-key: ${{ env.aarch64-w64-mingw32-msvcrt-toolchain-cache-key }}
-      aarch64-pc-cygwin-msvcrt-toolchain-cache-key: ${{ env.aarch64-pc-cygwin-msvcrt-toolchain-cache-key }}
+      aarch64-w64-mingw32-ucrt-toolchain-cache-key: ${{ env.aarch64-w64-mingw32-ucrt-toolchain-cache-key }}
+      aarch64-pc-cygwin-ucrt-toolchain-cache-key: ${{ env.aarch64-pc-cygwin-ucrt-toolchain-cache-key }}
       runtime-cache-key: ${{ env.PACK_TOOLCHAIN == 'true' && steps.cache-keys.outputs.runtime-cache-key || '' }}
-      aarch64-w64-mingw32-msvcrt-runtime-cache-key: ${{ env.aarch64-w64-mingw32-msvcrt-runtime-cache-key }}
-      aarch64-pc-cygwin-msvcrt-runtime-cache-key: ${{ env.aarch64-pc-cygwin-msvcrt-runtime-cache-key }}
+      aarch64-w64-mingw32-ucrt-runtime-cache-key: ${{ env.aarch64-w64-mingw32-ucrt-runtime-cache-key }}
+      aarch64-pc-cygwin-ucrt-runtime-cache-key: ${{ env.aarch64-pc-cygwin-ucrt-runtime-cache-key }}
 
   build-aarch64-tests:
     needs: [build-toolchain]
@@ -389,7 +389,7 @@ jobs:
       matrix:
         arch: [aarch64]
         platform: [w64-mingw32, pc-cygwin]
-        crt: [msvcrt]
+        crt: [ucrt]
 
     env:
       PLATFORM: ${{ matrix.platform }}
@@ -453,7 +453,7 @@ jobs:
       matrix:
         arch: [aarch64]
         platform: [w64-mingw32, pc-cygwin]
-        crt: [msvcrt]
+        crt: [ucrt]
 
     env:
       RUNTIME_PACKAGE_NAME: ${{ matrix.arch }}-${{ matrix.platform }}-${{ matrix.crt }}-runtime.tar.gz
