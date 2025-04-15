@@ -104,6 +104,9 @@ env:
   FFMPEG_REPO: FFmpeg/FFmpeg
   FFMPEG_BRANCH: release/6.1
 
+  BASH_REPO: Windows-on-ARM-Experiments/bash
+  BASH_BRANCH: woarm64
+
   TOOLCHAIN_PATH: ${{ github.workspace }}/cross
   TOOLCHAIN_NAME: aarch64-w64-mingw32-msvcrt
   TOOLCHAIN_ARTIFACT_NAME: aarch64-w64-mingw32-msvcrt-toolchain
@@ -507,6 +510,48 @@ jobs:
         shell: bash
         run: |
           .github/scripts/tests/cygwin/execute-tests.sh
+
+  build-bash:
+    needs: [build-toolchain]
+    runs-on: ubuntu-24.04-arm
+
+    env:
+      PLATFORM: pc-cygwin
+      TOOLCHAIN_NAME: aarch64-pc-cygwin-msvcrt
+      TOOLCHAIN_PACKAGE_NAME: aarch64-pc-cygwin-msvcrt-toolchain.tar.gz
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: ${{ github.workspace }}
+
+      - name: Checkout Bash
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.BASH_REPO }}
+          ref: ${{ env.BASH_BRANCH }}
+          path: ${{ env.SOURCE_PATH }}/bash
+
+      - name: Extract cache keys
+        run: |
+          .github/scripts/extract-cache-keys.sh '${{ toJSON(needs.build-toolchain.outputs) }}'
+
+      - name: Download ${{ env.TOOLCHAIN_NAME }} toolchain
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ env.RELATIVE_ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
+          key: ${{ env.toolchain-cache-key }}
+          enableCrossOsArchive: true
+          fail-on-cache-miss: true
+
+      - name: Unpack toolchain
+        run: |
+          .github/scripts/toolchain/unpack.sh
+    
+      - name: Build Bash
+        run: |
+          .github/scripts/bash/build.sh
 
   build-openblas:
     needs: [build-toolchain]
