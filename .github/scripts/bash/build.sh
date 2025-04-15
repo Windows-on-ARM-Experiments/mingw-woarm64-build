@@ -15,7 +15,7 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$BASH_BUILD_PATH/Makefile" ]]; then
     echo "::group::Configure Bash"
         rm -rf $BASH_BUILD_PATH/*
 
-        CFLAGS="-std=gnu89 -DNEED_EXTERN_PC" \
+        CFLAGS="-std=gnu89" \
         $BASH_SOURCE_PATH/configure \
             --prefix=$BASH_PATH \
             --build=$BUILD \
