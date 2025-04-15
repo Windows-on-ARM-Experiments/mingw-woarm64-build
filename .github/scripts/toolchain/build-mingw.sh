@@ -14,6 +14,9 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$MINGW_BUILD_PATH/Makefile" ]]; then
         if [[ "$DEBUG" = 1 ]]; then
             CFLAGS="$CFLAGS -O0 -ggdb"
             CXXFLAGS="$CXXFLAGS -O0 -ggdb"
+        else
+            CFLAGS="$CFLAGS -O2"
+            CXXFLAGS="$CXXFLAGS -O2"
         fi
 
         case "$ARCH" in
@@ -64,7 +67,8 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$MINGW_BUILD_PATH/Makefile" ]]; then
             --enable-shared \
             $HOST_OPTIONS \
             $TARGET_OPTIONS \
-            CFLAGS="$CFLAGS"
+            CFLAGS="$CFLAGS" \
+            CXXFLAGS="$CXXFLAGS"
     echo "::endgroup::"
 fi
 
