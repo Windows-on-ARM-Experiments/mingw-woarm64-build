@@ -1,11 +1,11 @@
 #include "gtest_like_c.h"
 
-#define UNICODE 1
-#define _UNICODE 1
 
 #include <windows.h>
 
-#define STACK_MAX 100
+#define STACK_MAX 150
+void* stack[STACK_MAX];
+int stack_size = 0;
 
 int walk_stack_rtl()
 {
@@ -13,9 +13,6 @@ int walk_stack_rtl()
     memset(&ctx, 0, sizeof(CONTEXT));
     ctx.ContextFlags = CONTEXT_ALL;
     RtlCaptureContext(&ctx);
-
-    HANDLE hp = GetCurrentProcess();
-    HANDLE ht = GetCurrentThread();
 
     UNWIND_HISTORY_TABLE ms_history;
     DISPATCHER_CONTEXT disp_context;
@@ -28,12 +25,8 @@ int walk_stack_rtl()
 
     for (i = 0; i < STACK_MAX; i++)
     {
-#ifdef _M_AMD64
-        ip = ctx.Rip;
-#elif defined(_M_ARM64)
         ip = ctx.Pc;
-#endif
-
+        stack[i] = (void*) ip;
         disp_context.ControlPc = ip;
         disp_context.FunctionEntry = RtlLookupFunctionEntry(ip, &disp_context.ImageBase, &ms_history);
 
@@ -45,30 +38,39 @@ int walk_stack_rtl()
                                                         &disp_context.HandlerData,
                                                         &disp_context.EstablisherFrame, NULL);
 
-        if (ip == 0)
+       if (ip == 0)
             return i;
     }
 
     return i;
 }
 
-int level4(void)
-{
-    return walk_stack_rtl();
-}
-int level3(void) { level4(); }
-int level2(void) { level3(); }
-int level1(void) { level2(); }
+void fn(int level) {
+    if (level == 103) {
+        int stack_size = walk_stack_rtl();
+        ASSERT_TRUE(stack_size > 105);
 
-int count_stack_frames()
-{
-    return level1();
+        int fn_call_count = 0;
+        for (int i = 0; i < stack_size; i++) {
+            if (stack[i] == stack[2])
+                ++fn_call_count;
+        }
+
+        ASSERT_EQ(fn_call_count, 102);
+
+        return;
+    }
+
+    return fn(level + 1);
 }
 
-TEST(Aarch64MinGW, TestUnwindStack)
+void unwind_stack_test()
 {
-    GTEST_SKIP();
-    
-    ASSERT_EQ(count_stack_frames(), 22);
+    fn(1);
+}
+
+TEST(Aarch64MinGW, UnwindStackTest)
+{
+    unwind_stack_test();
 }
 
