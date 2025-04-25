@@ -14,14 +14,14 @@ on:
       gcc_branch:
         description: 'GCC branch to build'
         required: false
-        default: 'woarm64'
+        default: 'fix-va-list'
       mingw_branch:
         description: 'Mingw branch to build'
         required: false
         default: 'woarm64'
 env:
   BINUTILS_BRANCH: ${{ inputs.binutils_branch || 'woarm64' }}
-  GCC_BRANCH: ${{ inputs.gcc_branch || 'woarm64' }}
+  GCC_BRANCH: ${{ inputs.gcc_branch || 'fix-va-list' }}
   MINGW_BRANCH: ${{ inputs.mingw_branch || 'woarm64' }}
 
   BUILD_PATH: ${{ github.workspace }}/build
