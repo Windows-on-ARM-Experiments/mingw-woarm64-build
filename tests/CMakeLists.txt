@@ -38,6 +38,9 @@ add_executable(
   nested-functions-test.c
   omp-test.c
   printf-double.c
+  seh-fregp.cpp
+  seh-large-func.cpp
+  seh-stack-probing.cpp
   sjlj-test.c
   sscanf-double.c
   static-constructor.cpp
