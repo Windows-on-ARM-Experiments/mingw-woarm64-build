@@ -13,6 +13,9 @@ TEST(Aarch64MinGW, MathTest);
 TEST(Aarch64MinGW, NestedFunction);
 TEST(Aarch64MinGW, OmpTest);
 TEST(Aarch64MinGW, PrintfDoubleTest);
+TEST(Aarch64MinGW, SEHFregpTest);
+TEST(Aarch64MinGW, SEHLargeFunctionTest);
+TEST(Aarch64MinGW, SEHStackProbing);
 TEST(Aarch64MinGW, SJLJTest);
 TEST(Aarch64MinGW, SscanfDoubleTest);
 TEST(Aarch64MinGW, StaticConstructorTest);
@@ -58,6 +61,9 @@ int main(int argc, char **argv) {
         DECLARE_TEST(Aarch64MinGW, NestedFunction),
         DECLARE_TEST(Aarch64MinGW, OmpTest),
         DECLARE_TEST(Aarch64MinGW, PrintfDoubleTest),
+        DECLARE_TEST(Aarch64MinGW, SEHFregpTest),
+        DECLARE_TEST(Aarch64MinGW, SEHLargeFunctionTest),
+        DECLARE_TEST(Aarch64MinGW, SEHStackProbing),
         DECLARE_TEST(Aarch64MinGW, SJLJTest),
         DECLARE_TEST(Aarch64MinGW, SscanfDoubleTest),
         DECLARE_TEST(Aarch64MinGW, StaticConstructorTest),
