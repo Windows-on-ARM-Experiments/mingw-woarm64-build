@@ -535,6 +535,10 @@ jobs:
           ref: ${{ env.BASH_BRANCH }}
           path: ${{ env.SOURCE_PATH }}/bash
 
+      - name: Install dependencies
+        run: |
+          .github/scripts/install-dependencies.sh
+
       - name: Extract cache keys
         run: |
           .github/scripts/extract-cache-keys.sh '${{ toJSON(needs.build-toolchain.outputs) }}'
