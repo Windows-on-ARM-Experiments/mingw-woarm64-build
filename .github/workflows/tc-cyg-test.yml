@@ -388,6 +388,7 @@ jobs:
           .github/scripts/toolchain/unpack.sh
       - name: Checkout Cygwin
         run: |
+          rm -rf ./code/cygwin
           .github/scripts/update-sources.sh cygwin
       - name: Build Cygwin
         run: |
