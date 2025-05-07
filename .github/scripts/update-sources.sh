@@ -46,9 +46,11 @@ function update_repository() {
 
             if ! is_current_branch $BRANCH; then
                 if is_tag $BRANCH; then
-                  git switch --detach $BRANCH
+                    git switch --detach $BRANCH
+                elif is_remote_branch $BRANCH; then
+                    git switch -c $BRANCH origin/$BRANCH
                 else
-                  git switch $BRANCH
+                    git switch $BRANCH
                 fi
             fi
 
