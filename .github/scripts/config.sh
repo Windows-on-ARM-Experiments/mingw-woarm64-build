@@ -9,13 +9,13 @@ BINUTILS_REPO=${BINUTILS_REPO:-Windows-on-ARM-Experiments/binutils-woarm64}
 BINUTILS_BRANCH=${BINUTILS_BRANCH:-woarm64-v3}
 
 GCC_REPO=${GCC_REPO:-Windows-on-ARM-Experiments/gcc-woarm64}
-GCC_BRANCH=${GCC_BRANCH:-woarm64-v8}
+GCC_BRANCH=${GCC_BRANCH:-fix-va-list}
 
 MINGW_REPO=${MINGW_REPO:-Windows-on-ARM-Experiments/mingw-woarm64}
 MINGW_BRANCH=${MINGW_BRANCH:-woarm64}
 
 CYGWIN_REPO=${CYGWIN_REPO:-Windows-on-ARM-Experiments/newlib-cygwin}
-CYGWIN_BRANCH=${CYGWIN_BRANCH:-test-winsup}
+CYGWIN_BRANCH=${CYGWIN_BRANCH:-fork-exec-api}
 
 CYGWIN_PACKAGES_REPO=${CYGWIN_PACKAGES_REPO:-Windows-on-ARM-Experiments/cygwin-packages}
 CYGWIN_PACKAGES_BRANCH=${CYGWIN_PACKAGES_BRANCH:-main}
@@ -32,7 +32,7 @@ CYGWIN_PACKAGES_BASE_BRANCH=main
 COCOM_BASE_BRANCH=master
 
 ARCH=${ARCH:-aarch64}
-PLATFORM=${PLATFORM:-w64-mingw32}
+PLATFORM=${PLATFORM:-pc-cygwin}
 if [[ "$PLATFORM" =~ (mingw|cygwin) ]]; then
     CRT=${CRT:-msvcrt}
 else
@@ -59,7 +59,7 @@ BUILD_PATH=${BUILD_PATH:-$ROOT_PATH/build-$TOOLCHAIN_NAME}
 CCACHE_DIR_PATH=${CCACHE_DIR_PATH:-$ROOT_PATH/ccache}
 ARTIFACT_PATH=${ARTIFACT_PATH:-$ROOT_PATH/artifact}
 BUILD_MAKE_OPTIONS=${BUILD_MAKE_OPTIONS:-V=1 -j$(nproc)}
-CHECK_MAKE_OPTIONS=${CHECK_MAKE_OPTIONS:-V=1 -j$(nproc) -k}
+CHECK_MAKE_OPTIONS=${CHECK_MAKE_OPTIONS:-V=1 -j1}
 TOOLCHAIN_PATH=${TOOLCHAIN_PATH:-~/cross-$TOOLCHAIN_NAME}
 TOOLCHAIN_FILE=${TOOLCHAIN_FILE:-$ROOT_PATH/.github/cmake/$TARGET.cmake}
 TOOLCHAIN_PACKAGE_NAME=${TOOLCHAIN_PACKAGE_NAME:-$TOOLCHAIN_NAME-toolchain.tar.gz}
@@ -109,12 +109,12 @@ else
     GCC_VERSION="15.0.0"
 fi
 
-DEBUG=${DEBUG:-0} # Enable debug build.
+DEBUG=${DEBUG:-1} # Enable debug build.
 CCACHE=${CCACHE:-0} # Enable usage of ccache.
 RUN_BOOTSTRAP=${RUN_BOOTSTRAP:-0} # Bootstrap dependencies during the build.
 UPDATE_SOURCES=${UPDATE_SOURCES:-0} # Update source code repositories.
 UPDATE_LIBRARIES=${UPDATE_LIBRARIES:-0} # Update also source code of tested libraries repositories.
-FLAT_CLONE=${FLAT_CLONE:-1} # Whether the clone of source codes should be full or flat.
+FLAT_CLONE=${FLAT_CLONE:-0} # Whether the clone of source codes should be full or flat.
 RESET_SOURCES=${RESET_SOURCES:-0} # Reset source code repositories before update.
 REBASE_SOURCES=${REBASE_SOURCES:-0} # Together with the update, rebase repositories
                                     # to the baseline branches and push the result.
