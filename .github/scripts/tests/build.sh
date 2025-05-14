@@ -3,11 +3,14 @@
 source `dirname ${BASH_SOURCE[0]}`/../config.sh
 
 echo "::group::Build Aarch64 tests"
-    if [[ "$RUN_CONFIG" = 1 ]]; then
-      rm -rf $ROOT_PATH/tests/build
+    cd $ROOT_PATH/tests
+
+    if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "build/Makefile" ]]; then
+      echo "::group::Configure GCC"
+        rm -rf build
+        cmake -S . -B build
+      echo "::endgroup::"
     fi
 
-    cd $ROOT_PATH/tests
-    cmake -S . -B build
     cmake --build build
 echo "::endgroup::"
