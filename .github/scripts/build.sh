@@ -44,8 +44,11 @@ fi
 if [[ "$PLATFORM" =~ mingw ]]; then
     $ROOT_PATH/.github/scripts/toolchain/build-mingw-winpthreads.sh
 fi
+
 if [[ "$PLATFORM" =~ cygwin ]]; then
-    $ROOT_PATH/.github/scripts/toolchain/build-cocom.sh
+    if [[ "$CYGWIN" = 0 ]]; then
+        $ROOT_PATH/.github/scripts/toolchain/build-cocom.sh
+    fi
     $ROOT_PATH/.github/scripts/toolchain/build-cygwin.sh 1
 fi
 

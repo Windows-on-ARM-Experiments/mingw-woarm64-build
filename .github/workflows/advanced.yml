@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-  pull_request:
   workflow_dispatch:
     inputs:
       binutils_branch:
@@ -533,7 +532,7 @@ jobs:
         # Run the job script created by the GitHub Actions runner as a `runner`
         # user in WSL. As this script is created on Windows, CRLF characters
         # need to be converted to LF and its path translated to WSL format.
-        shell: wsl --user runner bash --noprofile --norc -euo pipefail "$(s="$(wslpath '{0}')" && sed -i 's/\r$//' "$s" && echo "$s")"
+        shell: wsl --user runner bash -euo pipefail "$(s="$(wslpath '{0}')" && sed -i 's/\r$//' "$s" && echo "$s")"
 
     env:
       PLATFORM: pc-cygwin
