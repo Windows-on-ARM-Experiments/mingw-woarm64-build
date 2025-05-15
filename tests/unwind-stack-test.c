@@ -61,7 +61,7 @@ void fn(int level) {
         return;
     }
 
-    return fn(level + 1);
+    fn(level + 1);
 }
 
 void unwind_stack_test()
