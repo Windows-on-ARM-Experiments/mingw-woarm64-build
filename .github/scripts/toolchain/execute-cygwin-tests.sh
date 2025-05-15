@@ -10,6 +10,10 @@ CYGWIN_WINSUP_TEST_PATH=$BUILD_PATH/cygwin/$ARCH-$PLATFORM/winsup/testsuite
 
 echo "::group::Execute Cygwin tests"
     pushd "$CYGWIN_WINSUP_TEST_PATH" || exit 1
+        pushd mingw
+          make
+        popd
+
         if [[ -z "$NAMES" ]]; then
             MAKE_TARGET="check"
         else
