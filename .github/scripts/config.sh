@@ -15,7 +15,7 @@ MINGW_REPO=${MINGW_REPO:-Windows-on-ARM-Experiments/mingw-woarm64}
 MINGW_BRANCH=${MINGW_BRANCH:-woarm64}
 
 CYGWIN_REPO=${CYGWIN_REPO:-Windows-on-ARM-Experiments/newlib-cygwin}
-CYGWIN_BRANCH=${CYGWIN_BRANCH:-woarm64}
+CYGWIN_BRANCH=${CYGWIN_BRANCH:-native-cygwin}
 
 CYGWIN_PACKAGES_REPO=${CYGWIN_PACKAGES_REPO:-Windows-on-ARM-Experiments/cygwin-packages}
 CYGWIN_PACKAGES_BRANCH=${CYGWIN_PACKAGES_BRANCH:-main}
@@ -32,17 +32,18 @@ CYGWIN_PACKAGES_BASE_BRANCH=main
 COCOM_BASE_BRANCH=master
 
 ARCH=${ARCH:-aarch64}
-PLATFORM=${PLATFORM:-w64-mingw32}
+PLATFORM=${PLATFORM:-pc-cygwin}
 if [[ "$PLATFORM" =~ (mingw|cygwin) ]]; then
     CRT=${CRT:-msvcrt}
 else
     CRT=${CRT:-libc}
 fi
 
-PROCESSOR=$(uname --processor)
-BUILD=${BUILD:-$PROCESSOR-pc-linux-gnu}
-HOST=${HOST:-$PROCESSOR-pc-linux-gnu}
+PROCESSOR=x86_64
+BUILD=${BUILD:-$PROCESSOR-pc-cygwin}
+HOST=${HOST:-$PROCESSOR-pc-cygwin}
 TARGET=$ARCH-$PLATFORM
+CYGWIN=`if uname | grep -qi cygwin; then echo 1; else echo 0; fi`
 TOOLCHAIN_NAME=${TOOLCHAIN_NAME:-$ARCH-$PLATFORM-$CRT}
 
 if [[ ("$PLATFORM" =~ (mingw|cygwin) && ! ("$CRT" =~ (msvcrt|ucrt))) ||

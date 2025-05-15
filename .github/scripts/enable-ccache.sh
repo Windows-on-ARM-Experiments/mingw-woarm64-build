@@ -2,6 +2,7 @@
 
 source `dirname ${BASH_SOURCE[0]}`/config.sh
 
+mkdir -p $CCACHE_LIB_DIR
 mkdir -p $TOOLCHAIN_CCACHE_LIB_DIR
 
 echo "::group::Add $TARGET toolchain to ccache"

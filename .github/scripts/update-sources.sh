@@ -77,6 +77,11 @@ echo "::group::Update source code repositories"
 
     cd "$SOURCE_PATH"
 
+    # Setup git
+    git config --global pull.rebase true
+    git config --global rebase.autoStash true
+    git config --global core.autocrlf input
+
     if [[ -n "$PROJECT" ]]; then
         REPO=${PROJECT^^}_REPO
         BRANCH=${PROJECT^^}_BRANCH

@@ -2,7 +2,7 @@ diff --git a/winsup/configure b/winsup/configure
 index e146cb7..e71d678 100755
 --- a/winsup/configure
 +++ b/winsup/configure
-@@ -3938,150 +3938,6 @@ main (void)
+@@ -3938,155 +3938,6 @@ main (void)
  _ACEOF
  ac_clean_files_save=$ac_clean_files
  ac_clean_files="$ac_clean_files a.out a.out.dSYM a.exe b.out"
@@ -38,8 +38,8 @@ index e146cb7..e71d678 100755
 -  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
 -  test $ac_status = 0; }
 -then :
--  # Autoconf-2.13 could set the ac_cv_exeext variable to `no'.
--# So ignore a value of `no', otherwise this would lead to `EXEEXT = no'
+-  # Autoconf-2.13 could set the ac_cv_exeext variable to 'no'.
+-# So ignore a value of 'no', otherwise this would lead to 'EXEEXT = no'
 -# in a Makefile.  We should not override ac_cv_exeext if it was cached,
 -# so that the user can short-circuit this test for compilers unknown to
 -# Autoconf.
@@ -59,7 +59,7 @@ index e146cb7..e71d678 100755
 -	   ac_cv_exeext=`expr "$ac_file" : '[^.]*\(\..*\)'`
 -	fi
 -	# We set ac_cv_exeext here because the later test for it is not
--	# safe: cross compilers may not add the suffix if given an `-o'
+-	# safe: cross compilers may not add the suffix if given an '-o'
 -	# argument, so we may need to know it at that point already.
 -	# Even if this section looks crufty: it has the advantage of
 -	# actually working.
@@ -70,8 +70,9 @@ index e146cb7..e71d678 100755
 -done
 -test "$ac_cv_exeext" = no && ac_cv_exeext=
 -
--else $as_nop
--  ac_file=''
+-else case e in #(
+-  e) ac_file='' ;;
+-esac
 -fi
 -if test -z "$ac_file"
 -then :
@@ -80,13 +81,14 @@ index e146cb7..e71d678 100755
 -printf "%s\n" "$as_me: failed program was:" >&5
 -sed 's/^/| /' conftest.$ac_ext >&5
 -
--{ { printf "%s\n" "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
--printf "%s\n" "$as_me: error: in \`$ac_pwd':" >&2;}
+-{ { printf "%s\n" "$as_me:${as_lineno-$LINENO}: error: in '$ac_pwd':" >&5
+-printf "%s\n" "$as_me: error: in '$ac_pwd':" >&2;}
 -as_fn_error 77 "C compiler cannot create executables
--See \`config.log' for more details" "$LINENO" 5; }
--else $as_nop
--  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
--printf "%s\n" "yes" >&6; }
+-See 'config.log' for more details" "$LINENO" 5; }
+-else case e in #(
+-  e) { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+-printf "%s\n" "yes" >&6; } ;;
+-esac
 -fi
 -{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for C compiler default output file name" >&5
 -printf %s "checking for C compiler default output file name... " >&6; }
@@ -110,10 +112,10 @@ index e146cb7..e71d678 100755
 -  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
 -  test $ac_status = 0; }
 -then :
--  # If both `conftest.exe' and `conftest' are `present' (well, observable)
--# catch `conftest.exe'.  For instance with Cygwin, `ls conftest' will
--# work properly (i.e., refer to `conftest.exe'), while it won't with
--# `rm'.
+-  # If both 'conftest.exe' and 'conftest' are 'present' (well, observable)
+-# catch 'conftest.exe'.  For instance with Cygwin, 'ls conftest' will
+-# work properly (i.e., refer to 'conftest.exe'), while it won't with
+-# 'rm'.
 -for ac_file in conftest.exe conftest conftest.*; do
 -  test -f "$ac_file" || continue
 -  case $ac_file in
@@ -123,11 +125,12 @@ index e146cb7..e71d678 100755
 -    * ) break;;
 -  esac
 -done
--else $as_nop
--  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
--printf "%s\n" "$as_me: error: in \`$ac_pwd':" >&2;}
+-else case e in #(
+-  e) { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: error: in '$ac_pwd':" >&5
+-printf "%s\n" "$as_me: error: in '$ac_pwd':" >&2;}
 -as_fn_error $? "cannot compute suffix of executables: cannot compile and link
--See \`config.log' for more details" "$LINENO" 5; }
+-See 'config.log' for more details" "$LINENO" 5; } ;;
+-esac
 -fi
 -rm -f conftest conftest$ac_cv_exeext
 -{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_exeext" >&5
@@ -143,6 +146,8 @@ index e146cb7..e71d678 100755
 -main (void)
 -{
 -FILE *f = fopen ("conftest.out", "w");
+- if (!f)
+-  return 1;
 - return ferror (f) || fclose (f) != 0;
 -
 -  ;
