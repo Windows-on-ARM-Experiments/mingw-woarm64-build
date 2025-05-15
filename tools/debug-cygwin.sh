@@ -13,7 +13,11 @@ find_ttd_engine() {
 }
 
 path_to_windows() {
-    wslpath -w "$1"
+    if [[ "$CYGWIN" = 1 ]]; then
+        cygpath -w "$1"
+    else
+        wslpath -w "$1"
+    fi
 }
 
 show_help() {
@@ -106,26 +110,26 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Check if debugging and recording and launching are not both enabled.
-if [ $DEBUG -eq 1 ] && [ $COLLECT -eq 1 ]; then
+if [[ "$DEBUG" = 1 ]] && [[ "$COLLECT" = 1 ]]; then
     echo "Error: Cannot debug and collect at the same time."
     exit 1
 fi
-if [ $DEBUG -eq 1 ] && [ $LAUNCH -eq 1 ]; then
+if [[ "$DEBUG" = 1 ]] && [[ "$LAUNCH" = 1 ]]; then
     echo "Error: Cannot debug and launch at the same time."
     exit 1
 fi
 
 # Check for debugged executable.
-if [ -z "$EXECUTABLE_NAME" ]; then
+if [[ -z $EXECUTABLE_NAME ]]; then
     echo "Error: No executable specified"
     show_help
     exit 1
 fi
 
 # Find TTD engine if not specified.
-if [ -z "$TTD_ENGINE" ]; then
+if [[ -z $TTD_ENGINE ]]; then
     TTD_ENGINE=$(find_ttd_engine "$WINDBGX_PATH")
-    if [ -z "$TTD_ENGINE" ]; then
+    if [[ -z $TTD_ENGINE ]]; then
         echo "Error: TTD engine not found. Please specify path using -t option."
         exit 1
     fi
@@ -133,9 +137,9 @@ if [ -z "$TTD_ENGINE" ]; then
 fi
 
 # Find WinDbgX if not specified.
-if [ -z "$WINDBGX_PATH" ]; then
+if [[ -z $WINDBGX_PATH ]]; then
     WINDBGX_PATH=$(find_windbgx)
-    if [ -z "$WINDBGX_PATH" ]; then
+    if [[ -z $WINDBGX_PATH ]]; then
         echo "Error: WinDbgX not found. Please specify path using -w option."
         exit 1
     fi
@@ -143,10 +147,10 @@ if [ -z "$WINDBGX_PATH" ]; then
 fi
 
 # If a copy folder is specified, copy the binary and cygwin1.dll to that folder.
-if [ -n "$COPY_FOLDER" ]; then
+if [[ -n $COPY_FOLDER ]]; then
     mkdir -p "$COPY_FOLDER"
 
-    if [ $DEBUG -eq 1 ] || [ $COLLECT -eq 1 ]; then
+    if [[ "$DEBUG" = 1 ]] || [[ "$COLLECT" = 1 ]]; then
         rm -rf "$COPY_FOLDER/$EXECUTABLE_NAME.exe" "$COPY_FOLDER/cygwin1.dll"
 
         rm -rf $COPY_FOLDER/*.out \
@@ -163,21 +167,26 @@ if [ -n "$COPY_FOLDER" ]; then
     EXECUTABLE_DIR=$COPY_FOLDER
 fi
 
+# Copy cygwin1.dll to the executable directory if not already present.
+cp "$BUILD_PATH/cygwin/$TARGET/winsup/testsuite/testinst/bin/cygwin1.dll" "$EXECUTABLE_DIR"
+
 # Generate output filename if not specified.
-if [ -z "$OUTPUT_FILE" ]; then
+if [[ -z $OUTPUT_FILE ]]; then
     OUTPUT_FILE="$EXECUTABLE_DIR/$EXECUTABLE_NAME.run"
 fi
 LOG_FILE="$EXECUTABLE_DIR/$EXECUTABLE_NAME.out"
 
 # Convert paths to Windows format.
-WIN_EXECUTABLE=$(wslpath -w "$EXECUTABLE")
-WIN_EXECUTABLE_DIR=$(wslpath -w "$EXECUTABLE_DIR")
-WIN_OUTPUT_FILE=$(wslpath -w "$OUTPUT_FILE")
-WIN_TTD_ENGINE=$(wslpath -w "$TTD_ENGINE")
-WIN_SOURCE_PATH=$(wslpath -w "$SOURCE_PATH/cygwin")
-WIN_SOURCE_PATH="W:\\${WIN_SOURCE_PATH#\\\\wsl.localhost\\$WSL_DISTRO\\}"
+WIN_EXECUTABLE=`path_to_windows $EXECUTABLE`
+WIN_EXECUTABLE_DIR=`path_to_windows $EXECUTABLE_DIR`
+WIN_OUTPUT_FILE=`path_to_windows $OUTPUT_FILE`
+WIN_TTD_ENGINE=`path_to_windows $TTD_ENGINE`
+WIN_SOURCE_PATH=`path_to_windows $SOURCE_PATH/cygwin`
+if [[ "$CYGWIN" = 0 ]]; then
+    WIN_SOURCE_PATH="W:\\${WIN_SOURCE_PATH#\\\\wsl.localhost\\$WSL_DISTRO\\}"
+fi
 
-if [ $COLLECT -eq 1 ]; then
+if [[ "$COLLECT" = 1 ]]; then
     # Run the TTD recording with elevated privileges
     echo "Starting TTD recording for: $EXECUTABLE"
     echo "Recording will be saved to: $OUTPUT_FILE"
@@ -185,22 +194,22 @@ if [ $COLLECT -eq 1 ]; then
     powershell.exe "Set-Location -Path $WIN_EXECUTABLE_DIR; Start-Process -Wait -Verb RunAs -FilePath $WIN_TTD_ENGINE -ArgumentList \"-out $WIN_OUTPUT_FILE -noUI -children $WIN_EXECUTABLE $EXECUTABLE_ARGS\"; exit \$LASTEXITCODE"
 
     TTD_RESULT=$?
-    if [ $TTD_RESULT -ne 0 ]; then
+    if [[ "$TTD_RESULT" != 0 ]]; then
         echo "Error: TTD recording failed with exit code $TTD_RESULT"
         exit $TTD_RESULT
     fi
 
-    if [ -f "$LOG_FILE" ]; then
+    if [[ -f "$LOG_FILE" ]]; then
         echo "Parent recording log:"
         cat "$LOG_FILE"
     fi
 
-    if [ $CHILD -eq 1 ]; then
+    if [[ "$CHILD" = 1 ]]; then
         echo "Child $CHILD_ID recording log:"
         cat "${LOG_FILE%.out}$CHILD_ID.out"
     fi
 
-    if [ ! -f "$OUTPUT_FILE" ]; then
+    if [[ ! -f "$OUTPUT_FILE" ]]; then
         echo "Error: TTD output file $OUTPUT_FILE has not been created."
         exit 1
     fi
@@ -209,14 +218,14 @@ if [ $COLLECT -eq 1 ]; then
 fi
 
 # Launch WinDbgX if requested
-if [ $LAUNCH -eq 1 ] || [ $DEBUG -eq 1 ]; then
-    if [ $LAUNCH -eq 1 ]; then
-        if [ ! -f "$OUTPUT_FILE" ]; then
+if [[ "$LAUNCH" = 1 ]] || [[ "$DEBUG" = 1 ]]; then
+    if [[ "$LAUNCH" = 1 ]]; then
+        if [[ ! -f "$OUTPUT_FILE" ]]; then
             echo "Error: Output file $OUTPUT_FILE does not exist. Please run TTD recording first."
             exit 1
         fi
 
-        if [ $CHILD -eq 1 ]; then
+        if [[ "$CHILD" = 1 ]]; then
             WIN_OUTPUT_FILE="${WIN_OUTPUT_FILE%.run}$CHILD_ID.run"
         fi
     fi
@@ -293,14 +302,15 @@ if [ $LAUNCH -eq 1 ] || [ $DEBUG -eq 1 ]; then
       bm main
       g
 EOF
-
-    if ! command -v unix2dos &> /dev/null; then
-        echo "unix2dos command not found, installing..."
-        sudo apt install -y dos2unix
+    if [[ "$CYGWIN" = 0 ]]; then
+        if ! command -v unix2dos &> /dev/null; then
+            echo "unix2dos command not found, installing..."
+            sudo apt install -y dos2unix
+        fi
+        unix2dos $EXECUTABLE_DIR/script
     fi
-    unix2dos $EXECUTABLE_DIR/script
 
-    if [ $DEBUG -eq 1 ]; then
+    if [[ "$DEBUG" = 1 ]]; then
         echo "Launching WinDbgX in debug mode..."
         "$WINDBGX_PATH" -lsrcpath $WIN_SOURCE_PATH -c "$<$WIN_EXECUTABLE_DIR\\script" "$WIN_EXECUTABLE"
     else
