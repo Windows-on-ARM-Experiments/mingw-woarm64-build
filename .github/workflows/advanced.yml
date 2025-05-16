@@ -107,7 +107,7 @@ env:
   FFMPEG_BRANCH: release/6.1
 
   BASH_REPO: Windows-on-ARM-Experiments/bash
-  BASH_BRANCH: fix-flaky-condition
+  BASH_BRANCH: woarm64
 
   TOOLCHAIN_PATH: ${{ github.workspace }}/cross
   TOOLCHAIN_NAME: aarch64-w64-mingw32-msvcrt
