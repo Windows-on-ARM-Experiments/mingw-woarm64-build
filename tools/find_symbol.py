@@ -38,7 +38,7 @@ def help():
 
 
 def main(argv):
-    target = "aarch64-w64-mingw32"
+    target = os.environ.get("TARGET", "aarch64-w64-mingw32")
     directory = "."
     symbol = ""
     try:
