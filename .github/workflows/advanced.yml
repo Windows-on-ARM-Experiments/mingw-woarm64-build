@@ -93,7 +93,9 @@ env:
   ZLIB_BRANCH: 'master'
 
   LIBXML2_REPO: GNOME/libxml2
-  LIBXML2_BRANCH: 'master'
+# master branch contains an issue with va_list
+# perhaps after changes in testapi.c
+  LIBXML2_BRANCH: '2.14'
 
   OPENSSL_REPO: Windows-on-ARM-Experiments/openssl
   OPENSSL_BRANCH: ${{ inputs.openssl_branch || 'fix-tests' }}
@@ -532,6 +534,10 @@ jobs:
           repository: ${{ env.BASH_REPO }}
           ref: ${{ env.BASH_BRANCH }}
           path: ${{ env.SOURCE_PATH }}/bash
+
+      - name: Install dependencies
+        run: |
+          .github/scripts/install-dependencies.sh
 
       - name: Extract cache keys
         run: |
