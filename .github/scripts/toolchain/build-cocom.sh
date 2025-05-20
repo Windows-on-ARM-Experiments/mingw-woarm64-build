@@ -12,6 +12,8 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$COCOM_BUILD_PATH/Makefile" ]]; then
     echo "::group::Configure COCOM"
         rm -rf $COCOM_BUILD_PATH/*
 
+        # Use the GNU89 standard to maintain compatibility with GCC15.
+        CFLAGS="$CFLAGS -std=gnu89" \
         $COCOM_SOURCE_PATH/configure \
             --prefix=$TOOLCHAIN_PATH \
             --build=$HOST \
