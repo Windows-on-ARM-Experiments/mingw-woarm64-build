@@ -13,20 +13,38 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$CYGWIN_BUILD_PATH/Makefile" ]]; then
     echo "::group::Configure Cygwin"
         rm -rf $CYGWIN_BUILD_PATH/*
 
+        if [[ "$BUILD" != "$TARGET" ]] && [[ "$CYGWIN" = 0 ]]; then
+            BUILD_OPTIONS="$BUILD_OPTIONS \
+                --with-cross-bootstrap"
+        fi
+
         if [ "$DEBUG" = 1 ] ; then
             HOST_OPTIONS="$HOST_OPTIONS \
                 --enable-debug \
+                --enable-debugging \
                 --disable-lto"
+            CFLAGS="$CFLAGS -Og -ggdb -DDEBUG"
+            CXXFLAGS="$CXXFLAGS -Og -ggdb -DDEBUG"
+            CFLAGS_FOR_TARGET="$CFLAGS_FOR_TARGET -Og -ggdb -DDEBUG"
+            CXXFLAGS_FOR_TARGET="$CXXFLAGS_FOR_TARGET -Og -ggdb -DDEBUG"
         fi
 
         (cd $CYGWIN_SOURCE_PATH/winsup && ./autogen.sh)
         if [[ "$STAGE" = "1" ]]; then
             (cd $CYGWIN_SOURCE_PATH && patch -p1 -i $PATCHES_PATH/cygwin/0001-fix-autogen.patch)
+            HOST_OPTIONS="$HOST_OPTIONS \
+                --disable-cygserver"
+        else
+            HOST_OPTIONS="$HOST_OPTIONS \
+                --enable-cygserver"
         fi
 
         # ADDED: --disable-doc
         # ADDED: --disable-dumper
-        CXXFLAGS_FOR_TARGET="-Wno-error -Wno-narrowing" \
+        CFLAGS="$CFLAGS" \
+        CXXFLAGS="$CXXFLAGS" \
+        CFLAGS_FOR_TARGET="$CFLAGS_FOR_TARGET" \
+        CXXFLAGS_FOR_TARGET="$CXXFLAGS_FOR_TARGET -Wno-error -Wno-narrowing" \
         $CYGWIN_SOURCE_PATH/configure \
             --prefix=$TOOLCHAIN_PATH \
             --build=$HOST \
@@ -38,7 +56,7 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$CYGWIN_BUILD_PATH/Makefile" ]]; then
             --disable-dumper \
             --with-sysroot=$TOOLCHAIN_PATH \
             --with-build-sysroot=$TOOLCHAIN_PATH \
-            --with-cross-bootstrap \
+            $BUILD_OPTIONS \
             $HOST_OPTIONS \
             $TARGET_OPTIONS
     echo "::endgroup::"
