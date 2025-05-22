@@ -22,6 +22,11 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$CYGWIN_BUILD_PATH/Makefile" ]]; then
         (cd $CYGWIN_SOURCE_PATH/winsup && ./autogen.sh)
         if [[ "$STAGE" = "1" ]]; then
             (cd $CYGWIN_SOURCE_PATH && patch -p1 -i $PATCHES_PATH/cygwin/0001-fix-autogen.patch)
+            HOST_OPTIONS="$HOST_OPTIONS \
+                --disable-cygserver"
+        else
+            HOST_OPTIONS="$HOST_OPTIONS \
+                --enable-cygserver"
         fi
 
         # ADDED: --disable-doc
