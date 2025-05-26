@@ -448,7 +448,7 @@ jobs:
       build-toolchain,
       build-aarch64-tests
     ]
-    runs-on: [Windows, GCC, ARM64]
+    runs-on: windows-11-arm
 
     strategy:
       fail-fast: false
@@ -612,7 +612,7 @@ jobs:
       build-toolchain,
       build-openblas
     ]
-    runs-on: [Windows, GCC, ARM64]
+    runs-on: windows-11-arm
 
     env:
       OPENBLAS_TESTS_PATH: ${{ github.workspace }}/openblas-tests
@@ -854,7 +854,7 @@ jobs:
       build-toolchain,
       build-openssl
     ]
-    runs-on: [Windows, GCC, ARM64]
+    runs-on: windows-11-arm
 
     env:
       ZLIB_PATH: ${{ github.workspace }}/zlib
@@ -990,7 +990,7 @@ jobs:
       build-toolchain,
       build-libjpeg-turbo
     ]
-    runs-on: [Windows, GCC, ARM64]
+    runs-on: windows-11-arm
 
     env:
       LIBJPEG_TURBO_TESTS_PATH: ${{ github.workspace }}/libjpeg-turbo-tests
@@ -1098,7 +1098,7 @@ jobs:
       build-toolchain,
       build-ffmpeg
     ]
-    runs-on: [Windows, GCC, ARM64]
+    runs-on: windows-11-arm
 
     env:
       FFMPEG_TESTS_PATH: ${{ github.workspace }}/ffmpeg-tests
