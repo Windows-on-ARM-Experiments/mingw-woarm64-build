@@ -513,6 +513,96 @@ jobs:
         run: |
           .github/scripts/tests/cygwin/execute-tests.sh
 
+  execute-cygwin-tests:
+    needs: [
+      build-toolchain
+    ]
+    # Requirements for the runner:
+    #  - The runner must have WSL1 with Ubuntu 24.04 distribution installed.
+    #  - There must be user `runner` created in the WSL as the primary one.
+    #  - This `runner` user must be able to perform `sudo apt` without blocking terminal.
+    runs-on: [Windows, WSL, ARM64]
+
+    defaults:
+      run:
+        # Run the job script created by the GitHub Actions runner as a `runner`
+        # user in WSL. As this script is created on Windows, CRLF characters
+        # need to be converted to LF and its path translated to WSL format.
+        shell: wsl --user runner bash --noprofile --norc -euo pipefail "$(s="$(wslpath '{0}')" && sed -i 's/\r$//' "$s" && echo "$s")"
+
+    env:
+      PLATFORM: pc-cygwin
+      ROOT_PATH: /home/runner
+      SOURCE_PATH:
+      BUILD_PATH:
+      BUILD_PACKAGE_NAME: cygwin-build.tar.gz
+      TOOLCHAIN_PATH:
+      TOOLCHAIN_NAME: aarch64-pc-cygwin-msvcrt
+      TOOLCHAIN_PACKAGE_NAME: aarch64-pc-cygwin-msvcrt-toolchain.tar.gz
+
+      WSLENV: CYGWIN_REPO:CYGWIN_BRANCH:PLATFORM:ROOT_PATH:SOURCE_PATH/p:BUILD_PATH/p:BUILD_PACKAGE_NAME:ARTIFACT_PATH/p:TOOLCHAIN_PATH/p:TOOLCHAIN_NAME:TOOLCHAIN_PACKAGE_NAME:GITHUB_ENV/p:GITHUB_OUTPUT/p:GITHUB_STEP_SUMMARY/p
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: ${{ github.workspace }}
+
+      - name: Install zstd
+        shell: powershell
+        run: |
+          .github/scripts/install-zstd.ps1
+
+      - name: Clean previous build
+        run: |
+          .github/scripts/delete-build.sh
+          .github/scripts/delete-code.sh
+
+      - name: Install dependencies
+        run: |
+          .github/scripts/install-dependencies.sh
+
+      - name: Extract cache keys
+        run: | 
+          .github/scripts/extract-cache-keys.sh '${{ toJSON(needs.build-toolchain.outputs) }}'
+
+      - name: Download ${{ env.TOOLCHAIN_NAME }} toolchain
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ env.RELATIVE_ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
+          key: ${{ env.toolchain-cache-key }}
+          enableCrossOsArchive: true
+          fail-on-cache-miss: true
+
+      - name: Unpack toolchain
+        run: |
+          .github/scripts/toolchain/unpack.sh
+
+      - name: Checkout Cygwin
+        run: |
+          .github/scripts/update-sources.sh cygwin
+
+      - name: Build Cygwin
+        run: |
+          .github/scripts/toolchain/build-cygwin.sh 2
+
+      - name: Execute Cygwin tests
+        run: |
+          .github/scripts/toolchain/execute-cygwin-tests.sh
+
+      - name: Pack build folder
+        if: failure()
+        run: |
+          .github/scripts/pack-build.sh
+
+      - name: Upload build folder
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cygwin-build
+          retention-days: 1
+          path: ${{ env.ARTIFACT_PATH }}/${{ env.BUILD_PACKAGE_NAME }}
+
   build-bash:
     needs: [build-toolchain]
     runs-on: ubuntu-24.04-arm

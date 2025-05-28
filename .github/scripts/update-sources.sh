@@ -3,6 +3,8 @@
 source `dirname ${BASH_SOURCE[0]}`/config.sh
 source `dirname ${BASH_SOURCE[0]}`/git-utils.sh
 
+PROJECT=$1
+
 function update_repository() {
     DIRECTORY=$1
     REPOSITORY=$2
@@ -74,23 +76,31 @@ echo "::group::Update source code repositories"
     mkdir -p "$SOURCE_PATH"
 
     cd "$SOURCE_PATH"
-    update_repository binutils $BINUTILS_REPO $BINUTILS_BRANCH $BINUTILS_BASE_BRANCH
-    update_repository gcc $GCC_REPO $GCC_BRANCH $GCC_BASE_BRANCH
-    update_repository mingw $MINGW_REPO $MINGW_BRANCH $MINGW_BASE_BRANCH
-    if [[ "$PLATFORM" =~ cygwin ]]; then 
-        update_repository cygwin $CYGWIN_REPO $CYGWIN_BRANCH $CYGWIN_BASE_BRANCH
-        update_repository cygwin-packages $CYGWIN_PACKAGES_REPO $CYGWIN_PACKAGES_BRANCH $CYGWIN_PACKAGES_BASE_BRANCH
-        update_repository cocom $COCOM_REPO $COCOM_BRANCH $COCOM_BASE_BRANCH
-    fi
 
-    if [[ "$UPDATE_LIBRARIES" = 1 ]]; then
-        update_repository openblas $OPENBLAS_REPO $OPENBLAS_BRANCH
-        update_repository zlib $ZLIB_REPO $ZLIB_BRANCH
-        update_repository libxml2 $LIBXML2_REPO $LIBXML2_BRANCH
-        update_repository openssl $OPENSSL_REPO $OPENSSL_BRANCH
-        update_repository libjpeg-turbo $LIBJPEG_TURBO_REPO $LIBJPEG_TURBO_BRANCH
-        update_repository ffmpeg $FFMPEG_REPO $FFMPEG_BRANCH
-        update_repository bash $BASH_REPO $BASH_BRANCH
+    if [[ -n "$PROJECT" ]]; then
+        REPO=${PROJECT^^}_REPO
+        BRANCH=${PROJECT^^}_BRANCH
+        BASE_BRANCH=${PROJECT^^}_BASE_BRANCH
+        update_repository $PROJECT ${!REPO} ${!BRANCH} ${!BASE_BRANCH}
+    else
+        update_repository binutils $BINUTILS_REPO $BINUTILS_BRANCH $BINUTILS_BASE_BRANCH
+        update_repository gcc $GCC_REPO $GCC_BRANCH $GCC_BASE_BRANCH
+        update_repository mingw $MINGW_REPO $MINGW_BRANCH $MINGW_BASE_BRANCH
+        if [[ "$PLATFORM" =~ cygwin ]]; then 
+            update_repository cygwin $CYGWIN_REPO $CYGWIN_BRANCH $CYGWIN_BASE_BRANCH
+            update_repository cygwin-packages $CYGWIN_PACKAGES_REPO $CYGWIN_PACKAGES_BRANCH $CYGWIN_PACKAGES_BASE_BRANCH
+            update_repository cocom $COCOM_REPO $COCOM_BRANCH $COCOM_BASE_BRANCH
+        fi
+
+        if [[ "$UPDATE_LIBRARIES" = 1 ]]; then
+            update_repository openblas $OPENBLAS_REPO $OPENBLAS_BRANCH
+            update_repository zlib $ZLIB_REPO $ZLIB_BRANCH
+            update_repository libxml2 $LIBXML2_REPO $LIBXML2_BRANCH
+            update_repository openssl $OPENSSL_REPO $OPENSSL_BRANCH
+            update_repository libjpeg-turbo $LIBJPEG_TURBO_REPO $LIBJPEG_TURBO_BRANCH
+            update_repository ffmpeg $FFMPEG_REPO $FFMPEG_BRANCH
+            update_repository bash $BASH_REPO $BASH_BRANCH
+        fi
     fi
 echo "::endgroup::"
 
