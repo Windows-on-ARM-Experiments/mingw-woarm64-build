@@ -2,6 +2,8 @@
 
 source `dirname ${BASH_SOURCE[0]}`/../config.sh
 
+NAMES=$@
+
 CYGWIN_SOURCE_PATH=$SOURCE_PATH/cygwin
 CYGWIN_BUILD_PATH=$BUILD_PATH/cygwin
 CYGWIN_WINSUP_TEST_PATH=$BUILD_PATH/cygwin/$ARCH-$PLATFORM/winsup/testsuite
@@ -10,14 +12,24 @@ mkdir -p $ARTIFACT_PATH
 
 echo "::group::Execute Cygwin tests"
     pushd "$CYGWIN_WINSUP_TEST_PATH" || exit 1
-        MAKE_CHECK_COMMAND="make $CHECK_MAKE_OPTIONS check"
+        if [[ -z "$NAMES" ]]; then
+            MAKE_CHECK_COMMAND=( make $CHECK_MAKE_OPTIONS check )
+        else
+            PREFIXED_NAMES=""
+            for NAME in $NAMES; do
+                PREFIXED_NAMES="$PREFIXED_NAMES winsup.api/$NAME"
+            done
+            NAMES=${PREFIXED_NAMES[*]}
+            MAKE_CHECK_COMMAND=( make $CHECK_MAKE_OPTIONS check "TESTS=$NAMES" )
+        fi
+
         if [[ -z "$GITHUB_STEP_SUMMARY" ]]; then
             WSLENV="$WSLENV:PATH/p" \
-                $MAKE_CHECK_COMMAND
+                "${MAKE_CHECK_COMMAND[@]}"
         else
             RESULTS_FILE="$ARTIFACT_PATH/cygwin-test-results.txt"
             WSLENV="$WSLENV:PATH/p" \
-                $MAKE_CHECK_COMMAND 2>&1 | tee "$RESULTS_FILE" || true
+                "${MAKE_CHECK_COMMAND[@]}" 2>&1 | tee "$RESULTS_FILE" || true
             awk '
                 BEGIN { start=0; }
                 /^={76}$/ && start==0 { start=1; next }
