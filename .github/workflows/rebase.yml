@@ -1,6 +1,7 @@
 name: Daily rebase
 
 on:
+  pull_request:
   schedule:
     - cron: "0 5 * * *"
   workflow_dispatch:
@@ -16,7 +17,7 @@ on:
       rebase_branch:
         description: 'Name of temporary branch used to verify the rebase'
         required: true
-        default: 'rebase-upstream'
+        default: 'woarm64'
       backup_branch:
         description: 'Name for backup of origin branch from time when the rebase started'
         required: true
@@ -38,11 +39,12 @@ env:
   SOURCE_PATH: ${{ github.workspace }}/code
   ORIGIN_BRANCH: ${{ inputs.origin_branch || 'woarm64' }}
   UPSTREAM_BRANCH: ${{ inputs.upstream_branch || 'master' }}
-  REBASE_BRANCH: ${{ inputs.rebase_branch || 'rebase-upstream' }}
+  REBASE_BRANCH: ${{ inputs.rebase_branch || 'woarm64' }}
   BACKUP_BRANCH: ${{ inputs.backup_branch || 'rebase-upstream-backup' }}
 
 jobs:
   start-binutils-rebase:
+    if: false
     runs-on: ubuntu-latest
 
     steps:
@@ -70,6 +72,7 @@ jobs:
             ${{ env.BACKUP_BRANCH }}
 
   start-gcc-rebase:
+    if: false
     runs-on: ubuntu-latest
     
     steps:
@@ -97,6 +100,7 @@ jobs:
             ${{ env.BACKUP_BRANCH }}
 
   start-mingw-rebase:
+    if: false
     runs-on: ubuntu-latest
     
     steps:
@@ -124,6 +128,7 @@ jobs:
             ${{ env.BACKUP_BRANCH }}
 
   start-cygwin-rebase:
+    if: false
     runs-on: ubuntu-latest
     
     steps:
@@ -151,20 +156,15 @@ jobs:
             ${{ env.BACKUP_BRANCH }}
 
   build:
-    needs: [
-      start-binutils-rebase,
-      start-gcc-rebase,
-      start-mingw-rebase,
-      start-cygwin-rebase
-    ]
     uses: ./.github/workflows/advanced.yml
     with:
-      binutils_branch: ${{ inputs.rebase_branch || 'rebase-upstream' }}
-      gcc_branch: ${{ inputs.rebase_branch || 'rebase-upstream' }}
-      mingw_branch: ${{ inputs.rebase_branch || 'rebase-upstream' }}
-      cygwin_branch: ${{ inputs.rebase_branch || 'rebase-upstream' }}
+      binutils_branch: ${{ inputs.rebase_branch || 'woarm64' }}
+      gcc_branch: ${{ inputs.rebase_branch || 'woarm64' }}
+      mingw_branch: ${{ inputs.rebase_branch || 'woarm64' }}
+      cygwin_branch: ${{ inputs.rebase_branch || 'woarm64' }}
 
   finish-binutils-rebase:
+    if: false
     needs: [build]
     runs-on: ubuntu-latest
 
@@ -191,6 +191,7 @@ jobs:
             ${{ env.BACKUP_BRANCH }}
 
   finish-gcc-rebase:
+    if: false
     needs: [build]
     runs-on: ubuntu-latest
 
@@ -217,6 +218,7 @@ jobs:
             ${{ env.BACKUP_BRANCH }}
 
   finish-mingw-rebase:
+    if: false
     needs: [build]
     runs-on: ubuntu-latest
 
@@ -243,6 +245,7 @@ jobs:
             ${{ env.BACKUP_BRANCH }}
 
   finish-cygwin-rebase:
+    if: false
     needs: [build]
     runs-on: ubuntu-latest
 
@@ -269,7 +272,7 @@ jobs:
             ${{ env.BACKUP_BRANCH }}
 
   clean-binutils-rebase:
-    if: always()
+    if: false
     needs: [finish-binutils-rebase]
     runs-on: ubuntu-latest
 
@@ -296,7 +299,7 @@ jobs:
             ${{ env.BACKUP_BRANCH }}
 
   clean-gcc-rebase:
-    if: always()
+    if: false
     needs: [finish-gcc-rebase]
     runs-on: ubuntu-latest
 
@@ -323,7 +326,7 @@ jobs:
             ${{ env.BACKUP_BRANCH }}
 
   clean-mingw-rebase:
-    if: always()
+    if: false
     needs: [finish-mingw-rebase]
     runs-on: ubuntu-latest
 
@@ -350,7 +353,7 @@ jobs:
             ${{ env.BACKUP_BRANCH }}
 
   clean-cygwin-rebase:
-    if: always()
+    if: false
     needs: [finish-cygwin-rebase]
     runs-on: ubuntu-latest
 
@@ -376,7 +379,6 @@ jobs:
             ${{ env.BACKUP_BRANCH }}
 
   deploy:
-    if: github.ref == 'refs/heads/woarm64'
     needs: [build]
     runs-on: ubuntu-latest
 
@@ -389,15 +391,15 @@ jobs:
       url: ${{steps.create-release.outputs.url }}
 
     steps:
-      - name: Download toolchain artifact
+      - name: Download `aarch64-w64-mingw32-msvcrt` toolchain artifact
         uses: actions/download-artifact@v4
         with:
-          name: ${{ needs.build.outputs.toolchain-artifact-name }}
+          name: aarch64-w64-mingw32-msvcrt-toolchain
 
-      - name: Download runtime artifact
+      - name: Download `aarch64-w64-mingw32-msvcrt` runtime artifact
         uses: actions/download-artifact@v4
         with:
-          name: ${{ needs.build.outputs.runtime-artifact-name }}
+          name: aarch64-w64-mingw32-msvcrt-runtime
 
       - name: Create tag
         run: |
@@ -408,6 +410,6 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            ${{ needs.build.outputs.toolchain-package-name }}
-            ${{ needs.build.outputs.runtime-package-name }}
+            aarch64-w64-mingw32-msvcrt-toolchain.tar.gz
+            aarch64-w64-mingw32-msvcrt-runtime.tar.gz
           tag_name: ${{ env.TAG }}
