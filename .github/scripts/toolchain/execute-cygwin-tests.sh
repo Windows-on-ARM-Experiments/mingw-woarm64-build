@@ -12,6 +12,10 @@ mkdir -p $ARTIFACT_PATH
 
 echo "::group::Execute Cygwin tests"
     pushd "$CYGWIN_WINSUP_TEST_PATH" || exit 1
+        pushd mingw
+          make
+        popd
+
         if [[ -z "$NAMES" ]]; then
             MAKE_CHECK_COMMAND=( make $CHECK_MAKE_OPTIONS check )
         else
