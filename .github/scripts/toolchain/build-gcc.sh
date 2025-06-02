@@ -109,7 +109,7 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$GCC_BUILD_PATH/Makefile" ]]; then
             --host=$HOST \
             --target=$TARGET \
             --enable-static \
-            --enable-languages=c,c++,d,fortran,lto,m2,objc,obj-c++ \
+            --enable-languages=c,c++,fortran,lto,m2,objc,obj-c++ \
             --disable-bootstrap \
             --disable-multilib \
             --with-gnu-as \
