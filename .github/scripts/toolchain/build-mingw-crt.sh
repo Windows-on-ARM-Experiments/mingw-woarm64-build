@@ -37,6 +37,9 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$MINGW_BUILD_PATH/Makefile" ]]; then
             *cygwin*)
                 TARGET_OPTIONS="$TARGET_OPTIONS \
                     --enable-w32api"
+                # Workaround for missing https://github.com/Windows-on-ARM-Experiments/mingw-woarm64/blob/woarm64/mingw-w64-headers/crt/_cygwin.h#L32
+                # in v12.0.0 branch of MinGW.
+                CFLAGS="$CFLAGS -D_WIN64"
                 ;;
             *mingw*)
                 TARGET_OPTIONS="$TARGET_OPTIONS \

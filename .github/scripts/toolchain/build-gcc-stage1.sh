@@ -42,6 +42,9 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$GCC_BUILD_PATH/Makefile" ]]; then
                     --enable-threads=posix \
                     --with-dwarf2 \
                     --with-system-zlib"
+                # Workaround for missing https://github.com/Windows-on-ARM-Experiments/mingw-woarm64/blob/woarm64/mingw-w64-headers/crt/_cygwin.h#L32
+                # in v12.0.0 branch of MinGW.
+                CFLAGS_FOR_TARGET="$CFLAGS_FOR_TARGET -D_WIN64"
                 ;;
             *mingw*)
                 TARGET_OPTIONS="$TARGET_OPTIONS \
@@ -76,7 +79,8 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$GCC_BUILD_PATH/Makefile" ]]; then
         --with-gnu-ld \
         --without-headers \
         $HOST_OPTIONS \
-        $TARGET_OPTIONS
+        $TARGET_OPTIONS \
+        CFLAGS_FOR_TARGET="$CFLAGS_FOR_TARGET"
     echo "::endgroup::"
 fi
 

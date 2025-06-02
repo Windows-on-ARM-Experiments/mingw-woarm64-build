@@ -31,7 +31,9 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$CYGWIN_BUILD_PATH/Makefile" ]]; then
 
         # ADDED: --disable-doc
         # ADDED: --disable-dumper
-        CXXFLAGS_FOR_TARGET="-Wno-error -Wno-narrowing" \
+        # -D_WIN64 is a workaround for missing https://github.com/Windows-on-ARM-Experiments/mingw-woarm64/blob/woarm64/mingw-w64-headers/crt/_cygwin.h#L32
+        # in v12.0.0 branch of MinGW.
+        CXXFLAGS_FOR_TARGET="$CXXFLAGS_FOR_TARGET -D_WIN64 -Wno-error -Wno-narrowing" \
         $CYGWIN_SOURCE_PATH/configure \
             --prefix=$TOOLCHAIN_PATH \
             --build=$HOST \

@@ -15,7 +15,7 @@ MINGW_REPO=${MINGW_REPO:-Windows-on-ARM-Experiments/mingw-woarm64}
 MINGW_BRANCH=${MINGW_BRANCH:-woarm64}
 
 CYGWIN_REPO=${CYGWIN_REPO:-Windows-on-ARM-Experiments/newlib-cygwin}
-CYGWIN_BRANCH=${CYGWIN_BRANCH:-woarm64}
+CYGWIN_BRANCH=${CYGWIN_BRANCH:-upstream-workflow}
 
 CYGWIN_PACKAGES_REPO=${CYGWIN_PACKAGES_REPO:-Windows-on-ARM-Experiments/cygwin-packages}
 CYGWIN_PACKAGES_BRANCH=${CYGWIN_PACKAGES_BRANCH:-main}
@@ -127,4 +127,10 @@ PATH="$PATH:$TOOLCHAIN_PATH/bin:$ARTIFACT_PATH/bin"
 if [[ "$CCACHE" = 1 ]]; then
     PATH=$CCACHE_LIB_DIR:$TOOLCHAIN_CCACHE_LIB_DIR:$PATH
     export CCACHE_DIR=$CCACHE_DIR_PATH
+fi
+
+# Cygwin toolchain is using only Win32 API headers from MinGW. Upstream Cygwin
+# is being built with 12.0.0 tag.
+if [[ "$PLATFORM" =~ cygwin ]]; then
+    MINGW_BRANCH=v12.0.0
 fi
