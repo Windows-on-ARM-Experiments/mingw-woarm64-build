@@ -336,6 +336,11 @@ jobs:
           path: ${{ env.CCACHE_DIR_PATH }}
           key: ${{ steps.cache-keys.outputs.ccache-key }}
 
+      - name: Strip host binaries
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && matrix.platform != 'pc-linux-gnu' }}
+        run: |
+          .github/scripts/strip-host-binaries.sh
+
       - name: Pack toolchain
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && env.PACK_TOOLCHAIN == 'true' }}
         run: |
