@@ -51,7 +51,7 @@ fi
 
 $ROOT_PATH/.github/scripts/toolchain/build-gcc.sh
 
-if [[ "$PLATFORM" =~ (mingw|cygwin) ]]; then
+if [[ "$PLATFORM" =~ mingw ]]; then
     $ROOT_PATH/.github/scripts/toolchain/build-mingw.sh
 fi
 if [[ "$PLATFORM" =~ cygwin ]]; then
