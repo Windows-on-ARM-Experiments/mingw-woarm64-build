@@ -77,21 +77,25 @@ if [[ "$RUN_INSTALL" = 1 ]]; then
         case "$PLATFORM" in
             *cygwin*)
                 pushd $TOOLCHAIN_PATH/$TARGET/lib
-                    ln -fs w32api/libkernel32.a .
-                    ln -fs w32api/libuser32.a .
                     ln -fs w32api/libadvapi32.a .
-                    ln -fs w32api/libshell32.a .
-                    ln -fs w32api/libgdi32.a .
                     ln -fs w32api/libcomdlg32.a .
-                    ln -fs w32api/libntdll.a .
-                    ln -fs w32api/libnetapi32.a .
-                    ln -fs w32api/libpsapi.a .
-                    ln -fs w32api/libuserenv.a .
-                    ln -fs w32api/libnetapi32.a .
                     ln -fs w32api/libdbghelp.a .
+                    ln -fs w32api/libgdi32.a .
+                    ln -fs w32api/libkernel32.a .
+                    ln -fs w32api/libnetapi32.a .
+                    ln -fs w32api/libnetapi32.a .
+                    ln -fs w32api/libntdll.a .
+                    ln -fs w32api/libole32.a .
+                    ln -fs w32api/liboleaut32.a .
                     ln -fs w32api/libonecore.a .
                     ln -fs w32api/libpdh.a .
+                    ln -fs w32api/libpsapi.a .
+                    ln -fs w32api/libshell32.a .
+                    ln -fs w32api/libuser32.a .
+                    ln -fs w32api/libuserenv.a .
+                    ln -fs w32api/libuuid.a .
                     ln -fs w32api/libwinmm.a .
+                    ln -fs w32api/libwinspool.a .
                 popd
                 ;;
         esac
