@@ -159,9 +159,9 @@ jobs:
     uses: ./.github/workflows/advanced.yml
     with:
       binutils_branch: ${{ inputs.rebase_branch || 'woarm64' }}
-      gcc_branch: ${{ inputs.rebase_branch || 'woarm64' }}
+      gcc_branch: ${{ inputs.rebase_branch || 'fix-gcc-configure' }}
       mingw_branch: ${{ inputs.rebase_branch || 'woarm64' }}
-      cygwin_branch: ${{ inputs.rebase_branch || 'woarm64' }}
+      cygwin_branch: ${{ inputs.rebase_branch || 'rebase-upstream' }}
 
   finish-binutils-rebase:
     if: false
