@@ -9,6 +9,7 @@ cd $SOURCE_PATH/zlib
 if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f $ZLIB_BUILD_PATH/CMakeCache.txt ]]; then
     echo "::group::Configure zblib"
         rm -f $ZLIB_BUILD_PATH/CMakeCache.txt
+        LDFLAGS="-L$TOOLCHAIN_PATH/lib/gcc/$TARGET/lib" \
         cmake -G"Unix Makefiles" \
             -DCMAKE_INSTALL_PREFIX=$ZLIB_PATH \
             -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN_FILE \
@@ -23,8 +24,13 @@ echo "::endgroup::"
 if [[ "$RUN_INSTALL" = 1 ]]; then
     echo "::group::Install zlib"
         cmake --install $ZLIB_BUILD_PATH
-        mv $ZLIB_PATH/lib/libzlibstatic.a $ZLIB_PATH/lib/libz-static.a
-        mv $ZLIB_PATH/lib/libzlib.dll.a $ZLIB_PATH/lib/libz.dll.a
+        if [ -f $ZLIB_PATH/lib/libzlibstatic.a ]; then
+            cp $ZLIB_PATH/lib/libzlibstatic.a $ZLIB_PATH/lib/libz.a # For Cygwin
+            mv $ZLIB_PATH/lib/libzlibstatic.a $ZLIB_PATH/lib/libz-static.a # For OpenSSL
+        fi
+        if [ -f $ZLIB_PATH/lib/libzlib.dll.a ]; then
+            mv $ZLIB_PATH/lib/libzlib.dll.a $ZLIB_PATH/lib/libz.dll.a
+        fi
     echo "::endgroup::"
 fi
 
