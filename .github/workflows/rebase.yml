@@ -161,7 +161,7 @@ jobs:
       binutils_branch: ${{ inputs.rebase_branch || 'woarm64' }}
       gcc_branch: ${{ inputs.rebase_branch || 'woarm64' }}
       mingw_branch: ${{ inputs.rebase_branch || 'woarm64' }}
-      cygwin_branch: ${{ inputs.rebase_branch || 'woarm64' }}
+      cygwin_branch: ${{ inputs.rebase_branch || 'rebase-upstream' }}
 
   finish-binutils-rebase:
     if: false
