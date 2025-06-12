@@ -21,19 +21,15 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$MINGW_HEADERS_BUILD_PATH/Makefile" ]]; t
                 TARGET_OPTIONS="$TARGET_OPTIONS \
                     --enable-w32api"
                 ;;
-            *mingw*)
-                TARGET_OPTIONS="$TARGET_OPTIONS \
-                    --enable-sdk=all"
-                ;;
         esac
 
-        case "$CRT" in
-            ucrt)
+        case "$PLATFORM-$CRT" in
+            *mingw*-ucrt)
                 TARGET_OPTIONS="$TARGET_OPTIONS \
                     --with-default-win32-winnt=0x603 \
                     --with-default-msvcrt=ucrt"
             ;;
-            msvcrt)
+            *mingw*-msvcrt)
                 TARGET_OPTIONS="$TARGET_OPTIONS \
                     --with-default-win32-winnt=0x601 \
                     --with-default-msvcrt=msvcrt"
@@ -44,6 +40,7 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$MINGW_HEADERS_BUILD_PATH/Makefile" ]]; t
             --prefix=$TOOLCHAIN_PATH/$TARGET \
             --build=$BUILD \
             --host=$TARGET \
+            --enable-sdk=all \
             $HOST_OPTIONS \
             $TARGET_OPTIONS
     echo "::endgroup::"
