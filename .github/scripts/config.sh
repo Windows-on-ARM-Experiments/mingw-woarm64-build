@@ -12,7 +12,7 @@ GCC_REPO=${GCC_REPO:-Windows-on-ARM-Experiments/gcc-woarm64}
 GCC_BRANCH=${GCC_BRANCH:-woarm64}
 
 MINGW_REPO=${MINGW_REPO:-Windows-on-ARM-Experiments/mingw-woarm64}
-MINGW_BRANCH=${MINGW_BRANCH:-woarm64}
+MINGW_BRANCH=${MINGW_BRANCH:-fix-outline-atomics}
 
 CYGWIN_REPO=${CYGWIN_REPO:-Windows-on-ARM-Experiments/newlib-cygwin}
 CYGWIN_BRANCH=${CYGWIN_BRANCH:-woarm64}

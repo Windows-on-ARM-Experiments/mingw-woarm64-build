@@ -18,7 +18,7 @@ on:
       mingw_branch:
         description: 'MinGW branch to build'
         required: false
-        default: 'woarm64'
+        default: 'fix-outline-atomics'
       cygwin_branch:
         description: 'Cygwin branch to build'
         required: false
@@ -75,7 +75,7 @@ env:
   GCC_BRANCH: ${{ inputs.gcc_branch || 'woarm64' }}
 
   MINGW_REPO: Windows-on-ARM-Experiments/mingw-woarm64
-  MINGW_BRANCH: ${{ inputs.mingw_branch || 'woarm64' }}
+  MINGW_BRANCH: ${{ inputs.mingw_branch || 'fix-outline-atomics' }}
 
   CYGWIN_REPO: Windows-on-ARM-Experiments/newlib-cygwin
   CYGWIN_BRANCH: ${{ inputs.cygwin_branch || 'woarm64' }}
