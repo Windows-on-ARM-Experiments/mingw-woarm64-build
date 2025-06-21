@@ -23,7 +23,8 @@ echo "::endgroup::"
 if [[ "$RUN_INSTALL" = 1 ]]; then
     echo "::group::Install zlib"
         cmake --install $ZLIB_BUILD_PATH
-        mv $ZLIB_PATH/lib/libzlibstatic.a $ZLIB_PATH/lib/libz-static.a
+        cp $ZLIB_PATH/lib/libzlibstatic.a $ZLIB_PATH/lib/libz.a # For Cygwin
+        mv $ZLIB_PATH/lib/libzlibstatic.a $ZLIB_PATH/lib/libz-static.a # For OpenSSL
         mv $ZLIB_PATH/lib/libzlib.dll.a $ZLIB_PATH/lib/libz.dll.a
     echo "::endgroup::"
 fi

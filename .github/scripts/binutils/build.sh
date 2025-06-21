@@ -20,6 +20,7 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$BINUTILS_BUILD_PATH/Makefile" ]]; then
             *cygwin*)
                 # Compared to the upstream recipe:
                 #   ADDED: --with-sysroot to avoid using the host sysroot.
+                #   ADDED: --disable-nls to avoid dependency on gettext.
                 #   CHANGED: --enable-shared to --disable-shared to allow easier transfer
                 #            the produced host binaries across different build environments.
                 TARGET_OPTIONS="$TARGET_OPTIONS \
@@ -27,6 +28,7 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$BINUTILS_BUILD_PATH/Makefile" ]]; then
                     --disable-shared \
                     --enable-host-shared \
                     --enable-install-libiberty \
+                    --disable-nls \
                     --with-sysroot=$TOOLCHAIN_PATH \
                     --with-build-sysroot=$TOOLCHAIN_PATH \
                     --with-system-zlib \
