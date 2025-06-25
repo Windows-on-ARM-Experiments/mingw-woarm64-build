@@ -6,6 +6,8 @@ STAGE=$1
 CYGWIN_SOURCE_PATH=$SOURCE_PATH/cygwin
 CYGWIN_BUILD_PATH=$BUILD_PATH/cygwin
 
+export CYGWIN=winsymlinks:sys
+
 mkdir -p $CYGWIN_BUILD_PATH
 cd $CYGWIN_BUILD_PATH
 

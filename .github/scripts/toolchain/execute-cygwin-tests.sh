@@ -8,6 +8,8 @@ CYGWIN_SOURCE_PATH=$SOURCE_PATH/cygwin
 CYGWIN_BUILD_PATH=$BUILD_PATH/cygwin
 CYGWIN_WINSUP_TEST_PATH=$BUILD_PATH/cygwin/$ARCH-$PLATFORM/winsup/testsuite
 
+export CYGWIN=winsymlinks:sys
+
 mkdir -p $ARTIFACT_PATH
 
 echo "::group::Execute Cygwin tests"
@@ -24,11 +26,11 @@ echo "::group::Execute Cygwin tests"
         fi
 
         if [[ -z "$GITHUB_STEP_SUMMARY" ]]; then
-            WSLENV="$WSLENV:PATH/p" \
+            WSLENV="$WSLENV:PATH/p:CYGWIN" \
                 "${MAKE_CHECK_COMMAND[@]}"
         else
             RESULTS_FILE="$ARTIFACT_PATH/cygwin-test-results.txt"
-            WSLENV="$WSLENV:PATH/p" \
+            WSLENV="$WSLENV:PATH/p:CYGWIN" \
                 "${MAKE_CHECK_COMMAND[@]}" 2>&1 | tee "$RESULTS_FILE" || true
             awk '
                 BEGIN { start=0; }
