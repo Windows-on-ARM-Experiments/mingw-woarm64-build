@@ -5,6 +5,7 @@ source `dirname ${BASH_SOURCE[0]}`/../config.sh
 STAGE=$1
 CYGWIN_SOURCE_PATH=$SOURCE_PATH/cygwin
 CYGWIN_BUILD_PATH=$BUILD_PATH/cygwin
+export CYGWIN=winsymlinks:sys
 
 mkdir -p $CYGWIN_BUILD_PATH
 cd $CYGWIN_BUILD_PATH
@@ -50,6 +51,7 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$CYGWIN_BUILD_PATH/Makefile" ]]; then
 fi
 
 echo "::group::Build Cygwin"
+    WSLENV="$WSLENV:PATH/p:CYGWIN" \
     make $BUILD_MAKE_OPTIONS
 echo "::endgroup::"
 
