@@ -54,7 +54,9 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$BINUTILS_BUILD_PATH/Makefile" ]]; then
 fi
 
 echo "::group::Build binutils"
-    make $BUILD_MAKE_OPTIONS
+    which make
+    make --version
+    make
 echo "::endgroup::"
 
 if [[ "$RUN_INSTALL" = 1 ]]; then
