@@ -131,7 +131,7 @@ RUN_CONFIG=${RUN_CONFIG:-1} # Run configuration step.
 RUN_INSTALL=${RUN_INSTALL:-1} # Run installation step.
 DELETE_BUILD=${DELETE_BUILD:-0} # Delete build folders after successful builds.
 
-PATH="$TOOLCHAIN_PATH/bin:$TOOLCHAIN_PATH/lib/gcc/$TARGET/:$TOOLCHAIN_PATH/lib/gcc/$TARGET/$GCC_VERSION/:$PATH"
+PATH="$PATH:$TOOLCHAIN_PATH/bin:$ARTIFACT_PATH/bin"
 if [[ "$CCACHE" = 1 ]]; then
     PATH=$CCACHE_LIB_DIR:$TOOLCHAIN_CCACHE_LIB_DIR:$PATH
     export CCACHE_DIR=$CCACHE_DIR_PATH
