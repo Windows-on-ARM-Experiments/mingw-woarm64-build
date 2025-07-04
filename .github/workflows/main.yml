@@ -1,4 +1,4 @@
-name: Build main toolchain
+name: Build Cygwin toolchain
 
 on:
   push:
@@ -19,25 +19,94 @@ on:
         description: 'Mingw branch to build'
         required: false
         default: 'woarm64'
+      cygwin_branch:
+        description: 'Cygwin branch to build'
+        required: false
+        default: 'native-cygwin'
+
 env:
   BINUTILS_BRANCH: ${{ inputs.binutils_branch || 'woarm64' }}
   GCC_BRANCH: ${{ inputs.gcc_branch || 'woarm64' }}
   MINGW_BRANCH: ${{ inputs.mingw_branch || 'woarm64' }}
+  CYGWIN_BRANCH: ${{ inputs.cygwin_branch || 'native-cygwin' }}
 
-  BUILD_PATH: ${{ github.workspace }}/build
-  CCACHE_DIR_PATH: ${{ github.workspace }}/ccache
-  TOOLCHAIN_PATH: ${{ github.workspace }}/cross
+  ARCH: aarch64
+  PLATFORM: pc-cygwin
+
+  BUILD_PATH: /home/runneradmin/build
+  CCACHE_DIR_PATH: /home/runneradmin/ccache
+  CCACHE_DIR_PATH_WIN: D:\cygwin\home\runneradmin\ccache
+  TOOLCHAIN_PATH: /home/runneradmin/cross
+  TOOLCHAIN_PACKAGE_NAME: aarch64-pc-cygwin-toolchain.tar.xz
+  ARTIFACT_PATH: /home/runneradmin/artifacts
+  ARTIFACT_PATH_WIN: D:\cygwin\home\runneradmin\artifacts
+  TOOLCHAIN_ARTIFACT_NAME: aarch64-pc-cygwin-toolchain
 
   CCACHE: 1
   DELETE_BUILD: 1
 
 jobs:
   build-toolchain:
-    runs-on: ubuntu-24.04-arm
+    runs-on: [
+      Windows,
+      GCC
+    ]
+    timeout-minutes: 1440
+
+    defaults:
+      run:
+        shell: bash -c "$(s=$(/usr/bin/cygpath '{0}') && /usr/bin/sed -i 's/\r$//' $s && echo $s)"
 
     steps:
+      - name: Install Cygwin
+        uses: cygwin/cygwin-install-action@master
+        with:
+          platform: x86_64
+          packages: >-
+            autoconf,
+            automake,
+            busybox,
+            cocom,
+            cygutils-extra,
+            dblatex,
+            dejagnu,
+            docbook-xml45,
+            docbook-xsl,
+            docbook2X,
+            gcc-g++,
+            gettext-devel,
+            git,
+            libiconv,
+            libiconv-devel,
+            libzstd-devel,
+            make,
+            mingw64-x86_64-gcc-g++,
+            mingw64-x86_64-zlib,
+            patch,
+            perl,
+            python39-lxml,
+            python39-ply,
+            texlive-collection-fontsrecommended,
+            texlive-collection-latexrecommended,
+            texlive-collection-pictures,
+            wget,
+            xmlto,
+            zlib-devel
+
+      - name: Setup Git
+        run: |
+          git config --global core.autocrlf input
+          git config --global --add safe.directory /cygdrive/d/a/mingw-woarm64-build/mingw-woarm64-build
+
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          set-safe-directory: false
+
+      - name: Clean up
+        run: |
+          rm -rf ${{ env.BUILD_PATH }}
+          rm -rf ${{ env.TOOLCHAIN_PATH }}
 
       - name: Get cache key
         id: get-cache-key
@@ -47,36 +116,76 @@ jobs:
       - name: Restore Ccache
         uses: actions/cache/restore@v4
         with:
-          path: ${{ env.CCACHE_DIR_PATH }}
-          key: main-gcc-ccache-${{ steps.get-cache-key.outputs.timestamp }}
-          restore-keys: main-gcc-ccache-
+          path: ${{ env.CCACHE_DIR_PATH_WIN }}
+          key: cygwin-gcc-ccache-${{ steps.get-cache-key.outputs.timestamp }}
+          restore-keys: cygwin-gcc-ccache-
 
       - name: Run Build
+        timeout-minutes: 1440
         run: |
           ./build.sh
 
-      - name: Build tests
+      - name: Strip host binaries
         run: |
-          .github/scripts/tests/build.sh
+          .github/scripts/strip-host-binaries.sh
+
+      - name: Strip target binaries
+        run: |
+          .github/scripts/strip-target-binaries.sh
+
+      - name: Pack toolchain
+        run: |
+          .github/scripts/toolchain/pack.sh
+
+      - name: Upload toolchain artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.TOOLCHAIN_ARTIFACT_NAME }}
+          path: ${{ env.ARTIFACT_PATH_WIN }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
+          retention-days: 1
 
       - name: Save Ccache
         if: always()
         uses: actions/cache/save@v4
         with:
-          path: ${{ env.CCACHE_DIR_PATH }}
-          key: main-gcc-ccache-${{ steps.get-cache-key.outputs.timestamp }}
+          path: ${{ env.CCACHE_DIR_PATH_WIN }}
+          key: cygwin-gcc-ccache-${{ steps.get-cache-key.outputs.timestamp }}
 
       - name: Upload build folder
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: main-aarch64-w64-mingw32-build
+          name: aarch64-pc-cygwin-build
           retention-days: 1
           path: ${{ env.BUILD_PATH }}
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+  deploy:
+    needs: [
+      build-toolchain
+    ]
+    runs-on: ubuntu-latest
+
+    env:
+      GITHUB_TOKEN: ${{ secrets.GNU_PUSH_PAT }}
+
+    environment:
+      name: release
+      url: ${{steps.create-release.outputs.url }}
+      
+    steps:
+      - name: Download toolchain artifact
+        uses: actions/download-artifact@v4
         with:
-          name: main-aarch64-w64-mingw32-toolchain
-          path: ${{ env.TOOLCHAIN_PATH }}
-          retention-days: 1
+          name: ${{ env.TOOLCHAIN_ARTIFACT_NAME }}
+
+      - name: Create tag
+        run: |
+          echo "TAG=$(date --rfc-3339=date)" >> ${GITHUB_ENV}
+
+      - name: Create release
+        id: create-release
+        uses: softprops/action-gh-release@v2
+        with:
+          repository: Windows-on-ARM-Experiments/newlib-cygwin
+          tag_name: ${{ env.TAG }}
+          files: ${{ env.TOOLCHAIN_PACKAGE_NAME }}
