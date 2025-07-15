@@ -1,0 +1,308 @@
+name: Build toolchain variant
+
+on:
+  workflow_call:
+    inputs:
+      arch:
+        type: string
+      platform:
+        type: string
+      crt:
+        type: string
+      binutils_branch:
+        type: string
+      gcc_branch:
+        type: string
+      mingw_branch:
+        type: string
+      cygwin_branch:
+        type: string
+      cygwin_packages_branch:
+        type: string
+      cocom_branch:
+        type: string
+      pack_toolchain:
+        type: boolean
+        default: false
+    outputs:
+      aarch64-w64-mingw32-msvcrt-toolchain-cache-key:
+        description: 'Cache key for the `aarch64-w64-mingw32-msvcrt` toolchain'
+        value: ${{ jobs.build-toolchain-variant.outputs.aarch64-w64-mingw32-msvcrt-toolchain-cache-key }}
+      aarch64-w64-mingw32-msvcrt-runtime-cache-key:
+        description: 'Cache key for the `aarch64-w64-mingw32-msvcrt` runtime'
+        value: ${{ jobs.build-toolchain-variant.outputs.aarch64-w64-mingw32-msvcrt-runtime-cache-key }}
+      aarch64-pc-cygwin-msvcrt-toolchain-cache-key:
+        description: 'Cache key for the `aarch64-pc-cygwin-msvcrt` toolchain'
+        value: ${{ jobs.build-toolchain-variant.outputs.aarch64-pc-cygwin-msvcrt-toolchain-cache-key }}
+      aarch64-pc-cygwin-msvcrt-runtime-cache-key:
+        description: 'Cache key for the `aarch64-pc-cygwin-msvcrt` runtime'
+        value: ${{ jobs.build-toolchain-variant.outputs.aarch64-pc-cygwin-msvcrt-runtime-cache-key }}
+
+env:
+  BINUTILS_REPO: Windows-on-ARM-Experiments/binutils-woarm64
+  BINUTILS_BRANCH: ${{ inputs.binutils_branch }}
+
+  GCC_REPO: Windows-on-ARM-Experiments/gcc-woarm64
+  GCC_BRANCH: ${{ inputs.gcc_branch }}
+
+  MINGW_REPO: Windows-on-ARM-Experiments/mingw-woarm64
+  MINGW_BRANCH: ${{ inputs.mingw_branch }}
+
+  CYGWIN_REPO: Windows-on-ARM-Experiments/newlib-cygwin
+  CYGWIN_BRANCH: ${{ inputs.cygwin_branch }}
+
+  CYGWIN_PACKAGES_REPO: Windows-on-ARM-Experiments/cygwin-packages
+  CYGWIN_PACKAGES_BRANCH: ${{ inputs.cygwin_packages_branch }}
+
+  COCOM_REPO: git://git.code.sf.net/p/cocom/git
+  COCOM_BRANCH: ${{ inputs.cocom_branch }}
+
+  SOURCE_PATH: ${{ github.workspace }}/code
+  BUILD_PATH: ${{ github.workspace }}/build
+  CCACHE_DIR_PATH: ${{ github.workspace }}/ccache
+  ARTIFACT_PATH: ${{ github.workspace }}/artifact
+  RELATIVE_ARTIFACT_PATH: ./artifact
+
+  CCACHE: 1
+  DELETE_BUILD: 1
+
+jobs:
+  build-toolchain-variant:
+    name: 'Build ${{ inputs.arch }}-${{ inputs.platform }}-${{ inputs.crt }} toolchain variant'
+    runs-on: ${{ inputs.arch == 'aarch64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+
+    env:
+      ARCH: ${{ inputs.arch }}
+      PLATFORM: ${{ inputs.platform }}
+      CRT: ${{ inputs.crt }}
+      TOOLCHAIN_NAME: ${{ inputs.arch }}-${{ inputs.platform }}-${{ inputs.crt }}
+      TOOLCHAIN_ARTIFACT_NAME: ${{ inputs.arch }}-${{ inputs.platform }}-${{ inputs.crt }}-toolchain
+      TOOLCHAIN_PACKAGE_NAME: ${{ inputs.arch }}-${{ inputs.platform }}-${{ inputs.crt }}-toolchain.tar.gz
+      RUNTIME_ARTIFACT_NAME:  ${{ inputs.arch }}-${{ inputs.platform }}-${{ inputs.crt }}-runtime
+      RUNTIME_PACKAGE_NAME: ${{ inputs.arch }}-${{ inputs.platform }}-${{ inputs.crt }}-runtime.tar.gz
+      TESTS_ARTIFACT_NAME: ${{ inputs.arch }}-${{ inputs.platform }}-${{ inputs.crt }}-tests
+      TESTS_PACKAGE_NAME: ${{ inputs.arch }}-${{ inputs.platform }}-${{ inputs.crt }}-tests.tar.gz
+      BUILD_ARTIFACT_NAME: ${{ inputs.arch }}-${{ inputs.platform }}-${{ inputs.crt }}-build
+
+    steps:
+      - name: Output inputs
+        run: echo "${{ toJSON(inputs) }}"
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: ${{ github.workspace }}
+          fetch-depth: 0
+
+      - name: Get cache keys
+        id: cache-keys
+        run: |
+          .github/scripts/get-cache-keys.sh
+
+      - name: Cache toolchain
+        id: cache-toolchain
+        if: ${{ inputs.pack_toolchain }}
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.RELATIVE_ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
+          key: ${{ steps.cache-keys.outputs.toolchain-cache-key }}
+          enableCrossOsArchive: true
+
+      - name: Cache runtime
+        id: cache-runtime
+        if: ${{ inputs.pack_toolchain }}
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.RELATIVE_ARTIFACT_PATH }}/${{ env.RUNTIME_PACKAGE_NAME }}
+          key: ${{ steps.cache-keys.outputs.runtime-cache-key }}
+          enableCrossOsArchive: true
+
+      - name: Checkout binutils
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.BINUTILS_REPO }}
+          ref: ${{ env.BINUTILS_BRANCH }}
+          path: ${{ env.SOURCE_PATH }}/binutils
+
+      - name: Checkout GCC
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.GCC_REPO }}
+          ref: ${{ env.GCC_BRANCH }}
+          path: ${{ env.SOURCE_PATH }}/gcc
+
+      - name: Checkout MinGW
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && inputs.platform != 'pc-linux-gnu' }}
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.MINGW_REPO }}
+          ref: ${{ env.MINGW_BRANCH }}
+          path: ${{ env.SOURCE_PATH }}/mingw
+
+      - name: Checkout Cygwin
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && inputs.platform == 'pc-cygwin' }}
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.CYGWIN_REPO }}
+          ref: ${{ env.CYGWIN_BRANCH }}
+          path: ${{ env.SOURCE_PATH }}/cygwin
+
+      - name: Checkout Cygwin packages
+        if: ${{ false && steps.cache-toolchain.outputs.cache-hit != 'true' && inputs.platform == 'pc-cygwin' }}
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.CYGWIN_PACKAGES_REPO }}
+          ref: ${{ env.CYGWIN_PACKAGES_BRANCH }}
+          submodules: 'recursive'
+          path: ${{ env.SOURCE_PATH }}/cygwin-packages
+
+      - name: Checkout COCOM
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && inputs.platform == 'pc-cygwin' }}
+        run: |
+          cd ${{ env.SOURCE_PATH }}
+          git clone ${{ env.COCOM_REPO }} -b ${{ env.COCOM_BRANCH }} cocom
+
+      - name: Install dependencies
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
+        run: |
+          .github/scripts/install-dependencies.sh
+
+      - name: Install libraries
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
+        run: |
+          .github/scripts/install-libraries.sh
+
+      - name: Restore Ccache
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ env.CCACHE_DIR_PATH }}
+          key: ${{ steps.cache-keys.outputs.ccache-key }}
+          restore-keys: ${{ steps.cache-keys.outputs.ccache-restore-keys }}
+
+      - name: Build binutils
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
+        env:
+          # Don't delete build files, they're needed for running binutils tests in the next step.
+          DELETE_BUILD: 0
+        run: |
+          .github/scripts/binutils/build.sh
+
+      - name: Execute binutils tests
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
+        run: |
+          .github/scripts/toolchain/execute-binutils-tests.sh
+
+      - name: Delete binutils build files
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && env.DELETE_BUILD == 1 }}
+        run: |
+          .github/scripts/binutils/delete-build.sh
+
+      - name: Install cross headers and libraries
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && inputs.platform == 'pc-linux-gnu' }}
+        run: |
+          .github/scripts/toolchain/install-cross-headers-libs.sh
+
+      - name: Build MinGW headers
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && inputs.platform != 'pc-linux-gnu' }}
+        run: |
+          .github/scripts/toolchain/build-mingw-headers.sh
+
+      - name: Install Cygwin headers
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && inputs.platform == 'pc-cygwin' }}
+        run: |
+          .github/scripts/toolchain/install-cygwin-headers.sh
+
+      - name: Build GCC stage1
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && inputs.platform != 'pc-linux-gnu' }}
+        run: |
+          .github/scripts/toolchain/build-gcc-stage1.sh
+
+      - name: Build MinGW CRT
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && inputs.platform != 'pc-linux-gnu' }}
+        run: |
+          .github/scripts/toolchain/build-mingw-crt.sh
+
+      - name: Build MinGW winpthreads
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && inputs.platform == 'w64-mingw32' }}
+        run: |
+          .github/scripts/toolchain/build-mingw-winpthreads.sh
+  
+      - name: Build COCOM
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && inputs.platform == 'pc-cygwin' }}
+        run: |
+          .github/scripts/toolchain/build-cocom.sh
+
+      - name: Build Cygwin stage1
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && inputs.platform == 'pc-cygwin' }}
+        run: |
+          .github/scripts/toolchain/build-cygwin.sh 1
+
+      - name: Build GCC stage2
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
+        run: |
+          .github/scripts/toolchain/build-gcc.sh
+
+      - name: Build MinGW
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && inputs.platform == 'w64-mingw32' }}
+        run: |
+          .github/scripts/toolchain/build-mingw.sh
+
+      - name: Build Cygwin stage2
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && inputs.platform == 'pc-cygwin' }}
+        run: |
+          .github/scripts/toolchain/build-cygwin.sh 2
+
+      - name: Save Ccache
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && always() }}
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ env.CCACHE_DIR_PATH }}
+          key: ${{ steps.cache-keys.outputs.ccache-key }}
+
+      - name: Strip host binaries
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && inputs.platform != 'pc-linux-gnu' }}
+        run: |
+          .github/scripts/strip-host-binaries.sh
+
+      - name: Pack toolchain
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && inputs.pack_toolchain }}
+        run: |
+          .github/scripts/toolchain/pack.sh
+
+      - name: Pack runtime
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && inputs.pack_toolchain }}
+        run: |
+          .github/scripts/toolchain/pack-runtime.sh
+
+      - name: Upload build folder
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.BUILD_ARTIFACT_NAME }}
+          retention-days: 1
+          path: ${{ env.BUILD_PATH }}
+
+      - name: Upload toolchain artifact
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && inputs.pack_toolchain }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.TOOLCHAIN_ARTIFACT_NAME }}
+          path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_PACKAGE_NAME }}
+          retention-days: 3
+
+      - name: Upload runtime artifact
+        if: ${{ steps.cache-runtime.outputs.cache-hit != 'true' && inputs.pack_toolchain }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.RUNTIME_ARTIFACT_NAME }}
+          path: ${{ env.ARTIFACT_PATH }}/${{ env.RUNTIME_PACKAGE_NAME }}
+          retention-days: 3
+
+    outputs:
+      aarch64-w64-mingw32-msvcrt-toolchain-cache-key: ${{ env.aarch64-w64-mingw32-msvcrt-toolchain-cache-key }}
+      aarch64-w64-mingw32-msvcrt-runtime-cache-key: ${{ env.aarch64-w64-mingw32-msvcrt-runtime-cache-key }}
+      aarch64-pc-cygwin-msvcrt-toolchain-cache-key: ${{ env.aarch64-pc-cygwin-msvcrt-toolchain-cache-key }}
+      aarch64-pc-cygwin-msvcrt-runtime-cache-key: ${{ env.aarch64-pc-cygwin-msvcrt-runtime-cache-key }}
