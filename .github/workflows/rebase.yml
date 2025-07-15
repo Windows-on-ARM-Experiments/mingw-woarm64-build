@@ -401,6 +401,16 @@ jobs:
         with:
           name: aarch64-w64-mingw32-msvcrt-runtime
 
+      - name: Download `aarch64-pc-cygwin-msvcrt` toolchain artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: aarch64-pc-cygwin-msvcrt-toolchain
+
+      - name: Download `aarch64-pc-cygwin-msvcrt` runtime artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: aarch64-pc-cygwin-msvcrt-runtime
+
       - name: Create tag
         run: |
           echo "TAG=$(date --rfc-3339=date)" >> ${GITHUB_ENV}
@@ -412,4 +422,6 @@ jobs:
           files: |
             aarch64-w64-mingw32-msvcrt-toolchain.tar.gz
             aarch64-w64-mingw32-msvcrt-runtime.tar.gz
+            aarch64-pc-cygwin-msvcrt-toolchain.tar.gz
+            aarch64-pc-cygwin-msvcrt-runtime.tar.gz
           tag_name: ${{ env.TAG }}
