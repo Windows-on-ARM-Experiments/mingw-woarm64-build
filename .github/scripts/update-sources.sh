@@ -100,6 +100,8 @@ echo "::group::Update source code repositories"
             update_repository libjpeg-turbo $LIBJPEG_TURBO_REPO $LIBJPEG_TURBO_BRANCH
             update_repository ffmpeg $FFMPEG_REPO $FFMPEG_BRANCH
             update_repository bash $BASH_REPO $BASH_BRANCH
+            update_repository gettext $GETTEXT_REPO $GETTEXT_BRANCH
+            update_repository iconv $ICONV_REPO $ICONV_BRANCH
         fi
     fi
 echo "::endgroup::"

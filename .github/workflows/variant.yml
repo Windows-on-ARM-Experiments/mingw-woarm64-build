@@ -48,6 +48,9 @@ env:
   MINGW_REPO: Windows-on-ARM-Experiments/mingw-woarm64
   MINGW_BRANCH: ${{ inputs.mingw_branch }}
 
+  ZLIB_REPO: Windows-on-ARM-Experiments/zlib
+  ZLIB_BRANCH: 'woarm64'
+
   CYGWIN_REPO: Windows-on-ARM-Experiments/newlib-cygwin
   CYGWIN_BRANCH: ${{ inputs.cygwin_branch }}
 
@@ -56,6 +59,12 @@ env:
 
   COCOM_REPO: git://git.code.sf.net/p/cocom/git
   COCOM_BRANCH: ${{ inputs.cocom_branch }}
+
+  GETTEXT_REPO: Windows-on-ARM-Experiments/gettext
+  GETTEXT_BRANCH: woarm64
+
+  ICONV_REPO: Windows-on-ARM-Experiments/iconv
+  ICONV_BRANCH: woarm64
 
   SOURCE_PATH: ${{ github.workspace }}/code
   BUILD_PATH: ${{ github.workspace }}/build
@@ -141,6 +150,14 @@ jobs:
           ref: ${{ env.MINGW_BRANCH }}
           path: ${{ env.SOURCE_PATH }}/mingw
 
+      - name: Checkout zlib
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && inputs.platform != 'pc-linux-gnu' }}
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.ZLIB_REPO }}
+          ref: ${{ env.ZLIB_BRANCH }}
+          path: ${{ env.SOURCE_PATH }}/zlib
+
       - name: Checkout Cygwin
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && inputs.platform == 'pc-cygwin' }}
         uses: actions/checkout@v4
@@ -163,6 +180,22 @@ jobs:
         run: |
           cd ${{ env.SOURCE_PATH }}
           git clone ${{ env.COCOM_REPO }} -b ${{ env.COCOM_BRANCH }} cocom
+
+      - name: Checkout gettext
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && inputs.platform == 'pc-cygwin' }}
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.GETTEXT_REPO }}
+          ref: ${{ env.GETTEXT_BRANCH }}
+          path: ${{ env.SOURCE_PATH }}/gettext
+          
+      - name: Checkout iconv
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && inputs.platform == 'pc-cygwin' }}
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.ICONV_REPO }}
+          ref: ${{ env.ICONV_BRANCH }}
+          path: ${{ env.SOURCE_PATH }}/iconv
 
       - name: Install dependencies
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
@@ -249,6 +282,26 @@ jobs:
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && inputs.platform == 'w64-mingw32' }}
         run: |
           .github/scripts/toolchain/build-mingw.sh
+
+      - name: Build zlib
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && inputs.platform != 'pc-linux-gnu' }}
+        run: |
+          .github/scripts/toolchain/build-zlib.sh
+
+      - name: Build intl
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && inputs.platform == 'pc-cygwin' }}
+        run: |
+          .github/scripts/toolchain/build-intl.sh
+
+      - name: Build iconv
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && inputs.platform == 'pc-cygwin' }}
+        run: |
+          .github/scripts/toolchain/build-iconv.sh
+
+      - name: Build binutils libraries
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && inputs.platform == 'pc-cygwin' }}
+        run: |
+          .github/scripts/toolchain/build-binutils-libs.sh
 
       - name: Build Cygwin stage2
         if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && inputs.platform == 'pc-cygwin' }}

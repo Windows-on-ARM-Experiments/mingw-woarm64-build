@@ -54,7 +54,13 @@ $ROOT_PATH/.github/scripts/toolchain/build-gcc.sh
 if [[ "$PLATFORM" =~ mingw ]]; then
     $ROOT_PATH/.github/scripts/toolchain/build-mingw.sh
 fi
+if [[ "$PLATFORM" =~ (mingw|cygwin) ]]; then
+    $ROOT_PATH/.github/scripts/toolchain/build-zlib.sh
+fi
 if [[ "$PLATFORM" =~ cygwin ]]; then
+    $ROOT_PATH/.github/scripts/toolchain/build-intl.sh
+    $ROOT_PATH/.github/scripts/toolchain/build-iconv.sh
+    $ROOT_PATH/.github/scripts/toolchain/build-binutils-libs.sh
     $ROOT_PATH/.github/scripts/toolchain/build-cygwin.sh 2
 fi
 

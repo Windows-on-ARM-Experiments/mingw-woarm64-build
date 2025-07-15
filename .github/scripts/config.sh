@@ -69,8 +69,8 @@ DEJAGNU_FILE=${DEJAGNU_FILE:-$ROOT_PATH/.github/scripts/toolchain/site.exp}
 OPENBLAS_REPO=${OPENBLAS_REPO:-OpenMathLib/OpenBLAS}
 OPENBLAS_BRANCH=${OPENBLAS_BRANCH:-develop}
 
-ZLIB_REPO=${ZLIB_REPO:-madler/zlib}
-ZLIB_BRANCH=${ZLIB_BRANCH:-master}
+ZLIB_REPO=${ZLIB_REPO:-Windows-on-ARM-Experiments/zlib}
+ZLIB_BRANCH=${ZLIB_BRANCH:-woarm64}
 ZLIB_PATH=${ZLIB_PATH:-~/zlib}
 ZLIB_TESTS_PATH=${ZLIB_TESTS_PATH:-~/zlib-tests}
 
@@ -96,6 +96,14 @@ FFMPEG_TESTS_PATH=${FFMPEG_TESTS_PATH:-~/ffmpeg-tests}
 BASH_REPO=${BASH_REPO:-Windows-on-ARM-Experiments/bash}
 BASH_BRANCH=${BASH_BRANCH:-woarm64}
 BASH_PATH=${BASH_PATH:-~/$TARGET/bash}
+
+GETTEXT_REPO=${GETTEXT_REPO:-Windows-on-ARM-Experiments/gettext}
+GETTEXT_BRANCH=${GETTEXT_BRANCH:-woarm64}
+GETTEXT_PATH=${GETTEXT_PATH:-~/gettext}
+
+ICONV_REPO=${ICONV_REPO:-Windows-on-ARM-Experiments/libiconv}
+ICONV_BRANCH=${ICONV_BRANCH:-woarm64}
+ICONV_PATH=${ICONV_PATH:-~/libiconv}
 
 TESTS_PATH=${TESTS_PATH:-$ROOT_PATH/tests/build/bin/}
 TESTS_PACKAGE_NAME=${TESTS_PACKAGE_NAME:-$TOOLCHAIN_NAME-tests.tar.gz}

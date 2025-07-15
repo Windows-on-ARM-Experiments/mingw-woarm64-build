@@ -14,10 +14,14 @@ echo "::group::Install Dependencies"
       build-essential \
       busybox \
       ccache \
+      cmake \
       dejagnu \
       docbook2x \
       flex \
+      gettext \
       gdc \
+      gperf \
+      groff \
       jq \
       libc6-dev-arm64-cross \
       libc6-dev-amd64-cross \
