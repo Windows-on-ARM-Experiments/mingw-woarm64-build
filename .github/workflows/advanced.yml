@@ -78,7 +78,7 @@ env:
   MINGW_BRANCH: ${{ inputs.mingw_branch || 'woarm64' }}
 
   CYGWIN_REPO: Windows-on-ARM-Experiments/newlib-cygwin
-  CYGWIN_BRANCH: ${{ inputs.cygwin_branch || 'woarm64' }}
+  CYGWIN_BRANCH: ${{ inputs.cygwin_branch || 'aarch64-patch-series1-v1' }}
 
   CYGWIN_PACKAGES_REPO: Windows-on-ARM-Experiments/cygwin-packages
   CYGWIN_PACKAGES_BRANCH: ${{ inputs.cygwin_packages_branch || 'main' }}
