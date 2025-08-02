@@ -1,4 +1,4 @@
-name: Patch set test
+name: Validate binutils patch series 4 SEH
 
 on:
   workflow_dispatch:
@@ -6,65 +6,65 @@ on:
 
 jobs:
 
-  build-patch-series3-1:
+  build-patch-1:
     uses: ./.github/workflows/build-only.yml
     with:
-      binutils_branch: 'aarch64-patch-series3-v1'
-      gcc_branch: '3f6620568fde4b13e730062b1171342397040955'
+      binutils_branch: '3ec4281a96bf509c31bb5f69839cc2363b3403da'
+      gcc_branch: 'aarch64-patch-series4-v2.3'
       mingw_branch: 'woarm64'
 
-  build-patch-series3-2:
-    uses: ./.github/workflows/build-only.yml
-    with:
-      binutils_branch: 'aarch64-patch-series3-v1'
-      gcc_branch: 'a8ba22e29f51d858d893c28fc68f03a163da43ad'
-      mingw_branch: 'woarm64'
+  # build-patch-series3-2:
+  #   uses: ./.github/workflows/build-only.yml
+  #   with:
+  #     binutils_branch: 'aarch64-patch-series3-v1'
+  #     gcc_branch: 'a8ba22e29f51d858d893c28fc68f03a163da43ad'
+  #     mingw_branch: 'woarm64'
 
-  build-patch-series3-3:
-    uses: ./.github/workflows/build-only.yml
-    with:
-      binutils_branch: 'aarch64-patch-series3-v1'
-      gcc_branch: '44c695eb0d02b5a865bef91d9a44021ea81294c2'
-      mingw_branch: 'woarm64'
+  # build-patch-series3-3:
+  #   uses: ./.github/workflows/build-only.yml
+  #   with:
+  #     binutils_branch: 'aarch64-patch-series3-v1'
+  #     gcc_branch: '44c695eb0d02b5a865bef91d9a44021ea81294c2'
+  #     mingw_branch: 'woarm64'
 
-  build-patch-series3-4:
-    uses: ./.github/workflows/build-only.yml
-    with:
-      binutils_branch: 'aarch64-patch-series3-v1'
-      gcc_branch: '1a53881263b89d17537c454010abad42c0281daf'
-      mingw_branch: 'woarm64'
+  # build-patch-series3-4:
+  #   uses: ./.github/workflows/build-only.yml
+  #   with:
+  #     binutils_branch: 'aarch64-patch-series3-v1'
+  #     gcc_branch: '1a53881263b89d17537c454010abad42c0281daf'
+  #     mingw_branch: 'woarm64'
 
-  build-patch-series3-5:
-    uses: ./.github/workflows/build-only.yml
-    with:
-      binutils_branch: 'aarch64-patch-series3-v1'
-      gcc_branch: '9b27a1e45ccd27b3ae9d9f6bf611aaea901bf5aa'
-      mingw_branch: 'woarm64'
+  # build-patch-series3-5:
+  #   uses: ./.github/workflows/build-only.yml
+  #   with:
+  #     binutils_branch: 'aarch64-patch-series3-v1'
+  #     gcc_branch: '9b27a1e45ccd27b3ae9d9f6bf611aaea901bf5aa'
+  #     mingw_branch: 'woarm64'
 
-  build-patch-series3-6:
-    uses: ./.github/workflows/build-only.yml
-    with:
-      binutils_branch: 'aarch64-patch-series3-v1'
-      gcc_branch: 'b660dfe2ea3b2e6fba8a3a5cda9b4e8ec131bf50'
-      mingw_branch: 'woarm64'
+  # build-patch-series3-6:
+  #   uses: ./.github/workflows/build-only.yml
+  #   with:
+  #     binutils_branch: 'aarch64-patch-series3-v1'
+  #     gcc_branch: 'b660dfe2ea3b2e6fba8a3a5cda9b4e8ec131bf50'
+  #     mingw_branch: 'woarm64'
 
-  build-patch-series3-7:
-    uses: ./.github/workflows/build-only.yml
-    with:
-      binutils_branch: 'aarch64-patch-series3-v1'
-      gcc_branch: '26ed5f443fd1a41f8464fea0edaa5ec0eaadbbce'
-      mingw_branch: 'woarm64'
+  # build-patch-series3-7:
+  #   uses: ./.github/workflows/build-only.yml
+  #   with:
+  #     binutils_branch: 'aarch64-patch-series3-v1'
+  #     gcc_branch: '26ed5f443fd1a41f8464fea0edaa5ec0eaadbbce'
+  #     mingw_branch: 'woarm64'
 
-  build-patch-series3-8:
-    uses: ./.github/workflows/build-only.yml
-    with:
-      binutils_branch: 'aarch64-patch-series3-v1'
-      gcc_branch: '63513ae69c8328d7eadd381bc36fe00fa59fe283'
-      mingw_branch: 'woarm64'
+  # build-patch-series3-8:
+  #   uses: ./.github/workflows/build-only.yml
+  #   with:
+  #     binutils_branch: 'aarch64-patch-series3-v1'
+  #     gcc_branch: '63513ae69c8328d7eadd381bc36fe00fa59fe283'
+  #     mingw_branch: 'woarm64'
 
-  build-patch-series3-9:
-    uses: ./.github/workflows/build-only.yml
-    with:
-      binutils_branch: 'aarch64-patch-series3-v1'
-      gcc_branch: 'a6155628041c62bad573e23820bc28332ff15bfe'
-      mingw_branch: 'woarm64'
+  # build-patch-series3-9:
+  #   uses: ./.github/workflows/build-only.yml
+  #   with:
+  #     binutils_branch: 'aarch64-patch-series3-v1'
+  #     gcc_branch: 'a6155628041c62bad573e23820bc28332ff15bfe'
+  #     mingw_branch: 'woarm64'
