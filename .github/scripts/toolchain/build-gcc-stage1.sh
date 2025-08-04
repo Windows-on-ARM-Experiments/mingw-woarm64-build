@@ -45,7 +45,7 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$GCC_BUILD_PATH/Makefile" ]]; then
                 ;;
             *mingw*)
                 TARGET_OPTIONS="$TARGET_OPTIONS \
-                    --enable-languages=c,d \
+                    --enable-languages=c \
                     --disable-isl-version-check \
                     --disable-rpath \
                     --disable-win32-registry \
