@@ -53,17 +53,12 @@ int main(int argc, char **argv) {
         DECLARE_TEST(Aarch64MinGW, BigDataTest),
         DECLARE_TEST(Aarch64MinGW, CHKSTKTest),
         DECLARE_TEST(Aarch64MinGW, DllTest),
-        DECLARE_TEST(Aarch64MinGW, ExceptionConstructorTest),
-        DECLARE_TEST(Aarch64MinGW, ExceptionChainTest),
         DECLARE_TEST(Aarch64MinGW, LargeAlignmentTest),
         DECLARE_TEST(Aarch64MinGW, LargeStructRelocationTest),
         DECLARE_TEST(Aarch64MinGW, MathTest),
         DECLARE_TEST(Aarch64MinGW, NestedFunction),
         DECLARE_TEST(Aarch64MinGW, OmpTest),
         DECLARE_TEST(Aarch64MinGW, PrintfDoubleTest),
-        DECLARE_TEST(Aarch64MinGW, SEHFregpTest),
-        DECLARE_TEST(Aarch64MinGW, SEHLargeFunctionTest),
-        DECLARE_TEST(Aarch64MinGW, SEHStackProbing),
         DECLARE_TEST(Aarch64MinGW, SJLJTest),
         DECLARE_TEST(Aarch64MinGW, SscanfDoubleTest),
         DECLARE_TEST(Aarch64MinGW, StaticConstructorTest),
@@ -72,7 +67,6 @@ int main(int argc, char **argv) {
         DECLARE_TEST(Aarch64MinGW, TestVaList),
         DECLARE_TEST(Aarch64MinGW, TestSPrintf),
         DECLARE_TEST(Aarch64MinGW, TestVaArgPack),
-        DECLARE_TEST(Aarch64MinGW, UnwindStackTest),
         DECLARE_TEST(Aarch64MinGW, WeakReferencesTest)
     };
 

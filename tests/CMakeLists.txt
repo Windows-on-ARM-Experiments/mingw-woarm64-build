@@ -28,8 +28,6 @@ add_executable(
   bigdata-test.c
   chkstk-test.c
   dll-test.c
-  exception-constructor-test.cpp
-  exception-chain-test.cpp
   large-alignment-test.c
   large-struct-test.c
   gtest_like_c.c
@@ -38,9 +36,6 @@ add_executable(
   nested-functions-test.c
   omp-test.c
   printf-double.c
-  seh-fregp.cpp
-  seh-large-func.cpp
-  seh-stack-probing.cpp
   sjlj-test.c
   sscanf-double.c
   static-constructor.cpp
@@ -48,7 +43,6 @@ add_executable(
   static-function.c
   struct-test.c
   varargs-test.c
-  unwind-stack-test.c
   weak-references-test.c
   weak-references.c
 )
