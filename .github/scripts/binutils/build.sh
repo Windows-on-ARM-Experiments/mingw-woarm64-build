@@ -37,7 +37,6 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$BINUTILS_BUILD_PATH/Makefile" ]]; then
                 TARGET_OPTIONS="$TARGET_OPTIONS \
                     --enable-lto \
                     --enable-64-bit-bfd \
-                    --disable-werror \
                     --with-libiconv-prefix=$TOOLCHAIN_PATH \
                     --with-system-zlib"
                 ;;

@@ -80,7 +80,6 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$GCC_BUILD_PATH/Makefile" ]]; then
                     --disable-libssp \
                     --disable-rpath \
                     --disable-win32-registry \
-                    --disable-werror \
                     --disable-symvers \
                     --with-libiconv \
                     --with-system-zlib"

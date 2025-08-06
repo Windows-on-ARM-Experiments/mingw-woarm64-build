@@ -49,7 +49,6 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$GCC_BUILD_PATH/Makefile" ]]; then
                     --disable-isl-version-check \
                     --disable-rpath \
                     --disable-win32-registry \
-                    --disable-werror \
                     --disable-symvers \
                     --with-system-zlib"
                 ;;
