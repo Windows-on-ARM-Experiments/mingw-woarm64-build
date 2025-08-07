@@ -1257,3 +1257,52 @@ jobs:
         shell: bash
         run: |
           .github/scripts/ffmpeg/execute-tests.sh
+
+  build-patch-1:
+    uses: ./.github/workflows/build-toolchain.yml
+    with:
+      binutils_branch: 'f2712b0b77c8bc516c29354eb50d8abdee84408d'
+      gcc_branch: 'aarch64-patch-series4-v2.4'
+      mingw_branch: 'woarm64'
+
+  build-patch-2:
+    uses: ./.github/workflows/build-toolchain.yml
+    with:
+      binutils_branch: '4f6d8d37e26d75f47386858cbbd859d8eb157c0e'
+      gcc_branch: 'aarch64-patch-series4-v2.4'
+      mingw_branch: 'woarm64'
+
+  build-patch-3:
+    uses: ./.github/workflows/build-toolchain.yml
+    with:
+      binutils_branch: '2de8c9c8f1d8ef22ca310f895f0090401764cea5'
+      gcc_branch: 'aarch64-patch-series4-v2.4'
+      mingw_branch: 'woarm64'
+
+  build-patch-4:
+    uses: ./.github/workflows/build-toolchain.yml
+    with:
+      binutils_branch: '9b258f50f0d2603b080d6b6741d05b72a4c05951'
+      gcc_branch: 'aarch64-patch-series4-v2.4'
+      mingw_branch: 'woarm64'
+
+  build-patch-5:
+    uses: ./.github/workflows/build-toolchain.yml
+    with:
+      binutils_branch: '2ebdbb030da79d81b79f2043ff70ea8758287abc'
+      gcc_branch: 'aarch64-patch-series4-v2.4'
+      mingw_branch: 'woarm64'
+
+  build-patch-6:
+    uses: ./.github/workflows/build-toolchain.yml
+    with:
+      binutils_branch: '06554bcdab7f807f9ad6a1781954ef71ba830007'
+      gcc_branch: 'aarch64-patch-series4-v2.4'
+      mingw_branch: 'woarm64'
+
+  build-patch-7:
+    uses: ./.github/workflows/build-toolchain.yml
+    with:
+      binutils_branch: '62dd9940cc0ea8afb329148af95275be4a29ca6b'
+      gcc_branch: 'aarch64-patch-series4-v2.4'
+      mingw_branch: 'woarm64'
