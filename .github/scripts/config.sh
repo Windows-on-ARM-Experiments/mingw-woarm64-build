@@ -39,7 +39,7 @@ else
     CRT=${CRT:-libc}
 fi
 
-PROCESSOR=$(uname --processor)
+PROCESSOR=$(uname --machine)
 BUILD=${BUILD:-$PROCESSOR-pc-linux-gnu}
 HOST=${HOST:-$PROCESSOR-pc-linux-gnu}
 TARGET=$ARCH-$PLATFORM
