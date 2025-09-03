@@ -16,7 +16,12 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$CYGWIN_BUILD_PATH/Makefile" ]]; then
         if [ "$DEBUG" = 1 ] ; then
             HOST_OPTIONS="$HOST_OPTIONS \
                 --enable-debug \
+                --enable-debugging \
                 --disable-lto"
+            CFLAGS="$CFLAGS -Og -ggdb -DDEBUG"
+            CXXFLAGS="$CXXFLAGS -Og -ggdb -DDEBUG"
+            CFLAGS_FOR_TARGET="$CFLAGS_FOR_TARGET -Og -ggdb -DDEBUG"
+            CXXFLAGS_FOR_TARGET="$CXXFLAGS_FOR_TARGET -Og -ggdb -DDEBUG"
         fi
 
         (cd $CYGWIN_SOURCE_PATH/winsup && ./autogen.sh)
@@ -33,7 +38,10 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$CYGWIN_BUILD_PATH/Makefile" ]]; then
 
         # ADDED: --disable-doc
         # ADDED: --disable-dumper
-        CXXFLAGS_FOR_TARGET="-Wno-error -Wno-narrowing" \
+        CFLAGS="$CFLAGS" \
+        CXXFLAGS="$CXXFLAGS" \
+        CFLAGS_FOR_TARGET="$CFLAGS_FOR_TARGET" \
+        CXXFLAGS_FOR_TARGET="$CXXFLAGS_FOR_TARGET -Wno-error -Wno-narrowing" \
         $CYGWIN_SOURCE_PATH/configure \
             --prefix=$TOOLCHAIN_PATH \
             --build=$HOST \
