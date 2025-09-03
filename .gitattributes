@@ -1,1 +1,2 @@
 *.sh text eol=lf
+apt-cyg text eol=lf

@@ -13,6 +13,11 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$CYGWIN_BUILD_PATH/Makefile" ]]; then
     echo "::group::Configure Cygwin"
         rm -rf $CYGWIN_BUILD_PATH/*
 
+        if [[ "$BUILD" != "$TARGET" ]] && [[ "$CYGWIN" = 0 ]]; then
+            BUILD_OPTIONS="$BUILD_OPTIONS \
+                --with-cross-bootstrap"
+        fi
+
         if [ "$DEBUG" = 1 ] ; then
             HOST_OPTIONS="$HOST_OPTIONS \
                 --enable-debug \
@@ -45,7 +50,7 @@ if [[ "$RUN_CONFIG" = 1 ]] || [[ ! -f "$CYGWIN_BUILD_PATH/Makefile" ]]; then
             --disable-dumper \
             --with-sysroot=$TOOLCHAIN_PATH \
             --with-build-sysroot=$TOOLCHAIN_PATH \
-            --with-cross-bootstrap \
+            $BUILD_OPTIONS \
             $HOST_OPTIONS \
             $TARGET_OPTIONS
     echo "::endgroup::"
