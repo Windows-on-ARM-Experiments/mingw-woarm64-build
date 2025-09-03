@@ -39,6 +39,10 @@ on:
         description: 'OpenSSL branch to test'
         required: false
         default: 'fix-tests'
+      upload_artifacts:
+        description: 'Upload artifacts'
+        required: false
+        default: false
   workflow_call:
     inputs:
       binutils_branch:
@@ -53,6 +57,8 @@ on:
         type: string
       cocom_branch:
         type: string
+      upload_artifacts:
+        type: boolean
     outputs:
       toolchain-package-name:
         value: ${{ jobs.build-toolchain.outputs.toolchain-package-name }}
@@ -124,6 +130,7 @@ env:
 
   CCACHE: 1
   DELETE_BUILD: 1
+  UPLOAD_ARTIFACTS: ${{ inputs.upload_artifacts || 'false' }}
 
 jobs:
   build-toolchain:
@@ -352,7 +359,7 @@ jobs:
           .github/scripts/toolchain/pack-runtime.sh
 
       - name: Upload build folder
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && failure() }}
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && env.UPLOAD_ARTIFACTS == 'true' && failure() }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.BUILD_ARTIFACT_NAME }}
@@ -360,7 +367,7 @@ jobs:
           path: ${{ env.BUILD_PATH }}
 
       - name: Upload toolchain artifact
-        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && env.PACK_TOOLCHAIN == 'true' }}
+        if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' && env.UPLOAD_ARTIFACTS == 'true' && env.PACK_TOOLCHAIN == 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.TOOLCHAIN_ARTIFACT_NAME }}
@@ -883,6 +890,14 @@ jobs:
         with:
           path: ${{ github.workspace }}
 
+      - name: Cache OpenSSL tests
+        id: cache-openssl-tests
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_NAME }}-openssl-tests.zip
+          key: ${{ needs.build-toolchain.outputs.toolchain-cache-key }}-openssl-tests
+          enableCrossOsArchive: true
+
       - name: Checkout OpenSSL
         uses: actions/checkout@v4
         with:
@@ -933,6 +948,7 @@ jobs:
           .github/scripts/openssl/pack-tests.sh
     
       - name: Upload artifact
+        if: ${{ env.UPLOAD_ARTIFACTS == 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.TOOLCHAIN_NAME }}-openssl
@@ -940,6 +956,7 @@ jobs:
           retention-days: 3
 
       - name: Upload tests artifact
+        if: ${{ env.UPLOAD_ARTIFACTS == 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.TOOLCHAIN_NAME }}-openssl-tests
@@ -985,6 +1002,15 @@ jobs:
           path: ${{ env.RELATIVE_ARTIFACT_PATH }}/${{ env.RUNTIME_PACKAGE_NAME }}
           key: ${{ env.runtime-cache-key }}
           restore-keys: ${{ env.runtime-cache-key }}
+          enableCrossOsArchive: true
+          fail-on-cache-miss: true
+
+      - name: Download OpenSSL tests
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ env.RELATIVE_ARTIFACT_PATH }}/${{ env.TOOLCHAIN_NAME }}-openssl-tests.zip
+          key: ${{ needs.build-toolchain.outputs.toolchain-cache-key }}-openssl-tests
+          restore-keys: ${{ needs.build-toolchain.outputs.toolchain-cache-key }}-openssl-tests
           enableCrossOsArchive: true
           fail-on-cache-miss: true
 
@@ -1146,6 +1172,14 @@ jobs:
         uses: actions/checkout@v4
         with:
           path: ${{ github.workspace }}
+      
+      - name: Cache FFmpeg tests
+        id: cache-ffmpeg-tests
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.ARTIFACT_PATH }}/${{ env.TOOLCHAIN_NAME }}-ffmpeg-tests.zip
+          key: ${{ needs.build-toolchain.outputs.toolchain-cache-key }}-ffmpeg-tests
+          enableCrossOsArchive: true
 
       - name: Checkout FFmpeg
         uses: actions/checkout@v4
@@ -1184,6 +1218,7 @@ jobs:
           .github/scripts/ffmpeg/pack-tests.sh
 
       - name: Upload tests artifact
+        if: ${{ env.UPLOAD_ARTIFACTS == 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.TOOLCHAIN_NAME }}-ffmpeg-tests
@@ -1238,10 +1273,13 @@ jobs:
           fail-on-cache-miss: true
 
       - name: Download FFmpeg tests
-        uses: actions/download-artifact@v4
+        uses: actions/cache/restore@v4
         with:
-          name: ${{ env.TOOLCHAIN_NAME }}-ffmpeg-tests
-          path: ${{ env.ARTIFACT_PATH }}
+          path: ${{ env.RELATIVE_ARTIFACT_PATH }}/${{ env.TOOLCHAIN_NAME }}-ffmpeg-tests.zip
+          key: ${{ needs.build-toolchain.outputs.toolchain-cache-key }}-ffmpeg-tests
+          restore-keys: ${{ needs.build-toolchain.outputs.toolchain-cache-key }}-ffmpeg-tests
+          enableCrossOsArchive: true
+          fail-on-cache-miss: true
 
       - name: Unpack ${{ env.TOOLCHAIN_NAME }} runtime
         run: |
