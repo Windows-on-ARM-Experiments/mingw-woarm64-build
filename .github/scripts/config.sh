@@ -9,7 +9,7 @@ BINUTILS_REPO=${BINUTILS_REPO:-Windows-on-ARM-Experiments/binutils-woarm64}
 BINUTILS_BRANCH=${BINUTILS_BRANCH:-woarm64}
 
 GCC_REPO=${GCC_REPO:-Windows-on-ARM-Experiments/gcc-woarm64}
-GCC_BRANCH=${GCC_BRANCH:-woarm64}
+GCC_BRANCH=${GCC_BRANCH:-fix-va-list}
 
 MINGW_REPO=${MINGW_REPO:-Windows-on-ARM-Experiments/mingw-woarm64}
 MINGW_BRANCH=${MINGW_BRANCH:-woarm64}
@@ -33,11 +33,17 @@ COCOM_BASE_BRANCH=master
 
 ARCH=${ARCH:-aarch64}
 PLATFORM=${PLATFORM:-w64-mingw32}
-if [[ "$PLATFORM" =~ (mingw|cygwin) ]]; then
-    CRT=${CRT:-msvcrt}
-else
-    CRT=${CRT:-libc}
-fi
+case "$PLATFORM" in 
+    *mingw*)
+        CRT=${CRT:-ucrt}
+        ;;
+    *cygwin*)
+        CRT=${CRT:-msvcrt}
+        ;;
+    *)
+        CRT=${CRT:-libc}
+        ;;
+esac
 
 PROCESSOR=$(uname --machine)
 BUILD=${BUILD:-$PROCESSOR-pc-linux-gnu}
