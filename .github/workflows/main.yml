@@ -18,11 +18,11 @@ on:
       mingw_branch:
         description: 'Mingw branch to build'
         required: false
-        default: 'woarm64'
+        default: 'fix-outline-atomics'
 env:
   BINUTILS_BRANCH: ${{ inputs.binutils_branch || 'woarm64' }}
   GCC_BRANCH: ${{ inputs.gcc_branch || 'woarm64' }}
-  MINGW_BRANCH: ${{ inputs.mingw_branch || 'woarm64' }}
+  MINGW_BRANCH: ${{ inputs.mingw_branch || 'fix-outline-atomics' }}
 
   BUILD_PATH: ${{ github.workspace }}/build
   CCACHE_DIR_PATH: ${{ github.workspace }}/ccache
