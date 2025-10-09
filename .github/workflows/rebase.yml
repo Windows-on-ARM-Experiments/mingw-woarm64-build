@@ -5,8 +5,12 @@ on:
     - cron: "0 5 * * *"
   workflow_dispatch:
     inputs:
-      origin_branch:
-        description: 'Name of origin branch that should be rebased onto upstream branch'
+      origin_source_branch:
+        description: 'Name of origin source branch that should be rebased onto upstream branch'
+        required: true
+        default: 'woarm64'
+      origin_target_branch:
+        description: 'Name of origin target branch where rebased source branch will be placed'
         required: true
         default: 'woarm64'
       upstream_branch:
@@ -36,7 +40,8 @@ env:
   CYGWIN_UPSTREAM_URL: git://sourceware.org/git/newlib-cygwin.git
 
   SOURCE_PATH: ${{ github.workspace }}/code
-  ORIGIN_BRANCH: ${{ inputs.origin_branch || 'woarm64' }}
+  ORIGIN_SOURCE_BRANCH: ${{ inputs.origin_source_branch || 'woarm64' }}
+  ORIGIN_TARGET_BRANCH: ${{ inputs.origin_target_branch || 'woarm64' }}
   UPSTREAM_BRANCH: ${{ inputs.upstream_branch || 'master' }}
   REBASE_BRANCH: ${{ inputs.rebase_branch || 'rebase-upstream' }}
   BACKUP_BRANCH: ${{ inputs.backup_branch || 'rebase-upstream-backup' }}
@@ -56,7 +61,7 @@ jobs:
         with:
           token: ${{ secrets.GNU_PUSH_PAT }}
           repository: ${{ env.BINUTILS_REPO }}
-          ref: ${{ env.ORIGIN_BRANCH }}
+          ref: ${{ env.ORIGIN_SOURCE_BRANCH }}
           fetch-depth: 0
           path: ${{ env.SOURCE_PATH }}/binutils
 
@@ -83,7 +88,7 @@ jobs:
         with:
           token: ${{ secrets.GNU_PUSH_PAT }}
           repository: ${{ env.GCC_REPO }}
-          ref: ${{ env.ORIGIN_BRANCH }}
+          ref: ${{ env.ORIGIN_SOURCE_BRANCH }}
           fetch-depth: 0
           path: ${{ env.SOURCE_PATH }}/gcc
 
@@ -110,7 +115,7 @@ jobs:
         with:
           token: ${{ secrets.GNU_PUSH_PAT }}
           repository: ${{ env.MINGW_REPO }}
-          ref: ${{ env.ORIGIN_BRANCH }}
+          ref: ${{ env.ORIGIN_SOURCE_BRANCH }}
           fetch-depth: 0
           path: ${{ env.SOURCE_PATH }}/mingw
 
@@ -137,7 +142,7 @@ jobs:
         with:
           token: ${{ secrets.GNU_PUSH_PAT }}
           repository: ${{ env.CYGWIN_REPO }}
-          ref: ${{ env.ORIGIN_BRANCH }}
+          ref: ${{ env.ORIGIN_SOURCE_BRANCH }}
           fetch-depth: 0
           path: ${{ env.SOURCE_PATH }}/cygwin
 
@@ -164,8 +169,22 @@ jobs:
       mingw_branch: ${{ inputs.rebase_branch || 'rebase-upstream' }}
       cygwin_branch: ${{ inputs.rebase_branch || 'rebase-upstream' }}
 
-  finish-binutils-rebase:
+  finish-rebase-approval:
+    name: Request Finish Rebase Approval
+    if: startsWith(${{ inputs.origin_target_branch || 'woarm64' }}, 'woarm64') && ${{ inputs.origin_target_branch || 'woarm64' }} != ${{ inputs.origin_source_branch || 'woarm64' }}
     needs: [build]
+    runs-on: ubuntu-latest
+    environment:
+      name: approval-required 
+    steps:
+      - name: Approval
+        run: echo "Approval received. Proceeding with rebasing."
+      
+      - name: Test
+        run: exit 1
+
+  finish-binutils-rebase:
+    needs: [finish-rebase-approval]
     runs-on: ubuntu-latest
 
     steps:
@@ -179,7 +198,7 @@ jobs:
         with:
           token: ${{ secrets.GNU_PUSH_PAT }}
           repository: ${{ env.BINUTILS_REPO }}
-          ref: ${{ env.ORIGIN_BRANCH }}
+          ref: ${{ env.ORIGIN_TARGET_BRANCH }}
           path: ${{ env.SOURCE_PATH }}/binutils
 
       - name: Finish binutils rebase
@@ -187,11 +206,11 @@ jobs:
         run: |
           ${{ github.workspace }}/.github/scripts/rebase-finish.sh \
             ${{ env.REBASE_BRANCH }} \
-            ${{ env.ORIGIN_BRANCH }} \
+            ${{ env.ORIGIN_TARGET_BRANCH }} \
             ${{ env.BACKUP_BRANCH }}
 
   finish-gcc-rebase:
-    needs: [build]
+    needs: [finish-rebase-approval]
     runs-on: ubuntu-latest
 
     steps:
@@ -205,7 +224,7 @@ jobs:
         with:
           token: ${{ secrets.GNU_PUSH_PAT }}
           repository: ${{ env.GCC_REPO }}
-          ref: ${{ env.ORIGIN_BRANCH }}
+          ref: ${{ env.ORIGIN_TARGET_BRANCH }}
           path: ${{ env.SOURCE_PATH }}/gcc
 
       - name: Finish GCC rebase
@@ -213,11 +232,11 @@ jobs:
         run: |
           ${{ github.workspace }}/.github/scripts/rebase-finish.sh \
             ${{ env.REBASE_BRANCH }} \
-            ${{ env.ORIGIN_BRANCH }} \
+            ${{ env.ORIGIN_TARGET_BRANCH }} \
             ${{ env.BACKUP_BRANCH }}
 
   finish-mingw-rebase:
-    needs: [build]
+    needs: [finish-rebase-approval]
     runs-on: ubuntu-latest
 
     steps:
@@ -231,7 +250,7 @@ jobs:
         with:
           token: ${{ secrets.GNU_PUSH_PAT }}
           repository: ${{ env.MINGW_REPO }}
-          ref: ${{ env.ORIGIN_BRANCH }}
+          ref: ${{ env.ORIGIN_TARGET_BRANCH }}
           path: ${{ env.SOURCE_PATH }}/mingw
 
       - name: Finish MinGW rebase
@@ -239,11 +258,11 @@ jobs:
         run: |
           ${{ github.workspace }}/.github/scripts/rebase-finish.sh \
             ${{ env.REBASE_BRANCH }} \
-            ${{ env.ORIGIN_BRANCH }} \
+            ${{ env.ORIGIN_TARGET_BRANCH }} \
             ${{ env.BACKUP_BRANCH }}
 
   finish-cygwin-rebase:
-    needs: [build]
+    needs: [finish-rebase-approval]
     runs-on: ubuntu-latest
 
     steps:
@@ -257,7 +276,7 @@ jobs:
         with:
           token: ${{ secrets.GNU_PUSH_PAT }}
           repository: ${{ env.CYGWIN_REPO }}
-          ref: ${{ env.ORIGIN_BRANCH }}
+          ref: ${{ env.ORIGIN_TARGET_BRANCH }}
           path: ${{ env.SOURCE_PATH }}/cygwin
 
       - name: Finish Cygwin rebase
@@ -265,7 +284,7 @@ jobs:
         run: |
           ${{ github.workspace }}/.github/scripts/rebase-finish.sh \
             ${{ env.REBASE_BRANCH }} \
-            ${{ env.ORIGIN_BRANCH }} \
+            ${{ env.ORIGIN_TARGET_BRANCH }} \
             ${{ env.BACKUP_BRANCH }}
 
   clean-binutils-rebase:
@@ -284,7 +303,7 @@ jobs:
         with:
           token: ${{ secrets.GNU_PUSH_PAT }}
           repository: ${{ env.BINUTILS_REPO }}
-          ref: ${{ env.ORIGIN_BRANCH }}
+          ref: ${{ env.ORIGIN_SOURCE_BRANCH }}
           fetch-depth: 0
           path: ${{ env.SOURCE_PATH }}/binutils
 
@@ -311,7 +330,7 @@ jobs:
         with:
           token: ${{ secrets.GNU_PUSH_PAT }}
           repository: ${{ env.GCC_REPO }}
-          ref: ${{ env.ORIGIN_BRANCH }}
+          ref: ${{ env.ORIGIN_SOURCE_BRANCH }}
           fetch-depth: 0
           path: ${{ env.SOURCE_PATH }}/gcc
 
@@ -338,7 +357,7 @@ jobs:
         with:
           token: ${{ secrets.GNU_PUSH_PAT }}
           repository: ${{ env.MINGW_REPO }}
-          ref: ${{ env.ORIGIN_BRANCH }}
+          ref: ${{ env.ORIGIN_SOURCE_BRANCH }}
           fetch-depth: 0
           path: ${{ env.SOURCE_PATH }}/mingw
 
@@ -365,7 +384,7 @@ jobs:
         with:
           token: ${{ secrets.GNU_PUSH_PAT }}
           repository: ${{ env.CYGWIN_REPO }}
-          ref: ${{ env.ORIGIN_BRANCH }}
+          ref: ${{ env.ORIGIN_SOURCE_BRANCH }}
           path: ${{ env.SOURCE_PATH }}/cygwin
 
       - name: Clean Cygwin rebase
